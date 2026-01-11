@@ -1,0 +1,146 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Campos de Medidas</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">
+            ➕ Nuevo campo
+        </button>
+    </div>
+
+    <!-- ================= LISTADO ================= -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Nombre</th>
+                <th>Slug</th>
+                <th>Tipo</th>
+                <th>Unidad</th>
+                <th>Requerido</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in fields_with_forms %}
+            {% with field=item.field form=item.form %}
+            <tr>
+                <td>{{ field.order }}</td>
+                <td>{{ field.name }}</td>
+                <td>{{ field.slug }}</td>
+                <td>{{ field.get_field_type_display }}</td>
+                <td>{{ field.unit|default:"—" }}</td>
+                <td>
+                    {% if field.required %}✔️{% else %}—{% endif %}
+                </td>
+                <td>
+                    <!-- EDITAR -->
+                    <button
+                        class="btn btn-sm btn-outline-secondary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalEditar{{ field.id }}">
+                        ✏️
+                    </button>
+
+                    <!-- ELIMINAR -->
+                    <button
+                        class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalEliminar{{ field.id }}">
+                        🗑
+                    </button>
+                </td>
+            </tr>
+
+            <!-- ================= MODAL EDITAR ================= -->
+            <div class="modal fade" id="modalEditar{{ field.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Editar campo</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                {{ form.as_p }}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" name="editar_medida" class="btn btn-primary">
+                                    Guardar cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MODAL ELIMINAR ================= -->
+            <div class="modal fade" id="modalEliminar{{ field.id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-danger">
+                                    Desactivar campo
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                    ¿Seguro que deseas desactivar el campo
+                                    <strong>{{ field.name }}</strong>?
+                                </p>
+                                <small class="text-muted">
+                                    Las medidas existentes no se perderán.
+                                </small>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+                                <button type="submit" name="eliminar_medida" class="btn btn-danger">
+                                    Desactivar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= MODAL CREAR ================= -->
+<div class="modal fade" id="modalCrear" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo campo de medida</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_crear.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="crear_medida" class="btn btn-success">
+                        Crear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,452 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-3">
+
+    <!-- HEADER CON BOTONES -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                 style="width: 50px; height: 50px;">
+                <i class="bi bi-people fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h4 fw-bold mb-0">Gestión de Alumnos</h1>
+                <p class="text-muted mb-0 small">
+                    {{ athletes|length }} alumno{{ athletes|pluralize }}
+                </p>
+            </div>
+        </div>
+        
+        {% if puede_crear %}
+        <button class="btn btn-primary d-flex align-items-center shadow-sm" 
+                data-bs-toggle="modal" data-bs-target="#modalCrear">
+            <i class="bi bi-person-plus me-2"></i>
+            <span class="d-none d-md-inline">Crear Alumno</span>
+            <span class="d-inline d-md-none">Nuevo</span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- TARJETA DE LISTADO -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="h5 fw-bold mb-0">Lista de Alumnos</h2>
+                <span class="badge bg-primary rounded-pill">
+                    {{ athletes|length }}
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            {% if athletes %}
+            <!-- TABLA PARA ESCRITORIO -->
+            <div class="table-responsive d-none d-md-block">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-4">#</th>
+                            <th scope="col">Alumno</th>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col" class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for athlete in athletes %}
+                        <tr>
+                            <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="bi bi-person text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ athlete.get_full_name|default:athlete.username }}</div>
+                                        <small class="text-muted">ID: {{ athlete.id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <code class="bg-light px-2 py-1 rounded">{{ athlete.username }}</code>
+                            </td>
+                            <td>
+                                {% if athlete.email %}
+                                <a href="mailto:{{ athlete.email }}" class="text-decoration-none">
+                                    {{ athlete.email }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if athlete.phone %}
+                                <a href="tel:{{ athlete.phone }}" class="text-decoration-none">
+                                    {{ athlete.phone }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'edit_athlete_measures' athlete.id %}" 
+                                       class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                                        <i class="bi bi-rulers me-1 d-none d-md-inline"></i>
+                                        <span>Medidas</span>
+                                    </a>
+                                    <button class="btn btn-outline-secondary btn-sm" 
+                                            data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-eye me-2"></i>Ver perfil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-pencil me-2"></i>Editar datos
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#">
+                                                <i class="bi bi-trash me-2"></i>Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- LISTA PARA MÓVIL -->
+            <div class="d-block d-md-none">
+                <div class="list-group list-group-flush">
+                    {% for athlete in athletes %}
+                    <div class="list-group-item border-bottom py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="bi bi-person text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-0">{{ athlete.get_full_name|default:athlete.username }}</h6>
+                                <small class="text-muted">@{{ athlete.username }}</small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-dark" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'edit_athlete_measures' athlete.id %}">
+                                            <i class="bi bi-rulers me-2"></i>Editar medidas
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bi bi-eye me-2"></i>Ver perfil
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2 mt-2">
+                            <div class="col-12">
+                                {% if athlete.email %}
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    <span class="text-truncate">{{ athlete.email }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                {% if athlete.phone %}
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-telephone me-2"></i>
+                                    <span>{{ athlete.phone }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mt-2">
+                                <a href="{% url 'edit_athlete_measures' athlete.id %}" 
+                                   class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-rulers me-2"></i>
+                                    Gestionar medidas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- PAGINACIÓN (SI LA HAY) -->
+            {% if athletes.has_other_pages %}
+            <nav class="border-top p-3">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if athletes.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ athletes.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in athletes.paginator.page_range %}
+                        {% if athletes.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if athletes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ athletes.next_page_number }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- ESTADO VACÍO -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-people display-1 text-muted opacity-50"></i>
+                </div>
+                <h5 class="text-muted mb-3">No hay alumnos registrados</h5>
+                <p class="text-muted mb-4">Comienza agregando tu primer alumno al sistema.</p>
+                {% if puede_crear %}
+                <button class="btn btn-primary d-flex align-items-center mx-auto" 
+                        data-bs-toggle="modal" data-bs-target="#modalCrear">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Crear primer alumno
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= MODAL CREAR ALUMNO ================= -->
+{% if puede_crear %}
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="crear_alumno" value="1">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalCrearLabel">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Crear Nuevo Alumno
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <!-- NOMBRE -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-person me-1 text-primary"></i>
+                                Nombre
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-fonts"></i>
+                                </span>
+                                {{ form_crear.first_name }}
+                            </div>
+                            {% if form_crear.first_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form_crear.first_name.errors %}
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- APELLIDO -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-person me-1 text-primary"></i>
+                                Apellido
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-fonts"></i>
+                                </span>
+                                {{ form_crear.last_name }}
+                            </div>
+                            {% if form_crear.last_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form_crear.last_name.errors %}
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-envelope me-1 text-primary"></i>
+                                Email
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                {{ form_crear.email }}
+                            </div>
+                            {% if form_crear.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form_crear.email.errors %}
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- TELÉFONO -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-telephone me-1 text-primary"></i>
+                                Teléfono
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-phone"></i>
+                                </span>
+                                {{ form_crear.phone }}
+                            </div>
+                            {% if form_crear.phone.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form_crear.phone.errors %}
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- INFORMACIÓN ADICIONAL -->
+                        <div class="col-12">
+                            <div class="alert alert-info border-0 bg-light small mb-0">
+                                <div class="d-flex">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    <div>
+                                        <strong>Información importante:</strong>
+                                        <p class="mb-0">El sistema generará automáticamente un usuario y contraseña temporal para el alumno.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Crear Alumno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Añadir clases Bootstrap a los inputs del formulario modal
+    const modalInputs = document.querySelectorAll('#modalCrear input');
+    modalInputs.forEach(input => {
+        input.classList.add('form-control');
+        input.placeholder = 'Ej: ' + input.name.replace('_', ' ');
+    });
+
+    // Auto-abrir modal si hay error
+    {% if abrir_modal_crear %}
+    const modalCrear = new bootstrap.Modal(document.getElementById('modalCrear'));
+    modalCrear.show();
+    {% endif %}
+
+    // Validación en tiempo real para email
+    const emailInput = document.querySelector('#modalCrear input[name="email"]');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('is-invalid');
+                if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Formato de email inválido';
+                    this.parentNode.appendChild(errorDiv);
+                }
+            } else {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            }
+        });
+    }
+
+    // Enfoque automático en el primer campo al abrir el modal
+    document.getElementById('modalCrear')?.addEventListener('shown.bs.modal', function () {
+        const firstInput = this.querySelector('input');
+        if (firstInput) firstInput.focus();
+    });
+
+    // Confirmación antes de enviar el formulario
+    const crearForm = document.querySelector('#modalCrear form');
+    if (crearForm) {
+        crearForm.addEventListener('submit', function(e) {
+            const nombre = this.querySelector('input[name="first_name"]').value;
+            const apellido = this.querySelector('input[name="last_name"]').value;
+            
+            if (!nombre || !apellido) {
+                e.preventDefault();
+                alert('Por favor, completa al menos el nombre y apellido del alumno.');
+                return false;
+            }
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+Datos Sensibles (PII): Tienes direcciones físicas, teléfonos, CURP y medidas corporales (biometría indirecta) de menores de edad (probablemente).
+
+Acción: Cifra la CURP y la dirección en la base de datos (At rest encryption).
+
+Acción: Asegúrate de que un AssistantCoach no pueda ver los datos personales de los atletas de otro equipo.
+
+REVISAR LOS DECORADORES
+Y USAR EL ADMIN DE DJANGO
+
+REVISAR USUARIOS
+
+• Edición de perfil básico
+• Subida de foto de perfil (ya lo tienes en tu modelo)
+• Gestión de múltiples direcciones (UserAddress)
+
+EQUIPOS
+
+CATEGORIAS
+
+PEDIDOS
+
+Correos para los usuarios Unique
+
+Decoradores personalizados 
+Mixins para CBV 
+
+5. Implementar Team Membership correctamente
+
+Tu relación M:N con soft delete es excelente, pero inútil sin:
+
+• Formulario para agregar miembros
+• Vista para expulsar a un miembro (set end_date)
+• Vista para reactivar miembros
+• Tablas Bootstrap para mostrar historial
+• Validación: un atleta no puede pertenecer a dos equipos activos simultáneamente
+
+Este módulo será clave para Events y competencias.
+
+**6. Crear el módulo EVENTS **
+
+No lo toques hasta terminar lo anterior, pero aquí va lo que te espera:
+
+• Concursos
+• Inscripción de equipos
+• Inscripción de atletas
+• Habitaciones de hotel
+• Pagos de inscripción
+• Roles: admin, coach, atleta, juez
+
+Si no tienes autenticación bien cerrada, esto será un infierno.
+
+7. Comercio / Tienda (commerce)
+
+Con tu sistema de direcciones ya listo, aquí sigue:
+
+• Productos
+• Carrito
+• Checkout
+• Órdenes
+• Relación entre usuarios y medidas corporales (si las usas para tallas)
+
+Esto será el módulo más usado por atletas y padres, así que debe quedar limpio.
+
+8. Social / Feed deportivo
+
+Solo cuando todo lo crítico esté sólido.
+
+• Posts
+• Fotos
+• Likes
+• Comentarios
+• Perfiles públicos
+• Feed principal
+
+Esto es adorno, pero adorno de alto impacto visual.
+

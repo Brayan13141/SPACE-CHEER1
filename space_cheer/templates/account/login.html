@@ -1,0 +1,126 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Iniciar Sesión" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "Accede a tu cuenta" %}{% endblock %}
+
+{% block content %}
+<form class="login" method="POST" action="{% url 'account_login' %}" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Email/Username Field -->
+    <div class="mb-3">
+        <label for="id_login" class="form-label-neon">
+            <i class="bi bi-person-circle me-1"></i>
+            {% trans "Correo electrónico o usuario" %}
+        </label>
+        <input type="text" name="login" id="id_login" 
+               class="form-control form-control-neon" 
+               placeholder="tu@email.com"
+               autocomplete="username" required>
+        {% if form.login.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.login.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Password Field -->
+    <div class="mb-3">
+        <label for="id_password" class="form-label-neon">
+            <i class="bi bi-shield-lock me-1"></i>
+            {% trans "Contraseña" %}
+        </label>
+        <input type="password" name="password" id="id_password" 
+               class="form-control form-control-neon" 
+               placeholder="••••••••"
+               autocomplete="current-password" required>
+        {% if form.password.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.password.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Remember Me & Forgot Password -->
+    <div class="remember-forgot">
+        <div class="form-check form-check-neon">
+            <input class="form-check-input" type="checkbox" name="remember" id="id_remember">
+            <label class="form-check-label" for="id_remember">
+                {% trans "Recordar sesión" %}
+            </label>
+        </div>
+        <a class="text-decoration-none" href="{% url 'account_reset_password' %}" 
+           style="color: var(--secondary-color);">
+            {% trans "¿Olvidaste tu contraseña?" %}
+        </a>
+    </div>
+
+    <!-- Hidden redirect field -->
+    {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <!-- Submit Button -->
+    <button class="btn btn-neon-primary mb-3" type="submit">
+        <i class="bi bi-rocket-takeoff me-2"></i>
+        {% trans "Iniciar Sesión" %}
+    </button>
+
+    <!-- Social Login (Optional) -->
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+        <div class="divider-neon">
+            <span>{% trans "O continúa con" %}</span>
+        </div>
+        
+        <div class="row g-2">
+            {% for provider in socialaccount_providers %}
+                <div class="col-6">
+                    <a href="{% provider_login_url provider.id process='login' %}" 
+                       class="social-login-btn">
+                        <i class="bi bi-{{ provider.name|lower }}"></i>
+                        {{ provider.name }}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="divider-neon">
+            <span>{% trans "¿No tienes cuenta?" %}</span>
+        </div>
+    {% else %}
+        <div class="text-center mt-3">
+            <p class="mb-2" style="color: #a0a7d0;">
+                {% trans "¿No tienes cuenta?" %}
+            </p>
+        </div>
+    {% endif %}
+</form>
+
+<!-- Register Link -->
+<div class="text-center mt-4">
+    <a href="{% url 'account_signup' %}" class="btn btn-neon-outline">
+        <i class="bi bi-person-plus me-2"></i>
+        {% trans "Crear una cuenta nueva" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    {% trans "¿Problemas para iniciar sesión?" %} 
+    <a href="{% url 'account_reset_password' %}">{% trans "Recuperar contraseña" %}</a> •
+    <a href="{% url 'account_signup' %}">{% trans "Registrarse" %}</a>
+</p>
+{% endblock %}

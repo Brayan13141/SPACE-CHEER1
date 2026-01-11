@@ -1,0 +1,145 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Registrarse" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "Únete a SPACE CHEER" %}{% endblock %}
+
+{% block content %}
+<form class="signup" id="signup_form" method="POST" action="{% url 'account_signup' %}" novalidate>
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Email Field -->
+    <div class="mb-3">
+        <label for="id_email" class="form-label-neon">
+            <i class="bi bi-envelope me-1"></i>
+            {% trans "Correo electrónico" %}
+        </label>
+        <input type="email" name="email" id="id_email" 
+               class="form-control form-control-neon" 
+               placeholder="nombre@ejemplo.com"
+               autocomplete="email" required>
+        {% if form.email.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.email.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Username Field -->
+    <div class="mb-3">
+        <label for="id_username" class="form-label-neon">
+            <i class="bi bi-person-badge me-1"></i>
+            {% trans "Nombre de usuario" %}
+        </label>
+        <input type="text" name="username" id="id_username" 
+               class="form-control form-control-neon" 
+               placeholder="ej: cheer_athlete"
+               autocomplete="username" required>
+        {% if form.username.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.username.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Password Field -->
+    <div class="mb-3">
+        <label for="id_password1" class="form-label-neon">
+            <i class="bi bi-key me-1"></i>
+            {% trans "Contraseña" %}
+        </label>
+        <input type="password" name="password1" id="id_password1" 
+               class="form-control form-control-neon" 
+               placeholder="••••••••"
+               autocomplete="new-password" required>
+        {% if form.password1.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.password1.errors }}
+            </div>
+        {% endif %}
+        <div class="form-text" style="color: #a0a7d0; font-size: 0.8rem;">
+            {% trans "Mínimo 8 caracteres, con letras y números." %}
+        </div>
+    </div>
+
+    <!-- Password Confirmation -->
+    <div class="mb-4">
+        <label for="id_password2" class="form-label-neon">
+            <i class="bi bi-key-fill me-1"></i>
+            {% trans "Confirmar contraseña" %}
+        </label>
+        <input type="password" name="password2" id="id_password2" 
+               class="form-control form-control-neon" 
+               placeholder="••••••••"
+               autocomplete="new-password" required>
+        {% if form.password2.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.password2.errors }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Hidden redirect field -->
+    {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <!-- Terms Agreement -->
+    <div class="form-check mb-3 form-check-neon">
+        <input class="form-check-input" 
+               type="checkbox" 
+               id="id_terms" 
+               name="terms" 
+               required
+               {% if form.terms.value %}checked{% endif %}>
+               
+        <label class="form-check-label" for="id_terms" style="font-size: 0.85rem;">
+            {% trans "Acepto los" %} 
+            <a href="#" style="color: var(--secondary-color);">{% trans "Términos de servicio" %}</a> 
+            {% trans "y" %} 
+            <a href="#" style="color: var(--secondary-color);">{% trans "Política de privacidad" %}</a>
+        </label>
+        
+        {% if form.terms.errors %}
+            <div class="text-danger small mt-1">
+                {{ form.terms.errors.0 }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Submit Button -->
+    <button class="btn btn-neon-primary mb-3" type="submit">
+        <i class="bi bi-rocket-takeoff-fill me-2"></i>
+        {% trans "Crear Cuenta" %}
+    </button>
+</form>
+
+<!-- Already have account -->
+<div class="text-center mt-3">
+    <p style="color: #a0a7d0; margin-bottom: 0.5rem;">
+        {% trans "¿Ya tienes una cuenta?" %}
+    </p>
+    <a href="{% url 'account_login' %}" class="btn btn-neon-outline">
+        <i class="bi bi-box-arrow-in-right me-2"></i>
+        {% trans "Iniciar Sesión" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    {% trans "Al registrarte, aceptas nuestros" %} 
+    <a href="#" style="color: var(--secondary-color);">{% trans "Términos" %}</a> •
+    <a href="#" style="color: var(--secondary-color);">{% trans "Privacidad" %}</a> •
+    <a href="{% url 'account_login' %}">{% trans "Iniciar Sesión" %}</a>
+</p>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "account/base_account.html" %}
+{% load i18n widget_tweaks %}
+
+{% block head_title %}{{ title }} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="signup-additional-info">
+    <p class="text-center mb-4" style="color: #a0a7d0;">
+        <i class="bi bi-person-circle me-1"></i>
+        {% trans "¡Un paso más! Completa tus datos personales para acceder a la plataforma." %}
+    </p>
+
+    <form method="POST" class="additional-info-form">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-neon mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label-neon">
+                {% if field.name == 'first_name' %}
+                    <i class="bi bi-person me-1"></i>
+                {% elif field.name == 'last_name' %}
+                    <i class="bi bi-person-badge me-1"></i>
+                {% elif field.name == 'phone' %}
+                    <i class="bi bi-phone me-1"></i>
+                {% elif field.name == 'birth_date' %}
+                    <i class="bi bi-calendar me-1"></i>
+                {% elif field.name == 'gender' %}
+                    <i class="bi bi-gender-ambiguous me-1"></i>
+                {% elif field.name == 'role' %}
+                    <i class="bi bi-person-badge me-1"></i>
+                {% elif field.name == 'team' %}
+                    <i class="bi bi-people me-1"></i>
+                {% elif field.name == 'experience_years' %}
+                    <i class="bi bi-star me-1"></i>
+                {% else %}
+                    <i class="bi bi-info-circle me-1"></i>
+                {% endif %}
+                
+                {{ field.label }}
+                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            
+            {% if field.name == 'role' or field.name == 'gender' %}
+                {{ field|add_class:"form-select form-control-neon" }}
+            {% elif field.name == 'birth_date' %}
+                <input type="date" 
+                       name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}" 
+                       class="form-control form-control-neon"
+                       {% if field.value %}value="{{ field.value|date:'Y-m-d' }}"{% endif %}
+                       {% if field.field.required %}required{% endif %}>
+            {% else %}
+                {{ field|add_class:"form-control form-control-neon" }}
+            {% endif %}
+
+            {% if field.help_text %}
+                <div class="form-text" style="color: #a0a7d0; font-size: 0.8rem;">
+                    {{ field.help_text }}
+                </div>
+            {% endif %}
+
+            {% for error in field.errors %}
+                <div class="text-danger small mt-1">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-neon-primary" type="submit">
+                <i class="bi bi-send-fill me-2"></i>
+                {% trans "Guardar y Continuar" %}
+            </button>
+            
+            <a href="{% url 'account_logout' %}" class="btn btn-neon-outline mt-2">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                {% trans "Salir y completar después" %}
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.additional-info-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.alert-neon {
+    background: rgba(255, 75, 75, 0.1);
+    border: 1px solid rgba(255, 75, 75, 0.3);
+    color: #ff9e9e;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.form-check-neon .form-check-input {
+    background-color: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--primary-color);
+}
+
+.form-check-neon .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-select.form-control-neon {
+    background-color: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #e2e8f0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+.form-select.form-control-neon:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+}
+
+input[type="date"].form-control-neon {
+    background-color: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #e2e8f0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+input[type="date"].form-control-neon:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+}
+
+/* Estilos responsive */
+@media (max-width: 576px) {
+    .additional-info-form {
+        padding: 0 15px;
+    }
+    
+    .btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-label-neon {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .additional-info-form {
+        padding: 2rem;
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 15px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        backdrop-filter: blur(10px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    {% trans "¿Necesitas ayuda para completar tu perfil?" %} 
+    
+    <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">{% trans "Salir" %}</a>
+</p>
+{% endblock %}

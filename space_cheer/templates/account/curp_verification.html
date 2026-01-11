@@ -1,0 +1,119 @@
+{% extends "account/base_account.html" %}
+{% load i18n widget_tweaks %}
+
+{% block head_title %}{{ title }} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="curp-verification-container">
+    <p class="text-center mb-4" style="color: #a0a7d0;">
+        <i class="bi bi-shield-check me-1"></i>
+        {% trans "Este rol requiere validar tu CURP para continuar." %}
+    </p>
+
+    <form method="POST" class="curp-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-neon mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- CURP Field -->
+        <div class="mb-3">
+            <label for="{{ form.curp.id_for_label }}" class="form-label-neon">
+                <i class="bi bi-fingerprint me-1"></i>
+                {{ form.curp.label }}
+                <span class="text-danger">*</span>
+            </label>
+
+            {{ form.curp|add_class:"form-control form-control-neon" }}
+
+            {% if form.curp.help_text %}
+                <small class="form-text text-muted">{{ form.curp.help_text }}</small>
+            {% endif %}
+
+            {% for error in form.curp.errors %}
+                <div class="text-danger small mt-1">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-neon-primary" type="submit">
+                <i class="bi bi-send-check me-2"></i>
+                {% trans "Validar CURP y Continuar" %}
+            </button>
+
+            <a href="{% url 'account_logout' %}" class="btn btn-neon-outline mt-2">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                {% trans "Salir y completar después" %}
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.curp-verification-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.alert-neon {
+    background: rgba(255, 75, 75, 0.1);
+    border: 1px solid rgba(255, 75, 75, 0.3);
+    color: #ff9e9e;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.form-control-neon {
+    background-color: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+}
+
+.form-control-neon:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+}
+
+.btn-neon-outline:hover {
+    color: var(--primary-color);
+}
+
+/* Responsiveness */
+@media (max-width: 576px) {
+    .curp-verification-container {
+        padding: 0 15px;
+    }
+}
+
+@media (min-width: 768px) {
+    .curp-verification-container {
+        padding: 2rem;
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 15px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        backdrop-filter: blur(10px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    {% trans "¿Necesitas ayuda para validar tu CURP?" %}
+    <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">
+        {% trans "Salir" %}
+    </a>
+</p>
+{% endblock %}

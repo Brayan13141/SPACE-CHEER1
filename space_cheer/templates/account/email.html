@@ -1,0 +1,121 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Gestión de Emails" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "Direcciones de correo electrónico" %}{% endblock %}
+
+{% block content %}
+{% if user.emailaddress_set.all %}
+    <p class="mb-4" style="color: #b0b7e0;">
+        {% trans 'Las siguientes direcciones de correo electrónico están asociadas con tu cuenta:' %}
+    </p>
+
+    <form action="{% url 'account_email' %}" class="email_list" method="post">
+        {% csrf_token %}
+        
+        {% for emailaddress in user.emailaddress_set.all %}
+            <div class="card mb-3" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(127,90,240,0.1);">
+                <div class="card-body">
+                    <div class="form-check">
+                        <input id="email_radio_{{forloop.counter}}" type="radio" 
+                               name="email" value="{{emailaddress.email}}" 
+                               class="form-check-input"
+                               {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked{% endif %}>
+                        
+                        <label for="email_radio_{{forloop.counter}}" class="form-check-label">
+                            <span style="color: var(--light-color);">{{ emailaddress.email }}</span>
+                            {% if emailaddress.verified %}
+                                <span class="badge rounded-pill" style="background: rgba(25,135,84,0.2); color: #6dffb8;">
+                                    <i class="bi bi-check-circle me-1"></i>{% trans "Verificado" %}
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill" style="background: rgba(255,193,7,0.2); color: #ffd43b;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>{% trans "No verificado" %}
+                                </span>
+                            {% endif %}
+                            {% if emailaddress.primary %}
+                                <span class="badge rounded-pill" style="background: rgba(13,110,253,0.2); color: var(--secondary-color);">
+                                    <i class="bi bi-star me-1"></i>{% trans "Principal" %}
+                                </span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-neon-outline" type="submit" name="action_primary">
+                <i class="bi bi-star me-2"></i>
+                {% trans 'Hacer principal' %}
+            </button>
+            
+            <button class="btn btn-neon-outline" type="submit" name="action_send">
+                <i class="bi bi-envelope-arrow-up me-2"></i>
+                {% trans 'Reenviar verificación' %}
+            </button>
+            
+            <button class="btn btn-neon-outline" type="submit" name="action_remove">
+                <i class="bi bi-trash me-2"></i>
+                {% trans 'Eliminar' %}
+            </button>
+        </div>
+    </form>
+{% else %}
+    <div class="alert alert-warning" style="background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.3);">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>{% trans 'Advertencia:' %}</strong>
+        {% trans 'Actualmente no tienes ninguna dirección de correo electrónico configurada. Deberías agregar una dirección de correo electrónico para recibir notificaciones, restablecer tu contraseña, etc.' %}
+    </div>
+{% endif %}
+
+<hr style="border-color: rgba(255,255,255,0.05);">
+
+<h6 class="mt-4 mb-3" style="color: var(--light-color);">
+    <i class="bi bi-plus-circle me-2"></i>
+    {% trans "Agregar dirección de correo electrónico" %}
+</h6>
+
+<form method="post" action="{% url 'account_email' %}" class="add_email">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label for="id_email" class="form-label-neon">
+            {% trans "Nuevo correo electrónico:" %}
+        </label>
+        <input type="email" name="email" id="id_email" 
+               class="form-control form-control-neon" 
+               placeholder="nuevo@email.com"
+               required>
+    </div>
+    
+    <button name="action_add" type="submit" class="btn btn-neon-primary">
+        <i class="bi bi-plus-circle me-2"></i>
+        {% trans "Agregar correo" %}
+    </button>
+</form>
+
+<div class="text-center mt-5">
+    <a href="{% url 'account_login' %}" class="text-decoration-none" style="color: var(--secondary-color);">
+        <i class="bi bi-arrow-left me-1"></i>
+        {% trans "Volver a la cuenta" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+(function() {
+    var message = "{% trans '¿Realmente deseas eliminar la dirección de correo electrónico seleccionada?' %}";
+    var actions = document.getElementsByName('action_remove');
+    if (actions.length) {
+        actions[0].addEventListener("click", function(e) {
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}

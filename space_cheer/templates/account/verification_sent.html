@@ -1,0 +1,64 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Verificación Enviada" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "Verifica tu correo electrónico" %}{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <div class="mb-4">
+        <div class="feature-icon mx-auto" style="width: 5rem; height: 5rem; background-color: rgba(13, 110, 253, 0.1);">
+            <i class="bi bi-envelope-check" style="font-size: 2rem; color: var(--secondary-color);"></i>
+        </div>
+    </div>
+    
+    <h5 class="mb-3" style="color: var(--light-color);">
+        {% trans "¡Revisa tu correo!" %}
+    </h5>
+    
+    <p class="mb-4" style="color: #b0b7e0;">
+        {% blocktrans %}
+        Te hemos enviado un correo electrónico para verificación. 
+        Sigue el enlace proporcionado para finalizar el proceso de registro.
+        {% endblocktrans %}
+    </p>
+    
+    <div class="alert alert-info" style="background: rgba(13, 110, 253, 0.1); border-color: rgba(13, 110, 253, 0.3);">
+        <i class="bi bi-info-circle me-2"></i>
+        <div class="small">
+            <strong>{% trans "Importante:" %}</strong> 
+            {% trans "Si no ves el correo, revisa tu carpeta de spam." %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <p class="small" style="color: #a0a7d0;">
+            {% trans "¿No recibiste el correo?" %}
+        </p>
+        <form method="post" action="{% url 'account_email' %}">
+            {% csrf_token %}
+            <button type="submit" name="action_send" class="btn btn-neon-outline btn-sm">
+                <i class="bi bi-envelope-arrow-up me-1"></i>
+                {% trans "Reenviar verificación" %}
+            </button>
+        </form>
+    </div>
+    
+    <div class="mt-5 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+        <a href="{% url 'account_login' %}" class="text-decoration-none" style="color: var(--secondary-color);">
+            <i class="bi bi-arrow-left me-1"></i>
+            {% trans "Volver al inicio de sesión" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p class="small">
+    {% trans "¿Problemas con la verificación?" %} 
+    <a href="mailto:registro@spacecheer.com" style="color: var(--secondary-color);">
+        {% trans "Contacta a registro" %}
+    </a>
+</p>
+{% endblock %}

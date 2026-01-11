@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}SPACE CHEER - {% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
+
+    <style>
+    :root {
+        --primary-color: #7f5af0;
+        --secondary-color: #2cb1ff;
+        --accent-color: #ff4f9a;
+        --dark-color: #0d0d1a;
+        --light-color: #e4eaff;
+        --panel-color: #1a1a2e;
+        --hover-glow: rgba(127, 90, 240, 0.25);
+    }
+    
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
+        color: var(--light-color);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .space-particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    .particle {
+        position: absolute;
+        background: var(--primary-color);
+        border-radius: 50%;
+        animation: float 15s infinite linear;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0) translateX(0); opacity: 0.3; }
+        50% { opacity: 0.7; }
+        100% { transform: translateY(-100vh) translateX(100px); opacity: 0.3; }
+    }
+
+    .account-card {
+        background: rgba(26, 26, 46, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(127, 90, 240, 0.2);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                    0 0 30px rgba(127, 90, 240, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .account-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, 
+            var(--primary-color), 
+            var(--secondary-color), 
+            var(--accent-color));
+    }
+
+    .account-header {
+        text-align: center;
+        padding: 2rem 2rem 1rem;
+    }
+
+    .logo-neon {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(127, 90, 240, 0.5);
+        margin-bottom: 1rem;
+    }
+
+    .account-subtitle {
+        color: #a0a7d0;
+        font-size: 0.9rem;
+    }
+
+    .form-control-neon {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(127, 90, 240, 0.3);
+        color: var(--light-color);
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-neon:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(127, 90, 240, 0.25);
+        color: var(--light-color);
+        outline: none;
+    }
+
+    .form-control-neon::placeholder {
+        color: #6c757d;
+    }
+
+    .form-label-neon {
+        color: #b0b7e0;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-neon-primary {
+        background: linear-gradient(45deg, var(--primary-color), #6b49d1);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-neon-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(127, 90, 240, 0.4);
+        background: linear-gradient(45deg, #6b49d1, var(--primary-color));
+    }
+
+    .btn-neon-outline {
+        background: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-neon-outline:hover {
+        background: rgba(127, 90, 240, 0.1);
+        color: var(--light-color);
+        border-color: var(--secondary-color);
+    }
+
+    .social-login-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--light-color);
+        padding: 10px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .social-login-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--primary-color);
+        color: var(--light-color);
+        transform: translateY(-1px);
+    }
+
+    .divider-neon {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: #a0a7d0;
+    }
+
+    .divider-neon::before,
+    .divider-neon::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid rgba(127, 90, 240, 0.3);
+    }
+
+    .divider-neon span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+    }
+
+    .error-message {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #ff6b8b;
+        padding: 10px 15px;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .success-message {
+        background: rgba(25, 135, 84, 0.1);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+        color: #6dffb8;
+        padding: 10px 15px;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .account-footer {
+        text-align: center;
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        color: #a0a7d0;
+        font-size: 0.9rem;
+    }
+
+    .account-footer a {
+        color: var(--secondary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .account-footer a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .remember-forgot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-check-neon {
+        color: #b0b7e0;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+        
+        .account-card {
+            margin: 0;
+        }
+    }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <!-- Particles background -->
+    <div class="space-particles" id="particles-container"></div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="account-card">
+                    <div class="account-header">
+                        <div class="logo-neon">
+                            <i class="bi bi-stars me-2"></i>SPACE CHEER
+                        </div>
+                        <p class="account-subtitle">
+                            {% block page_title %}Portal de Cuenta{% endblock %}
+                        </p>
+                    </div>
+
+                    <div class="p-4">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% block content %}
+                        {% endblock %}
+                    </div>
+
+                    <div class="account-footer">
+                        {% block footer_links %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+    
+    
+    <script>
+    // Simple particles effect
+    function createParticles() {
+        const container = document.getElementById('particles-container');
+        const particlesCount = 30;
+        
+        for (let i = 0; i < particlesCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random properties
+            const size = Math.random() * 4 + 1;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
+            const duration = Math.random() * 20 + 10;
+            const delay = Math.random() * 5;
+            const color = Math.random() > 0.5 ? 'var(--primary-color)' : 'var(--secondary-color)';
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${posX}%`;
+            particle.style.top = `${posY}%`;
+            particle.style.animationDuration = `${duration}s`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.backgroundColor = color;
+            particle.style.opacity = Math.random() * 0.5 + 0.2;
+            
+            container.appendChild(particle);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', createParticles);
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

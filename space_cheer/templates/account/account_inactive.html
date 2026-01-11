@@ -1,0 +1,66 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Cuenta Inactiva" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "Cuenta desactivada" %}{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <div class="mb-4">
+        <div class="feature-icon mx-auto" style="width: 5rem; height: 5rem; background-color: rgba(108, 117, 125, 0.1);">
+            <i class="bi bi-person-x" style="font-size: 2rem; color: #a0a7d0;"></i>
+        </div>
+    </div>
+    
+    <h5 class="mb-3" style="color: var(--light-color);">
+        {% trans "Cuenta inactiva" %}
+    </h5>
+    
+    <div class="alert alert-warning" style="background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.3);">
+        <i class="bi bi-exclamation-octagon me-2"></i>
+        <p class="mb-0">
+            {% trans "Esta cuenta está actualmente inactiva." %}
+        </p>
+    </div>
+    
+    <p class="mb-4" style="color: #b0b7e0;">
+        {% trans "Por favor, contacta al administrador del sistema o al soporte técnico para reactivar tu cuenta." %}
+    </p>
+    
+    <div class="row g-2">
+        <div class="col-6">
+            <a href="mailto:soporte@spacecheer.com" class="btn btn-neon-outline w-100">
+                <i class="bi bi-envelope me-1"></i>
+                {% trans "Contactar soporte" %}
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="/" class="btn btn-neon-primary w-100">
+                <i class="bi bi-house me-1"></i>
+                {% trans "Volver al inicio" %}
+            </a>
+        </div>
+    </div>
+    
+    <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+        <p class="small" style="color: #a0a7d0;">
+            {% trans "¿Crear una nueva cuenta?" %}
+            <a href="{% url 'account_signup' %}" style="color: var(--secondary-color);">
+                {% trans "Registrarse" %}
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p class="small">
+    {% trans "Soporte técnico:" %} 
+    <a href="mailto:soporte@spacecheer.com" style="color: var(--secondary-color);">
+        soporte@spacecheer.com
+    </a>
+     
+   
+</p>
+{% endblock %}

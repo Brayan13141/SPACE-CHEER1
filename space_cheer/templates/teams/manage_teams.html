@@ -1,0 +1,575 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- HEADER MOBILE-FIRST -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                 style="width: 50px; height: 50px;">
+                <i class="bi bi-people fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h4 fw-bold mb-0">Gestión de Equipos</h1>
+                <p class="text-muted mb-0 small">{{ teams|length }} equipo{{ teams|pluralize }}</p>
+            </div>
+        </div>
+        
+        {% if puede_crear %}
+        <button class="btn btn-primary d-flex align-items-center shadow-sm" 
+                data-bs-toggle="modal" data-bs-target="#modalCrear">
+            <i class="bi bi-plus-circle me-2"></i>
+            <span class="d-none d-md-inline">Crear Equipo</span>
+            <span class="d-inline d-md-none">Nuevo</span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- TARJETA DE LISTADO -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="h5 fw-bold mb-0">Lista de Equipos</h2>
+                <span class="badge bg-primary rounded-pill">{{ teams|length }}</span>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            {% if teams %}
+            <!-- TABLA PARA ESCRITORIO -->
+            <div class="table-responsive d-none d-md-block">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Logo</th>
+                            <th>Equipo</th>
+                            <th>Entrenador</th>
+                            <th>Categoría</th>
+                            <th>Ciudad</th>
+                            <th>Teléfono</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team in teams %}
+                        <tr class="border-bottom">
+                            <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                {% if team.logo %}
+                                <img src="{{ team.logo.url }}" alt="{{ team.name }}" 
+                                     class="rounded-circle border" width="40" height="40" style="object-fit:cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center border" 
+                                     style="width: 40px; height: 40px;">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ team.name }}</div>
+                                <small class="text-muted">ID: {{ team.id }}</small>
+                            </td>
+                            <td>
+                                {% if team.coach %}
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                         style="width: 30px; height: 30px;">
+                                        <i class="bi bi-person text-info"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small fw-bold">{{ team.coach.get_full_name|default:team.coach.username }}</div>
+                                        <small class="text-muted">Coach</small>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted small">Sin entrenador</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">
+                                    {{ team.category }}
+                                </span>
+                            </td>
+                            <td>{{ team.city|default:"—" }}</td>
+                            <td>
+                                {% if team.phone %}
+                                <a href="tel:{{ team.phone }}" class="text-decoration-none">{{ team.phone }}</a>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'manage_team_members' team.id %}" 
+                                       class="btn btn-outline-success btn-sm d-flex align-items-center">
+                                        <i class="bi bi-people me-1 d-none d-md-inline"></i>
+                                        <span>Miembros</span>
+                                    </a>
+                                    {% if puede_editar %}
+                                    <button class="btn btn-outline-warning btn-sm btn-editar"
+                                            data-id="{{ team.id }}"
+                                            data-name="{{ team.name }}"
+                                            data-coach="{{ team.coach.id|default:'' }}"
+                                            data-city="{{ team.city }}"
+                                            data-phone="{{ team.phone }}"
+                                            data-address="{{ team.address }}"
+                                            data-category="{{ team.category.id }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditar">
+                                        <i class="bi bi-pencil d-none d-md-inline me-1"></i>
+                                        <span>Editar</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if puede_eliminar %}
+                                    <button class="btn btn-outline-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminar{{ team.id }}">
+                                        <i class="bi bi-trash d-none d-md-inline me-1"></i>
+                                        <span>Eliminar</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- LISTA PARA MÓVIL -->
+            <div class="d-block d-md-none">
+                <div class="list-group list-group-flush">
+                    {% for team in teams %}
+                    <div class="list-group-item border-bottom py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-3">
+                                {% if team.logo %}
+                                <img src="{{ team.logo.url }}" alt="{{ team.name }}" 
+                                     class="rounded-circle border" width="50" height="50" style="object-fit:cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center border" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="bi bi-people fs-5"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-0">{{ team.name }}</h6>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                        {{ team.category }}
+                                    </span>
+                                    {% if team.city %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ team.city }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-dark" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'manage_team_members' team.id %}">
+                                            <i class="bi bi-people me-2"></i>Gestionar miembros
+                                        </a>
+                                    </li>
+                                    {% if puede_editar %}
+                                    <li>
+                                        <a class="dropdown-item btn-editar"
+                                           data-id="{{ team.id }}"
+                                           data-name="{{ team.name }}"
+                                           data-coach="{{ team.coach.id|default:'' }}"
+                                           data-city="{{ team.city }}"
+                                           data-phone="{{ team.phone }}"
+                                           data-address="{{ team.address }}"
+                                           data-category="{{ team.category.id }}"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#modalEditar">
+                                            <i class="bi bi-pencil me-2"></i>Editar equipo
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    {% if puede_eliminar %}
+                                    <li>
+                                        <a class="dropdown-item text-danger" 
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#modalEliminar{{ team.id }}">
+                                            <i class="bi bi-trash me-2"></i>Eliminar
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- DETALLES ADICIONALES EN MÓVIL -->
+                        <div class="row g-2 mt-2">
+                            {% if team.coach %}
+                            <div class="col-12">
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-person me-2"></i>
+                                    <span>{{ team.coach.get_full_name|default:team.coach.username }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if team.phone %}
+                            <div class="col-12">
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-telephone me-2"></i>
+                                    <span>{{ team.phone }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-12 mt-2">
+                                <a href="{% url 'manage_team_members' team.id %}" 
+                                   class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-people me-2"></i>
+                                    Gestionar miembros
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% else %}
+            <!-- ESTADO VACÍO -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-people display-1 text-muted opacity-50"></i>
+                </div>
+                <h5 class="text-muted mb-3">No hay equipos registrados</h5>
+                <p class="text-muted mb-4">Comienza creando tu primer equipo.</p>
+                {% if puede_crear %}
+                <button class="btn btn-primary d-flex align-items-center mx-auto" 
+                        data-bs-toggle="modal" data-bs-target="#modalCrear">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Crear primer equipo
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL CREAR EQUIPO -->
+{% if puede_crear %}
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <form method="POST" enctype="multipart/form-data" novalidate id="crearForm">
+                {% csrf_token %}
+                <input type="hidden" name="crear_team" value="1">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalCrearLabel">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Crear Nuevo Equipo
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- USANDO FORM.AS_P PERO MEJORADO -->
+                    <div class="formulario-equipo">
+                        {{ form_crear.as_p }}
+                    </div>
+                    
+                    <!-- INFORMACIÓN ADICIONAL -->
+                    <div class="alert alert-info border-0 bg-light mt-4">
+                        <div class="d-flex">
+                            <i class="bi bi-info-circle text-primary me-2"></i>
+                            <div>
+                                <strong>Información importante:</strong>
+                                <ul class="mb-0 ps-3 small">
+                                    <li>El logo debe ser una imagen cuadrada (recomendado 400x400px)</li>
+                                    <li>La categoría define el nivel competitivo del equipo</li>
+                                    <li>Puedes agregar miembros después de crear el equipo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Crear Equipo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL EDITAR EQUIPO -->
+{% if puede_editar %}
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <form method="POST" enctype="multipart/form-data" id="editarForm">
+                {% csrf_token %}
+                <input type="hidden" name="editar_team" value="1">
+                <input type="hidden" name="team_id" id="editar_team_id">
+
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalEditarLabel">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Editar Equipo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- USANDO FORM.AS_P PERO MEJORADO -->
+                    <div class="formulario-equipo">
+                        {{ form_crear.as_p }}
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODALES DE ELIMINAR -->
+{% for team in teams %}
+{% if puede_eliminar %}
+<div class="modal fade" id="modalEliminar{{ team.id }}" tabindex="-1" aria-labelledby="modalEliminarLabel{{ team.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="team_id" value="{{ team.id }}">
+                <input type="hidden" name="eliminar_team" value="1">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalEliminarLabel{{ team.id }}">
+                        <i class="bi bi-trash me-2"></i>
+                        Eliminar Equipo
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">¿Estás seguro?</h5>
+                        <p class="text-muted mb-4">
+                            Estás a punto de eliminar el equipo 
+                            <strong>"{{ team.name }}"</strong>.
+                            <br>
+                            <span class="text-danger">Esta acción no se puede deshacer.</span>
+                        </p>
+                        <div class="alert alert-warning border-0 bg-light small">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Todos los miembros serán removidos del equipo.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Eliminar definitivamente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- INFORMACIÓN PARA MÓVIL -->
+<div class="d-block d-md-none mt-4">
+    <div class="card border-0 bg-light">
+        <div class="card-body">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Gestión de equipos
+            </h6>
+            <ul class="mb-0 small ps-3 text-muted">
+                <li>Desliza horizontalmente para ver más columnas en la tabla</li>
+                <li>Toca los tres puntos verticales para ver más opciones</li>
+                <li>Los badges indican la categoría y ciudad del equipo</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Mejorar el formato de form.as_p con clases de Bootstrap
+    function mejorarFormularios() {
+        // Aplicar clases a todos los inputs, selects y textareas dentro de .formulario-equipo
+        document.querySelectorAll('.formulario-equipo input, .formulario-equipo select, .formulario-equipo textarea').forEach(element => {
+            if (!element.classList.contains('form-control') && !element.classList.contains('form-select')) {
+                if (element.tagName === 'SELECT') {
+                    element.classList.add('form-select');
+                } else if (element.tagName === 'INPUT' && element.type === 'file') {
+                    element.classList.add('form-control');
+                } else if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+                    element.classList.add('form-control');
+                }
+            }
+            
+            // Añadir placeholders específicos
+            if (element.name === 'name') {
+                element.placeholder = 'Ej: Los Halcones';
+            } else if (element.name === 'city') {
+                element.placeholder = 'Ej: Ciudad de México';
+            } else if (element.name === 'phone') {
+                element.placeholder = 'Ej: +52 55 1234 5678';
+            }
+        });
+        
+        // Aplicar clases a las etiquetas
+        document.querySelectorAll('.formulario-equipo label').forEach(label => {
+            label.classList.add('form-label', 'fw-bold', 'mb-2');
+        });
+        
+        // Aplicar clases a los párrafos
+        document.querySelectorAll('.formulario-equipo p').forEach(p => {
+            p.classList.add('mb-3');
+        });
+    }
+
+    // Llamar a la función después de que el DOM esté listo
+    mejorarFormularios();
+    
+    // También llamar cuando se abran los modales
+    document.getElementById('modalCrear')?.addEventListener('shown.bs.modal', mejorarFormularios);
+    document.getElementById('modalEditar')?.addEventListener('shown.bs.modal', mejorarFormularios);
+
+    // Script para llenar el formulario de editar
+    document.querySelectorAll(".btn-editar").forEach(btn => {
+        btn.addEventListener("click", function() {
+            document.getElementById("editar_team_id").value = this.dataset.id;
+            
+            const form = document.querySelector("#modalEditar form");
+            
+            // Llenar campos básicos
+            const fields = ["name", "city", "phone", "address"];
+            fields.forEach(field => {
+                const el = form.querySelector(`[name='${field}']`);
+                if (el) el.value = this.dataset[field] || '';
+            });
+            
+            // Llenar selects
+            const coachSelect = form.querySelector("select[name='coach']");
+            if (coachSelect) coachSelect.value = this.dataset.coach || '';
+            
+            const categorySelect = form.querySelector("select[name='category']");
+            if (categorySelect) categorySelect.value = this.dataset.category || '';
+            
+            // Mejorar el formulario después de llenarlo
+            setTimeout(mejorarFormularios, 100);
+        });
+    });
+
+    // Auto-abrir modales si hay error
+    {% if abrir_modal_crear %}
+    const modalCrear = new bootstrap.Modal(document.getElementById('modalCrear'));
+    modalCrear.show();
+    {% endif %}
+    
+    {% if abrir_modal_editar %}
+    const modalEditar = new bootstrap.Modal(document.getElementById('modalEditar'));
+    modalEditar.show();
+    {% endif %}
+
+    // Validación de formularios
+    const crearForm = document.getElementById('crearForm');
+    const editarForm = document.getElementById('editarForm');
+    
+    [crearForm, editarForm].forEach(form => {
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const nameInput = this.querySelector('input[name="name"]');
+                if (nameInput && !nameInput.value.trim()) {
+                    e.preventDefault();
+                    nameInput.classList.add('is-invalid');
+                    
+                    // Mostrar alerta si está en móvil
+                    if (window.innerWidth < 768) {
+                        alert('Por favor, ingresa el nombre del equipo.');
+                    }
+                    
+                    nameInput.focus();
+                    return false;
+                }
+                return true;
+            });
+        }
+    });
+    
+    // Remover clase de error cuando el usuario empiece a escribir
+    document.querySelectorAll('.formulario-equipo input').forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+
+<!-- ESTILOS MÍNIMOS PARA MEJORAR FORM.AS_P -->
+<style>
+.formulario-equipo p {
+    margin-bottom: 1rem;
+}
+
+.formulario-equipo label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Asegurar que los inputs de archivo se vean bien */
+.formulario-equipo input[type="file"] {
+    padding: 0.375rem;
+}
+
+/* Mejorar la apariencia de los selects en móvil */
+@media (max-width: 768px) {
+    .formulario-equipo select.form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+}
+</style>
+{% endblock %}

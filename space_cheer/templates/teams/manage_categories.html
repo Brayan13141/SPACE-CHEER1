@@ -1,0 +1,210 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid py-3">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Gestión de Categorías de Equipo</h5>
+
+            {% if puede_crear %}
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                + Crear Categoría
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Nivel</th>
+                            <th>Descripcion</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for categoria in categorias %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ categoria.name }}</td>
+                            <td>{{ categoria.level }}</td>
+                            <td>{{ categoria.description }}</td>
+                            <td>
+
+                                {% if puede_editar %}
+                                <button 
+                                    class="btn btn-sm btn-warning btn-editar"
+                                    data-id="{{ categoria.id }}"
+                                    data-name="{{ categoria.name }}"
+                                    data-level="{{ categoria.level }}"
+                                    data-description="{{ categoria.description|default:'' }}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEditar"
+                                >
+                                    Editar
+                                </button>
+                                {% endif %}
+
+                                {% if puede_eliminar %}
+                                <button
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEliminar{{ categoria.id }}"
+                                >
+                                    Eliminar
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- MODAL ELIMINAR -->
+                        {% if puede_eliminar %}
+                        <div class="modal fade" id="modalEliminar{{ categoria.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="categoria_id" value="{{ categoria.id }}">
+                                        <input type="hidden" name="eliminar_categoria" value="1">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Eliminar Categoría</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            ¿Seguro que deseas eliminar la categoría 
+                                            <strong>{{ categoria.name }}</strong>?
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Cancelar
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                No hay categorías registradas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CREAR -->
+{% if puede_crear %}
+<div class="modal fade" id="modalCrear" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="crear_categoria" value="1">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Crear Categoría</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          {{ form_crear.as_p }}
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- MODAL EDITAR -->
+{% if puede_editar %}
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="editar_categoria" value="1">
+        <input type="hidden" name="categoria_id" id="editar_categoria_id">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Categoría</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          {{ form_editar|default:form_crear.as_p }}
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar Cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Rellenar formulario de edición
+    document.querySelectorAll(".btn-editar").forEach(btn => {
+        btn.addEventListener("click", function () {
+            let id = this.dataset.id;
+            let name = this.dataset.name;
+
+            document.getElementById("editar_categoria_id").value = id;
+
+            const inputName = document.querySelector("#modalEditar form input[name='name']");
+            if (inputName) inputName.value = name;
+        });
+    });
+
+    // Reabrir modal si hubo errores
+    {% if abrir_modal_crear %}
+        new bootstrap.Modal(document.getElementById('modalCrear')).show();
+    {% endif %}
+
+    {% if abrir_modal_editar %}
+        new bootstrap.Modal(document.getElementById('modalEditar')).show();
+    {% endif %}
+});
+</script>
+{% endblock %}

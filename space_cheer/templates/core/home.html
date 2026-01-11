@@ -1,0 +1,334 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Inicio - SPACE CHEER{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'CORE/CSS/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <span class="hero-badge">✨ Líderes en Competencias de Cheerleading</span>
+                <h1 class="display-4 fw-bold mb-4">Eleva tu espíritu con <span class="text-warning">SPACE CHEER</span></h1>
+                <p class="lead mb-4">La plataforma integral para atletas, entrenadores y amantes del cheerleading. Competencias emocionantes, uniformes de calidad y una comunidad apasionada.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#" class="btn btn-primary btn-lg px-4">Explorar Competencias</a>
+                    <a href="#" class="btn btn-outline-light btn-lg px-4">Ver Tienda</a>
+                </div>
+                
+                <div class="row stats-counter">
+                    <div class="col-4 text-center">
+                        <div class="stat-number">150+</div>
+                        <div class="stat-label">Competencias</div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="stat-number">5,000+</div>
+                        <div class="stat-label">Atletas</div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Satisfacción</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'CORE/images/hero-image.png' %}" alt="Cheerleading Team" class="img-fluid rounded-3 shadow-lg" style="max-height: 500px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Todo lo que necesitas en un solo lugar</h2>
+                <p class="text-muted">SPACE CHEER ofrece una plataforma completa para la comunidad de cheerleading</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card service-card card-hover h-100 text-center p-4">
+                    <div class="service-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <h4>Competencias</h4>
+                    <p class="text-muted">Organiza, participa y sigue competencias de cheerleading en tiempo real.</p>
+                    <a href="#" class="btn btn-outline-primary mt-auto">Explorar</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card service-card card-hover h-100 text-center p-4">
+                    <div class="service-icon">
+                        <i class="bi bi-cart"></i>
+                    </div>
+                    <h4>Tienda Online</h4>
+                    <p class="text-muted">Uniforme personalizados de alta calidad y accesorios para tu equipo.</p>
+                    <a href="#" class="btn btn-outline-primary mt-auto">Comprar</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card service-card card-hover h-100 text-center p-4">
+                    <div class="service-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h4>Academia</h4>
+                    <p class="text-muted">Programas de entrenamiento, seguimiento de progreso y recursos educativos.</p>
+                    <a href="#" class="btn btn-outline-primary mt-auto">Aprender</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card service-card card-hover h-100 text-center p-4">
+                    <div class="service-icon">
+                        <i class="bi bi-chat-heart"></i>
+                    </div>
+                    <h4>Comunidad</h4>
+                    <p class="text-muted">Conecta con otros equipos, comparte experiencias y crea lazos.</p>
+                    <a href="#" class="btn btn-outline-primary mt-auto">Unirse</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Competitions -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h2 class="section-title">Próximas Competencias</h2>
+                <a href="#" class="btn btn-outline-primary">Ver Todas</a>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card competition-card card-hover h-100">
+                    <div class="card-body">
+                        <span class="competition-date">15 Nov 2023</span>
+                        <h4 class="card-title">National Cheer Championship</h4>
+                        <p class="card-text text-muted">La competencia más prestigiosa del año con equipos de todo el país.</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge bg-primary">Nacional</span>
+                            <span class="text-muted"><i class="bi bi-geo-alt"></i> Miami, FL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card competition-card card-hover h-100">
+                    <div class="card-body">
+                        <span class="competition-date">22 Nov 2023</span>
+                        <h4 class="card-title">Space Cheer Invitational</h4>
+                        <p class="card-text text-muted">Competencia exclusiva para equipos registrados en nuestra plataforma.</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge bg-success">Invitación</span>
+                            <span class="text-muted"><i class="bi bi-geo-alt"></i> Orlando, FL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card competition-card card-hover h-100">
+                    <div class="card-body">
+                        <span class="competition-date">05 Dic 2023</span>
+                        <h4 class="card-title">Winter Cheer Fest</h4>
+                        <p class="card-text text-muted">Festival navideño de cheerleading con categorías para todas las edades.</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge bg-warning text-dark">Festival</span>
+                            <span class="text-muted"><i class="bi bi-geo-alt"></i> Atlanta, GA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h2 class="section-title">Uniformes Destacados</h2>
+                <a href="#" class="btn btn-outline-primary">Ver Catálogo</a>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card product-card card-hover h-100">
+                    <div class="product-image">
+                        <img src="{% static 'CORE/images/uniform-1.png' %}" alt="Uniforme Galaxy" class="img-fluid">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Uniforme Galaxy</h5>
+                        <p class="card-text text-muted">Diseño espacial con detalles brillantes para competencias.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">$89.99</span>
+                            <a href="#" class="btn btn-primary btn-sm">Comprar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card product-card card-hover h-100">
+                    <div class="product-image">
+                        <img src="{% static 'CORE/images/uniform-2.png' %}" alt="Uniforme Stellar" class="img-fluid">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Uniforme Stellar</h5>
+                        <p class="card-text text-muted">Elegancia y comodidad con nuestro diseño premium.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">$79.99</span>
+                            <a href="#" class="btn btn-primary btn-sm">Comprar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card product-card card-hover h-100">
+                    <div class="product-image">
+                        <img src="{% static 'CORE/images/uniform-3.png' %}" alt="Uniforme Nebula" class="img-fluid">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Uniforme Nebula</h5>
+                        <p class="card-text text-muted">Colores vibrantes y diseño moderno para destacar.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">$69.99</span>
+                            <a href="#" class="btn btn-primary btn-sm">Comprar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card product-card card-hover h-100">
+                    <div class="product-image">
+                        <img src="{% static 'CORE/images/uniform-4.png' %}" alt="Uniforme Cosmos" class="img-fluid">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Uniforme Cosmos</h5>
+                        <p class="card-text text-muted">Clásico renovado con tecnología de tejido avanzado.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">$74.99</span>
+                            <a href="#" class="btn btn-primary btn-sm">Comprar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'CORE/images/user-1.jpg' %}" alt="Maria González" class="testimonial-avatar">
+                        <div>
+                            <h5 class="mb-0">Maria González</h5>
+                            <small class="text-muted">Entrenadora, Star Cheer Team</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"SPACE CHEER ha revolucionado cómo organizamos nuestras competencias. La plataforma es intuitiva y nos ha ahorrado innumerables horas de trabajo administrativo."</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'CORE/images/user-2.jpg' %}" alt="Carlos Rodriguez" class="testimonial-avatar">
+                        <div>
+                            <h5 class="mb-0">Carlos Rodriguez</h5>
+                            <small class="text-muted">Atleta, Galaxy Cheer</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"Los uniformes son de excelente calidad y el sistema de medidas personalizadas es perfecto. ¡Por fin encontramos un proveedor que entiende nuestras necesidades!"</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'CORE/images/user-3.jpg' %}" alt="Laura Chen" class="testimonial-avatar">
+                        <div>
+                            <h5 class="mb-0">Laura Chen</h5>
+                            <small class="text-muted">Directora, Moonlight Academy</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"La combinación de e-commerce, gestión de competencias y comunidad en una sola plataforma es exactamente lo que necesitábamos. ¡Altamente recomendado!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-pattern"></div>
+    <div class="container position-relative">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h2 class="display-5 fw-bold mb-4">¿Listo para llevar tu equipo al siguiente nivel?</h2>
+                <p class="lead mb-4">Únete a miles de equipos que ya usan SPACE CHEER para gestionar sus competencias, adquirir uniformes y conectar con la comunidad.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="#" class="btn btn-light btn-lg px-4">Crear Cuenta Gratis</a>
+                    <a href="#" class="btn btn-outline-light btn-lg px-4">Saber Más</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animación simple para los contadores
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aquí puedes agregar animaciones para los contadores si lo deseas
+        // Por ejemplo, podrías hacer que cuenten hacia arriba
+        
+   
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 200;
+        
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            const increment = target / speed;
+            
+            if(count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(updateCount, 1);
+            } else {
+                counter.innerText = target;
+            }
+        });
+        
+    });
+</script>
+{% endblock %}

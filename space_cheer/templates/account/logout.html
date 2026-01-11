@@ -1,0 +1,69 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Cerrar Sesión" %} | SPACE CHEER{% endblock %}
+
+{% block page_title %}{% trans "¿Listo para partir?" %}{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <div class="mb-4">
+        <i class="bi bi-rocket" style="font-size: 4rem; color: var(--secondary-color);"></i>
+    </div>
+    
+    <h5 class="mb-3" style="color: var(--light-color);">
+        {% trans "Cerrar sesión" %}
+    </h5>
+    
+    <p class="mb-4" style="color: #b0b7e0;">
+        {% trans '¿Estás seguro de que deseas cerrar sesión?' %}
+    </p>
+    
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+        {% endif %}
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-neon-primary">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                {% trans "Sí, cerrar sesión" %}
+            </button>
+            
+            <a href="/" class="btn btn-neon-outline">
+                <i class="bi bi-x-circle me-2"></i>
+                {% trans "Cancelar y volver" %}
+            </a>
+        </div>
+    </form>
+    
+    <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+        <p class="small" style="color: #a0a7d0;">
+            {% trans "¿No eres tú?" %} 
+            <a href="{% url 'account_login' %}" style="color: var(--secondary-color);">
+                {% trans "Inicia sesión con otra cuenta" %}
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p class="small">
+    {% trans "¿Problemas para cerrar sesión?" %} 
+    <a href="mailto:soporte@spacecheer.com" style="color: var(--secondary-color);">
+        {% trans "Contacta a soporte" %}
+    </a>
+</p>
+{% endblock %}
