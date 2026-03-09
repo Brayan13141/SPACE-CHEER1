@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Eliminar dirección</h2>
+
+  <div class="alert alert-warning">
+    ¿Seguro que deseas eliminar la dirección
+    <strong>{{ address.label }}</strong>?
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">
+      Sí, eliminar
+    </button>
+    <a href="{% url 'addresses:list' %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+</div>
+
+{% endblock %}

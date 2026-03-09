@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Mis direcciones</h2>
+    <a href="{% url 'accounts:create_address' %}" class="btn btn-primary">
+      Nueva dirección
+    </a>
+  </div>
+
+  {% if addresses %}
+    <div class="list-group">
+      {% for address in addresses %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ address.label }}</strong>
+            {% if address.is_default %}
+              <span class="badge bg-success ms-2">Default</span>
+            {% endif %}
+            <div class="text-muted small">
+              {{ address.address }}, {{ address.city }} – {{ address.zip_code }}
+            </div>
+          </div>
+
+          <div>
+            <a href="{% url 'accounts:update_address' address.pk %}" class="btn btn-sm btn-outline-secondary">
+              Editar
+            </a>
+            <a href="{% url 'accounts:delete_address' address.pk %}" class="btn btn-sm btn-outline-danger">
+              Eliminar
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No tienes direcciones registradas.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

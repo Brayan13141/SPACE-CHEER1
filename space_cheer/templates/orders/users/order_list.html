@@ -1,0 +1,284 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-3 py-md-4">
+  <!-- Header con título y botón de creación -->
+  <div class="row g-3 align-items-center mb-4">
+    <div class="col-12 col-md-6">
+      <h1 class="h2 mb-0">Órdenes</h1>
+      <p class="text-muted mb-0">
+        {% if orders %}
+          {{ orders|length }} orden{{ orders|pluralize:"es" }} encontrada{{ orders|pluralize:"s" }}
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-12 col-md-6 text-md-end">
+      <a href="{% url 'orders:create_order' %}" class="btn btn-primary btn-lg w-100 w-md-auto">
+        <i class="bi bi-plus-circle me-2"></i>Crear orden
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros mejorados en tarjeta -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-lg-4 mb-3 mb-lg-0">
+          <h6 class="card-title mb-0 text-primary">
+            <i class="bi bi-funnel me-2"></i>Estado de la orden
+          </h6>
+        </div>
+        <div class="col-lg-8">
+          <form method="get" class="mb-0">
+            <div class="d-flex flex-column flex-md-row gap-3">
+              <div class="d-flex gap-4">
+                <div class="form-check form-check-inline">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="filter"
+                    id="filter-active"
+                    value="active"
+                    {% if filter_status != "finalized" %}checked{% endif %}
+                    onchange="this.form.submit()"
+                  >
+                  <label class="form-check-label d-flex align-items-center" for="filter-active">
+                    <i class="bi bi-clock-history me-2"></i>Activas
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="filter"
+                    id="filter-finalized"
+                    value="finalized"
+                    {% if filter_status == "finalized" %}checked{% endif %}
+                    onchange="this.form.submit()"
+                  >
+                  <label class="form-check-label d-flex align-items-center" for="filter-finalized">
+                    <i class="bi bi-check-circle me-2"></i>Finalizadas
+                  </label>
+                </div>
+              </div>
+              <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 ms-md-auto align-self-center">
+                <i class="bi bi-info-circle me-1"></i>
+                {% if filter_status == "finalized" %}
+                  Mostrando órdenes finalizadas
+                {% else %}
+                  Mostrando órdenes activas
+                {% endif %}
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de órdenes -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="card-body p-0">
+        <table id="ordersTable" class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              
+              <th scope="col" class="ps-4 d-none d-md-table-cell">ID</th>
+ 
+              <th scope="col">Tipo</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="d-none d-lg-table-cell">Dueño</th>
+              <th scope="col" class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <!-- ID: visible en desktop, badge en móvil -->
+                 
+                <td class="ps-4 d-none d-md-table-cell fw-bold">
+                  #{{ order.id }}
+                </td>
+                
+                <!-- Tipo de orden con icono -->
+                <td>
+                  <div class="d-flex align-items-center">
+                    <span class="badge bg-info rounded-pill d-md-none me-2">#{{ order.id }}</span>
+                    {% if order.order_type == "PERSONAL" %}
+                      <i class="bi bi-person text-primary me-2"></i>
+                      <span>Personal</span>
+                    {% elif order.order_type == "TEAM" %}
+                      <i class="bi bi-people text-primary me-2"></i>
+                      <span>Equipo</span>
+                    {% else %}
+                      {{ order.order_type }}
+                    {% endif %}
+                  </div>
+                </td>
+                <!-- Estado con badge personalizado -->
+                <td>
+                  {% with status=order.status %}
+                    {% if status == "DRAFT" %}
+                      <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+                        <i class="bi bi-pencil me-1"></i>Borrador
+                      </span>
+                    {% elif status == "PENDING" %}
+                      <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                        <i class="bi bi-clock me-1"></i>Pendiente
+                      </span>
+                    {% elif status == "DESIGN_APPROVED" %}
+                      <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                        <i class="bi bi-check2-circle me-1"></i>Diseño aprobado
+                      </span>
+                    {% elif status == "IN_PRODUCTION" %}
+                      <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                        <i class="bi bi-gear me-1"></i>En producción
+                      </span>
+                    {% elif status == "DELIVERED" %}
+                      <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                        <i class="bi bi-check-circle me-1"></i>Entregado
+                      </span>
+                    {% elif status == "CANCELLED" %}
+                      <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                        <i class="bi bi-x-circle me-1"></i>Cancelado
+                      </span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ status }}</span>
+                    {% endif %}
+                  {% endwith %}
+                </td>
+                <!-- Dueño: visible solo en desktop grande -->
+                <td class="d-none d-lg-table-cell">
+                  <div class="d-flex align-items-center">
+                    {% if order.owner_user %}
+                      <i class="bi bi-person-circle text-muted me-2"></i>
+                      <span class="text-truncate" style="max-width: 180px;">
+                        {{ order.owner_user.get_full_name|default:order.owner_user.email }}
+                      </span>
+                    {% elif order.owner_team %}
+                      <i class="bi bi-people text-muted me-2"></i>
+                      <span class="text-truncate" style="max-width: 180px;">
+                        {{ order.owner_team.name }}
+                      </span>
+                    {% endif %}
+                  </div>
+                </td>
+                <!-- Acciones -->
+                <td class="text-end pe-4">
+                  <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'orders:detail_order' order.id %}" 
+                       class="btn btn-sm btn-outline-primary" 
+                       data-bs-toggle="tooltip" 
+                       title="Ver detalles">
+                      <i class="bi bi-eye"></i>
+                      <span class="d-none d-md-inline ms-1">Ver</span>
+                    </a>
+                    <a href="{% url 'orders:contact_info_order' order.id %}" 
+                       class="btn btn-sm btn-outline-secondary"
+                       data-bs-toggle="tooltip" 
+                       title="Información de contacto">
+                      <i class="bi bi-person-lines-fill"></i>
+                      <span class="d-none d-md-inline ms-1">Contacto</span>
+                    </a>
+                    {% if order.is_editable %}
+                      <a href="{% url 'orders:edit_order' order.id %}" 
+                         class="btn btn-sm btn-outline-warning"
+                         data-bs-toggle="tooltip" 
+                         title="Editar orden">
+                        <i class="bi bi-pencil"></i>
+                        <span class="d-none d-md-inline ms-1">Editar</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <!-- Estado vacío -->
+              <tr>
+                <td colspan="5" class="text-center py-5">
+                  <div class="text-muted">
+                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                    <h5 class="mb-2">
+                      {% if filter_status == "finalized" %}
+                        No hay órdenes finalizadas
+                      {% else %}
+                        No hay órdenes activas
+                      {% endif %}
+                    </h5>
+                    <p class="mb-4">Comienza creando una nueva orden</p>
+                    <a href="{% url 'orders:create_order' %}" class="btn btn-primary btn-lg">
+                      <i class="bi bi-plus-circle me-2"></i>Crear primera orden
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Paginación (si existe en el contexto) -->
+    
+    <div class="card-footer">
+      <nav aria-label="Paginación de órdenes">
+        <ul class="pagination justify-content-center justify-content-md-end mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_status %}&filter={{ filter_status }}{% endif %}" aria-label="Anterior">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if filter_status %}&filter={{ filter_status }}{% endif %}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_status %}&filter={{ filter_status }}{% endif %}" aria-label="Siguiente">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Inicializar tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Inicializar DataTables
+    var table = $('#ordersTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        ordering: true,
+        order: [[0, 'desc']],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+        },
+        columnDefs: [
+            { orderable: false, targets: -1 }
+        ]
+    });
+
+});
+</script>
+{% endblock %}

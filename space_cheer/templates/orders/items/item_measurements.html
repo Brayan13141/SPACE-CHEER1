@@ -1,0 +1,111 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2>
+        Medidas de 
+        <span class="badge bg-primary">
+          {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.username }}
+        </span>
+      </h2>
+      <p class="text-muted mb-0">
+        {{ athlete_item.order_item.product.name }}
+      </p>
+    </div>
+
+    <a href="{% url 'orders:order_item_detail' athlete_item.order_item.id %}"
+       class="btn btn-outline-secondary">
+      Volver
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>Registro de medidas</strong>
+      <span class="badge {% if filled_count == product_fields|length %}bg-success{% else %}bg-warning text-dark{% endif %}">
+        {{ filled_count }}/{{ product_fields|length }}
+      </span>
+    </div>
+
+    <div class="card-body">
+
+      {% if not can_edit %}
+        <div class="alert alert-warning">
+          La orden no permite modificar medidas.
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-4">
+
+          {% for pf in product_fields %}
+            <div class="col-md-6 col-lg-4">
+
+              <label class="form-label">
+                {{ pf.field.name }}
+                {% if pf.field.unit %}
+                  ({{ pf.field.unit }})
+                {% endif %}
+                {% if pf.required %}
+                  <span class="text-danger">*</span>
+                {% endif %}
+              </label>
+
+              <input
+                  type="text"
+                  name="field_{{ pf.field.id }}"
+                  class="form-control"
+                  value="{{ pf.current_value|default:'' }}"
+                  {% if pf.required %}required{% endif %}
+                  {% if not can_edit %}disabled{% endif %}
+              >
+
+              {% if pf.field.description %}
+                <small class="text-muted">
+                  {{ pf.field.description }}
+                </small>
+              {% endif %}
+
+            </div>
+          {% empty %}
+            <div class="col-12 text-center text-muted">
+              Este producto no tiene medidas configuradas.
+            </div>
+          {% endfor %}
+
+        </div>
+
+        {% if can_edit and product_fields %}
+          <hr class="my-4">
+
+          <div class="d-flex gap-2 flex-column flex-md-row">
+
+            <button type="submit"
+                    name="action"
+                    value="save_manual"
+                    class="btn btn-primary flex-fill">
+              Guardar medidas
+            </button>
+
+            <a href="{% url 'orders:order_item_detail' athlete_item.order_item.id %}"
+               class="btn btn-outline-dark flex-fill">
+              Cancelar
+            </a>
+
+          </div>
+        {% endif %}
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

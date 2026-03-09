@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Desactivar producto</h2>
+
+  <div class="alert alert-warning">
+    <p>
+      ¿Estás seguro de que deseas desactivar el producto
+      <strong>{{ product.name }}</strong>?
+    </p>
+    <p class="mb-0">
+      Este producto no podrá agregarse a nuevas órdenes,
+      pero se conservará para órdenes existentes.
+    </p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <button type="submit" class="btn btn-danger">
+      Sí, desactivar
+    </button>
+
+    <a href="{% url 'products:list_products' %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+</div>
+
+{% endblock %}

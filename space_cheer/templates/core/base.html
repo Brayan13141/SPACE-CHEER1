@@ -261,7 +261,8 @@
             object-fit: cover;
         }
     </style>
-
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -347,9 +348,18 @@
                             <li><a class="dropdown-item" href="{% url 'manage_owned_users' %}">
                                 <i class="bi bi-person-badge me-2"></i>Mi Crew
                             </a></li>
-                            
+                            {% if user.is_superuser or user.is_staff%}
+                            <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}">
+                                <i class="bi bi-grid me-2"></i>Administrar pedidos
+                            </a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="{% url 'orders:manage_orders' %}">
+                                <i class="bi bi-grid me-2"></i>Pedidos
+                            </a></li>
+                            {% endif %}
+
                             <!-- Categorías - solo para superuser -->
-                            {% if user.is_superuser %}
+                            {% if user.is_superuser or user.is_staff %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'manage_categories' %}">
                                 <i class="bi bi-grid me-2"></i>Categorías
@@ -373,9 +383,11 @@
                             <span class="badge bg-danger badge-notification">3</span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarStore">
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-grid me-2"></i>Catálogo
+                            {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'products:list_products' %}">
+                                <i class="bi bi-grid me-2"></i>Productos
                             </a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="#">
                                 <i class="bi bi-person-standing-dress me-2"></i>Uniformes
                             </a></li>
@@ -473,8 +485,8 @@
                                 <li><a class="dropdown-item" href="#">
                                     <i class="bi bi-bag me-2"></i>Mis Pedidos
                                 </a></li>
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="bi bi-heart me-2"></i>Favoritos
+                                <li><a class="dropdown-item" href="{% url 'accounts:list_address' %}">
+                                    <i class="bi bi-heart me-2"></i>Mi Dirección
                                 </a></li>
                                 <li><a class="dropdown-item" href="#">
                                     <i class="bi bi-gear me-2"></i>Configuración
@@ -547,71 +559,6 @@
             {% endblock %}
         </div>
 
-        <!-- SIDEBAR DE PERFIL - RED SOCIAL -->
-        {% if profile_section %}
-        <aside class="profile-sidebar" id="profileSidebar">
-            <div class="sidebar-header">
-                <h4>Mi Perfil</h4>
-                <button class="toggle-sidebar-btn" id="toggleProfileSidebarBtn">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-            
-            <div class="sidebar-profile">
-                <img src="https://via.placeholder.com/70" alt="Perfil" class="sidebar-profile-img">
-                <h6>{{ user.username }}</h6>
-                <small class="text-muted">Miembro desde 2024</small>
-            </div>
-            
-            <div class="sidebar-menu">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <i class="bi bi-people-fill"></i>
-                            <span class="nav-text">Mi Equipo</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-rulers"></i>
-                            <span class="nav-text">Mis Medidas</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-person-badge"></i>
-                            <span class="nav-text">Información Personal</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-camera"></i>
-                            <span class="nav-text">Foto de Perfil</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-heart"></i>
-                            <span class="nav-text">Favoritos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-chat"></i>
-                            <span class="nav-text">Mensajes</span>
-                            <span class="badge bg-danger ms-2">3</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-gear"></i>
-                            <span class="nav-text">Configuración</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
-        {% endif %}
     </div>
 
     <!-- FOOTER -->
@@ -667,6 +614,13 @@
     </footer>
 
     <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+
+        <!-- jQuery (requerido por DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/bundle@3/tsparticles.bundle.min.js"></script>
     <script src="{% static '/JS/CORE/particles.min.js' %}"></script>
@@ -826,7 +780,7 @@
         });
     });
     </script>
-
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

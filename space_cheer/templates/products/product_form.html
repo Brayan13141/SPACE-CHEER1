@@ -1,0 +1,178 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container py-3 py-md-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h2 mb-0">{{ title }}</h1>
+
+  <a href="{% url 'products:select_template' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1 d-none d-md-inline"></i>
+    Volver
+  </a>
+</div>
+
+{% if template %}
+<div class="alert alert-info mb-4">
+  <strong>Plantilla seleccionada:</strong> {{ template.label }}<br>
+  <small>{{ template.description }}</small>
+</div>
+{% endif %}
+
+{% if form.errors %}
+<div class="alert alert-danger">
+  <strong>Por favor corrige los errores:</strong>
+  <ul class="mb-0 mt-2">
+    {% for field in form %}
+      {% for error in field.errors %}
+      <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+{% if template_key %}
+<input type="hidden" name="template" value="{{ template_key }}">
+{% endif %}
+
+<!-- BASIC INFO -->
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-header bg-light">
+<h5 class="mb-0">
+<i class="bi bi-info-circle me-2"></i>
+Información básica
+</h5>
+</div>
+
+<div class="card-body">
+
+<div class="row g-3">
+
+<div class="col-md-8">
+<label class="form-label fw-semibold">Nombre</label>
+{{ form.name }}
+</div>
+
+<div class="col-md-4">
+<label class="form-label fw-semibold">Tipo</label>
+{{ form.product_type }}
+</div>
+
+<div class="col-12">
+<label class="form-label fw-semibold">Descripción</label>
+{{ form.description }}
+</div>
+
+<div class="col-md-4">
+<label class="form-label fw-semibold">Tipo de uso</label>
+{{ form.usage_type }}
+</div>
+
+<div class="col-md-4">
+<label class="form-label fw-semibold">Estrategia de talla</label>
+{{ form.size_strategy }}
+</div>
+
+<div class="col-md-4">
+<label class="form-label fw-semibold">Alcance</label>
+{{ form.scope }}
+</div>
+
+<div class="col-12" id="owner-team-container">
+<label class="form-label fw-semibold">Equipo dueño</label>
+{{ form.owner_team }}
+<small class="text-muted">{{ form.owner_team.help_text }}</small>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- IMAGE -->
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-header bg-light">
+<h5 class="mb-0">
+<i class="bi bi-image me-2"></i>
+Imagen
+</h5>
+</div>
+
+<div class="card-body">
+{{ form.image }}
+</div>
+
+</div>
+
+<!-- DETAILS -->
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-header bg-light">
+<h5 class="mb-0">
+<i class="bi bi-gear me-2"></i>
+Detalles
+</h5>
+</div>
+
+<div class="card-body">
+
+<div class="row g-3">
+
+<div class="col-md-6">
+<label class="form-label fw-semibold">Temporada</label>
+{{ form.season }}
+</div>
+
+<div class="col-md-6">
+<label class="form-label fw-semibold">Precio base</label>
+<div class="input-group">
+<span class="input-group-text">$</span>
+{{ form.base_price }}
+</div>
+</div>
+
+<div class="col-12">
+
+<div class="form-check form-switch">
+{{ form.is_active }}
+<label class="form-check-label fw-semibold">
+Producto activo
+</label>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="d-flex gap-2">
+
+<button type="submit" class="btn btn-primary btn-lg flex-fill">
+Guardar producto
+</button>
+
+<a href="{% url 'products:list_products' %}"
+class="btn btn-outline-secondary btn-lg flex-fill">
+Cancelar
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -92,6 +92,10 @@
                                         Liberar
                                     </button>
                                 </form>
+                                <a href="{% url 'edit_owned_user' ownership.user.id %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-person-dash me-1"></i>
+                                        Editar
+                                    </a>
                             </td>
                         </tr>
                         {% endfor %}

@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Crear orden</h2>
+
+  {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Tipo de orden</label>
+      <select name="order_type" id="order_type" class="form-select" required>
+        <option value="PERSONAL">Personal</option>
+        <option value="TEAM">Equipo</option>
+      </select>
+    </div>
+
+    {% if teams.exists %}
+    <div class="mb-3 d-none" id="team-selector">
+      <label class="form-label">Equipo</label>
+      <select name="order_team" class="form-select">
+        <option value="">Selecciona un equipo</option>
+        {% for team in teams %}
+          <option value="{{ team.id }}">{{ team.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% else %}
+      <div class="alert alert-info">
+        No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo.
+      </div>
+    {% endif %}
+   
+    
+
+    <button type="submit" class="btn btn-primary">
+      Crear
+    </button>
+  </form>
+</div>
+
+<script>
+  const orderType = document.getElementById("order_type");
+  const teamSelector = document.getElementById("team-selector");
+
+  orderType.addEventListener("change", function () {
+    if (this.value === "TEAM") {
+      teamSelector.classList.remove("d-none");
+    } else {
+      teamSelector.classList.add("d-none");
+    }
+  });
+</script>
+
+{% endblock %}

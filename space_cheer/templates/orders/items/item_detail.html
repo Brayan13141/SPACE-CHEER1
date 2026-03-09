@@ -1,0 +1,289 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-3 py-md-4">
+  <!-- Cabecera con navegación y título -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <h1 class="h2 mb-1">{{ item.product.name }}</h1>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <span class="badge bg-light text-dark border">
+          <i class="bi bi-tag me-1"></i>{{ item.product.get_product_type_display }}
+        </span>
+        <span class="badge bg-light text-dark border">
+          <i class="bi bi-gear me-1"></i>{{ item.product.get_usage_type_display }}
+        </span>
+        <span class="badge bg-light text-dark border">
+          <i class="bi bi-globe me-1"></i>{{ item.product.get_scope_display }}
+        </span>
+        {% if item.product.owner_team %}
+          <span class="badge bg-info">
+            <i class="bi bi-people me-1"></i>{{ item.product.owner_team.name|truncatechars:20 }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="mt-3 mt-md-0">
+      <a href="{% url 'orders:detail_order' item.order.id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver a la orden
+      </a>
+    </div>
+  </div>
+
+  <!-- Tarjeta con información del producto y la orden -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex flex-column flex-md-row">
+            <!-- Imagen del producto (si existe) -->
+            {% if item.product.image %}
+              <div class="flex-shrink-0 mb-3 mb-md-0 me-md-3">
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                     class="rounded" style="width: 120px; height: 120px; object-fit: cover;">
+              </div>
+            {% endif %}
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-2">Detalles del producto</h5>
+              <p class="card-text text-muted">{{ item.product.description|default:"Sin descripción"|truncatechars:200 }}</p>
+              <div class="row g-2">
+                <div class="col-6 col-md-3">
+                  <span class="text-muted d-block small">Cantidad</span>
+                  <span class="fw-bold fs-5">{{ item.quantity }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="text-muted d-block small">Precio unit.</span>
+                  <span class="fw-bold fs-5">${{ item.unit_price|floatformat:2 }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="text-muted d-block small">Subtotal</span>
+                  <span class="fw-bold fs-5 text-primary">${{ item.subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="text-muted d-block small">Temporada</span>
+                  <span>{{ item.product.season.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm bg-light h-100">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-lightning-charge me-2"></i>Acciones
+          </h5>
+          <div class="d-flex flex-column gap-2">
+
+            {% if item.order.order_type == "TEAM" and item.product.usage_type == "ATHLETE_CUSTOM" and item.order.can_edit_general %}
+              <a href="{% url 'orders:item_import_team_athletes' item.id %}" 
+                 class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center">
+                <i class="bi bi-people me-2"></i>Importar atletas del equipo
+              </a>
+            {% endif %}
+
+            {% if item.order.can_edit_general %}
+              <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
+                      data-bs-toggle="modal" data-bs-target="#deleteItemModal">
+                <i class="bi bi-trash3 me-2"></i>Eliminar producto
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de atletas asignados -->
+   {% if item.product.usage_type == "ATHLETE_CUSTOM" %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+      <i class="bi bi-person-arms-up me-2"></i>Atletas asignados
+    </h4>
+    {% if athlete_items %}
+      <span class="badge bg-primary rounded-pill fs-6">{{ athlete_items|length }} atleta{{ athlete_items|pluralize:"s" }}</span>
+    {% endif %}
+  </div>
+
+  {% if athlete_items %}
+    <div class="row g-3 mb-4">
+      {% for athlete_item in athlete_items %}
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">
+                  {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.username }}
+                </h5>
+                <div>
+                  {% if athlete_item.has_complete_measurements %}
+                    <span class="badge bg-success" data-bs-toggle="tooltip" title="Todas las medidas registradas">
+                      <i class="bi bi-check-circle me-1"></i>Completo
+                    </span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="Faltan medidas obligatorias">
+                      <i class="bi bi-exclamation-triangle me-1"></i>Incompleto
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Información del atleta -->
+              <div class="small text-muted mb-2">
+                <i class="bi bi-envelope me-1"></i>{{ athlete_item.athlete.email }}
+                {% if athlete_item.athlete.phone %}
+                  <span class="mx-1">|</span>
+                  <i class="bi bi-telephone me-1"></i>{{ athlete_item.athlete.phone }}
+                {% endif %}
+              </div>
+
+              <!-- Campos de medida con valores (si existen) -->
+              {% if athlete_item.measurements.exists %}
+                <div class="mt-2 mb-3">
+                  <span class="text-muted small d-block mb-1">Medidas registradas:</span>
+                  <div class="d-flex flex-wrap gap-1">
+                    {% for measurement in athlete_item.measurements.all|slice:":3" %}
+                      <span class="badge bg-light text-dark border">
+                        {{ measurement.field_name }}: {{ measurement.value }}{{ measurement.field_unit }}
+                      </span>
+                    {% endfor %}
+                    {% if athlete_item.measurements.count > 3 %}
+                      <span class="badge bg-light border">+{{ athlete_item.measurements.count|add:"-3" }} más</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+
+              <!-- Personalización (texto) -->
+              {% if athlete_item.customization %}
+                <div class="mt-2 p-2 bg-light rounded">
+                  <span class="text-muted small d-block">Personalización:</span>
+                  <span class="fw-semibold">{{ athlete_item.customization.custom_text }}</span>
+                </div>
+              {% endif %}
+
+              <!-- Botones de acción por atleta -->
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{% url 'orders:item_measurements_order_add' athlete_item.id %}" 
+                   class="btn btn-sm btn-outline-primary flex-grow-1">
+                  <i class="bi bi-rulers me-1"></i>Medidas
+                </a>
+                {% if item.order.is_editable %}
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-danger" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#removeAthleteModal{{ athlete_item.id }}"
+                          title="Eliminar asignación">
+                    <i class="bi bi-person-dash"></i>
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para confirmar eliminación de atleta (por cada atleta) -->
+        {% if item.order.is_editable %}
+          <div class="modal fade" id="removeAthleteModal{{ athlete_item.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Eliminar asignación</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p>¿Estás seguro de que deseas eliminar a 
+                     <strong>{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.username }}</strong> 
+                     de este producto?</p>
+                  <p class="text-muted small">Esta acción no se puede deshacer.</p>
+                </div>
+              
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <!-- Estado vacío -->
+    <div class="text-center py-5 mb-4">
+      <i class="bi bi-person-slash display-4 text-muted mb-3"></i>
+      <h5 class="text-muted">No hay atletas asignados</h5>
+      <p class="text-muted mb-4">
+        {% if item.product.usage_type == "GLOBAL" %}
+          Este producto no requiere asignación individual.
+        {% else %}
+          Asigna atletas para personalizar el producto.
+        {% endif %}
+      </p>
+    </div>
+  {% endif %}
+  {% endif %}
+  <!-- Información adicional -->
+  {% if item.product.measurement_fields.exists %}
+    <hr class="my-4">
+    <div class="card bg-light">
+      <div class="card-body">
+        <div class="d-flex align-items-start">
+          <i class="bi bi-info-circle-fill text-primary me-3 fs-4"></i>
+          <div>
+            <h5 class="card-title mb-2">Medidas requeridas para este producto</h5>
+            <p class="card-text">
+              Este producto requiere las siguientes medidas:
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              {% for field in item.product.measurement_fields.all %}
+                <span class="badge bg-white text-dark border px-3 py-2">
+                  {{ field.field.name }}
+                  {% if field.required %}
+                    <span class="text-danger ms-1">*</span>
+                  {% endif %}
+                </span>
+              {% endfor %}
+            </div>
+            <p class="text-muted small mt-2 mb-0">
+              <span class="text-danger">*</span> Campo obligatorio
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal para confirmar eliminación del producto completo -->
+{% if item.order.is_editable %}
+  <div class="modal fade" id="deleteItemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar <strong>{{ item.product.name }}</strong> de la orden?</p>
+          <p class="text-danger small">Esta acción eliminará también todas las asignaciones de atletas y medidas asociadas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Inicializar tooltips de Bootstrap
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+{% endblock %}

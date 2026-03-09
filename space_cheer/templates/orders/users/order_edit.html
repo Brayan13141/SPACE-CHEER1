@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Editar orden #{{ order.id }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea name="design_notes" class="form-control" rows="4">{{ order.design_notes }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      Guardar
+    </button>
+
+    <a href="{% url 'orders:detail_order' order.id %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+</div>
+
+{% endblock %}

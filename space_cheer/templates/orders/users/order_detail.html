@@ -1,0 +1,390 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container py-3 py-md-4">
+  <!-- Cabecera con número de orden y estado -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <h1 class="h2 mb-1 d-flex align-items-center flex-wrap gap-2">
+        <span>Orden #{{ order.id }}</span>
+        <span class="badge fs-6 {% if order.status == 'DELIVERED' %}bg-success
+                               {% elif order.status == 'DRAFT' %}bg-secondary
+                               {% elif order.status == 'PENDING' %}bg-warning text-dark
+                               {% elif order.status == 'CANCELLED' %}bg-danger
+                               {% else %}bg-primary{% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </h1>
+      <p class="text-muted mb-0">
+        <i class="bi bi-calendar3 me-1"></i> Creada: {{ order.created_at|date:"d/m/Y H:i" }}
+      </p>
+    </div>
+    <div class="mt-3 mt-md-0">
+      <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+      </a>
+    </div>
+  </div>
+
+  <!-- Bloqueo de medidas (problemas que impiden enviar) -->
+  {% if blocking_issues %}
+    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong>Esta orden no se puede enviar</strong>
+      <ul class="mb-0 mt-2">
+        {% for issue in blocking_issues %}
+          <li>{{ issue.message }}</li>
+        {% endfor %}
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% else %}
+    <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <span>Pedido listo para enviarse</span>
+    </div>
+  {% endif %}
+
+  <!-- Tarjeta con información de la orden -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-info-circle me-2"></i>Detalles de la orden
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-tag text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Tipo</span>
+              <span class="fw-semibold">{{ order.get_order_type_display }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Dueño</span>
+              <span class="fw-semibold">
+                {% if order.owner_user %}
+                  {{ order.owner_user.get_full_name|default:order.owner_user.email }}
+                {% else %}
+                  {{ order.owner_team.name }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-lock text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Bloqueo de medidas</span>
+              <span class="badge {% if order.measurements_locked %}bg-success{% else %}bg-secondary{% endif %}">
+                {{ order.measurements_locked|yesno:"Activado,Desactivado" }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-pencil-square text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Editable</span>
+              <span class="badge bg-info">
+                {{ order.is_editable|yesno:"Sí,No" }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información de contacto y envío (si existe) -->
+  {% if order.has_contact_info %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-truck me-2"></i>Información de envío
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-person-badge text-primary me-3 mt-1"></i>
+              <div>
+                <span class="text-muted small d-block">Contacto</span>
+                <span class="fw-semibold">{{ order.contact_info.contact_name }}</span>
+                <div class="small">{{ order.contact_info.contact_phone }} • {{ order.contact_info.contact_email }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-geo-alt text-primary me-3 mt-1"></i>
+              <div>
+                <span class="text-muted small d-block">Dirección</span>
+                <span>{{ order.contact_info.shipping_address_line }}</span>
+                <div class="small">{{ order.contact_info.shipping_city }}, CP: {{ order.contact_info.shipping_postal_code }}</div>
+                {% if order.contact_info.shipping_notes %}
+                  <div class="small text-muted mt-1">Nota: {{ order.contact_info.shipping_notes }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Botones de acción (solo si editable) -->
+  {% if order.can_edit_general %}
+    <div class="d-flex flex-column flex-md-row gap-2 mb-4">
+      <a href="{% url 'orders:add_item_product_order' order.id %}" class="btn btn-success flex-fill">
+        <i class="bi bi-cart-plus me-1"></i>Agregar producto
+      </a>
+      <a href="{% url 'orders:edit_order' order.id %}" class="btn btn-warning flex-fill">
+        <i class="bi bi-pencil me-1"></i>Editar orden
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Productos en la orden -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+      <i class="bi bi-box-seam me-2"></i>Productos en la orden
+    </h4>
+    {% if order.items.exists %}
+      <span class="badge bg-primary rounded-pill fs-6">{{ order.items.count }} producto{{ order.items.count|pluralize:"s" }}</span>
+    {% endif %}
+  </div>
+
+  {% if order.items.exists %}
+    <!-- Listado de productos -->
+    <div class="row g-3 mb-4">
+      {% for item in order.items.all %}
+        <div class="col-12">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start">
+                <div class="mb-3 mb-md-0 flex-grow-1">
+                  <h5 class="card-title mb-1 d-flex align-items-center flex-wrap gap-2">
+                    {{ item.product.name }}
+                    {% if not item.product.is_active %}
+                      <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                  </h5>
+                  <div class="d-flex flex-wrap gap-2 mb-2">
+                    <span class="badge bg-light text-dark border">
+                      <i class="bi bi-tag me-1"></i>{{ item.product.get_product_type_display }}
+                    </span>
+                    <span class="badge bg-light text-dark border">
+                      <i class="bi bi-gear me-1"></i>{{ item.product.get_usage_type_display }}
+                    </span>
+                    <span class="badge bg-light text-dark border">
+                      <i class="bi bi-globe me-1"></i>{{ item.product.get_scope_display }}
+                    </span>
+                    {% if item.product.owner_team %}
+                      <span class="badge bg-info">
+                        <i class="bi bi-people me-1"></i>{{ item.product.owner_team.name|truncatechars:15 }}
+                      </span>
+                    {% endif %}
+                  </div>
+                  <!-- Atletas asignados (si es TEAM y uso personalizado) -->
+                  {% if item.athletes.exists %}
+                    <div class="small text-muted mt-2">
+                      <i class="bi bi-person-arms-up me-1"></i>
+                      Atletas:
+                      {% for athlete_item in item.athletes.all %}
+                        <span class="badge bg-light border me-1" 
+                              data-bs-toggle="tooltip" 
+                              title="Medidas {% if athlete_item.has_complete_measurements %}completas{% else %}incompletas{% endif %}">
+                          {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
+                          {% if not athlete_item.has_complete_measurements %}
+                            <i class="bi bi-exclamation-circle text-warning ms-1"></i>
+                          {% endif %}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  <!-- Texto de personalización (si existe) -->
+                  {% for athlete_item in item.athletes.all %}
+                    {% if athlete_item.customization %}
+                      <div class="small text-muted">
+                        <i class="bi bi-type me-1"></i>
+                        Personalización: <span class="fw-semibold">{{ athlete_item.customization.custom_text }}</span>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="text-md-end">
+                  <div class="mb-2">
+                    <span class="h5 mb-0">${{ item.subtotal|floatformat:2 }}</span>
+                    <span class="text-muted small"> subtotal</span>
+                  </div>
+                  <div>
+                    <span class="text-muted">Cantidad:</span>
+                    <span class="fw-bold ms-1">{{ item.quantity }}</span>
+                    <span class="text-muted mx-1">|</span>
+                    <span class="text-muted">Precio unit.:</span>
+                    <span class="fw-bold ms-1">${{ item.unit_price|floatformat:2 }}</span>
+                  </div>
+                  {% if item.product.usage_type == "ATHLETE_CUSTOM" %}
+                      <a href="{% url 'orders:order_item_detail' item.id %}" 
+                        class="btn btn-outline-primary btn-sm mt-2 w-100 w-md-auto">
+                          <i class="bi bi-people me-1"></i>Ver atletas
+                      </a>
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Total de la orden -->
+    <div class="card bg-light mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="h5 mb-0">Total de la orden:</span>
+          <span class="h3 mb-0 text-primary">${{ order.total|floatformat:2 }}</span>
+        </div>
+        <div class="text-muted small mt-1">
+          {{ order.items.count }} producto{{ order.items.count|pluralize:"s" }} | {{ order.total_quantity }} unidades
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <!-- Estado vacío -->
+    <div class="text-center py-5 mb-4">
+      <i class="bi bi-box display-4 text-muted mb-3"></i>
+      <h5 class="text-muted">Esta orden aún no tiene productos</h5>
+      <p class="text-muted mb-4">Agrega productos para comenzar</p>
+      {% if order.can_edit_general %}
+        <a href="{% url 'orders:add_item_product_order' order.id %}" class="btn btn-success">
+          <i class="bi bi-cart-plus me-2"></i>Agregar producto
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Imágenes de diseño -->
+  {% if order.design_images.exists %}
+    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">
+        <i class="bi bi-images me-2"></i>Diseños
+      </h4>
+    </div>
+    <div class="row g-3 mb-4">
+      {% for design in order.design_images.all %}
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="card shadow-sm">
+            <img src="{{ design.image.url }}" class="card-img-top" alt="Diseño" style="height: 150px; object-fit: cover;">
+            <div class="card-body p-2 text-center">
+              <small class="text-muted">
+                {% if design.is_final %}
+                  <span class="badge bg-success">Final</span>
+                {% endif %}
+                <br>{{ design.created_at|date:"d/m/Y" }}
+              </small>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Historial de la orden (log) -->
+  {% if order.orderlog_set.exists %}
+    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">
+        <i class="bi bi-clock-history me-2"></i>Historial
+      </h4>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          {% for log in order.orderlog_set.all|slice:":5" %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <strong>{{ log.user.get_full_name|default:log.user.email }}</strong>
+                  <span class="badge bg-light text-dark">{{ log.action }}</span>
+                  <span class="text-muted small">
+                    de {{ log.from_status }} a {{ log.to_status }}
+                  </span>
+                </div>
+                <small class="text-muted">{{ log.created_at|date:"d/m/Y H:i" }}</small>
+              </div>
+              {% if log.notes %}
+                <div class="small text-muted mt-1">{{ log.notes }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          {% if order.orderlog_set.count > 5 %}
+            <div class="list-group-item text-center">
+              <a href="#" class="small">Ver historial completo</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Transiciones de estado (acciones disponibles) -->
+  <hr class="my-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+      <i class="bi bi-lightning-charge me-2"></i>Acciones disponibles
+    </h4>
+  </div>
+
+  {% if available_transitions %}
+    <div class="row g-2">
+      {% for status in available_transitions %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <form method="post" action="{% url 'orders:transition' order.id status %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center py-3">
+              <i class="bi bi-arrow-right-circle me-2"></i>
+              <span>Pasar a {{ status|title }}</span>
+            </button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-4">
+      <div class="text-muted mb-3">
+        <i class="bi bi-check2-circle display-5"></i>
+      </div>
+      <p class="lead text-muted">No hay transiciones disponibles</p>
+      <p class="text-muted">Esta orden ha alcanzado su estado final</p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Activar tooltips de Bootstrap
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  });
+</script>
+{% endblock %}

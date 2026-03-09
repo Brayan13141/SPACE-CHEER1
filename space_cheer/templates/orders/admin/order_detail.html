@@ -1,0 +1,349 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-3 py-md-4">
+
+<!-- ================= HEADER ================= -->
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+<div>
+<h1 class="h2 mb-1 d-flex align-items-center flex-wrap gap-2">
+
+Orden #{{ order.id }}
+
+<span class="badge fs-6
+{% if order.status == 'DRAFT' %}bg-secondary
+{% elif order.status == 'PENDING' %}bg-warning text-dark
+{% elif order.status == 'DESIGN_APPROVED' %}bg-info
+{% elif order.status == 'IN_PRODUCTION' %}bg-primary
+{% elif order.status == 'DELIVERED' %}bg-success
+{% elif order.status == 'CANCELLED' %}bg-danger
+{% endif %}">
+
+{{ order.get_status_display }}
+
+</span>
+
+</h1>
+
+<p class="text-muted mb-0">
+<i class="bi bi-calendar3 me-1"></i>
+{{ order.created_at|date:"d/m/Y H:i" }}
+</p>
+
+</div>
+
+<a href="{% url 'orders:manage_orders' %}"
+class="btn btn-outline-secondary">
+
+<i class="bi bi-arrow-left"></i> Volver
+
+</a>
+
+</div>
+
+<!-- ================= ORDER INFO ================= -->
+
+<div class="card shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-4">
+
+<strong>Tipo</strong><br>
+{{ order.get_order_type_display }}
+
+</div>
+
+<div class="col-md-4">
+
+<strong>Propietario</strong><br>
+
+{% if order.owner_user %}
+{{ order.owner_user.get_full_name|default:order.owner_user.email }}
+{% else %}
+{{ order.owner_team.name }}
+{% endif %}
+
+</div>
+
+<div class="col-md-4">
+
+<strong>Total</strong><br>
+${{ order.total }}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= PRODUCTOS ================= -->
+
+<h4 class="mb-3">
+<i class="bi bi-box-seam"></i>
+Productos
+</h4>
+
+{% if items %}
+
+<div class="row g-3 mb-4">
+
+{% for item in items %}
+
+<div class="col-12">
+
+<div class="card shadow-sm">
+
+<div class="card-body">
+
+<div class="d-flex flex-column flex-md-row justify-content-between">
+
+<div class="flex-grow-1">
+
+<h5 class="mb-1">
+
+{{ item.product.name }}
+
+</h5>
+
+<div class="small text-muted mb-2">
+
+{{ item.product.get_product_type_display }}
+•
+{{ item.product.get_usage_type_display }}
+
+</div>
+
+<!-- ========= TALLA ========= -->
+
+{% if item.product.requires_sizes %}
+
+<div class="mb-2">
+
+<strong>Talla:</strong>
+
+{% if item.size_variant %}
+<span class="badge bg-primary">
+{{ item.size_variant.size }}
+</span>
+{% else %}
+
+<a href="#"
+class="btn btn-sm btn-outline-primary">
+
+Elegir talla
+
+</a>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+<!-- ========= ATLETAS ========= -->
+
+{% if item.product.requires_athletes %}
+
+<div class="mt-3">
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+{% if item.athletes.exists %}
+
+<ul class="list-group list-group-flush">
+
+{% for athlete_item in item.athletes.all %}
+
+<li class="list-group-item">
+
+<strong>
+
+{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
+
+</strong>
+
+<!-- ========= MEDIDAS ========= -->
+
+{% if item.product.requires_measurements %}
+
+{% if athlete_item.measurements.exists %}
+
+<ul class="small text-muted mb-0">
+
+{% for m in athlete_item.measurements.all %}
+
+<li>
+
+{{ m.field_name }} :
+{{ m.value }} {{ m.field_unit }}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<a href="#"
+class="btn btn-sm btn-outline-secondary mt-2">
+
+Capturar medidas
+
+</a>
+
+{% endif %}
+
+{% endif %}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p class="text-muted small">
+No hay atletas agregados
+</p>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- ========= RESUMEN ========= -->
+
+<div class="text-md-end mt-3 mt-md-0">
+
+<div class="h5 mb-0">
+
+${{ item.subtotal }}
+
+</div>
+
+<div class="small text-muted">
+
+Cantidad:
+<strong>{{ item.quantity }}</strong>
+
+</div>
+
+<div class="small text-muted">
+
+Precio:
+<strong>${{ item.unit_price }}</strong>
+
+</div>
+
+<!-- ========= DISEÑO ========= -->
+
+{% if item.product.requires_design %}
+
+<a href="{% url 'orders:admin_upload_design' item.id %}"
+class="btn btn-outline-primary btn-sm mt-3">
+
+<i class="bi bi-upload"></i>
+Subir diseño
+
+</a>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="text-center py-5">
+
+<i class="bi bi-box display-4 text-muted"></i>
+
+<p class="text-muted">
+Esta orden no tiene productos
+</p>
+
+</div>
+
+{% endif %}
+
+<!-- ================= DISEÑOS ================= -->
+
+{% if order.design_images.exists %}
+
+<hr>
+
+<h4 class="mb-3">
+
+<i class="bi bi-images"></i>
+Diseños
+
+</h4>
+
+<div class="row g-3">
+
+{% for design in order.design_images.all %}
+
+<div class="col-md-3">
+
+<div class="card">
+
+<img src="{{ design.image.url }}"
+class="card-img-top">
+
+<div class="card-body text-center">
+
+{% if design.is_final %}
+
+<span class="badge bg-success">
+
+Final
+
+</span>
+
+{% endif %}
+
+<p class="small text-muted mb-0">
+
+{{ design.created_at|date:"d/m/Y" }}
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Productos</h2>
+
+    <a href="{% url 'products:select_template' %}" class="btn btn-primary">
+      + Nuevo producto
+    </a>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Temporada</th>
+        <th>Precio base</th>
+        <th>Activo</th>
+        <th class="text-end">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+        <tr>
+          <td>{{ product.name }}</td>
+          <td>{{ product.get_product_type_display }}</td>
+          <td>{{ product.season }}</td>
+          <td>${{ product.base_price }}</td>
+          <td>
+            {% if product.is_active %}
+              <span class="badge bg-success">Sí</span>
+            {% else %}
+              <span class="badge bg-secondary">No</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a
+              href="{% url 'products:update_product' product.id %}"
+              class="btn btn-sm btn-outline-primary"
+            >
+              Editar
+            </a>
+            {% if product.is_active %}
+            <a
+              href="{% url 'products:delete_product' product.id %}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              Desactivar
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">
+            No hay productos registrados
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

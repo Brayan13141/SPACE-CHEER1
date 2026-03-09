@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Contacto y envío – Orden #{{ order.id }}</h2>
+
+  {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Nombre de contacto</label>
+      <input
+        type="text"
+        name="contact_name"
+        class="form-control"
+        value="{{ contact_info.contact_name }}"
+        required
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Teléfono</label>
+      <input
+        type="text"
+        name="contact_phone"
+        class="form-control"
+        value="{{ contact_info.contact_phone }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input
+        type="email"
+        name="contact_email"
+        class="form-control"
+        value="{{ contact_info.contact_email }}"
+        required
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Dirección</label>
+      <input
+        type="text"
+        name="shipping_address_line"
+        class="form-control"
+        value="{{ contact_info.shipping_address_line }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ciudad</label>
+      <input
+        type="text"
+        name="shipping_city"
+        class="form-control"
+        value="{{ contact_info.shipping_city }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Código postal</label>
+      <input
+        type="text"
+        name="shipping_postal_code"
+        class="form-control"
+        value="{{ contact_info.shipping_postal_code }}"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      Guardar contacto
+    </button>
+
+    <a href="{% url 'orders:manage_orders' %}" class="btn btn-secondary">
+      Volver
+    </a>
+  </form>
+</div>
+
+{% endblock %}
