@@ -4,346 +4,460 @@
 {% block content %}
 <div class="container py-3 py-md-4">
 
-<!-- ================= HEADER ================= -->
+  <!-- ========== HEADER ========== -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <h1 class="h2 mb-1 d-flex align-items-center flex-wrap gap-2">
+        <span>Orden #{{ order.id }}</span>
+        <span class="badge fs-6 
+          {% if order.status == 'DELIVERED' %}bg-success
+          {% elif order.status == 'DRAFT' %}bg-secondary
+          {% elif order.status == 'PENDING' %}bg-warning text-dark
+          {% elif order.status == 'CANCELLED' %}bg-danger
+          {% else %}bg-primary{% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </h1>
+      <p class="text-muted mb-0">
+        <i class="bi bi-calendar3 me-1"></i> Creada: {{ order.created_at|date:"d/m/Y H:i" }}
+        <br class="d-md-none">
+        <span class="text-muted">por {{ order.created_by.get_full_name|default:order.created_by.email }}</span>
+      </p>
+    </div>
+    <div class="mt-3 mt-md-0">
+      <a href="{% url 'orders:admin_order_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+      </a>
+    </div>
+  </div>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+  <!-- ========== ORDER SUMMARY ========== -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-sm-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-tag text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Tipo</span>
+              <span class="fw-semibold">{{ order.get_order_type_display }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Propietario</span>
+              <span class="fw-semibold">
+                {% if order.owner_user %}
+                  {{ order.owner_user.get_full_name|default:order.owner_user.email }}
+                {% else %}
+                  {{ order.owner_team.name }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-workspace text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Creada por</span>
+              <span class="fw-semibold">{{ order.created_by.get_full_name|default:order.created_by.email }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-cash-stack text-primary me-3 fs-5"></i>
+            <div>
+              <span class="text-muted small d-block">Total</span>
+              <span class="fw-bold text-primary">${{ order.total|floatformat:2 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div>
-<h1 class="h2 mb-1 d-flex align-items-center flex-wrap gap-2">
+  <!-- ========== CONTACT INFO ========== -->
+  {% if order.has_contact_info %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-truck me-2"></i>Información de envío
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-person-badge text-primary me-3 mt-1"></i>
+              <div>
+                <span class="text-muted small d-block">Contacto</span>
+                <span class="fw-semibold">{{ order.contact_info.contact_name }}</span>
+                <div class="small">{{ order.contact_info.contact_phone }} • {{ order.contact_info.contact_email }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-geo-alt text-primary me-3 mt-1"></i>
+              <div>
+                <span class="text-muted small d-block">Dirección</span>
+                <span>{{ order.contact_info.shipping_address_line }}</span>
+                <div class="small">{{ order.contact_info.shipping_city }}, CP: {{ order.contact_info.shipping_postal_code }}</div>
+                {% if order.contact_info.shipping_notes %}
+                  <div class="small text-muted mt-1">Nota: {{ order.contact_info.shipping_notes }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
-Orden #{{ order.id }}
-
-<span class="badge fs-6
-{% if order.status == 'DRAFT' %}bg-secondary
-{% elif order.status == 'PENDING' %}bg-warning text-dark
-{% elif order.status == 'DESIGN_APPROVED' %}bg-info
-{% elif order.status == 'IN_PRODUCTION' %}bg-primary
-{% elif order.status == 'DELIVERED' %}bg-success
-{% elif order.status == 'CANCELLED' %}bg-danger
-{% endif %}">
-
-{{ order.get_status_display }}
-
-</span>
-
-</h1>
-
-<p class="text-muted mb-0">
-<i class="bi bi-calendar3 me-1"></i>
-{{ order.created_at|date:"d/m/Y H:i" }}
-</p>
-
-</div>
-
-<a href="{% url 'orders:manage_orders' %}"
-class="btn btn-outline-secondary">
-
-<i class="bi bi-arrow-left"></i> Volver
-
-</a>
-
-</div>
-
-<!-- ================= ORDER INFO ================= -->
-
+  <!-- ========== OPERATIVE DATES ========== -->
 <div class="card shadow-sm mb-4">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-calendar-event me-2"></i>Fechas operativas
+    </h5>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{% url 'orders:admin_update_order_dates' order.id %}">
+      {% csrf_token %}
+      <div class="row g-3">
 
-<div class="card-body">
+        <div class="col-sm-6 col-md-3">
+          <label class="form-label">{{ dates_form.freeze_payment_date.label }}</label>
+          {{ dates_form.freeze_payment_date }}
+          {% if dates_form.freeze_payment_date.errors %}
+            <div class="text-danger small">{{ dates_form.freeze_payment_date.errors }}</div>
+          {% endif %}
+        </div>
 
-<div class="row">
+        <div class="col-sm-6 col-md-3">
+          <label class="form-label">{{ dates_form.measurements_due_date.label }}</label>
+          {{ dates_form.measurements_due_date }}
+          {% if dates_form.measurements_due_date.errors %}
+            <div class="text-danger small">{{ dates_form.measurements_due_date.errors }}</div>
+          {% endif %}
+        </div>
 
-<div class="col-md-4">
+        <div class="col-sm-6 col-md-3">
+          <label class="form-label">{{ dates_form.uniform_delivery_date.label }}</label>
+          {{ dates_form.uniform_delivery_date }}
+          {% if dates_form.uniform_delivery_date.errors %}
+            <div class="text-danger small">{{ dates_form.uniform_delivery_date.errors }}</div>
+          {% endif %}
+        </div>
 
-<strong>Tipo</strong><br>
-{{ order.get_order_type_display }}
+        <div class="col-sm-6 col-md-3">
+          <label class="form-label">{{ dates_form.first_payment_date.label }}</label>
+          {{ dates_form.first_payment_date }}
+          {% if dates_form.first_payment_date.errors %}
+            <div class="text-danger small">{{ dates_form.first_payment_date.errors }}</div>
+          {% endif %}
+        </div>
 
+      </div>
+
+      {% if dates_form.non_field_errors %}
+        <div class="alert alert-danger mt-3">
+          {{ dates_form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <button class="btn btn-primary mt-3">
+        <i class="bi bi-save me-1"></i>Guardar fechas
+      </button>
+    </form>
+  </div>
 </div>
 
-<div class="col-md-4">
+  <!-- ========== PRODUCTS ========== -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-box-seam me-2"></i>Productos
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Producto</th>
+              <th>Talla</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+              <th>Configuración</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+              <tr>
+                <td>
+                  <strong>{{ item.product.name }}</strong>
+                  {% if not item.product.is_active %}
+                    <span class="badge bg-secondary">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.size_variant %}
+                    {{ item.size_variant.size }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.subtotal|floatformat:2 }}</td>
+                <td>
+                  {% if item.configuration_state == "READY" %}
+                    <span class="badge bg-success">Completo</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% if item.athletes.exists %}
+                <tr class="table-light">
+                  <td colspan="5">
+                    <div class="p-2">
+                      <strong><i class="bi bi-person-arms-up me-1"></i>Atletas:</strong>
+                      <ul class="list-unstyled mt-1 mb-0">
+                        {% for athlete_item in item.athletes.all %}
+                          <li class="d-flex align-items-center gap-2">
+                            <span>{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}</span>
+                            {% if athlete_item.has_complete_measurements %}
+                              <span class="badge bg-success">Medidas completas</span>
+                            {% else %}
+                              <span class="badge bg-warning">Medidas pendientes</span>
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  <i class="bi bi-box display-6"></i>
+                  <p class="mt-2">No hay productos en esta orden</p>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-<strong>Propietario</strong><br>
+  <!-- ========== DESIGNS (mejorado) ========== -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light d-flex flex-wrap align-items-center justify-content-between">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-images me-2"></i>Diseños
+      </h5>
+      <!-- Botón para abrir el formulario de subida (puede estar en un modal o colapsable) -->
+      <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#uploadDesignCollapse" aria-expanded="false">
+        <i class="bi bi-upload me-1"></i>Subir nuevo diseño
+      </button>
+    </div>
 
-{% if order.owner_user %}
-{{ order.owner_user.get_full_name|default:order.owner_user.email }}
-{% else %}
-{{ order.owner_team.name }}
-{% endif %}
+    <div class="card-body">
+      <!-- Formulario de subida (colapsable) -->
+      <div class="collapse mb-4" id="uploadDesignCollapse">
+        <div class="card card-body border">
+          <form method="post" action="{% url 'orders:admin_upload_design' order.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <label class="form-label">Seleccionar imagen</label>
+                <input type="file" class="form-control" name="image" accept="image/*" required>
+              </div>
+              <div class="col-md-3">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="is_final" id="isFinalCheck">
+                  <label class="form-check-label" for="isFinalCheck">Marcar como diseño final</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-cloud-upload me-1"></i>Subir
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
+      <!-- Galería de diseños -->
+      {% if order.design_images.exists %}
+        <div class="row g-3">
+          {% for design in order.design_images.all %}
+            <div class="col-6 col-md-4 col-lg-3">
+              <div class="card h-100 shadow-sm design-card">
+                <img src="{{ design.image.url }}"
+                     class="card-img-top"
+                     alt="Diseño"
+                     style="height: 160px; object-fit: cover; cursor: pointer;"
+                     data-bs-toggle="modal"
+                     data-bs-target="#designModal{{ design.id }}">
+                <div class="card-body p-2 text-center">
+                  {% if design.is_final %}
+                    <span class="badge bg-success mb-1"><i class="bi bi-check-circle-fill"></i> Final</span>
+                  {% endif %}
+                  <small class="text-muted d-block">
+                    <i class="bi bi-person"></i> {{ design.uploaded_by.get_full_name|default:design.uploaded_by.email|default:"Sistema" }}
+                  </small>
+                  <small class="text-muted">
+                    {{ design.created_at|date:"d/m/Y H:i" }}
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal para cada diseño -->
+            <div class="modal fade" id="designModal{{ design.id }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Diseño #{{ forloop.counter }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <img src="{{ design.image.url }}" class="img-fluid rounded" alt="Diseño">
+                      </div>
+                      <div class="col-md-4">
+                        <p><strong>Subido por:</strong> {{ design.uploaded_by.get_full_name|default:design.uploaded_by.email|default:"Sistema" }}</p>
+                        <p><strong>Fecha:</strong> {{ design.created_at|date:"d/m/Y H:i" }}</p>
+                        <p>
+                          <strong>Estado:</strong>
+                          {% if design.is_final %}
+                            <span class="badge bg-success">Final</span>
+                          {% else %}
+                            <span class="badge bg-secondary">Borrador</span>
+                          {% endif %}
+                        </p>
+                        <hr>
+                       
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-4">
+          <i class="bi bi-image display-4 text-muted mb-3"></i>
+          <p class="text-muted">No hay diseños subidos aún.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ========== ACTIONS (TRANSITIONS) ========== -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-lightning-charge me-2"></i>Acciones disponibles
+      </h5>
+    </div>
+    <div class="card-body">
+      {% if available_transitions %}
+        <div class="row g-2">
+          {% for status in available_transitions %}
+            <div class="col-12 col-md-6 col-lg-4">
+              <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary w-100 py-3">
+                  <i class="bi bi-arrow-right-circle me-2"></i>Pasar a {{ status|title }}
+                </button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-3">
+          <i class="bi bi-check2-circle text-muted display-6"></i>
+          <p class="text-muted mt-2">No hay transiciones disponibles en este estado.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ========== HISTORY ========== -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-clock-history me-2"></i>Historial
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in order.orderlog_set.all %}
+              <tr>
+                <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ log.user.get_full_name|default:log.user.email|default:"Sistema" }}</td>
+                <td>{{ log.from_status }} → {{ log.to_status }}</td>
+                <td>{{ log.notes|default:"—" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-3">
+                  No hay eventos registrados.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="col-md-4">
-
-<strong>Total</strong><br>
-${{ order.total }}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= PRODUCTOS ================= -->
-
-<h4 class="mb-3">
-<i class="bi bi-box-seam"></i>
-Productos
-</h4>
-
-{% if items %}
-
-<div class="row g-3 mb-4">
-
-{% for item in items %}
-
-<div class="col-12">
-
-<div class="card shadow-sm">
-
-<div class="card-body">
-
-<div class="d-flex flex-column flex-md-row justify-content-between">
-
-<div class="flex-grow-1">
-
-<h5 class="mb-1">
-
-{{ item.product.name }}
-
-</h5>
-
-<div class="small text-muted mb-2">
-
-{{ item.product.get_product_type_display }}
-•
-{{ item.product.get_usage_type_display }}
-
-</div>
-
-<!-- ========= TALLA ========= -->
-
-{% if item.product.requires_sizes %}
-
-<div class="mb-2">
-
-<strong>Talla:</strong>
-
-{% if item.size_variant %}
-<span class="badge bg-primary">
-{{ item.size_variant.size }}
-</span>
-{% else %}
-
-<a href="#"
-class="btn btn-sm btn-outline-primary">
-
-Elegir talla
-
-</a>
-
-{% endif %}
-
-</div>
-
-{% endif %}
-
-<!-- ========= ATLETAS ========= -->
-
-{% if item.product.requires_athletes %}
-
-<div class="mt-3">
-
-<div class="d-flex justify-content-between align-items-center mb-2">
-
-{% if item.athletes.exists %}
-
-<ul class="list-group list-group-flush">
-
-{% for athlete_item in item.athletes.all %}
-
-<li class="list-group-item">
-
-<strong>
-
-{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
-
-</strong>
-
-<!-- ========= MEDIDAS ========= -->
-
-{% if item.product.requires_measurements %}
-
-{% if athlete_item.measurements.exists %}
-
-<ul class="small text-muted mb-0">
-
-{% for m in athlete_item.measurements.all %}
-
-<li>
-
-{{ m.field_name }} :
-{{ m.value }} {{ m.field_unit }}
-
-</li>
-
-{% endfor %}
-
-</ul>
-
-{% else %}
-
-<a href="#"
-class="btn btn-sm btn-outline-secondary mt-2">
-
-Capturar medidas
-
-</a>
-
-{% endif %}
-
-{% endif %}
-
-</li>
-
-{% endfor %}
-
-</ul>
-
-{% else %}
-
-<p class="text-muted small">
-No hay atletas agregados
-</p>
-
-{% endif %}
-
-</div>
-
-{% endif %}
-
-</div>
-
-<!-- ========= RESUMEN ========= -->
-
-<div class="text-md-end mt-3 mt-md-0">
-
-<div class="h5 mb-0">
-
-${{ item.subtotal }}
-
-</div>
-
-<div class="small text-muted">
-
-Cantidad:
-<strong>{{ item.quantity }}</strong>
-
-</div>
-
-<div class="small text-muted">
-
-Precio:
-<strong>${{ item.unit_price }}</strong>
-
-</div>
-
-<!-- ========= DISEÑO ========= -->
-
-{% if item.product.requires_design %}
-
-<a href="{% url 'orders:admin_upload_design' item.id %}"
-class="btn btn-outline-primary btn-sm mt-3">
-
-<i class="bi bi-upload"></i>
-Subir diseño
-
-</a>
-
-{% endif %}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-{% else %}
-
-<div class="text-center py-5">
-
-<i class="bi bi-box display-4 text-muted"></i>
-
-<p class="text-muted">
-Esta orden no tiene productos
-</p>
-
-</div>
-
-{% endif %}
-
-<!-- ================= DISEÑOS ================= -->
-
-{% if order.design_images.exists %}
-
-<hr>
-
-<h4 class="mb-3">
-
-<i class="bi bi-images"></i>
-Diseños
-
-</h4>
-
-<div class="row g-3">
-
-{% for design in order.design_images.all %}
-
-<div class="col-md-3">
-
-<div class="card">
-
-<img src="{{ design.image.url }}"
-class="card-img-top">
-
-<div class="card-body text-center">
-
-{% if design.is_final %}
-
-<span class="badge bg-success">
-
-Final
-
-</span>
-
-{% endif %}
-
-<p class="small text-muted mb-0">
-
-{{ design.created_at|date:"d/m/Y" }}
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-{% endif %}
-
-</div>
-
+<!-- Opcional: estilos adicionales para la galería -->
+<style>
+  .design-card {
+    transition: transform 0.2s;
+  }
+  .design-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    cursor: pointer;
+  }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Activar tooltips de Bootstrap (si se usan)
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+  });
+</script>
 {% endblock %}

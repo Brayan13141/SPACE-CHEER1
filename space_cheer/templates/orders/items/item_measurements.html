@@ -39,7 +39,7 @@
         </div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" action="{% url 'orders:item_measurements_order_add' athlete_item.id %}">
         {% csrf_token %}
 
         <div class="row g-4">
@@ -62,7 +62,7 @@
                   name="field_{{ pf.field.id }}"
                   class="form-control"
                   value="{{ pf.current_value|default:'' }}"
-                  {% if pf.required %}required{% endif %}
+                  
                   {% if not can_edit %}disabled{% endif %}
               >
 

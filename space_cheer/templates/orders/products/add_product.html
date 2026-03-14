@@ -245,24 +245,18 @@
 
                   </div>
                   {% endif %}
+                  <form method="post" class="add-to-order-form">
                   {% if product.size_strategy == "STANDARD" %}
 
                   <select name="size_variant" class="form-select form-select-sm">
-
                   {% for size in product.size_variants.all %}
-
                   <option value="{{ size.id }}">
-
-                  {{ size.size }}
-
-                  {% if size.additional_price > 0 %}
-                  (+${{ size.additional_price }})
-                  {% endif %}
-
+                    {{ size.size }}
+                    {% if size.additional_price > 0 %}
+                      (+${{ size.additional_price }})
+                    {% endif %}
                   </option>
-
                   {% endfor %}
-
                   </select>
 
                   {% endif %}
@@ -285,7 +279,7 @@
                   </div>
 
                   <!-- Add to Order Form -->
-                  <form method="post" class="add-to-order-form">
+                  
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.id }}">
                     <div class="row g-2 align-items-center">
