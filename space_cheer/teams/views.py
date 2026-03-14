@@ -1,4 +1,6 @@
 # views.py
+from logging import config
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Team, TeamCategory
@@ -18,6 +20,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Max
 from django.core.exceptions import PermissionDenied
+from django.conf import settings
 
 
 @full_profile_required
@@ -329,7 +332,9 @@ def manage_athletes(request):
                         last_name=cd["last_name"],
                         email=cd.get("email", ""),
                         phone=cd.get("phone", ""),
-                        password="$Temporal123",
+                        password=config(
+                            "ATHLETE_TEMP_PASSWORD", default="$Temporal123"
+                        ),
                         profile_completed=False,
                     )
 
@@ -356,7 +361,7 @@ def manage_athletes(request):
 
                 messages.success(
                     request,
-                    f"Alumno creado usuario {username} password temporal $Temporal123",
+                    f"Alumno creado usuario {username} password temporal {config('ATHLETE_TEMP_PASSWORD', default='$Temporal123')}",
                 )
                 return redirect("manage_athletes")
 
