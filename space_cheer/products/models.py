@@ -1,10 +1,12 @@
 # models.py - Modelos de la aplicación products
 # Contiene las definiciones de temporadas, productos, campos de medida asociados y variantes de talla.
 
+from decimal import Decimal
 from django.db import models
 from django.core.exceptions import ValidationError
 from measures.models import MeasurementField
 from teams.models import Team
+from django.core.validators import MinValueValidator
 
 
 class Season(models.Model):
@@ -124,6 +126,9 @@ class Product(models.Model):
         Guarda el producto después de ejecutar las validaciones completas.
         Se llama a full_clean() para asegurar que se ejecuten clean() y las validaciones de campo.
         """
+        if self.usage_type == "GLOBAL" and self.size_strategy == "NONE":
+            self.is_configured = True
+
         self.full_clean()  # Dispara clean() y validaciones de campo
         super().save(*args, **kwargs)
 
@@ -154,7 +159,7 @@ class Product(models.Model):
         return self.size_strategy == "STANDARD"
 
     @property
-    def supports_team(self):
+    def requires_team(self):
         return self.scope == "TEAM_ONLY" or self.usage_type == "TEAM_CUSTOM"
 
     @property
@@ -332,7 +337,12 @@ class ProductSizeVariant(models.Model):
 
     size = models.CharField(max_length=20)
 
-    additional_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    additional_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
 
     class Meta:
         constraints = [
@@ -345,7 +355,7 @@ class ProductSizeVariant(models.Model):
 
         if self.size:
             self.size = self.size.upper().strip()
-
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -67,6 +67,10 @@ class Team(models.Model):
                 if not Team.objects.filter(join_code=code).exists():
                     self.join_code = code
                     break
+                else:
+                    raise RuntimeError(
+                        "No se pudo generar un join_code único. Contacta al administrador."
+                    )
         super().save(*args, **kwargs)
 
     def __str__(self):
