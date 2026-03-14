@@ -2,6 +2,7 @@ from django import forms
 from allauth.account.forms import SignupForm
 from .models import User, Role
 import re
+from .models import UserAddress
 
 
 class UserProfilingForm(forms.ModelForm):
@@ -63,3 +64,16 @@ class CustomSignupForm(SignupForm):
         user.save()
 
         return user
+
+
+class UserAddressForm(forms.ModelForm):
+    class Meta:
+        model = UserAddress
+        fields = ["label", "address", "city", "zip_code", "is_default"]
+        widgets = {
+            "label": forms.TextInput(attrs={"class": "form-control"}),
+            "address": forms.TextInput(attrs={"class": "form-control"}),
+            "city": forms.TextInput(attrs={"class": "form-control"}),
+            "zip_code": forms.TextInput(attrs={"class": "form-control"}),
+            "is_default": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
