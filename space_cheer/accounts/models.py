@@ -1,8 +1,11 @@
+import re
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 # -------------------------------------------------------------
@@ -29,7 +32,19 @@ class User(AbstractUser):
     foto_perfil = models.ImageField(
         upload_to="accounts/perfiles/", null=True, blank=True
     )
-    curp = models.CharField(max_length=18, unique=True, null=True, blank=True)
+    curp_validator = RegexValidator(
+        regex=r"^[A-Z]{4}\d{6}[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$",
+        message="El formato de CURP no es válido.",
+        code="curp_invalida",
+    )
+
+    curp = models.CharField(
+        max_length=18,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[curp_validator],
+    )
     phone = models.CharField(max_length=15, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     gender = models.CharField(
@@ -46,8 +61,18 @@ class User(AbstractUser):
         default=False
     )  # Marca cuando ya pasó onboarding
 
+    # Regex oficial de la CURP mexicana
+
     def clean(self):
-        # si el usuario aún no existe en DB, no validar roles
+        CURP_REGEX = re.compile(
+            r"^[A-Z]{4}"  # 4 letras iniciales
+            r"\d{6}"  # fecha YYMMDD
+            r"[HM]"  # sexo
+            r"(AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)"  # estado
+            r"[B-DF-HJ-NP-TV-Z]{3}"  # 3 consonantes internas
+            r"[A-Z0-9]"  # homoclave
+            r"\d$"  # dígito verificador
+        )
         if not self.pk:
             return super().clean()
 
@@ -56,10 +81,22 @@ class User(AbstractUser):
                 {"curp": "Este usuario requiere CURP debido a su rol."}
             )
 
-        if self.curp and len(self.curp) != 18:
-            raise ValidationError({"curp": "La CURP debe tener 18 caracteres."})
+        if self.curp:
+            curp = self.curp.upper().strip()
+
+            if len(curp) != 18:
+                raise ValidationError({"curp": "La CURP debe tener 18 caracteres."})
+
+            if not CURP_REGEX.match(curp):
+                raise ValidationError({"curp": "El formato de CURP no es válido."})
+
+            self.curp = curp  # Normalizar a mayúsculas
 
         super().clean()
+
+    @property
+    def is_headcoach(self):
+        return self.roles.filter(name="HEADCOACH").exists()
 
     @property
     def is_minor(self):
@@ -94,12 +131,20 @@ class UserOwnership(models.Model):
         related_name="owner_links",
         help_text="Usuario perteneciente al coach",
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
+    deactivated_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ("owner", "user")
+        # unique_together solo aplica a registros ACTIVOS
+        # No ponemos unique en el modelo, lo manejamos con constraint condicional
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "user"],
+                condition=models.Q(is_active=True),
+                name="unique_active_ownership",
+            )
+        ]
         indexes = [
             models.Index(fields=["owner", "is_active"]),
             models.Index(fields=["user", "is_active"]),
@@ -116,11 +161,20 @@ class UserAddress(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="addresses"
     )
-    label = models.CharField(max_length=50, default="Principal")
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=10)
+    label = models.CharField(
+        max_length=50, help_text="Etiqueta para identificar la dirección"
+    )
+    address = models.CharField(max_length=255, help_text="Calle y número")
+    city = models.CharField(max_length=100, help_text="Ciudad")
+    zip_code = models.CharField(max_length=10, help_text="Código postal")
     is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            UserAddress.objects.filter(user=self.user, is_default=True).exclude(
+                pk=self.pk
+            ).update(is_default=False)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.label} - {self.address}"
@@ -132,8 +186,12 @@ class UserAddress(models.Model):
 class AthleteProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    emergency_contact = models.CharField(max_length=100)
-    emergency_phone = models.CharField(max_length=20, blank=True)
+    emergency_contact = models.CharField(
+        max_length=100, help_text="Contacto de emergencia"
+    )
+    emergency_phone = models.CharField(
+        max_length=20, blank=True, help_text="Teléfono de emergencia"
+    )
 
     is_active_competitor = models.BooleanField(default=True)
 

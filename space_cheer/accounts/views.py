@@ -1,8 +1,9 @@
 # accounts/views.py
 
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import UserProfilingForm, CurpForm
+from .models import UserAddress
+from .forms import UserAddressForm, UserProfilingForm, CurpForm
 
 
 def profile_setup_view(request):
@@ -67,3 +68,54 @@ def curp_verification(request):
         form = CurpForm(instance=user)
 
     return render(request, "account/curp_verification.html", {"form": form})
+
+
+@login_required
+def address_list(request):
+    addresses = request.user.addresses.all()
+    return render(
+        request, "account/addresses/list_address.html", {"addresses": addresses}
+    )
+
+
+@login_required
+def address_create(request):
+    if request.method == "POST":
+        form = UserAddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            return redirect("accounts:list_address")
+    else:
+        form = UserAddressForm()
+
+    return render(request, "account/addresses/form.html", {"form": form})
+
+
+@login_required
+def address_update(request, pk):
+    address = get_object_or_404(UserAddress, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = UserAddressForm(request.POST, instance=address)
+        if form.is_valid():
+            form.save()
+            return redirect("accounts:list_address")
+    else:
+        form = UserAddressForm(instance=address)
+
+    return render(request, "account/addresses/form.html", {"form": form})
+
+
+@login_required
+def address_delete(request, pk):
+    address = get_object_or_404(UserAddress, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        address.delete()
+        return redirect("accounts:list_address")
+
+    return render(
+        request, "account/addresses/confirm_delete.html", {"address": address}
+    )

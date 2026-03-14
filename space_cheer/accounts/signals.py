@@ -32,5 +32,5 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
         if role_name == "coach":
             CoachProfile.objects.get_or_create(user=instance)
 
-        if role_name == "apoyo":
+        if role_name == "staff":
             StaffProfile.objects.get_or_create(user=instance)

@@ -8,12 +8,12 @@ urlpatterns = [
         name="edit_athlete_measures",
     ),
     path(
-        "/members/",
+        "members/",
         views.manage_owned_users,
         name="manage_owned_users",
     ),
     path(
-        "/members/remove/<int:ownership_id>/",
+        "members/remove/<int:ownership_id>/",
         views.remove_owned_user,
         name="remove_owned_user",
     ),

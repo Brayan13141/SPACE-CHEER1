@@ -144,6 +144,13 @@ def manage_teams(request):
             form_crear = TeamForm(request.POST, request.FILES)
             if form_crear.is_valid():
                 team = form_crear.save()
+                UserTeamMembership.objects.create(
+                    user=team.coach,
+                    team=team,
+                    role_in_team="HEADCOACH",
+                    status="accepted",
+                    is_active=True,
+                )
                 messages.success(request, f"Equipo '{team.name}' creado exitosamente.")
                 return redirect("manage_teams")
             abrir_modal_crear = True
