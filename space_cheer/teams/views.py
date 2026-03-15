@@ -1,6 +1,4 @@
 # views.py
-from logging import config
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Team, TeamCategory
@@ -20,7 +18,8 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Max
 from django.core.exceptions import PermissionDenied
-from django.conf import settings
+from decouple import config
+from django.db.models import ProtectedError
 
 
 @full_profile_required
@@ -181,12 +180,34 @@ def manage_teams(request):
         elif "eliminar_team" in request.POST and puede_eliminar:
             team_id = request.POST.get("team_id")
             team = get_object_or_404(Team, id=team_id)
-            nombre_eliminado = team.name
-            team.delete()
+            nombre = team.name
 
-            messages.success(
-                request, f"Equipo '{nombre_eliminado}' eliminado exitosamente."
-            )
+            try:
+                team.delete()
+                messages.success(request, f"Equipo '{nombre}' eliminado exitosamente.")
+
+            except ProtectedError as e:
+                # Separar órdenes de productos en el mensaje
+                orders = [
+                    o for o in e.protected_objects if o.__class__.__name__ == "Order"
+                ]
+                products = [
+                    p for p in e.protected_objects if p.__class__.__name__ == "Product"
+                ]
+
+                partes = []
+                if orders:
+                    partes.append(f"{len(orders)} orden(es)")
+                if products:
+                    partes.append(f"{len(products)} producto(s) exclusivo(s)")
+
+                messages.error(
+                    request,
+                    f"No se puede eliminar el equipo '{nombre}' porque tiene "
+                    f"{' y '.join(partes)} asociados. "
+                    f"Cancela o reasigna esos registros antes de eliminarlo.",
+                )
+
             return redirect("manage_teams")
 
     # ---------------- RENDER ----------------

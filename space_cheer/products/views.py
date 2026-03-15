@@ -1,26 +1,60 @@
 from django.contrib import messages
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
-from products.models import Product
+from django.db.models import Count
+from django.db.models import ProtectedError
+from products.models import Product, ProductSizeVariant, ProductMeasurementField
 from products.forms import ProductForm
-from .product_templates import PRODUCT_TEMPLATES
-from products.models import ProductSizeVariant
+from products.product_templates import PRODUCT_TEMPLATES
 from measures.models import MeasurementField
-from products.models import ProductMeasurementField
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. LISTA
+# ─────────────────────────────────────────────────────────────────────────────
 @login_required
 def product_list(request):
-    products = Product.objects.order_by("name")
+
+    products = (
+        Product.objects.select_related("season", "owner_team")
+        .annotate(
+            measurement_count=Count("measurement_fields", distinct=True),
+            size_count=Count("size_variants", distinct=True),
+        )
+        .order_by("name")
+    )
+    # Filtros opcionales
+    active_filter = request.GET.get("active", "")
+    type_filter = request.GET.get("type", "")
+    search = request.GET.get("q", "").strip()
+
+    if active_filter == "1":
+        products = products.filter(is_active=True)
+    elif active_filter == "0":
+        products = products.filter(is_active=False)
+
+    if type_filter:
+        products = products.filter(product_type=type_filter)
+
+    if search:
+        products = products.filter(name__icontains=search)
 
     return render(
         request,
         "products/product_list.html",
-        {"products": products},
+        {
+            "products": products,
+            "active_filter": active_filter,
+            "type_filter": type_filter,
+            "search": search,
+            "type_choices": Product.PRODUCT_TYPE_CHOICES,
+        },
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. CREAR — paso 1: seleccionar plantilla
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 @login_required
@@ -36,50 +70,40 @@ def product_create_select_type(request):
     )
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. CREAR — paso 2: formulario
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 @login_required
 @permission_required("products.add_product", raise_exception=True)
 def product_create(request):
 
-    template_key = request.GET.get("template")
+    template_key = request.GET.get("template") or request.POST.get("template")
     template = PRODUCT_TEMPLATES.get(template_key)
-
-    initial_data = {}
-
-    if template:
-        initial_data = template.get("defaults", {})
+    initial_data = template.get("defaults", {}) if template else {}
 
     if request.method == "POST":
 
-        form = ProductForm(
-            request.POST,
-            request.FILES,
-            template_key=template_key,
-            initial=initial_data,  # 🔥 IMPORTANTE
-        )
+        form = ProductForm(request.POST, request.FILES, template_key=template_key)
 
         if form.is_valid():
-
             product = form.save(commit=False)
 
-            # seguridad backend
+            # Forzar valores desde la plantilla — no confiar en el POST
             if template:
                 defaults = template["defaults"]
-
                 product.product_type = defaults["product_type"]
                 product.usage_type = defaults["usage_type"]
                 product.scope = defaults["scope"]
                 product.size_strategy = defaults["size_strategy"]
 
             product.save()
-
-            return redirect("products:product_configure", product_id=product.id)
+            messages.success(request, f"Producto '{product.name}' creado.")
+            return redirect("products:product_detail", product_id=product.id)
 
     else:
-
-        form = ProductForm(
-            initial=initial_data,
-            template_key=template_key,  # 🔥 faltaba esto
-        )
+        form = ProductForm(initial=initial_data, template_key=template_key)
 
     return render(
         request,
@@ -93,172 +117,151 @@ def product_create(request):
     )
 
 
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def product_configure(request, product_id):
-
-    product = get_object_or_404(Product, pk=product_id)
-
-    if product.size_strategy == "STANDARD":
-        return redirect("products:product_sizes", product_id=product.id)
-
-    if product.size_strategy == "MEASUREMENTS":
-        return redirect("products:product_measurements", product_id=product.id)
-
-    return redirect("products:list_products")
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. DETALLE — editar info, toggle activo, tallas y medidas en una sola vista
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 @login_required
 @permission_required("products.change_product", raise_exception=True)
-def product_update(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
+def product_detail(request, product_id):
+
+    product = get_object_or_404(
+        Product.objects.select_related("season", "owner_team").prefetch_related(
+            "measurement_fields__field", "size_variants"
+        ),
+        pk=product_id,
+    )
 
     if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect("products:list_products")
-    else:
-        form = ProductForm(instance=product)
+        action = request.POST.get("action")
 
-    return render(
-        request,
-        "products/product_form.html",
-        {"form": form, "title": "Editar producto"},
-    )
+        # ── Editar información básica ──────────────────────────────────────
+        if action == "edit_info":
+            form = ProductForm(request.POST, request.FILES, instance=product)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Producto actualizado.")
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+            return redirect("products:product_detail", product_id=product.id)
 
+        # ── Toggle activo / inactivo ───────────────────────────────────────
+        elif action == "toggle_active":
+            product.is_active = not product.is_active
+            product.save(update_fields=["is_active"])
+            estado = "activado" if product.is_active else "desactivado"
+            messages.success(request, f"Producto {estado}.")
+            return redirect("products:product_detail", product_id=product.id)
 
-@login_required
-@permission_required("products.delete_product", raise_exception=True)
-def product_delete(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
+        # ── Agregar talla ──────────────────────────────────────────────────
+        elif action == "add_size":
+            size = request.POST.get("size", "").strip().upper()
+            price = request.POST.get("additional_price") or "0"
 
-    if request.method == "POST":
-        product.is_active = False
-        product.save(update_fields=["is_active"])
-        return redirect("products:list_products")
+            if not size:
+                messages.error(request, "Ingresa una talla.")
+            elif ProductSizeVariant.objects.filter(product=product, size=size).exists():
+                messages.error(request, f"La talla '{size}' ya existe.")
+            else:
+                try:
+                    ProductSizeVariant.objects.create(
+                        product=product,
+                        size=size,
+                        additional_price=float(price),
+                    )
+                    product.update_configuration_status()
+                    messages.success(request, f"Talla '{size}' agregada.")
+                except Exception as e:
+                    messages.error(request, str(e))
 
-    return render(
-        request,
-        "products/product_confirm_delete.html",
-        {"product": product},
-    )
+            return redirect("products:product_detail", product_id=product.id)
 
+        # ── Eliminar talla ─────────────────────────────────────────────────
+        elif action == "remove_size":
+            size_id = request.POST.get("size_id")
+            variant = get_object_or_404(ProductSizeVariant, pk=size_id, product=product)
+            nombre = variant.size
 
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def product_sizes(request, product_id):
+            try:
+                variant.delete()
+                product.update_configuration_status()
+                messages.success(request, f"Talla '{nombre}' eliminada.")
+            except ProtectedError as e:
+                # Contar cuántas órdenes la usan para dar contexto
+                orders_count = len(e.protected_objects)
+                messages.error(
+                    request,
+                    f"No se puede eliminar la talla '{nombre}' porque está siendo "
+                    f"usada en {orders_count} item(s) de órdenes existentes. "
+                    f"Solo puedes eliminarla cuando no haya órdenes activas que la referencien.",
+                )
 
-    product = get_object_or_404(Product, pk=product_id)
+            return redirect("products:product_detail", product_id=product.id)
 
-    if product.size_strategy != "STANDARD":
-        return redirect("products:list_products")
+        # ── Agregar campo de medida ────────────────────────────────────────
+        elif action == "add_measurement":
+            field_id = request.POST.get("field_id")
+            required = request.POST.get("required") == "on"
 
-    sizes = product.size_variants.all()
+            if not field_id:
+                messages.error(request, "Selecciona un campo.")
+                return redirect("products:product_detail", product_id=product.id)
 
-    return render(
-        request,
-        "products/product_sizes.html",
-        {
-            "product": product,
-            "sizes": sizes,
-        },
-    )
+            field = get_object_or_404(MeasurementField, pk=field_id)
 
+            if ProductMeasurementField.objects.filter(
+                product=product, field=field
+            ).exists():
+                messages.warning(request, f"'{field.name}' ya está en este producto.")
+            else:
+                ProductMeasurementField.objects.create(
+                    product=product,
+                    field=field,
+                    required=required,
+                )
+                product.update_configuration_status()
+                messages.success(request, f"Campo '{field.name}' agregado.")
 
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def product_size_add(request, product_id):
+            return redirect("products:product_detail", product_id=product.id)
 
-    product = get_object_or_404(Product, pk=product_id)
-
-    if request.method == "POST":
-
-        size = request.POST.get("size")
-        price = request.POST.get("additional_price") or 0
-
-        if ProductSizeVariant.objects.filter(product=product, size=size).exists():
-
-            messages.error(request, "Esta talla ya existe")
-            return redirect("products:product_sizes", product.id)
-
-        ProductSizeVariant.objects.create(
-            product=product,
-            size=size,
-            additional_price=price,
-        )
-        product.update_configuration_status()
-
-        return redirect("products:product_sizes", product_id=product.id)
-
-    return render(
-        request,
-        "products/product_size_form.html",
-        {"product": product},
-    )
-
-
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def product_measurements(request, product_id):
-
-    product = get_object_or_404(Product, pk=product_id)
-
-    if product.size_strategy != "MEASUREMENTS":
-        return redirect("products:list_products")
-
-    fields = product.measurement_fields.select_related("field")
-
-    return render(
-        request,
-        "products/product_measurements.html",
-        {
-            "product": product,
-            "fields": fields,
-        },
-    )
-
-
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def product_measurement_add(request, product_id):
-
-    product = get_object_or_404(Product, pk=product_id)
-
-    fields = MeasurementField.objects.all()
-
-    if request.method == "POST":
-
-        field_id = request.POST.get("field")
-        required = bool(request.POST.get("required"))
-
-        # verificar duplicado
-        if ProductMeasurementField.objects.filter(
-            product=product, field_id=field_id
-        ).exists():
-
-            messages.error(
-                request, "Este campo de medida ya está agregado a este producto"
+        # ── Eliminar campo de medida ───────────────────────────────────────
+        elif action == "remove_measurement":
+            field_id = request.POST.get("field_id")
+            pmf = get_object_or_404(
+                ProductMeasurementField, product=product, field_id=field_id
             )
+            nombre = pmf.field.name
 
-            return redirect("products:product_measurements", product.id)
+            try:
+                pmf.delete()
+                product.update_configuration_status()
+                messages.success(request, f"Campo '{nombre}' eliminado.")
+            except ProtectedError as e:
+                orders_count = len(e.protected_objects)
+                messages.error(
+                    request,
+                    f"No se puede eliminar el campo '{nombre}' porque está referenciado "
+                    f"en {orders_count} medida(s) de órdenes existentes.",
+                )
 
-        ProductMeasurementField.objects.create(
-            product=product,
-            field_id=field_id,
-            required=required,
-        )
-        product.update_configuration_status()
-        return redirect(
-            "products:product_measurements",
-            product_id=product.id,
-        )
+            return redirect("products:product_detail", product_id=product.id)
+
+    # ── GET ────────────────────────────────────────────────────────────────
+    used_field_ids = product.measurement_fields.values_list("field_id", flat=True)
+    available_fields = MeasurementField.objects.exclude(id__in=used_field_ids)
+    form = ProductForm(instance=product)
 
     return render(
         request,
-        "products/product_measurement_form.html",
+        "products/product_detail.html",
         {
             "product": product,
-            "fields": fields,
+            "form": form,
+            "measurement_fields": product.measurement_fields.select_related("field"),
+            "size_variants": product.size_variants.all(),
+            "available_fields": available_fields,
         },
     )
