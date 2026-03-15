@@ -1,178 +1,192 @@
 {% extends "core/base.html" %}
-{% block content %}
+{% load static %}
 
+{% block content %}
 <div class="container py-3 py-md-4">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h2 mb-0">{{ title }}</h1>
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1">{{ title }}</h1>
+      {% if template %}
+        <span class="badge bg-info">
+          <i class="bi bi-file-earmark-text me-1"></i>{{ template.label }}
+        </span>
+      {% endif %}
+    </div>
+    <a href="{% url 'products:select_template' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+  </div>
 
-  <a href="{% url 'products:select_template' %}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1 d-none d-md-inline"></i>
-    Volver
-  </a>
-</div>
+  {% if template %}
+  <div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>{{ template.label }}:</strong> {{ template.description }}
+    <div class="mt-1 small text-muted">
+      Ejemplo: <em>{{ template.example.name }}</em> — {{ template.example.usage }}
+    </div>
+  </div>
+  {% endif %}
 
-{% if template %}
-<div class="alert alert-info mb-4">
-  <strong>Plantilla seleccionada:</strong> {{ template.label }}<br>
-  <small>{{ template.description }}</small>
-</div>
-{% endif %}
-
-{% if form.errors %}
-<div class="alert alert-danger">
-  <strong>Por favor corrige los errores:</strong>
-  <ul class="mb-0 mt-2">
-    {% for field in form %}
-      {% for error in field.errors %}
-      <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+  <!-- ERRORES -->
+  {% if form.errors %}
+  <div class="alert alert-danger mb-4">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>Corrige los siguientes errores:</strong>
+    <ul class="mb-0 mt-2">
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
       {% endfor %}
-    {% endfor %}
-    {% for error in form.non_field_errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-  </ul>
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if template_key %}
+      <input type="hidden" name="template" value="{{ template_key }}">
+    {% endif %}
+
+    <div class="row g-4">
+
+      <!-- Columna izquierda: info básica -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-info-circle me-2"></i>Información básica
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Descripción</label>
+                {{ form.description }}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Precio base <span class="text-danger">*</span></label>
+                {{ form.base_price }}
+                {% if form.base_price.errors %}
+                  <div class="text-danger small mt-1">{{ form.base_price.errors }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Temporada <span class="text-danger">*</span></label>
+                {{ form.season }}
+                {% if form.season.errors %}
+                  <div class="text-danger small mt-1">{{ form.season.errors }}</div>
+                {% endif %}
+              </div>
+
+              {% if not template_key %}
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Tipo de producto</label>
+                {{ form.product_type }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Tipo de uso</label>
+                {{ form.usage_type }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Estrategia de talla</label>
+                {{ form.size_strategy }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Alcance</label>
+                {{ form.scope }}
+              </div>
+              <div class="col-md-6" id="owner-team-container">
+                <label class="form-label fw-semibold">Equipo exclusivo</label>
+                {{ form.owner_team }}
+                <small class="text-muted">Solo si el alcance es "Solo un equipo"</small>
+              </div>
+              {% else %}
+              {# Cuando viene de plantilla, los campos fijos se muestran como info, no editables #}
+              <div class="col-12">
+                <div class="bg-light rounded p-3 small text-muted">
+                  <i class="bi bi-lock me-1"></i>
+                  Los campos de tipo, uso y estrategia están definidos por la plantilla
+                  y no se pueden modificar aquí.
+                </div>
+              </div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: imagen -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-image me-2"></i>Imagen
+            </h5>
+          </div>
+          <div class="card-body text-center">
+            <div id="preview-container" class="mb-3">
+              <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                   style="height:160px;" id="placeholder">
+                <i class="bi bi-image text-muted display-4"></i>
+              </div>
+              <img id="img-preview" src="#" alt="Preview"
+                   class="img-fluid rounded d-none" style="max-height:160px;">
+            </div>
+            {{ form.image }}
+            <small class="text-muted d-block mt-2">JPG, PNG. Máx 5MB.</small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex gap-2 mt-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-2"></i>Crear producto
+      </button>
+      <a href="{% url 'products:list_products' %}" class="btn btn-outline-secondary">
+        Cancelar
+      </a>
+    </div>
+
+  </form>
 </div>
-{% endif %}
+{% endblock %}
 
-<form method="post" enctype="multipart/form-data">
-{% csrf_token %}
-
-{% if template_key %}
-<input type="hidden" name="template" value="{{ template_key }}">
-{% endif %}
-
-<!-- BASIC INFO -->
-
-<div class="card shadow-sm mb-4">
-
-<div class="card-header bg-light">
-<h5 class="mb-0">
-<i class="bi bi-info-circle me-2"></i>
-Información básica
-</h5>
-</div>
-
-<div class="card-body">
-
-<div class="row g-3">
-
-<div class="col-md-8">
-<label class="form-label fw-semibold">Nombre</label>
-{{ form.name }}
-</div>
-
-<div class="col-md-4">
-<label class="form-label fw-semibold">Tipo</label>
-{{ form.product_type }}
-</div>
-
-<div class="col-12">
-<label class="form-label fw-semibold">Descripción</label>
-{{ form.description }}
-</div>
-
-<div class="col-md-4">
-<label class="form-label fw-semibold">Tipo de uso</label>
-{{ form.usage_type }}
-</div>
-
-<div class="col-md-4">
-<label class="form-label fw-semibold">Estrategia de talla</label>
-{{ form.size_strategy }}
-</div>
-
-<div class="col-md-4">
-<label class="form-label fw-semibold">Alcance</label>
-{{ form.scope }}
-</div>
-
-<div class="col-12" id="owner-team-container">
-<label class="form-label fw-semibold">Equipo dueño</label>
-{{ form.owner_team }}
-<small class="text-muted">{{ form.owner_team.help_text }}</small>
-</div>
-
-</div>
-</div>
-</div>
-
-<!-- IMAGE -->
-
-<div class="card shadow-sm mb-4">
-
-<div class="card-header bg-light">
-<h5 class="mb-0">
-<i class="bi bi-image me-2"></i>
-Imagen
-</h5>
-</div>
-
-<div class="card-body">
-{{ form.image }}
-</div>
-
-</div>
-
-<!-- DETAILS -->
-
-<div class="card shadow-sm mb-4">
-
-<div class="card-header bg-light">
-<h5 class="mb-0">
-<i class="bi bi-gear me-2"></i>
-Detalles
-</h5>
-</div>
-
-<div class="card-body">
-
-<div class="row g-3">
-
-<div class="col-md-6">
-<label class="form-label fw-semibold">Temporada</label>
-{{ form.season }}
-</div>
-
-<div class="col-md-6">
-<label class="form-label fw-semibold">Precio base</label>
-<div class="input-group">
-<span class="input-group-text">$</span>
-{{ form.base_price }}
-</div>
-</div>
-
-<div class="col-12">
-
-<div class="form-check form-switch">
-{{ form.is_active }}
-<label class="form-check-label fw-semibold">
-Producto activo
-</label>
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
-<div class="d-flex gap-2">
-
-<button type="submit" class="btn btn-primary btn-lg flex-fill">
-Guardar producto
-</button>
-
-<a href="{% url 'products:list_products' %}"
-class="btn btn-outline-secondary btn-lg flex-fill">
-Cancelar
-</a>
-
-</div>
-
-</form>
-
-</div>
-
+{% block extra_js %}
+<script>
+// Preview de imagen antes de subir
+document.querySelector('input[type="file"]')?.addEventListener('change', function () {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const preview = document.getElementById('img-preview');
+    const placeholder = document.getElementById('placeholder');
+    preview.src = e.target.result;
+    preview.classList.remove('d-none');
+    placeholder.classList.add('d-none');
+  };
+  reader.readAsDataURL(file);
+});
+</script>
 {% endblock %}

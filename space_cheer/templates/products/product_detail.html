@@ -1,0 +1,465 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-3 py-md-4">
+
+  <!-- ══════════════════════════════════════════════════════════ HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3">
+    <div>
+      <h1 class="h2 mb-1">{{ product.name }}</h1>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="badge bg-{{ product.is_active|yesno:'success,secondary' }} fs-6">
+          {{ product.is_active|yesno:"Activo,Inactivo" }}
+        </span>
+        <span class="badge bg-light text-dark border">{{ product.get_product_type_display }}</span>
+        <span class="badge bg-light text-dark border">{{ product.get_usage_type_display }}</span>
+        <span class="badge bg-light text-dark border">{{ product.get_size_strategy_display }}</span>
+        {% if not product.is_configured %}
+          <span class="badge bg-warning text-dark">
+            <i class="bi bi-exclamation-triangle me-1"></i>Sin configurar
+          </span>
+        {% else %}
+          <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i>Configurado
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-shrink-0">
+      <!-- Toggle activo — dispara modal -->
+      <button type="button"
+        class="btn btn-sm {% if product.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+        data-confirm
+        data-title="{{ product.is_active|yesno:'Desactivar,Activar' }} producto"
+        data-body="¿Confirmas {{ product.is_active|yesno:'desactivar,activar' }} el producto <strong>{{ product.name }}</strong>?"
+        data-form="formToggleActive"
+        data-variant="{{ product.is_active|yesno:'danger,success' }}">
+        <i class="bi bi-{% if product.is_active %}pause-circle{% else %}play-circle{% endif %} me-1"></i>
+        {{ product.is_active|yesno:"Desactivar,Activar" }}
+      </button>
+      <form id="formToggleActive" method="post" class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="toggle_active">
+      </form>
+
+      <a href="{% url 'products:list_products' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Volver
+      </a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ MENSAJES -->
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show mb-4">
+      <i class="bi bi-{% if msg.tags == 'success' %}check-circle{% elif msg.tags == 'error' or msg.tags == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+      {{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  <div class="row g-4">
+
+    <!-- ══════════════════════════════════════════ COLUMNA IZQUIERDA -->
+    <div class="col-lg-4">
+
+      <!-- Imagen -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-3 text-center">
+          {% if product.image %}
+            <img src="{{ product.image.url }}"
+                 class="img-fluid rounded"
+                 style="max-height:200px; object-fit:cover; width:100%;"
+                 alt="{{ product.name }}">
+          {% else %}
+            <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                 style="height:160px;">
+              <div class="text-center text-muted">
+                <i class="bi bi-image display-4 d-block mb-2"></i>
+                <small>Sin imagen</small>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Editar información básica -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-pencil me-2"></i>Información básica
+          </h5>
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit_info">
+
+            {% if form.errors %}
+              <div class="alert alert-danger py-2 small mb-3">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Nombre</label>
+              {{ form.name }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Descripción</label>
+              {{ form.description }}
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Precio base</label>
+                {{ form.base_price }}
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Temporada</label>
+                {{ form.season }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Nueva imagen</label>
+              {{ form.image }}
+              {% if product.image %}
+                <small class="text-muted d-block mt-1">
+                  <i class="bi bi-info-circle me-1"></i>Sube una nueva para reemplazar la actual.
+                </small>
+              {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100">
+              <i class="bi bi-save me-1"></i>Guardar cambios
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════ COLUMNA DERECHA -->
+    <div class="col-lg-8">
+
+      <!-- ─────────────────────────── TALLAS -->
+      {% if product.size_strategy == "STANDARD" %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-tags me-2"></i>Tallas
+            <span class="badge bg-primary ms-1">{{ size_variants|length }}</span>
+          </h5>
+          <button class="btn btn-sm btn-primary"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#addSizePanel"
+                  aria-expanded="false">
+            <i class="bi bi-plus me-1"></i>Agregar
+          </button>
+        </div>
+
+        <!-- Formulario agregar talla -->
+        <div class="collapse" id="addSizePanel">
+          <div class="card-body border-bottom bg-light">
+            <form method="post" class="row g-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_size">
+
+              <div class="col-sm-4">
+                <label class="form-label small fw-semibold mb-1">Talla</label>
+                <input type="text" name="size"
+                       class="form-control form-control-sm"
+                       placeholder="XS, S, M, L, XL..."
+                       maxlength="20" required>
+              </div>
+
+              <div class="col-sm-4">
+                <label class="form-label small fw-semibold mb-1">Precio adicional</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">$</span>
+                  <input type="number" name="additional_price"
+                         class="form-control"
+                         value="0" step="0.01" min="0">
+                </div>
+              </div>
+
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-plus-circle me-1"></i>Agregar talla
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Lista de tallas -->
+        <div class="card-body p-0">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Talla</th>
+                <th class="text-end">Precio adicional</th>
+                <th style="width:60px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for variant in size_variants %}
+              <tr>
+                <td class="ps-4 fw-bold fs-6">{{ variant.size }}</td>
+                <td class="text-end text-muted">
+                  {% if variant.additional_price > 0 %}
+                    +${{ variant.additional_price|floatformat:2 }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-3">
+                  <!-- Form oculto para esta talla -->
+                  <form id="removeSize_{{ variant.id }}" method="post" class="d-none">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_size">
+                    <input type="hidden" name="size_id" value="{{ variant.id }}">
+                  </form>
+                  <!-- Botón que dispara el modal -->
+                  <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    data-confirm
+                    data-title="Eliminar talla"
+                    data-body="¿Eliminar la talla <strong>{{ variant.size }}</strong>? Si hay órdenes que la usan, no se podrá eliminar."
+                    data-form="removeSize_{{ variant.id }}"
+                    data-variant="danger">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                  <i class="bi bi-tags display-6 d-block mb-2"></i>
+                  No hay tallas configuradas.<br>
+                  <small>Agrega al menos una para poder usar este producto en órdenes.</small>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ─────────────────────────── CAMPOS DE MEDIDA -->
+      {% if product.size_strategy == "MEASUREMENTS" %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-rulers me-2"></i>Campos de medida
+            <span class="badge bg-primary ms-1">{{ measurement_fields|length }}</span>
+          </h5>
+          <button class="btn btn-sm btn-primary"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#addMeasurePanel"
+                  aria-expanded="false">
+            <i class="bi bi-plus me-1"></i>Agregar
+          </button>
+        </div>
+
+        <!-- Formulario agregar campo -->
+        <div class="collapse" id="addMeasurePanel">
+          <div class="card-body border-bottom bg-light">
+            {% if available_fields %}
+            <form method="post" class="row g-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_measurement">
+
+              <div class="col-sm-5">
+                <label class="form-label small fw-semibold mb-1">Campo de medida</label>
+                <select name="field_id" class="form-select form-select-sm">
+                  {% for field in available_fields %}
+                    <option value="{{ field.id }}">
+                      {{ field.name }}{% if field.unit %} ({{ field.unit }}){% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-sm-3 d-flex align-items-center" style="padding-top:1.5rem;">
+                <div class="form-check mb-0">
+                  <input type="checkbox" name="required"
+                         class="form-check-input"
+                         id="required_check" checked>
+                  <label class="form-check-label small" for="required_check">
+                    Obligatorio
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-plus-circle me-1"></i>Agregar campo
+                </button>
+              </div>
+            </form>
+            {% else %}
+              <p class="text-muted small mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                No quedan campos disponibles.
+                <a href="{% url 'manage_measurement_fields' %}">Crear nuevos campos</a>
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Lista de campos -->
+        <div class="card-body p-0">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Campo</th>
+                <th>Unidad</th>
+                <th class="text-center">Requerido</th>
+                <th style="width:60px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pmf in measurement_fields %}
+              <tr>
+                <td class="ps-4 fw-semibold">{{ pmf.field.name }}</td>
+                <td class="text-muted small">{{ pmf.field.unit|default:"—" }}</td>
+                <td class="text-center">
+                  {% if pmf.required %}
+                    <span class="badge bg-success">Sí</span>
+                  {% else %}
+                    <span class="badge bg-secondary">No</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-3">
+                  <!-- Form oculto para este campo -->
+                  <form id="removeMeasure_{{ pmf.field.id }}" method="post" class="d-none">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_measurement">
+                    <input type="hidden" name="field_id" value="{{ pmf.field.id }}">
+                  </form>
+                  <!-- Botón que dispara el modal -->
+                  <button type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    data-confirm
+                    data-title="Eliminar campo de medida"
+                    data-body="¿Eliminar el campo <strong>{{ pmf.field.name }}</strong> de este producto?"
+                    data-form="removeMeasure_{{ pmf.field.id }}"
+                    data-variant="danger">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  <i class="bi bi-rulers display-6 d-block mb-2"></i>
+                  No hay campos configurados.<br>
+                  <small>Agrega al menos uno para poder registrar medidas en órdenes.</small>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ─────────────────────────── PRODUCTO SIN TALLAS NI MEDIDAS -->
+      {% if product.size_strategy == "NONE" %}
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
+          <h5>Producto simple</h5>
+          <p class="text-muted mb-0">
+            Este producto no requiere tallas ni medidas.<br>
+            <small>Estrategia: <strong>{{ product.get_size_strategy_display }}</strong></small>
+          </p>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ MODAL CONFIRMACIÓN -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="confirmModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2 pb-1">
+        <p class="text-muted mb-0" id="confirmModalBody"></p>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn" id="confirmModalBtn">
+          <i class="bi bi-check me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  const modalEl    = document.getElementById('confirmModal');
+  const modal      = new bootstrap.Modal(modalEl);
+  const titleEl    = document.getElementById('confirmModalTitle');
+  const bodyEl     = document.getElementById('confirmModalBody');
+  const confirmBtn = document.getElementById('confirmModalBtn');
+
+  let pendingFormId = null;
+
+  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const variant = this.dataset.variant || 'danger';
+
+      titleEl.textContent  = this.dataset.title || 'Confirmar acción';
+      bodyEl.innerHTML     = this.dataset.body  || '¿Estás seguro?';
+      pendingFormId        = this.dataset.form;
+
+      // Ajusta color del botón según la acción
+      confirmBtn.className = `btn btn-${variant}`;
+      confirmBtn.innerHTML = variant === 'success'
+        ? '<i class="bi bi-play-circle me-1"></i>Confirmar'
+        : '<i class="bi bi-trash3 me-1"></i>Desactivar';
+
+      modal.show();
+    });
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    if (pendingFormId) {
+      const form = document.getElementById(pendingFormId);
+      if (form) form.submit();
+    }
+    modal.hide();
+  });
+
+  // Limpiar estado al cerrar el modal sin confirmar
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    pendingFormId = null;
+  });
+
+});
+</script>
+{% endblock %}

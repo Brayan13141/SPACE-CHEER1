@@ -2,325 +2,334 @@
 {% load static %}
 
 {% block content %}
-
 <div class="container py-3 py-md-4">
 
   <!-- ===================================================== -->
   <!-- HEADER -->
   <!-- ===================================================== -->
-
   <div class="row g-3 align-items-center mb-4">
     <div class="col-md-6">
       <h1 class="h2 mb-0">
-        <i class="bi bi-kanban me-2 text-primary"></i>
-        Panel de órdenes
+        <i class="bi bi-kanban me-2 text-primary"></i>Panel de órdenes
       </h1>
       <p class="text-muted mb-0">
-        {{ orders|length }} orden{{ orders|pluralize:"es" }} en el sistema
+        {{ orders|length }} resultado{{ orders|length|pluralize:"s" }} 
+        de {{ stats.total }} orden{{ stats.total|pluralize:"es" }} en total
       </p>
     </div>
   </div>
 
+  <!-- ===================================================== -->
+  <!-- STATS CARDS -->
+  <!-- ===================================================== -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if not status_filter %}border-primary{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1">{{ stats.total }}</div>
+            <div class="small text-muted">Todas</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=DRAFT" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if status_filter == 'DRAFT' %}border-secondary{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1 text-secondary">{{ stats.draft }}</div>
+            <div class="small text-muted">Borrador</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=PENDING" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if status_filter == 'PENDING' %}border-warning{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1 text-warning">{{ stats.pending }}</div>
+            <div class="small text-muted">Pendiente</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=IN_PRODUCTION" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if status_filter == 'IN_PRODUCTION' %}border-primary{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1 text-primary">{{ stats.in_production }}</div>
+            <div class="small text-muted">Producción</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=DELIVERED" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if status_filter == 'DELIVERED' %}border-success{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1 text-success">{{ stats.delivered }}</div>
+            <div class="small text-muted">Entregadas</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="?status=CANCELLED" class="text-decoration-none">
+        <div class="card shadow-sm h-100 {% if status_filter == 'CANCELLED' %}border-danger{% endif %}">
+          <div class="card-body text-center p-3">
+            <div class="h4 fw-bold mb-1 text-danger">{{ stats.cancelled }}</div>
+            <div class="small text-muted">Canceladas</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
 
   <!-- ===================================================== -->
-  <!-- FILTRO -->
+  <!-- FILTROS -->
   <!-- ===================================================== -->
-
   <div class="card shadow-sm mb-4">
     <div class="card-body">
+      <form method="get" id="filterForm">
+        <div class="row g-3 align-items-end">
 
-      <form method="get">
-
-        <div class="row align-items-center g-3">
-
+          <!-- Búsqueda -->
           <div class="col-md-3">
-            <label class="form-label fw-semibold mb-0">
-              <i class="bi bi-funnel me-2"></i>Filtrar por estado
+            <label class="form-label fw-semibold small mb-1">
+              <i class="bi bi-search me-1"></i>Buscar
             </label>
+            <input
+              type="text"
+              name="q"
+              class="form-control form-control-sm"
+              placeholder="Nombre, email, #ID..."
+              value="{{ search }}"
+            >
           </div>
 
-          <div class="col-md-5">
-
-            <select
-              name="status"
-              class="form-select"
-              onchange="this.form.submit()"
-            >
-
-              <option value="">Todas las órdenes</option>
-
-              <option value="DRAFT" {% if status_filter == "DRAFT" %}selected{% endif %}>
-                Borrador
-              </option>
-
-              <option value="PENDING" {% if status_filter == "PENDING" %}selected{% endif %}>
-                Pendiente
-              </option>
-
-              <option value="DESIGN_APPROVED" {% if status_filter == "DESIGN_APPROVED" %}selected{% endif %}>
-                Diseño aprobado
-              </option>
-
-              <option value="IN_PRODUCTION" {% if status_filter == "IN_PRODUCTION" %}selected{% endif %}>
-                En producción
-              </option>
-
-              <option value="DELIVERED" {% if status_filter == "DELIVERED" %}selected{% endif %}>
-                Entregado
-              </option>
-
-              <option value="CANCELLED" {% if status_filter == "CANCELLED" %}selected{% endif %}>
-                Cancelado
-              </option>
-
+          <!-- Estado -->
+          <div class="col-md-2">
+            <label class="form-label fw-semibold small mb-1">Estado</label>
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">Todos</option>
+              <option value="DRAFT"            {% if status_filter == "DRAFT" %}selected{% endif %}>Borrador</option>
+              <option value="PENDING"          {% if status_filter == "PENDING" %}selected{% endif %}>Pendiente</option>
+              <option value="DESIGN_APPROVED"  {% if status_filter == "DESIGN_APPROVED" %}selected{% endif %}>Diseño aprobado</option>
+              <option value="IN_PRODUCTION"    {% if status_filter == "IN_PRODUCTION" %}selected{% endif %}>En producción</option>
+              <option value="DELIVERED"        {% if status_filter == "DELIVERED" %}selected{% endif %}>Entregado</option>
+              <option value="CANCELLED"        {% if status_filter == "CANCELLED" %}selected{% endif %}>Cancelado</option>
             </select>
+          </div>
 
+          <!-- Tipo -->
+          <div class="col-md-2">
+            <label class="form-label fw-semibold small mb-1">Tipo</label>
+            <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">Todos</option>
+              <option value="PERSONAL" {% if type_filter == "PERSONAL" %}selected{% endif %}>Personal</option>
+              <option value="TEAM"     {% if type_filter == "TEAM" %}selected{% endif %}>Equipo</option>
+            </select>
+          </div>
+
+          <!-- Fecha desde -->
+          <div class="col-md-2">
+            <label class="form-label fw-semibold small mb-1">Desde</label>
+            <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
+          </div>
+
+          <!-- Fecha hasta -->
+          <div class="col-md-2">
+            <label class="form-label fw-semibold small mb-1">Hasta</label>
+            <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
+          </div>
+
+          <!-- Botones -->
+          <div class="col-md-1 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="bi bi-search"></i>
+            </button>
+            <a href="{% url 'orders:admin_order_list' %}" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+              <i class="bi bi-x-lg"></i>
+            </a>
           </div>
 
         </div>
-
       </form>
-
     </div>
   </div>
-
 
   <!-- ===================================================== -->
   <!-- TABLA -->
   <!-- ===================================================== -->
-
   <div class="card shadow-sm">
-
     <div class="card-body p-0">
-
       <table id="ordersTable" class="table table-hover align-middle mb-0">
 
         <thead class="table-light">
           <tr>
-
             <th class="ps-4">ID</th>
-
             <th>Tipo</th>
-
             <th>Estado</th>
-
             <th>Dueño</th>
-
             <th class="d-none d-lg-table-cell">Creado por</th>
-
             <th class="text-center">Items</th>
-
+            <th class="text-end">Total</th>
             <th class="text-end pe-4">Acciones</th>
-
           </tr>
         </thead>
 
         <tbody>
-
         {% for order in orders %}
-
-        <tr>
+        <tr {% if order.id in needs_attention %}class="table-warning"{% endif %}>
 
           <!-- ID -->
-
           <td class="ps-4 fw-bold">
             #{{ order.id }}
+            {% if order.id in needs_attention %}
+              <i class="bi bi-exclamation-circle text-danger ms-1"
+                 data-bs-toggle="tooltip"
+                 title="Requiere atención: faltan fechas o datos operativos"></i>
+            {% endif %}
           </td>
-
 
           <!-- TIPO -->
-
           <td>
-
             {% if order.order_type == "PERSONAL" %}
               <span class="d-flex align-items-center">
-                <i class="bi bi-person text-primary me-2"></i>
-                Personal
+                <i class="bi bi-person text-primary me-2"></i>Personal
               </span>
-
             {% else %}
               <span class="d-flex align-items-center">
-                <i class="bi bi-people text-primary me-2"></i>
-                Equipo
+                <i class="bi bi-people text-primary me-2"></i>Equipo
               </span>
             {% endif %}
-
           </td>
-
 
           <!-- ESTADO -->
-
           <td>
-
             {% with status=order.status %}
-
               {% if status == "DRAFT" %}
-                <span class="badge rounded-pill bg-secondary">
-                  Borrador
-                </span>
-
+                <span class="badge rounded-pill bg-secondary">Borrador</span>
               {% elif status == "PENDING" %}
-                <span class="badge rounded-pill bg-warning text-dark">
-                  Pendiente
-                </span>
-
+                <span class="badge rounded-pill bg-warning text-dark">Pendiente</span>
               {% elif status == "DESIGN_APPROVED" %}
-                <span class="badge rounded-pill bg-info">
-                  Diseño aprobado
-                </span>
-
+                <span class="badge rounded-pill bg-info">Diseño aprobado</span>
               {% elif status == "IN_PRODUCTION" %}
-                <span class="badge rounded-pill bg-primary">
-                  En producción
-                </span>
-
+                <span class="badge rounded-pill bg-primary">En producción</span>
               {% elif status == "DELIVERED" %}
-                <span class="badge rounded-pill bg-success">
-                  Entregado
-                </span>
-
+                <span class="badge rounded-pill bg-success">Entregado</span>
               {% elif status == "CANCELLED" %}
-                <span class="badge rounded-pill bg-danger">
-                  Cancelado
-                </span>
-
+                <span class="badge rounded-pill bg-danger">Cancelado</span>
               {% else %}
-                <span class="badge bg-secondary">
-                  {{ status }}
-                </span>
-
+                <span class="badge bg-secondary">{{ status }}</span>
               {% endif %}
-
             {% endwith %}
-
           </td>
 
-
           <!-- DUEÑO -->
-
           <td>
-
             {% if order.owner_user %}
               <span class="text-truncate d-inline-block" style="max-width:160px;">
                 {{ order.owner_user.get_full_name|default:order.owner_user.email }}
               </span>
-
             {% elif order.owner_team %}
               <span class="text-truncate d-inline-block" style="max-width:160px;">
-                {{ order.owner_team.name }}
+                <i class="bi bi-shield me-1 text-muted"></i>{{ order.owner_team.name }}
               </span>
             {% endif %}
-
           </td>
-
 
           <!-- CREADO POR -->
-
-          <td class="d-none d-lg-table-cell">
-
+          <td class="d-none d-lg-table-cell text-muted small">
             {{ order.created_by.get_full_name|default:order.created_by.email }}
-
+            <div class="text-muted" style="font-size:0.75rem;">
+              {{ order.created_at|date:"d/m/Y" }}
+            </div>
           </td>
-
 
           <!-- ITEMS -->
-
           <td class="text-center">
-
-            <span class="badge bg-light text-dark border">
-
-              {% if order.items_count %}
-                {{ order.items_count }}
-              {% else %}
-                {{ order.items.count }}
-              {% endif %}
-
-            </span>
-
+            <span class="badge bg-light text-dark border">{{ order.items_count }}</span>
           </td>
 
+          <!-- TOTAL -->
+          <td class="text-end fw-semibold">
+            {% if order.total_amount %}
+              ${{ order.total_amount|floatformat:2 }}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
 
           <!-- ACCIONES -->
-
           <td class="text-end pe-4">
-
-            <div class="d-flex justify-content-end gap-2">
-
-              <a
-                href="{% url 'orders:admin_order_detail' order.id %}"
-                class="btn btn-sm btn-outline-primary"
-                data-bs-toggle="tooltip"
-                title="Ver orden"
-              >
-                <i class="bi bi-eye"></i>
-              </a>
-
-            </div>
-
+            
+            <a href="{% url 'orders:admin_order_detail' order.id %}"
+              class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="tooltip"
+              title="Ver detalle"
+            >
+              <i class="bi bi-eye"></i>
+            </a>
           </td>
 
         </tr>
-
         {% empty %}
-
         <tr>
-          <td colspan="7" class="text-center py-5">
-
-            <i class="bi bi-inbox display-4 text-muted"></i>
-
-            <h5 class="mt-3">No hay órdenes registradas</h5>
-
+          <td colspan="8" class="text-center py-5">
+            <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+            <h5>No hay órdenes que coincidan</h5>
+            {% if search or status_filter or type_filter %}
+              <a href="{% url 'orders:admin_order_list' %}" class="btn btn-outline-secondary btn-sm mt-2">
+                Limpiar filtros
+              </a>
+            {% endif %}
           </td>
         </tr>
-
         {% endfor %}
-
         </tbody>
 
       </table>
-
     </div>
-
   </div>
 
 </div>
-
 {% endblock %}
-
-
 
 {% block extra_js %}
 {% if orders %}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function() {
-
-  // tooltips
-  var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  );
-
-  tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+  // Tooltips
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+    new bootstrap.Tooltip(el);
   });
 
-  // DataTables
+  // DataTables — desactivar columnas que ya tienen filtro server-side
   $('#ordersTable').DataTable({
-      responsive: true,
-      pageLength: 25,
-      lengthMenu: [10,25,50,100],
-      ordering: true,
-      order: [[0, 'desc']],
-      language: {
-          url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
-      },
-      columnDefs: [
-          { orderable: false, targets: -1 }
-      ]
+    responsive: true,
+    pageLength: 25,
+    lengthMenu: [10, 25, 50, 100],
+    ordering: true,
+    order: [[0, 'desc']],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+    },
+    columnDefs: [
+      { orderable: false, targets: -1 },  // Acciones no ordenable
+      { orderable: false, targets: 2 },   // Estado tiene filtro propio
+    ]
   });
 
 });
-
 </script>
 {% endif %}
 {% endblock %}
