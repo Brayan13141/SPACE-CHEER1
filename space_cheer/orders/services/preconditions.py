@@ -22,7 +22,6 @@ def can_submit_order(order: Order) -> list[OrderBlockingIssue]:
             )
         )
     else:
-        # Verifica que los campos estén completos
         try:
             OrderContactValidator.validate_complete(order)
         except DjangoValidationError as e:
@@ -40,11 +39,11 @@ def can_submit_order(order: Order) -> list[OrderBlockingIssue]:
                 message="El pedido no tiene productos agregados",
             )
         )
-        return issues  # sin items no hay más que validar
+        return issues
 
+    # ✅ Ahora filtra igual que la view: usage_type en CUSTOM
     items_requiring_athletes = order.items.filter(
         product__usage_type__in=["ATHLETE_CUSTOM", "TEAM_CUSTOM"],
-        product__size_strategy="MEASUREMENTS",
     )
 
     if items_requiring_athletes.exists():
