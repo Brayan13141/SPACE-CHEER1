@@ -334,6 +334,12 @@ class Order(models.Model):
     def can_edit_measurements(self):
         return not self.measurements_locked
 
+    # orders/models.py — dentro de class Order
+
+    def can_edit_items(self):
+        """La orden permite agregar/eliminar items."""
+        return self.status == "DRAFT" and not self.closed
+
     @cached_property
     def requires_design(self):
         return any(item.product.requires_design for item in self.items.all())
