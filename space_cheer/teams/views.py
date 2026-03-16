@@ -234,55 +234,51 @@ def manage_teams(request):
 def manage_team_members(request, team_id):
 
     team = get_object_or_404(Team, id=team_id, is_active=True)
-    roles = [
-        (value, label)
-        for value, label in UserTeamMembership.ROLE_CHOICES
-        if value != "HEADCOACH"
-    ]
-    print(roles)
-    # Seguridad
+
+    # Seguridad: HEADCOACH solo puede ver su propio equipo
     if request.user.roles.filter(name="HEADCOACH").exists():
         if team.coach != request.user:
             raise PermissionDenied
 
-    # ---------------- MIEMBROS DEL EQUIPO ----------------
-    memberships = UserTeamMembership.objects.filter(team=team).select_related("user")
+    is_admin = request.user.roles.filter(name="ADMIN").exists()
+    is_headcoach = request.user.roles.filter(name="HEADCOACH").exists()
+
+    # ── Miembros del equipo ───────────────────────────────────────────────
+    memberships = (
+        UserTeamMembership.objects.filter(team=team)
+        .select_related("user")
+        .order_by("role_in_team", "user__first_name")
+    )
 
     active_members = memberships.filter(is_active=True, status="accepted")
     pending_members = memberships.filter(status="pending")
     inactive_members = memberships.filter(is_active=False)
 
-    # ---------------- CANDIDATOS A AGREGAR ----------------
-    base_exclude = {
-        "team_memberships__team": team,
-        "team_memberships__is_active": True,
-    }
+    # ── Candidatos a agregar (excluye solo membresías ACTIVAS) ────────────
+    already_active_ids = active_members.values_list("user_id", flat=True)
 
-    # HEADCOACH: usuarios creados por él (atletas + crew)
-    coach_candidates = User.objects.none()
-    if request.user.roles.filter(name="HEADCOACH").exists():
-        coach_candidates = (
+    if is_admin:
+        # ADMIN ve a todos los usuarios del sistema excepto los ya activos
+        available_users = (
+            User.objects.exclude(id__in=already_active_ids)
+            .exclude(id=team.coach_id)  # el coach ya es dueño del equipo
+            .order_by("first_name")
+            .distinct()
+        )
+    else:
+        # HEADCOACH solo ve sus owned users (atletas + crew)
+        available_users = (
             User.objects.filter(
                 owner_links__owner=request.user,
                 owner_links__is_active=True,
             )
-            .exclude(**base_exclude)
+            .exclude(id__in=already_active_ids)
+            .order_by("first_name")
             .distinct()
         )
 
-    # ADMIN: cualquier usuario del club
-    club_users = User.objects.none()
-    if request.user.roles.filter(name="ADMIN").exists():
-        club_users = User.objects.exclude(**base_exclude).distinct()
-
-    first_time_coach_users = (
-        User.objects.filter(
-            owner_links__owner=request.user,
-            owner_links__is_active=True,
-        )
-        .exclude(team_memberships__team=team)
-        .distinct()
-    )
+    # Roles disponibles para asignar en el equipo
+    role_choices = UserTeamMembership.ROLE_CHOICES
 
     return render(
         request,
@@ -292,10 +288,10 @@ def manage_team_members(request, team_id):
             "active_members": active_members,
             "pending_members": pending_members,
             "inactive_members": inactive_members,
-            "coach_athletes": coach_candidates,
-            "club_users": club_users,
-            "roles": roles,
-            "available_users": first_time_coach_users,
+            "available_users": available_users,
+            "role_choices": role_choices,  # ← nombre consistente con el template
+            "is_admin": is_admin,
+            "is_headcoach": is_headcoach,
         },
     )
 
