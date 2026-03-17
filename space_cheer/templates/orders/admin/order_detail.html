@@ -119,9 +119,10 @@
     </div>
   {% endif %}
 
-  <!-- ========== OPERATIVE DATES ========== -->
+  <!-- ========== OPERATIVE DATES (condicional) ========== -->
+{% if order_flags.has_items %}
 <div class="card shadow-sm mb-4">
-  <div class="card-header bg-light">
+  <div class="card-header bg-light d-flex justify-content-between align-items-center">
     <h5 class="card-title mb-0">
       <i class="bi bi-calendar-event me-2"></i>Fechas operativas
     </h5>
@@ -131,52 +132,94 @@
       {% csrf_token %}
       <div class="row g-3">
 
-        <div class="col-sm-6 col-md-3">
-          <label class="form-label">{{ dates_form.freeze_payment_date.label }}</label>
-          {{ dates_form.freeze_payment_date }}
-          {% if dates_form.freeze_payment_date.errors %}
-            <div class="text-danger small">{{ dates_form.freeze_payment_date.errors }}</div>
-          {% endif %}
-        </div>
+        <!-- freeze_payment_date: solo si tiene diseño custom -->
+{% if order_flags.requires_design %}
+<div class="col-sm-6 col-md-3">
+  <label class="form-label">
+    {{ dates_form.freeze_payment_date.label }}
+    <span class="text-danger">*</span>
+  </label>
+  {{ dates_form.freeze_payment_date }}
+  {% if dates_form.freeze_payment_date.errors %}
+    <div class="text-danger small">{{ dates_form.freeze_payment_date.errors }}</div>
+  {% endif %}
+</div>
+{% endif %}
 
-        <div class="col-sm-6 col-md-3">
-          <label class="form-label">{{ dates_form.measurements_due_date.label }}</label>
-          {{ dates_form.measurements_due_date }}
-          {% if dates_form.measurements_due_date.errors %}
-            <div class="text-danger small">{{ dates_form.measurements_due_date.errors }}</div>
-          {% endif %}
-        </div>
+<!-- measurements_due_date: solo si tiene medidas -->
+{% if order_flags.requires_measurements %}
+<div class="col-sm-6 col-md-3">
+  <label class="form-label">
+    {{ dates_form.measurements_due_date.label }}
+    <span class="text-danger">*</span>
+  </label>
+  {{ dates_form.measurements_due_date }}
+  {% if dates_form.measurements_due_date.errors %}
+    <div class="text-danger small">{{ dates_form.measurements_due_date.errors }}</div>
+  {% endif %}
+</div>
+{% endif %}
 
-        <div class="col-sm-6 col-md-3">
-          <label class="form-label">{{ dates_form.uniform_delivery_date.label }}</label>
-          {{ dates_form.uniform_delivery_date }}
-          {% if dates_form.uniform_delivery_date.errors %}
-            <div class="text-danger small">{{ dates_form.uniform_delivery_date.errors }}</div>
-          {% endif %}
-        </div>
+<!-- uniform_delivery_date: solo si tiene uniformes -->
+{% if order_flags.has_uniforms %}
+<div class="col-sm-6 col-md-3">
+  <label class="form-label">
+    {{ dates_form.uniform_delivery_date.label }}
+    <span class="text-danger">*</span>
+  </label>
+  {{ dates_form.uniform_delivery_date }}
+  {% if dates_form.uniform_delivery_date.errors %}
+    <div class="text-danger small">{{ dates_form.uniform_delivery_date.errors }}</div>
+  {% endif %}
+</div>
+{% endif %}
 
-        <div class="col-sm-6 col-md-3">
-          <label class="form-label">{{ dates_form.first_payment_date.label }}</label>
-          {{ dates_form.first_payment_date }}
-          {% if dates_form.first_payment_date.errors %}
-            <div class="text-danger small">{{ dates_form.first_payment_date.errors }}</div>
-          {% endif %}
-        </div>
+<!-- first_payment_date: SIEMPRE, toda orden requiere primer pago -->
+<div class="col-sm-6 col-md-3">
+  <label class="form-label">
+    {{ dates_form.first_payment_date.label }}
+    <span class="text-danger">*</span>
+  </label>
+  {{ dates_form.first_payment_date }}
+  {% if dates_form.first_payment_date.errors %}
+    <div class="text-danger small">{{ dates_form.first_payment_date.errors }}</div>
+  {% endif %}
+</div>
+
+<!-- final_payment_date: solo si tiene diseño custom -->
+{% if order_flags.requires_design %}
+<div class="col-sm-6 col-md-3">
+  <label class="form-label">{{ dates_form.final_payment_date.label }}</label>
+  {{ dates_form.final_payment_date }}
+  {% if dates_form.final_payment_date.errors %}
+    <div class="text-danger small">{{ dates_form.final_payment_date.errors }}</div>
+  {% endif %}
+</div>
+{% endif %}
 
       </div>
 
-      {% if dates_form.non_field_errors %}
-        <div class="alert alert-danger mt-3">
-          {{ dates_form.non_field_errors }}
-        </div>
+      {% if not order_flags.requires_design and not order_flags.requires_measurements and not order_flags.has_uniforms %}
+        <p class="text-muted small mt-3 mb-0">
+          <i class="bi bi-info-circle me-1"></i>
+          Esta orden solo contiene productos simples. No requiere fechas adicionales.
+        </p>
       {% endif %}
 
+      {% if dates_form.non_field_errors %}
+        <div class="alert alert-danger mt-3">{{ dates_form.non_field_errors }}</div>
+      {% endif %}
+
+      {% if order_flags.requires_design or order_flags.has_uniforms %}
       <button class="btn btn-primary mt-3">
         <i class="bi bi-save me-1"></i>Guardar fechas
       </button>
+      {% endif %}
+
     </form>
   </div>
 </div>
+{% endif %}
 
   <!-- ========== PRODUCTS ========== -->
   <div class="card shadow-sm mb-4">
@@ -257,6 +300,49 @@
       </div>
     </div>
   </div>
+
+  <!-- ========== MEASUREMENTS PROGRESS (condicional) ========== -->
+{% if order_flags.requires_measurements and measurements_summary %}
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-rulers me-2"></i>Progreso de medidas
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-muted small">
+        {{ measurements_summary.complete }} de {{ measurements_summary.total }} atletas completos
+      </span>
+      <span class="fw-bold
+        {% if measurements_summary.percent == 100 %}text-success
+        {% elif measurements_summary.percent >= 50 %}text-warning
+        {% else %}text-danger{% endif %}">
+        {{ measurements_summary.percent }}%
+      </span>
+    </div>
+    <div class="progress" style="height: 10px;">
+      <div class="progress-bar
+        {% if measurements_summary.percent == 100 %}bg-success
+        {% elif measurements_summary.percent >= 50 %}bg-warning
+        {% else %}bg-danger{% endif %}"
+        role="progressbar"
+        style="width: {{ measurements_summary.percent }}%">
+      </div>
+    </div>
+    {% if measurements_summary.pending > 0 %}
+    <p class="text-muted small mt-2 mb-0">
+      <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+      {{ measurements_summary.pending }} atleta{{ measurements_summary.pending|pluralize }} sin medidas completas
+    </p>
+    {% else %}
+    <p class="text-success small mt-2 mb-0">
+      <i class="bi bi-check-circle me-1"></i>Todas las medidas están completas
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
 
   <!-- ========== DESIGNS (mejorado) ========== -->
   <div class="card shadow-sm mb-4">

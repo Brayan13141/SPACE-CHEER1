@@ -2,41 +2,45 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Medidas de atleta
     path(
         "manage_athletes/<int:id>/edit_measures/",
         views.edit_athlete_measures,
         name="edit_athlete_measures",
     ),
+    # Usuarios propios (atletas + crew)
     path(
-        "members/",
+        "members/",  # ← quitado el / inicial
         views.manage_owned_users,
         name="manage_owned_users",
     ),
     path(
-        "members/remove/<int:ownership_id>/",
+        "members/remove/<int:ownership_id>/",  # ← quitado el / inicial
         views.remove_owned_user,
         name="remove_owned_user",
     ),
-    # Ruta para crear un miembro del equipo
     path(
-        "<int:team_id>/crew",
+        "members/edit/<int:ownership_id>/",
+        views.edit_owned_user,
+        name="edit_owned_user",
+    ),
+    # Crew
+    path(
+        "<int:team_id>/crew/",  # ← agregado / al final
         views.create_team_crew_member,
         name="create_team_crew_member",
     ),
-    # Rutas para la gestión de miembros del equipo
-    # Rutas para modificar el rol o eliminar un miembro del equipo
+    # Membresías
     path(
         "membership/<int:membership_id>/role/",
         views.change_team_role,
         name="change_team_role",
     ),
-    # Ruta para eliminar un miembro del equipo
     path(
         "membership/<int:membership_id>/remove/",
         views.remove_team_member,
         name="remove_team_member",
     ),
-    # Ruta para agregar un miembro al equipo
     path(
         "<int:team_id>/members/add/",
         views.add_team_member,

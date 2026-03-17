@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
 from orders.models import OrderItem, Order, OrderItemAthlete
 from orders.services.servicesItems.order_item_athlete_service import (
@@ -29,24 +29,16 @@ def order_item_detail(request, item_id):
     order = item.order
 
     # -------------------------------------------------
-    # REGLAS DE CONFIGURACIÓN DEL PRODUCTO
+    # REGLAS DE CONFIGURACIÓN
     # -------------------------------------------------
-
-    requires_team = product.usage_type == "TEAM_CUSTOM"
-
-    requires_athlete = (
-        product.usage_type == "ATHLETE_CUSTOM"
-        or product.size_strategy == "MEASUREMENTS"
-    )
-
+    requires_team = product.requires_team
+    requires_athlete = product.requires_athletes
     requires_sizes = product.size_strategy == "STANDARD"
-
-    requires_measurements = product.size_strategy == "MEASUREMENTS"
+    requires_measurements = product.requires_measurements
 
     # -------------------------------------------------
     # ATLETAS DEL ITEM
     # -------------------------------------------------
-
     athlete_items = []
 
     if requires_athlete:
@@ -59,7 +51,6 @@ def order_item_detail(request, item_id):
     # -------------------------------------------------
     # MEDIDAS REQUERIDAS
     # -------------------------------------------------
-
     measurement_fields = []
 
     if requires_measurements:
@@ -70,7 +61,6 @@ def order_item_detail(request, item_id):
     # -------------------------------------------------
     # ESTADO DE CONFIGURACIÓN
     # -------------------------------------------------
-
     missing_configuration = []
 
     if requires_athlete and not athlete_items:
@@ -82,12 +72,20 @@ def order_item_detail(request, item_id):
     configuration_state = "READY" if not missing_configuration else "INCOMPLETE"
 
     # -------------------------------------------------
-    # PERMISOS UI
+    # PERMISOS UI — ahora con lógica real
     # -------------------------------------------------
+    can_import_athletes = (
+        requires_team
+        and requires_athlete
+        and order.can_edit_general()  # ← solo si la orden es editable
+    )
 
-    can_import_athletes = requires_team and requires_athlete
-    can_manage_athletes = requires_athlete
-    can_delete_item = True
+    can_manage_athletes = (
+        requires_athlete and order.can_edit_general()  # ← solo si la orden es editable
+    )
+
+    # lógica para eliminar item
+    can_delete_item = _can_user_delete_item(request.user, order, item)
 
     context = {
         "order": order,
@@ -106,11 +104,58 @@ def order_item_detail(request, item_id):
         "can_delete_item": can_delete_item,
     }
 
-    return render(
-        request,
-        "orders/items/item_detail.html",
-        context,
+    return render(request, "orders/items/item_detail.html", context)
+
+
+# -------------------------------------------------
+# Helper privado — separado de la view para testear
+# -------------------------------------------------
+
+
+def _can_user_delete_item(user, order, item) -> bool:
+    """
+    Reglas para eliminar un item de una orden:
+    1. La orden debe estar en DRAFT (no enviada)
+    2. El usuario debe ser el creador de la orden o staff
+    """
+    if not order.can_edit_general():
+        return False
+
+    if user.is_staff or user.is_superuser:
+        return True
+
+    # El creador de la orden puede eliminar sus items
+    if order.created_by == user:
+        return True
+
+    return False
+
+
+@login_required
+@require_POST
+def order_item_delete(request, item_id):
+    """
+    Elimina un item de una orden.
+    Solo permitido si la orden está en DRAFT y el usuario tiene permisos.
+    """
+    item = get_object_or_404(
+        OrderItem.objects.select_related("order", "product"),
+        pk=item_id,
+        order__in=Order.objects.visible_for_user(request.user),
     )
+
+    order = item.order
+
+    # Verificación de seguridad en el servidor — nunca confíes solo en el template
+    if not _can_user_delete_item(request.user, order, item):
+        raise PermissionDenied("No tienes permiso para eliminar este producto.")
+
+    product_name = item.product.name
+    item.delete()
+    order.invalidate_cache()
+
+    messages.success(request, f'Producto "{product_name}" eliminado de la orden.')
+    return redirect("orders:detail_order", order_id=order.id)
 
 
 # --------------------------------------------------------

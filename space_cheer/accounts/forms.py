@@ -3,6 +3,7 @@ from allauth.account.forms import SignupForm
 from .models import User, Role
 import re
 from .models import UserAddress
+from django.core.exceptions import ValidationError
 
 
 class UserProfilingForm(forms.ModelForm):
@@ -21,6 +22,45 @@ class UserProfilingForm(forms.ModelForm):
         widgets = {
             "birth_date": forms.DateInput(attrs={"type": "date"}),
         }
+
+    def clean_phone(self):
+        """
+        Valida que el teléfono sea único si se proporciona
+        """
+        phone = self.cleaned_data.get("phone")
+
+        if not phone:
+            return phone
+
+        # Normalizar teléfono (eliminar espacios, guiones, paréntesis)
+        phone = (
+            phone.strip()
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("(", "")
+            .replace(")", "")
+        )
+
+        # Validar formato básico (solo números)
+        if not phone.isdigit():
+            raise ValidationError("El teléfono solo debe contener números.")
+
+        # Validar longitud (10 dígitos para México)
+        if len(phone) != 10:
+            raise ValidationError("El teléfono debe tener exactamente 10 dígitos.")
+
+        # Verificar si ya existe (excluyendo el usuario actual si es edición)
+        queryset = User.objects.filter(phone=phone)
+        if self.instance and self.instance.pk:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise ValidationError(
+                "Ya existe un usuario con este número de teléfono. "
+                "Por favor, usa otro número o contacta al administrador."
+            )
+
+        return phone
 
 
 class CurpForm(forms.ModelForm):
@@ -44,6 +84,11 @@ class CurpForm(forms.ModelForm):
 
 
 class CustomSignupForm(SignupForm):
+    """
+    Formulario de registro personalizado con validación de términos
+    y validación de email único
+    """
+
     # Definimos el campo explícitamente para que Django lo valide
     terms = forms.BooleanField(
         required=True,  # Esto fuerza la validación en el servidor
@@ -52,6 +97,27 @@ class CustomSignupForm(SignupForm):
         },
         label="Acepto los términos y condiciones",
     )
+
+    def clean_email(self):
+        """
+        Valida que el email sea único en el sistema
+        """
+        email = self.cleaned_data.get("email")
+
+        if not email:
+            raise ValidationError("El correo electrónico es obligatorio.")
+
+        # Normalizar email (lowercase y trim)
+        email = email.lower().strip()
+
+        # Verificar si ya existe
+        if User.objects.filter(email=email).exists():
+            raise ValidationError(
+                "Ya existe un usuario con este correo electrónico. "
+                "¿Olvidaste tu contraseña? Usa la opción de recuperación."
+            )
+
+        return email
 
     def save(self, request):
         # 1. Guardamos el usuario base (username, email, password)

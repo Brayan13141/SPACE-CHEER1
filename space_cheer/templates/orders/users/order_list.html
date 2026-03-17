@@ -255,6 +255,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if orders %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -281,4 +282,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+{% endif%}
 {% endblock %}

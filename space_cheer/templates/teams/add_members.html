@@ -4,506 +4,523 @@
 {% block content %}
 <div class="container-fluid py-3">
 
-    <!-- ================= HEADER ================= -->
-    <div class="card shadow-sm mb-4 border-0">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-people-fill fs-4"></i>
-                </div>
-                <div>
-                    <h4 class="mb-1 fw-bold">{{ team.name }}</h4>
-                    <p class="mb-0 opacity-75">Gestión de miembros del equipo</p>
-                </div>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{% url 'manage_teams' %}" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
-                </a>
-            </div>
+  <!-- ══════════════════════════════════════════════════════ HEADER -->
+  <div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-people-fill fs-4 me-3"></i>
+        <div>
+          <h4 class="mb-1 fw-bold">{{ team.name }}</h4>
+          <p class="mb-0 opacity-75 small">Gestión de miembros</p>
         </div>
-        <div class="card-body bg-light">
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
-                            <i class="bi bi-person-check-fill text-primary fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">Activos</h6>
-                            <h3 class="mb-0 fw-bold">{{ active_members|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
-                            <i class="bi bi-clock-fill text-warning fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">Pendientes</h6>
-                            <h3 class="mb-0 fw-bold">{{ pending_members|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-secondary bg-opacity-10 rounded p-3 me-3">
-                            <i class="bi bi-person-x-fill text-secondary fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">Inactivos</h6>
-                            <h3 class="mb-0 fw-bold">{{ inactive_members|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
-                            <i class="bi bi-person-add text-success fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">Disponibles</h6>
-                            <h3 class="mb-0 fw-bold">{{ available_users|length }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'create_team_crew_member' team.id %}" class="btn btn-light btn-sm">
+          <i class="bi bi-person-badge me-1"></i>Crear miembro nuevo
+        </a>
+        <a href="{% url 'manage_teams' %}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </a>
+      </div>
     </div>
 
-    <!-- ================= SISTEMA DE TABS ================= -->
-    <ul class="nav nav-pills mb-4 rounded shadow-sm" id="membersTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active rounded-pill" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-pane" type="button">
-                <i class="bi bi-person-check me-1"></i>Activos
-                <span class="badge bg-white text-primary rounded-pill ms-1">{{ active_members|length }}</span>
-            </button>
-        </li>
-        {% if pending_members %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-pill" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-pane" type="button">
-                <i class="bi bi-clock me-1"></i>Pendientes
-                <span class="badge bg-white text-warning rounded-pill ms-1">{{ pending_members|length }}</span>
-            </button>
-        </li>
-        {% endif %}
-        {% if inactive_members %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-pill" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive-pane" type="button">
-                <i class="bi bi-person-x me-1"></i>Inactivos
-                <span class="badge bg-white text-secondary rounded-pill ms-1">{{ inactive_members|length }}</span>
-            </button>
-        </li>
-        {% endif %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-pill" id="available-tab" data-bs-toggle="tab" data-bs-target="#available-pane" type="button">
-                <i class="bi bi-person-plus me-1"></i>Agregar
-                <span class="badge bg-white text-success rounded-pill ms-1">{{ available_users|length }}</span>
-            </button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="membersTabContent">
-        
-        <!-- ================= PESTAÑA ACTIVOS ================= -->
-        <div class="tab-pane fade show active" id="active-pane" role="tabpanel">
-            <div class="card shadow-sm border">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-primary">
-                        <i class="bi bi-person-check-fill me-2"></i>
-                        Miembros Activos
-                    </h6>
-                    <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">{{ active_members|length }} miembros</span>
-                </div>
-                <div class="card-body p-0">
-                    {% if active_members %}
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th >#</th>
-                                    <th>Miembro</th>
-                                    <th class="text-center">Rol Actual</th>
-                                    <th class="text-center">Fecha Ingreso</th>
-                                    <th class="text-center">Cambiar Rol</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for membership in active_members %}
-                                <tr class="border-bottom">
-                                    <td class="text-muted align-middle">{{ forloop.counter }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-3">
-                                                {% if membership.user.profile_image %}
-                                                <img src="{{ membership.user.profile_image.url }}" 
-                                                     class="rounded-circle border" width="40" height="40" alt="{{ membership.user.get_full_name }}">
-                                                {% else %}
-                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <span class="fw-bold">{{ membership.user.get_full_name|first|upper }}</span>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0 fw-bold">{{ membership.user.get_full_name }}</h6>
-                                                <small class="text-muted">@{{ membership.user.username }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">
-                                            {{ membership.role_in_team }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center text-muted align-middle">
-                                        <small>{{ membership.date_joined|date:"d/m/Y" }}</small>
-                                    </td>
-                                    <td class="align-middle">
-                                        <form method="POST" action="{% url 'change_team_role' membership.id %}" 
-                                              class="d-flex gap-2 align-items-center justify-content-center">
-                                            {% csrf_token %}
-                                            <select name="role_in_team" class="form-select form-select-sm w-auto">
-                                                {% for value,label in roles%}
-                                                <option value="{{ value }}" {% if membership.role_in_team == value %}selected{% endif %}>
-                                                    {{ label }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle" 
-                                                    style="width: 32px; height: 32px;" title="Actualizar rol">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <form method="POST" action="{% url 'remove_team_member' membership.id %}" 
-                                              class="d-inline"
-                                              onsubmit="return confirm('¿Seguro que deseas quitar a {{ membership.user.get_full_name }} del equipo?');">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" 
-                                                    style="width: 32px; height: 32px;" title="Quitar del equipo">
-                                                <i class="bi bi-person-dash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="bi bi-people display-1 text-muted opacity-50"></i>
-                        </div>
-                        <h5 class="text-muted mb-2">No hay miembros activos</h5>
-                        <p class="text-muted mb-4">Agrega miembros desde la pestaña "Agregar"</p>
-                        <a href="#available-pane" class="btn btn-primary" data-bs-toggle="tab">
-                            <i class="bi bi-person-plus me-1"></i> Agregar miembros
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
+    <div class="card-body bg-light">
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <div class="bg-primary bg-opacity-10 rounded p-3 me-3 flex-shrink-0">
+              <i class="bi bi-person-check-fill text-primary fs-5"></i>
             </div>
-        </div>
-
-        <!-- ================= PESTAÑA PENDIENTES ================= -->
-        {% if pending_members %}
-        <div class="tab-pane fade" id="pending-pane" role="tabpanel">
-            <div class="card shadow-sm border">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-warning">
-                        <i class="bi bi-clock-fill me-2"></i>
-                        Solicitudes Pendientes
-                    </h6>
-                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill fs-6 px-3 py-2">
-                        {{ pending_members|length }} pendientes
-                    </span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="w-50">#</th>
-                                    <th>Solicitante</th>
-                                    <th class="text-center">Rol Solicitado</th>
-                                    <th class="text-center">Fecha Solicitud</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for membership in pending_members %}
-                                <tr class="border-bottom">
-                                    <td class="text-muted align-middle">{{ forloop.counter }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-3">
-                                                {% if membership.user.profile_image %}
-                                                <img src="{{ membership.user.profile_image.url }}" 
-                                                     class="rounded-circle border" width="40" height="40" alt="{{ membership.user.get_full_name }}">
-                                                {% else %}
-                                                <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center border" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <span class="fw-bold">{{ membership.user.get_full_name|first|upper }}</span>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0 fw-bold">{{ membership.user.get_full_name }}</h6>
-                                                <small class="text-muted">@{{ membership.user.username }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2">
-                                            {{ membership.role_in_team }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center text-muted align-middle">
-                                        <small>{{ membership.joined_at|date:"d/m/Y H:i" }}</small>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <form method="POST" action="{% url 'add_team_member' team.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="user_id" value="{{ membership.user.id }}">
-                                                <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
-                                                <button type="submit" class="btn btn-sm btn-success rounded-pill">
-                                                    <i class="bi bi-check-lg me-1"></i>Aceptar
-                                                </button>
-                                            </form>
-                                            <form method="POST" action="{% url 'remove_team_member' membership.id %}" 
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('¿Rechazar solicitud de {{ membership.user.get_full_name }}?');">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
-                                                    <i class="bi bi-x-lg me-1"></i>Rechazar
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div>
+              <div class="text-muted small">Activos</div>
+              <div class="h4 mb-0 fw-bold">{{ active_members|length }}</div>
             </div>
+          </div>
         </div>
-        {% endif %}
-
-        <!-- ================= PESTAÑA INACTIVOS ================= -->
-        {% if inactive_members %}
-        <div class="tab-pane fade" id="inactive-pane" role="tabpanel">
-            <div class="card shadow-sm border">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-secondary">
-                        <i class="bi bi-person-x-fill me-2"></i>
-                        Miembros Inactivos
-                    </h6>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill fs-6 px-3 py-2">
-                        {{ inactive_members|length }} inactivos
-                    </span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="w-50">#</th>
-                                    <th>Miembro</th>
-                                    <th class="text-center">Último Rol</th>
-                                    <th class="text-center">Fecha Salida</th>
-                                    <th class="text-center">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for membership in inactive_members %}
-                                <tr class="border-bottom">
-                                    <td class="text-muted align-middle">{{ forloop.counter }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-3">
-                                                {% if membership.user.profile_image %}
-                                                <img src="{{ membership.user.profile_image.url }}" 
-                                                     class="rounded-circle border" width="40" height="40" alt="{{ membership.user.get_full_name }}">
-                                                {% else %}
-                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center border" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <span class="fw-bold">{{ membership.user.get_full_name|first|upper }}</span>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0 fw-bold">{{ membership.user.get_full_name }}</h6>
-                                                <small class="text-muted">@{{ membership.user.username }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2">
-                                            {{ membership.role_in_team }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center text-muted align-middle">
-                                        <small>{{ membership.end_date|date:"d/m/Y" }}</small>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <form method="POST" action="{% url 'add_team_member' team.id %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="user_id" value="{{ membership.user.id }}">
-                                            <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
-                                            <button type="submit" class="btn btn-sm btn-success rounded-pill">
-                                                <i class="bi bi-arrow-clockwise me-1"></i>Reactivar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="col-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <div class="bg-warning bg-opacity-10 rounded p-3 me-3 flex-shrink-0">
+              <i class="bi bi-clock-fill text-warning fs-5"></i>
             </div>
+            <div>
+              <div class="text-muted small">Pendientes</div>
+              <div class="h4 mb-0 fw-bold">{{ pending_members|length }}</div>
+            </div>
+          </div>
         </div>
-        {% endif %}
+        <div class="col-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <div class="bg-secondary bg-opacity-10 rounded p-3 me-3 flex-shrink-0">
+              <i class="bi bi-person-x-fill text-secondary fs-5"></i>
+            </div>
+            <div>
+              <div class="text-muted small">Inactivos</div>
+              <div class="h4 mb-0 fw-bold">{{ inactive_members|length }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="d-flex align-items-center">
+            <div class="bg-success bg-opacity-10 rounded p-3 me-3 flex-shrink-0">
+              <i class="bi bi-person-add text-success fs-5"></i>
+            </div>
+            <div>
+              <div class="text-muted small">Disponibles</div>
+              <div class="h4 mb-0 fw-bold">{{ available_users|length }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- ================= PESTAÑA AGREGAR ================= -->
-        <div class="tab-pane fade" id="available-pane" role="tabpanel">
-            <div class="card shadow-sm border">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold text-success">
-                        <i class="bi bi-person-plus-fill me-2"></i>
-                        Agregar Miembros Disponibles
-                    </h6>
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill fs-6 px-3 py-2">
-                        {{ available_users|length }} disponibles
+
+  <!-- TABS -->
+  <ul class="nav nav-pills mb-4" id="membersTab">
+    <li class="nav-item">
+      <button class="nav-link active rounded-pill" data-bs-toggle="tab"
+              data-bs-target="#active-pane" id="tab-active" type="button">
+        <i class="bi bi-person-check me-1"></i>Activos
+        <span class="badge bg-white text-primary rounded-pill ms-1">{{ active_members|length }}</span>
+      </button>
+    </li>
+    {% if pending_members %}
+    <li class="nav-item">
+      <button class="nav-link rounded-pill" data-bs-toggle="tab"
+              data-bs-target="#pending-pane" id="tab-pending" type="button">
+        <i class="bi bi-clock me-1"></i>Pendientes
+        <span class="badge bg-white text-warning rounded-pill ms-1">{{ pending_members|length }}</span>
+      </button>
+    </li>
+    {% endif %}
+    {% if inactive_members %}
+    <li class="nav-item">
+      <button class="nav-link rounded-pill" data-bs-toggle="tab"
+              data-bs-target="#inactive-pane" id="tab-inactive" type="button">
+        <i class="bi bi-person-x me-1"></i>Inactivos
+        <span class="badge bg-white text-secondary rounded-pill ms-1">{{ inactive_members|length }}</span>
+      </button>
+    </li>
+    {% endif %}
+    <li class="nav-item">
+      <button class="nav-link rounded-pill" data-bs-toggle="tab"
+              data-bs-target="#available-pane" id="tab-available" type="button">
+        <i class="bi bi-person-plus me-1"></i>Agregar
+        <span class="badge bg-white text-success rounded-pill ms-1">{{ available_users|length }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- TAB ACTIVOS -->
+    <div class="tab-pane fade show active" id="active-pane">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+          <h6 class="mb-0 fw-bold text-primary">
+            <i class="bi bi-person-check-fill me-2"></i>Miembros activos
+          </h6>
+          <span class="badge bg-primary rounded-pill">{{ active_members|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          {% if active_members %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">#</th>
+                  <th>Miembro</th>
+                  <th class="text-center">Rol actual</th>
+                  <th class="text-center d-none d-md-table-cell">Ingreso</th>
+                  <th class="text-center">Cambiar rol</th>
+                  <th class="text-center">Quitar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for membership in active_members %}
+                <tr>
+                  <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                                  justify-content-center flex-shrink-0 fw-bold"
+                           style="width:38px;height:38px;">
+                        {{ membership.user.get_full_name|first|upper }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ membership.user.get_full_name }}</div>
+                        <small class="text-muted">@{{ membership.user.username }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1">
+                      {{ membership.role_in_team }}
                     </span>
-                </div>
-                <div class="card-body">
-                    {% if available_users %}
-                    <div class="row">
-                        {% for user in available_users %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card border h-100 shadow-sm">
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="me-3">
-                                            {% if user.profile_image %}
-                                            <img src="{{ user.profile_image.url }}" 
-                                                 class="rounded-circle border" width="50" height="50" alt="{{ user.get_full_name }}">
-                                            {% else %}
-                                            <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center border" 
-                                                 style="width: 50px; height: 50px;">
-                                                <span class="fw-bold">{{ user.get_full_name|first|upper }}</span>
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold">{{ user.get_full_name }}</h6>
-                                            <small class="text-muted">@{{ user.username }}</small>
-                                            <div class="mt-1">
-                                                {% for role in user.roles.all %}
-                                                <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">{{ role.name }}</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 flex-grow-1">
-                                        <div class="small text-muted mb-1">
-                                            <i class="bi bi-envelope me-1"></i> {{ user.email|default:"Sin email" }}
-                                        </div>
-                                        <div class="small text-muted">
-                                            <i class="bi bi-telephone me-1"></i> {{ user.phone|default:"Sin teléfono" }}
-                                        </div>
-                                    </div>
-                                    <form method="POST" action="{% url 'add_team_member' team.id %}" class="d-flex gap-2 mt-auto">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="user_id" value="{{ user.id }}">
-                                        <select name="role_in_team" class="form-select form-select-sm flex-grow-1">
-                                            {% for value,label in role_choices %}
-                                            <option value="{{ value }}" {% if "ATLETA" in value %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-success rounded-circle" style="width: 32px; height: 32px;">
-                                            <i class="bi bi-plus-lg"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                  </td>
+                  <td class="text-center text-muted small d-none d-md-table-cell">
+                    {{ membership.date_joined|date:"d/m/Y" }}
+                  </td>
+                  <td class="text-center">
+                    <form method="post" action="{% url 'change_team_role' membership.id %}"
+                          class="d-flex gap-1 align-items-center justify-content-center">
+                      {% csrf_token %}
+                      <select name="role_in_team" class="form-select form-select-sm w-auto">
+                        {% for value, label in role_choices %}
+                          <option value="{{ value }}"
+                            {% if membership.role_in_team == value %}selected{% endif %}>
+                            {{ label }}
+                          </option>
                         {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="bi bi-person-slash display-1 text-muted opacity-50"></i>
-                        </div>
-                        <h5 class="text-muted mb-2">No hay usuarios disponibles</h5>
-                        <p class="text-muted mb-4">Todos los usuarios ya están en el equipo o no tienes alumnos asignados</p>
-                        <div class="d-flex gap-2 justify-content-center">
-                            <a href="{% url 'manage_athletes' %}" class="btn btn-primary">
-                                <i class="bi bi-person-plus me-1"></i> Crear nuevo alumno
-                            </a>
-                            <a href="{% url 'create_team_crew_member' team.id %}" class="btn btn-outline-primary">
-                                <i class="bi bi-person-plus me-1"></i> Crear Miembro
-                            </a>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+                      </select>
+                      <button type="submit" class="btn btn-sm btn-outline-primary" title="Guardar rol">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                    </form>
+                  </td>
+                  <td class="text-center">
+                    <form id="removeMember_{{ membership.id }}" method="post"
+                          action="{% url 'remove_team_member' membership.id %}" class="d-none">
+                      {% csrf_token %}
+                    </form>
+                    <button type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      data-confirm
+                      data-title="Quitar del equipo"
+                      data-body="¿Quitar a <strong>{{ membership.user.get_full_name }}</strong> del equipo <strong>{{ team.name }}</strong>?"
+                      data-form="removeMember_{{ membership.id }}"
+                      data-variant="danger">
+                      <i class="bi bi-person-dash"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-people display-4 text-muted d-block mb-3"></i>
+            <h5 class="text-muted mb-2">No hay miembros activos</h5>
+            <button class="btn btn-primary btn-sm mt-2"
+                    onclick="bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-available')).show()">
+              <i class="bi bi-person-plus me-1"></i>Agregar miembros
+            </button>
+          </div>
+          {% endif %}
         </div>
-
+      </div>
     </div>
 
+    <!-- TAB PENDIENTES -->
+    {% if pending_members %}
+    <div class="tab-pane fade" id="pending-pane">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+          <h6 class="mb-0 fw-bold text-warning">
+            <i class="bi bi-clock-fill me-2"></i>Solicitudes pendientes
+          </h6>
+          <span class="badge bg-warning rounded-pill">{{ pending_members|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">#</th>
+                  <th>Solicitante</th>
+                  <th class="text-center">Rol</th>
+                  <th class="text-center d-none d-md-table-cell">Fecha</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for membership in pending_members %}
+                <tr>
+                  <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle bg-warning text-dark d-flex align-items-center
+                                  justify-content-center flex-shrink-0 fw-bold"
+                           style="width:38px;height:38px;">
+                        {{ membership.user.get_full_name|first|upper }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ membership.user.get_full_name }}</div>
+                        <small class="text-muted">@{{ membership.user.username }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-2 py-1">
+                      {{ membership.role_in_team }}
+                    </span>
+                  </td>
+                  <td class="text-center text-muted small d-none d-md-table-cell">
+                    {{ membership.date_joined|date:"d/m/Y" }}
+                  </td>
+                  <td class="text-center">
+                    <div class="d-flex gap-2 justify-content-center">
+                      <form method="post" action="{% url 'add_team_member' team.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ membership.user.id }}">
+                        <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill">
+                          <i class="bi bi-check-lg me-1"></i>Aceptar
+                        </button>
+                      </form>
+                      <form id="rejectMember_{{ membership.id }}" method="post"
+                            action="{% url 'remove_team_member' membership.id %}" class="d-none">
+                        {% csrf_token %}
+                      </form>
+                      <button type="button"
+                        class="btn btn-sm btn-outline-danger rounded-pill"
+                        data-confirm
+                        data-title="Rechazar solicitud"
+                        data-body="¿Rechazar la solicitud de <strong>{{ membership.user.get_full_name }}</strong>?"
+                        data-form="rejectMember_{{ membership.id }}"
+                        data-variant="danger">
+                        <i class="bi bi-x-lg me-1"></i>Rechazar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- TAB INACTIVOS -->
+    {% if inactive_members %}
+    <div class="tab-pane fade" id="inactive-pane">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+          <h6 class="mb-0 fw-bold text-secondary">
+            <i class="bi bi-person-x-fill me-2"></i>Miembros inactivos
+          </h6>
+          <span class="badge bg-secondary rounded-pill">{{ inactive_members|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">#</th>
+                  <th>Miembro</th>
+                  <th class="text-center">Último rol</th>
+                  <th class="text-center d-none d-md-table-cell">Fecha salida</th>
+                  <th class="text-center">Reactivar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for membership in inactive_members %}
+                <tr class="text-muted">
+                  <td class="ps-4">{{ forloop.counter }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle bg-secondary text-white d-flex align-items-center
+                                  justify-content-center flex-shrink-0 fw-bold"
+                           style="width:38px;height:38px;">
+                        {{ membership.user.get_full_name|first|upper }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ membership.user.get_full_name }}</div>
+                        <small>@{{ membership.user.username }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1">
+                      {{ membership.role_in_team }}
+                    </span>
+                  </td>
+                  <td class="text-center small d-none d-md-table-cell">
+                    {{ membership.end_date|date:"d/m/Y"|default:"—" }}
+                  </td>
+                  <td class="text-center">
+                    <form method="post" action="{% url 'add_team_member' team.id %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="user_id" value="{{ membership.user.id }}">
+                      <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
+                      <button type="submit" class="btn btn-sm btn-outline-success rounded-pill">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Reactivar
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- TAB AGREGAR -->
+    <div class="tab-pane fade" id="available-pane">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+          <h6 class="mb-0 fw-bold text-success">
+            <i class="bi bi-person-plus-fill me-2"></i>Usuarios disponibles
+          </h6>
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-success rounded-pill">{{ available_users|length }}</span>
+            <a href="{% url 'create_team_crew_member' team.id %}"
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-person-badge me-1"></i>Crear miembro nuevo
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if available_users %}
+          <div class="row g-3">
+            {% for user in available_users %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card border h-100">
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-info text-white d-flex align-items-center
+                                justify-content-center flex-shrink-0 fw-bold"
+                         style="width:44px;height:44px;">
+                      {{ user.get_full_name|first|upper }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
+                      <small class="text-muted">@{{ user.username }}</small>
+                      <div class="d-flex flex-wrap gap-1 mt-1">
+                        {% for role in user.roles.all %}
+                          <span class="badge bg-info bg-opacity-10 text-info border border-info"
+                                style="font-size:.7rem;">{{ role.name }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="small text-muted mb-3 flex-grow-1">
+                    <div><i class="bi bi-envelope me-1"></i>{{ user.email|default:"Sin email" }}</div>
+                    {% if user.phone %}
+                      <div><i class="bi bi-telephone me-1"></i>{{ user.phone }}</div>
+                    {% endif %}
+                  </div>
+                  <form method="post" action="{% url 'add_team_member' team.id %}"
+                        class="d-flex gap-2 mt-auto">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <select name="role_in_team" class="form-select form-select-sm flex-grow-1">
+                      {% for value, label in role_choices %}
+                        <option value="{{ value }}"
+                          {% if value == "ATLETA" %}selected{% endif %}>
+                          {{ label }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success flex-shrink-0"
+                            title="Agregar al equipo">
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-person-slash display-4 text-muted d-block mb-3"></i>
+            <h5 class="text-muted mb-2">No hay usuarios disponibles</h5>
+            <p class="text-muted small mb-4">
+              Todos tus usuarios ya están en este equipo, o aún no tienes usuarios asignados.
+            </p>
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+              <a href="{% url 'manage_athletes' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus me-1"></i>Crear atleta
+              </a>
+              <a href="{% url 'create_team_crew_member' team.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-person-badge me-1"></i>Crear miembro nuevo
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
+<!-- MODAL CONFIRMACIÓN -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="confirmModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2 pb-1">
+        <p class="text-muted mb-0" id="confirmModalBody"></p>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmModalBtn">
+          <i class="bi bi-person-dash me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Activar tabs de Bootstrap
-        var triggerTabList = [].slice.call(document.querySelectorAll('#membersTab button'));
-        triggerTabList.forEach(function (triggerEl) {
-            var tabTrigger = new bootstrap.Tab(triggerEl);
-            triggerEl.addEventListener('click', function (event) {
-                event.preventDefault();
-                tabTrigger.show();
-                
-                // Guardar la pestaña activa en localStorage
-                localStorage.setItem('activeTeamTab', event.target.id);
-            });
-        });
-        
-        // Recuperar pestaña activa del localStorage
-        var activeTabId = localStorage.getItem('activeTeamTab');
-        if (activeTabId) {
-            var activeTab = document.getElementById(activeTabId);
-            if (activeTab) {
-                var tab = new bootstrap.Tab(activeTab);
-                tab.show();
-            }
-        }
-        
-        // Hacer que los botones de "Agregar miembros" funcionen
-        var addMemberButtons = document.querySelectorAll('[href="#available-pane"]');
-        addMemberButtons.forEach(function(button) {
-            button.addEventListener('click', function(e) {
-                if (this.getAttribute('href') === '#available-pane') {
-                    e.preventDefault();
-                    var availableTab = document.getElementById('available-tab');
-                    if (availableTab) {
-                        var tab = new bootstrap.Tab(availableTab);
-                        tab.show();
-                    }
-                }
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Modal de confirmación
+  const modalEl    = document.getElementById('confirmModal');
+  const modal      = new bootstrap.Modal(modalEl);
+  const titleEl    = document.getElementById('confirmModalTitle');
+  const bodyEl     = document.getElementById('confirmModalBody');
+  const confirmBtn = document.getElementById('confirmModalBtn');
+  let pendingFormId = null;
+
+  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      titleEl.textContent = this.dataset.title || 'Confirmar';
+      bodyEl.innerHTML    = this.dataset.body  || '¿Estás seguro?';
+      pendingFormId       = this.dataset.form;
+      modal.show();
     });
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    if (pendingFormId) document.getElementById(pendingFormId)?.submit();
+    modal.hide();
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    pendingFormId = null;
+  });
+
+  // Persistir tab activa por equipo usando sessionStorage
+  const TAB_KEY = 'activeTeamMembersTab_{{ team.id }}';
+
+  document.querySelectorAll('#membersTab button[data-bs-toggle="tab"]').forEach(function (btn) {
+    btn.addEventListener('shown.bs.tab', function (e) {
+      sessionStorage.setItem(TAB_KEY, e.target.id);
+    });
+  });
+
+  const savedTab = sessionStorage.getItem(TAB_KEY);
+  if (savedTab) {
+    const tabEl = document.getElementById(savedTab);
+    if (tabEl) bootstrap.Tab.getOrCreateInstance(tabEl).show();
+  }
+
+});
 </script>
 {% endblock %}

@@ -10,7 +10,10 @@ from orders.services.preconditions import can_submit_order
 from orders.services.validators import OrderBaseValidator
 from orders.services.validators import OrderMeasurementsValidator
 from orders.services.contactinfo import OrderContactValidator
-
+from teams.models import UserTeamMembership
+from orders.services.measurements.MeasurementLifecycleService import (
+    MeasurementLifecycleService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +27,6 @@ class OrderStateService:
     # Efectos secundarios por cada transición
     STATE_EFFECTS = {
         "DESIGN_APPROVED": {
-            "measurements_locked": True,
-            "locked_at": True,  # True significa usar timezone.now()
             "design_approved_by": "user",
             "design_approved_at": True,
         },
@@ -69,7 +70,7 @@ class OrderStateService:
         validation_method = getattr(cls, f"_validate_to_{to_status.lower()}", None)
 
         if validation_method:
-            validation_method(order)
+            validation_method(order, user=user)
 
     @classmethod
     def _apply_state_effects(cls, order, to_status, user, notes, extra_kwargs):
@@ -106,14 +107,10 @@ class OrderStateService:
     @classmethod
     @transaction.atomic
     def transition(cls, order, to_status, user, notes="", **kwargs):
-        # ── Paso 1: lock solo sobre la tabla Order ──────────────────────
-        Order.objects.select_for_update().filter(pk=order.pk).get()
-
-        # ── Paso 2: fetch completo con relaciones SIN select_for_update ─
         order = (
-            Order.objects.select_related("owner_team", "owner_user")
+            Order.objects.select_for_update(of=("self",))
+            .select_related("owner_team", "owner_user")
             .prefetch_related(
-                "items",
                 "items__product",
                 "items__athletes__measurements",
                 "design_images",
@@ -138,23 +135,25 @@ class OrderStateService:
 
     @classmethod
     def _persist_transition(cls, order):
+        # Campos base siempre guardados
+        base_fields = {"status", "updated_at"}
+
+        # Agregar campos que STATE_EFFECTS puede haber tocado
+        effect_fields = set(cls.STATE_EFFECTS.get(order.status, {}).keys())
+
+        # Normalizar: FKs necesitan _id
+        normalized = set()
+        for f in effect_fields:
+            if hasattr(order, f"{f}_id"):
+                normalized.add(f"{f}_id")
+            else:
+                normalized.add(f)
+
+        # CORRECCIÓN
+        extra = {"cancelled_reason"} if order.status == "CANCELLED" else set()
+        all_fields = list(base_fields | normalized | extra)
         order._allow_status_change = True
-        order.save(
-            update_fields=[
-                "status",
-                "updated_at",
-                "measurements_locked",
-                "locked_at",
-                "design_approved_by",
-                "design_approved_at",
-                "production_started_at",
-                "delivered_at",
-                "closed",
-                "cancelled_at",
-                "cancelled_by",
-                "cancelled_reason",
-            ]
-        )
+        order.save(update_fields=all_fields)
 
     @classmethod
     def _can_user_transition(cls, user, order, to_status):
@@ -225,9 +224,8 @@ class OrderStateService:
         return True
 
     @classmethod
-    def _validate_to_pending(cls, order):
-        # ── Validaciones de contenido (ya existen) ──
-        order.validate_order_ready(order)
+    def _validate_to_pending(cls, order, user=None):
+        Order.validate_order_ready(order)
 
         for item in order.items.select_related("product").all():
             if order.order_type == "TEAM":
@@ -247,17 +245,18 @@ class OrderStateService:
                 {"blocking_issues": [issue.message for issue in issues]}
             )
 
-        # ── Fecha requerida para confirmar ──────────────────────────────
-        if not order.freeze_payment_date:
+        # freeze_payment_date: solo si la orden requiere diseño personalizado
+        items = list(order.items.select_related("product"))
+        requires_design = any(item.product.requires_design for item in items)
+
+        if requires_design and not order.freeze_payment_date:
             raise ValidationError(
-                "Debe registrarse el pago de congelación antes de enviar la orden."
+                "Esta orden requiere diseño personalizado. "
+                "Debe registrarse el pago de congelación antes de enviar."
             )
 
     @classmethod
-    def _validate_to_design_approved(cls, order):
-
-        from teams.models import UserTeamMembership
-
+    def _validate_to_design_approved(cls, order, user=None):
         items = list(
             order.items.select_related("product").prefetch_related("athletes__athlete")
         )
@@ -350,8 +349,10 @@ class OrderStateService:
         if requires_design:
             OrderDesignValidator.validate(order)
 
+        MeasurementLifecycleService.lock(order, user=user)
+
     @classmethod
-    def _validate_to_in_production(cls, order):
+    def _validate_to_in_production(cls, order, user=None):
         items = list(order.items.select_related("product"))
 
         if not items:
@@ -365,33 +366,42 @@ class OrderStateService:
         requires_measurements = any(
             item.product.requires_measurements for item in items
         )
-        if requires_measurements and not order.measurements_locked:
-            raise ValidationError("Las medidas deben estar bloqueadas")
+        if requires_measurements:
+            if not order.measurements_locked:
+                raise ValidationError("Las medidas deben estar bloqueadas")
+            if not order.measurements_due_date:
+                raise ValidationError(
+                    "Debe establecerse la fecha límite de entrega de medidas."
+                )
 
-        # ── Fechas requeridas para iniciar producción ────────────────────
-        if not order.measurements_due_date:
+        has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+        if has_uniforms:
+            if not order.uniform_delivery_date:
+                raise ValidationError(
+                    "Debe establecerse la fecha de entrega del uniforme antes de iniciar producción."
+                )
+
+        # first_payment_date: requerido para TODA orden sin excepción
+        if not order.first_payment_date:
             raise ValidationError(
-                "Debe establecerse la fecha límite de entrega de medidas."
+                "Debe registrarse la fecha del primer pago antes de iniciar producción."
             )
-
-        if not order.uniform_delivery_date:
-            raise ValidationError(
-                "Debe establecerse la fecha de entrega del uniforme antes de iniciar producción."
-            )
-
-        # La regla measurements_due_date <= uniform_delivery_date
-        # ya la valida Order.clean() cuando el staff edita las fechas.
-        # Aquí solo verificamos que ambas existan.
 
     @classmethod
-    def _validate_to_delivered(cls, order):
-        # ── Fecha requerida para marcar como entregada ───────────────────
-        if not order.final_payment_date:
+    def _validate_to_delivered(cls, order, user=None):
+        items = list(order.items.select_related("product"))
+
+        # ── final_payment solo si la orden tuvo diseño (fue una orden custom) ──
+        requires_design = any(item.product.requires_design for item in items)
+
+        if requires_design and not order.final_payment_date:
             raise ValidationError(
                 "Debe registrarse el pago final antes de marcar como entregada."
             )
 
-        if not order.uniform_delivery_date:
+        has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+
+        if has_uniforms and not order.uniform_delivery_date:
             raise ValidationError("Debe establecer la fecha de entrega del uniforme.")
 
     @classmethod

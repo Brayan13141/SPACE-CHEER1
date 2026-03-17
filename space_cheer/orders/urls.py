@@ -14,6 +14,9 @@ urlpatterns = [
     path("items/<int:item_id>/", views.order_item_detail, name="order_item_detail"),
     # ================================== Edit order ============================
     path("<int:order_id>/edit/", views.order_edit, name="edit_order"),
+    path(
+        "items/<int:item_id>/delete/", views.order_item_delete, name="order_item_delete"
+    ),
     # ================================== Contact info for order ============================
     path(
         "<int:order_id>/contact/",

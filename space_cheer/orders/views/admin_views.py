@@ -1,5 +1,5 @@
 import logging
-
+from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError
 from django.db.models import Count, Prefetch
@@ -16,6 +16,7 @@ from orders.models import (
 )
 from orders.services.state import OrderStateService
 from orders.forms import OrderDatesForm
+from django.db.models import Q, Sum
 
 logger = logging.getLogger(__name__)
 
@@ -23,26 +24,75 @@ logger = logging.getLogger(__name__)
 @staff_member_required
 def admin_order_list(request):
 
-    status_filter = request.GET.get("status")
+    status_filter = request.GET.get("status", "")
+    type_filter = request.GET.get("type", "")
+    search = request.GET.get("q", "").strip()
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
 
     orders = (
-        Order.objects.select_related(
-            "owner_user",
-            "owner_team",
-            "created_by",
-        )
+        Order.objects.select_related("owner_user", "owner_team", "created_by")
         .prefetch_related(
-            Prefetch(
-                "items",
-                queryset=OrderItem.objects.select_related("product"),
-            )
+            Prefetch("items", queryset=OrderItem.objects.select_related("product"))
         )
-        .annotate(items_count=Count("items"))
+        .annotate(
+            items_count=Count("items", distinct=True),
+            total_amount=Sum("items__subtotal"),
+        )
         .order_by("-created_at")
     )
 
+    # ── Filtros ──────────────────────────────────────────────────────────
     if status_filter:
         orders = orders.filter(status=status_filter)
+
+    if type_filter:
+        orders = orders.filter(order_type=type_filter)
+
+    if search:
+        orders = orders.filter(
+            Q(owner_user__first_name__icontains=search)
+            | Q(owner_user__last_name__icontains=search)
+            | Q(owner_user__email__icontains=search)
+            | Q(owner_team__name__icontains=search)
+            | Q(created_by__email__icontains=search)
+            | Q(id__icontains=search)
+        )
+
+    if date_from:
+        try:
+            orders = orders.filter(
+                created_at__date__gte=datetime.strptime(date_from, "%Y-%m-%d").date()
+            )
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            orders = orders.filter(
+                created_at__date__lte=datetime.strptime(date_to, "%Y-%m-%d").date()
+            )
+        except ValueError:
+            pass
+
+    # ── Stats por estado (siempre sobre el total sin filtrar) ─────────────
+    all_orders = Order.objects.all()
+    stats = {
+        "total": all_orders.count(),
+        "draft": all_orders.filter(status="DRAFT").count(),
+        "pending": all_orders.filter(status="PENDING").count(),
+        "design_approved": all_orders.filter(status="DESIGN_APPROVED").count(),
+        "in_production": all_orders.filter(status="IN_PRODUCTION").count(),
+        "delivered": all_orders.filter(status="DELIVERED").count(),
+        "cancelled": all_orders.filter(status="CANCELLED").count(),
+    }
+
+    # ── Órdenes que necesitan atención del admin ──────────────────────────
+    needs_attention = orders.filter(
+        Q(status="PENDING", freeze_payment_date__isnull=True)
+        | Q(status="PENDING", first_payment_date__isnull=True)
+        | Q(status="IN_PRODUCTION", uniform_delivery_date__isnull=True)
+    ).values_list("id", flat=True)
 
     return render(
         request,
@@ -50,7 +100,13 @@ def admin_order_list(request):
         {
             "orders": orders,
             "status_filter": status_filter,
+            "type_filter": type_filter,
+            "search": search,
+            "date_from": date_from,
+            "date_to": date_to,
             "status_choices": Order.STATUS_CHOICES,
+            "stats": stats,
+            "needs_attention": set(needs_attention),
         },
     )
 
@@ -85,23 +141,49 @@ def admin_order_detail(request, order_id):
                             ),
                             "customization",
                         ),
-                    )
+                    ),
                 ),
             ),
             "design_images",
-            Prefetch(
-                "orderlog_set",
-                queryset=OrderLog.objects.select_related("user"),
-            ),
+            Prefetch("orderlog_set", queryset=OrderLog.objects.select_related("user")),
         ),
         pk=order_id,
     )
 
-    dates_form = OrderDatesForm(instance=order)
+    # ── Flags condicionales basados en los productos de la orden ──────────
+    items = list(order.items.all())
 
+    order_flags = {
+        "requires_design": any(i.product.requires_design for i in items),
+        "requires_measurements": any(i.product.requires_measurements for i in items),
+        "requires_athletes": any(i.product.requires_athletes for i in items),
+        "has_uniforms": any(i.product.product_type == "UNIFORM" for i in items),
+        "has_items": bool(items),
+    }
+
+    # ── Progreso de medidas ───────────────────────────────────────────────
+    measurements_summary = None
+    if order_flags["requires_measurements"]:
+        total_athletes = 0
+        complete_athletes = 0
+        for item in items:
+            if item.product.requires_measurements:
+                for ai in item.athletes.all():
+                    total_athletes += 1
+                    if ai.has_complete_measurements():
+                        complete_athletes += 1
+        measurements_summary = {
+            "total": total_athletes,
+            "complete": complete_athletes,
+            "pending": total_athletes - complete_athletes,
+            "percent": int(
+                (complete_athletes / total_athletes * 100) if total_athletes else 0
+            ),
+        }
+
+    dates_form = OrderDatesForm(instance=order)
     available_transitions = OrderStateService.get_available_transitions(
-        order,
-        request.user,
+        order, request.user
     )
 
     return render(
@@ -109,9 +191,10 @@ def admin_order_detail(request, order_id):
         "orders/admin/order_detail.html",
         {
             "order": order,
-            # ← eliminado "items": order.items.all() — redundante con prefetch
             "dates_form": dates_form,
             "available_transitions": available_transitions,
+            "order_flags": order_flags,
+            "measurements_summary": measurements_summary,
         },
     )
 
@@ -128,6 +211,16 @@ def admin_upload_design(request, order_id):
 
         if not image:
             messages.error(request, "Debes subir una imagen.")
+            return redirect("orders:admin_order_detail", order_id=order.id)
+        ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
+        MAX_SIZE_MB = 10
+
+        if image.content_type not in ALLOWED_TYPES:
+            messages.error(request, "Solo se permiten imágenes JPG, PNG o WEBP.")
+            return redirect("orders:admin_order_detail", order_id=order.id)
+
+        if image.size > MAX_SIZE_MB * 1024 * 1024:
+            messages.error(request, f"El tamaño máximo permitido es {MAX_SIZE_MB} MB.")
             return redirect("orders:admin_order_detail", order_id=order.id)
 
         try:

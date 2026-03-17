@@ -1,66 +1,183 @@
 {% extends "core/base.html" %}
+{% load static %}
+
 {% block content %}
+<div class="container py-3 py-md-4">
 
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Productos</h2>
-
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-0">
+        <i class="bi bi-box-seam me-2 text-primary"></i>Productos
+      </h1>
+      <p class="text-muted mb-0">{{ products|length }} producto{{ products|length|pluralize:"s" }}</p>
+    </div>
     <a href="{% url 'products:select_template' %}" class="btn btn-primary">
-      + Nuevo producto
+      <i class="bi bi-plus-circle me-2"></i>Nuevo producto
     </a>
   </div>
 
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Tipo</th>
-        <th>Temporada</th>
-        <th>Precio base</th>
-        <th>Activo</th>
-        <th class="text-end">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for product in products %}
-        <tr>
-          <td>{{ product.name }}</td>
-          <td>{{ product.get_product_type_display }}</td>
-          <td>{{ product.season }}</td>
-          <td>${{ product.base_price }}</td>
-          <td>
-            {% if product.is_active %}
-              <span class="badge bg-success">Sí</span>
-            {% else %}
-              <span class="badge bg-secondary">No</span>
-            {% endif %}
-          </td>
-          <td class="text-end">
-            <a
-              href="{% url 'products:update_product' product.id %}"
-              class="btn btn-sm btn-outline-primary"
-            >
-              Editar
-            </a>
-            {% if product.is_active %}
-            <a
-              href="{% url 'products:delete_product' product.id %}"
-              class="btn btn-sm btn-outline-danger"
-            >
-              Desactivar
-            </a>
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="6" class="text-center text-muted">
-            No hay productos registrados
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+  <!-- FILTROS -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
 
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold mb-1">
+            <i class="bi bi-search me-1"></i>Buscar
+          </label>
+          <input type="text" name="q" class="form-control form-control-sm"
+                 placeholder="Nombre del producto..." value="{{ search }}">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">Tipo</label>
+          <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for value, label in type_choices %}
+              <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold mb-1">Estado</label>
+          <select name="active" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            <option value="1" {% if active_filter == "1" %}selected{% endif %}>Activos</option>
+            <option value="0" {% if active_filter == "0" %}selected{% endif %}>Inactivos</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-search"></i>
+          </button>
+          <a href="{% url 'products:list_products' %}" class="btn btn-outline-secondary btn-sm"
+             title="Limpiar">
+            <i class="bi bi-x-lg"></i>
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Nombre</th>
+            <th>Tipo</th>
+            <th>Temporada</th>
+            <th class="text-center">Estrategia</th>
+            <th class="text-center">Config.</th>
+            <th class="text-end">Precio</th>
+            <th class="text-center">Estado</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr class="{% if not product.is_active %}table-secondary{% endif %}">
+
+            <td class="ps-4">
+              <div class="d-flex align-items-center gap-2">
+                {% if product.image %}
+                  <img src="{{ product.image.url }}" width="36" height="36"
+                       class="rounded object-fit-cover border">
+                {% else %}
+                  <div class="bg-light border rounded d-flex align-items-center
+                              justify-content-center" style="width:36px;height:36px;">
+                    <i class="bi bi-image text-muted small"></i>
+                  </div>
+                {% endif %}
+                <div>
+                  <div class="fw-semibold">{{ product.name }}</div>
+                  <div class="text-muted" style="font-size:.75rem;">
+                    {{ product.get_usage_type_display }}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <span class="badge bg-light text-dark border">
+                {{ product.get_product_type_display }}
+              </span>
+            </td>
+
+            <td class="text-muted small">{{ product.season.name }}</td>
+
+            <td class="text-center">
+              <span class="badge
+                {% if product.size_strategy == 'MEASUREMENTS' %}bg-info
+                {% elif product.size_strategy == 'STANDARD' %}bg-primary
+                {% else %}bg-secondary{% endif %}">
+                {{ product.get_size_strategy_display }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              {% if product.is_configured %}
+                <i class="bi bi-check-circle-fill text-success" title="Configurado"></i>
+              {% else %}
+                <i class="bi bi-exclamation-circle-fill text-warning"
+                   title="Sin configurar"></i>
+              {% endif %}
+            </td>
+
+            <td class="text-end fw-semibold">${{ product.base_price|floatformat:2 }}</td>
+
+            <td class="text-center">
+              {% if product.is_active %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+              {% endif %}
+            </td>
+
+            <td class="text-end pe-4">
+              <a href="{% url 'products:product_detail' product.id %}"
+                 class="btn btn-sm btn-outline-primary"
+                 data-bs-toggle="tooltip" title="Ver / Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+            </td>
+
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+              <h5>No hay productos registrados</h5>
+              {% if search or type_filter or active_filter %}
+                <a href="{% url 'products:list_products' %}"
+                   class="btn btn-outline-secondary btn-sm mt-2">
+                  Limpiar filtros
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+    new bootstrap.Tooltip(el);
+  });
+});
+</script>
 {% endblock %}

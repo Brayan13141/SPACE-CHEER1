@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import Csv, config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,14 +21,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-%z%&$*9ki(qd75m$qk4u9f@eywpl7wp+9%e^+*x9%%-mhz!)@="
+SECRET_KEY = config("SECRET_KEY")
+CSRF_TRUSTED_ORIGINS = [
+    "https://9389-2806-102e-25-1c6-8d48-be36-901b-2fdf.ngrok-free.app",
+]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = config("DEBUG", default=False, cast=bool)
 AUTH_USER_MODEL = "accounts.User"
 
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost", cast=Csv())
 SITE_ID = 1
 
 
@@ -48,6 +52,9 @@ INSTALLED_APPS = [
     "commerce",
     "events",
     "social",
+    "orders",
+    "products",
+    #
     "widget_tweaks",
     # Allauth
     "allauth",
@@ -70,8 +77,10 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_RATE_LIMITS = {
     "login_failed": "5/300s",  # 5 intentos en 300 segundos
 }
-
-
+# ===============IMAGENES==================================
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+# =================================================================
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirige al home después de logout
@@ -145,8 +154,12 @@ WSGI_APPLICATION = "space_cheer.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST", default="localhost"),
+        "PORT": config("DB_PORT", default="5432"),
     }
 }
 

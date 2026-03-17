@@ -45,7 +45,24 @@ class User(AbstractUser):
         blank=True,
         validators=[curp_validator],
     )
-    phone = models.CharField(max_length=15, blank=True)
+
+    email = models.EmailField(
+        verbose_name="email address",
+        max_length=254,
+        unique=True,  # Email único a nivel de base de datos
+        error_messages={"unique": "Ya existe un usuario con este correo electrónico."},
+    )
+
+    phone = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,  #  Permite NULL para múltiples usuarios sin teléfono
+        unique=True,  #  Si tiene valor, debe ser único
+        error_messages={"unique": "Ya existe un usuario con este número de teléfono."},
+    )
+
+    # ═══════════════════════════════════════════════════════════
+
     birth_date = models.DateField(null=True, blank=True)
     gender = models.CharField(
         max_length=1,
@@ -61,9 +78,11 @@ class User(AbstractUser):
         default=False
     )  # Marca cuando ya pasó onboarding
 
-    # Regex oficial de la CURP mexicana
-
     def clean(self):
+        """
+        Validación personalizada a nivel de modelo
+        """
+        # Regex oficial de la CURP mexicana
         CURP_REGEX = re.compile(
             r"^[A-Z]{4}"  # 4 letras iniciales
             r"\d{6}"  # fecha YYMMDD
@@ -73,6 +92,49 @@ class User(AbstractUser):
             r"[A-Z0-9]"  # homoclave
             r"\d$"  # dígito verificador
         )
+
+        if self.email:
+            # Normalizar email (lowercase y trim)
+            self.email = self.email.lower().strip()
+
+            # Verificar duplicados excluyendo la instancia actual
+            if User.objects.filter(email=self.email).exclude(pk=self.pk).exists():
+                raise ValidationError(
+                    {"email": "Ya existe un usuario con este correo electrónico."}
+                )
+
+        if self.phone:
+            # Normalizar teléfono (eliminar espacios, guiones y paréntesis)
+            self.phone = (
+                self.phone.strip()
+                .replace(" ", "")
+                .replace("-", "")
+                .replace("(", "")
+                .replace(")", "")
+            )
+
+            # Validar que solo contenga dígitos
+            if not self.phone.isdigit():
+                raise ValidationError(
+                    {"phone": "El teléfono solo debe contener números."}
+                )
+
+            # Validar longitud (10 dígitos para México)
+            if len(self.phone) != 10:
+                raise ValidationError(
+                    {"phone": "El teléfono debe tener exactamente 10 dígitos."}
+                )
+
+            # Verificar duplicados excluyendo la instancia actual
+            if User.objects.filter(phone=self.phone).exclude(pk=self.pk).exists():
+                raise ValidationError(
+                    {"phone": "Ya existe un usuario con este número de teléfono."}
+                )
+
+        # ═══════════════════════════════════════════════════════════
+        # VALIDACIÓN DE CURP (código original)
+        # ═══════════════════════════════════════════════════════════
+
         if not self.pk:
             return super().clean()
 
@@ -93,6 +155,14 @@ class User(AbstractUser):
             self.curp = curp  # Normalizar a mayúsculas
 
         super().clean()
+
+    def save(self, *args, **kwargs):
+        """
+        Override save para ejecutar clean() automáticamente
+        """
+        # Ejecuta validaciones antes de guardar
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     @property
     def is_headcoach(self):
