@@ -115,7 +115,14 @@ class Order(models.Model):
         default="DRAFT",
     )
 
-    # Control de medidas y aprobación de diseño
+    # | measurements_open | measurements_locked | Resultado            |
+    # | ----------------- | ------------------- | -------------------- |
+    # | True              | False               | Editable             |
+    # | False             | False               | Cerrado temporal     |
+    # | False             | True                | Bloqueado definitivo |
+
+    measurements_open = models.BooleanField(default=True)
+    # Si las medidas están bloqueadas, no se pueden modificar ni agregar nuevas
     measurements_locked = models.BooleanField(default=False)
     locked_at = models.DateTimeField(null=True, blank=True)
     design_approved_by = models.ForeignKey(
@@ -332,9 +339,16 @@ class Order(models.Model):
         return self.status in ["DRAFT", "PENDING"] and not self.closed
 
     def can_edit_measurements(self):
-        return not self.measurements_locked
+        if self.measurements_locked:
+            return False
 
-    # orders/models.py — dentro de class Order
+        if not self.measurements_open:
+            return False
+
+        if not self.can_edit_general():
+            return False
+
+        return True
 
     def can_edit_items(self):
         """La orden permite agregar/eliminar items."""
@@ -756,8 +770,8 @@ class OrderItemMeasurement(models.Model):
         """
         order = self.athlete_item.order_item.order
 
-        if order.measurements_locked:
-            raise ValidationError("Las medidas están bloqueadas para esta orden.")
+        if not order.can_edit_measurements():
+            raise ValidationError("Las medidas no pueden editarse")
 
         product = self.athlete_item.order_item.product
 
@@ -768,15 +782,6 @@ class OrderItemMeasurement(models.Model):
             raise ValidationError("Campo no pertenece al producto")
 
     def save(self, *args, **kwargs):
-
-        order = self.athlete_item.order_item.order
-
-        if not order.can_edit_general():
-            raise ValidationError("No se puede modificar en esta etapa")
-
-        if order.measurements_locked:
-            raise ValidationError("No se pueden modificar medidas bloqueadas.")
-
         if not self.field_name:
             self.field_name = self.field.name
             self.field_unit = self.field.unit
