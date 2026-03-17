@@ -591,14 +591,14 @@
       <i class="bi bi-lightning-charge me-2"></i>Acciones disponibles
     </h4>
   </div>
-
-  {% if available_transitions %}
-    {% if blocking_issues %}
+{% if blocking_issues %}
       <div class="alert alert-warning mb-3">
         <i class="bi bi-lock me-2"></i>
         <strong>Resuelve los problemas señalados arriba</strong> para poder avanzar.
       </div>
     {% endif %}
+  {% if available_transitions and not blocking_issues %}
+    
     <div class="row g-2">
       {% for status in available_transitions %}
         <div class="col-12 col-md-6 col-lg-4">
@@ -624,6 +624,7 @@
   {% endif %}
 
 </div>
+
 
 
 {% if can_edit %}
