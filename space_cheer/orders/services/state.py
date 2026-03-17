@@ -10,7 +10,10 @@ from orders.services.preconditions import can_submit_order
 from orders.services.validators import OrderBaseValidator
 from orders.services.validators import OrderMeasurementsValidator
 from orders.services.contactinfo import OrderContactValidator
-
+from teams.models import UserTeamMembership
+from orders.services.measurements.MeasurementLifecycleService import (
+    MeasurementLifecycleService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +27,6 @@ class OrderStateService:
     # Efectos secundarios por cada transición
     STATE_EFFECTS = {
         "DESIGN_APPROVED": {
-            "measurements_locked": True,
-            "locked_at": True,  # True significa usar timezone.now()
             "design_approved_by": "user",
             "design_approved_at": True,
         },
@@ -69,7 +70,7 @@ class OrderStateService:
         validation_method = getattr(cls, f"_validate_to_{to_status.lower()}", None)
 
         if validation_method:
-            validation_method(order)
+            validation_method(order, user=user)
 
     @classmethod
     def _apply_state_effects(cls, order, to_status, user, notes, extra_kwargs):
@@ -106,14 +107,10 @@ class OrderStateService:
     @classmethod
     @transaction.atomic
     def transition(cls, order, to_status, user, notes="", **kwargs):
-        # ── Paso 1: lock solo sobre la tabla Order ──────────────────────
-        Order.objects.select_for_update().filter(pk=order.pk).get()
-
-        # ── Paso 2: fetch completo con relaciones SIN select_for_update ─
         order = (
-            Order.objects.select_related("owner_team", "owner_user")
+            Order.objects.select_for_update(of=("self",))
+            .select_related("owner_team", "owner_user")
             .prefetch_related(
-                "items",
                 "items__product",
                 "items__athletes__measurements",
                 "design_images",
@@ -152,7 +149,9 @@ class OrderStateService:
             else:
                 normalized.add(f)
 
-        all_fields = list(base_fields | normalized | {"cancelled_reason"})
+        # CORRECCIÓN
+        extra = {"cancelled_reason"} if order.status == "CANCELLED" else set()
+        all_fields = list(base_fields | normalized | extra)
         order._allow_status_change = True
         order.save(update_fields=all_fields)
 
@@ -225,7 +224,7 @@ class OrderStateService:
         return True
 
     @classmethod
-    def _validate_to_pending(cls, order):
+    def _validate_to_pending(cls, order, user=None):
         Order.validate_order_ready(order)
 
         for item in order.items.select_related("product").all():
@@ -257,10 +256,7 @@ class OrderStateService:
             )
 
     @classmethod
-    def _validate_to_design_approved(cls, order):
-
-        from teams.models import UserTeamMembership
-
+    def _validate_to_design_approved(cls, order, user=None):
         items = list(
             order.items.select_related("product").prefetch_related("athletes__athlete")
         )
@@ -353,8 +349,10 @@ class OrderStateService:
         if requires_design:
             OrderDesignValidator.validate(order)
 
+        MeasurementLifecycleService.lock(order, user=user)
+
     @classmethod
-    def _validate_to_in_production(cls, order):
+    def _validate_to_in_production(cls, order, user=None):
         items = list(order.items.select_related("product"))
 
         if not items:
@@ -390,7 +388,7 @@ class OrderStateService:
             )
 
     @classmethod
-    def _validate_to_delivered(cls, order):
+    def _validate_to_delivered(cls, order, user=None):
         items = list(order.items.select_related("product"))
 
         # ── final_payment solo si la orden tuvo diseño (fue una orden custom) ──
