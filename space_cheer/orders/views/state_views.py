@@ -26,22 +26,24 @@ def transition_order(request, order_id, to_status):
 @require_POST
 def admin_transition_order(request, order_id, to_status):
     """Transición para admin/staff."""
-    _do_transition(request, order_id, to_status)
+    _do_transition(request, order_id, to_status, is_admin=True)
     return redirect("orders:admin_order_detail", order_id=order_id)
 
 
-def _do_transition(request, order_id, to_status):
-    """Lógica común extraída para no duplicar código."""
+def _do_transition(request, order_id, to_status, is_admin=False):
+
+    qs = (
+        Order.objects.all()
+        if is_admin
+        else Order.objects.visible_for_user(request.user)
+    )
+    order = get_object_or_404(qs, pk=order_id)
+
     VALID_STATUSES = {s for s, _ in Order.STATUS_CHOICES}
 
     if to_status not in VALID_STATUSES:
         messages.error(request, "Estado inválido.")
         return
-
-    order = get_object_or_404(
-        Order.objects.visible_for_user(request.user),
-        pk=order_id,
-    )
 
     try:
         OrderStateService.transition(

@@ -212,6 +212,16 @@ def admin_upload_design(request, order_id):
         if not image:
             messages.error(request, "Debes subir una imagen.")
             return redirect("orders:admin_order_detail", order_id=order.id)
+        ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
+        MAX_SIZE_MB = 10
+
+        if image.content_type not in ALLOWED_TYPES:
+            messages.error(request, "Solo se permiten imágenes JPG, PNG o WEBP.")
+            return redirect("orders:admin_order_detail", order_id=order.id)
+
+        if image.size > MAX_SIZE_MB * 1024 * 1024:
+            messages.error(request, f"El tamaño máximo permitido es {MAX_SIZE_MB} MB.")
+            return redirect("orders:admin_order_detail", order_id=order.id)
 
         try:
             OrderDesignImage.objects.create(

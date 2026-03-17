@@ -122,9 +122,6 @@ def order_create(request):
                 contact_info.full_clean()
                 contact_info.save()
 
-                contact_info.full_clean()
-                contact_info.save()
-
         except ValidationError as e:
             return render(
                 request,
@@ -156,7 +153,7 @@ def order_edit(request, order_id):
         raise PermissionDenied("La orden no es editable.")
 
     if request.method == "POST":
-        order.design_notes = request.POST.get("design_notes", "")
+        order.design_notes = request.POST.get("design_notes", "").strip()[:5000]
         order.save(update_fields=["design_notes", "updated_at"])
 
         return redirect("orders:detail_order", order_id=order.id)
@@ -221,14 +218,9 @@ def order_contact_info(request, order_id):
 @login_required
 def order_detail(request, order_id):
 
-    order = (
+    order = get_object_or_404(
         Order.objects.visible_for_user(request.user)
-        .select_related(
-            "owner_user",
-            "owner_team",
-            "created_by",
-            "contact_info",
-        )
+        .select_related("owner_user", "owner_team", "created_by", "contact_info")
         .prefetch_related(
             "items__product",
             "items__size_variant",
@@ -237,8 +229,8 @@ def order_detail(request, order_id):
             "items__athletes__customization",
             "design_images",
             "orderlog_set",
-        )
-        .get(pk=order_id)
+        ),
+        pk=order_id,  # ← pk va acá, como kwarg separado
     )
 
     # Ambas fuentes producen OrderBlockingIssue — tipo uniforme
