@@ -49,6 +49,12 @@ def _generate_unique_username(base: str) -> str:
     return username
 
 
+def _validate_team_access(user, team):
+    if user.roles.filter(name="HEADCOACH").exists():
+        if team.coach != user:
+            raise PermissionDenied
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # AGREGAR MIEMBRO AL EQUIPO (usuario existente)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -108,86 +114,126 @@ def add_team_member(request, team_id):
 def create_team_crew_member(request, team_id):
 
     team = get_object_or_404(Team, id=team_id, is_active=True)
-
-    if request.user.roles.filter(name="HEADCOACH").exists():
-        if team.coach != request.user:
-            raise PermissionDenied
+    _validate_team_access(request.user, team)
 
     allowed_global_roles = Role.objects.filter(name__in=["COACH", "STAFF"])
+
     allowed_team_roles = [
         (value, label)
         for value, label in UserTeamMembership.ROLE_CHOICES
         if value != "ATLETA"
     ]
 
+    # ─────────────────────────────
+    # POST
+    # ─────────────────────────────
     if request.method == "POST":
+
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
         email = request.POST.get("email", "").strip().lower()
         global_role_id = request.POST.get("global_role")
         team_role = request.POST.get("team_role")
 
+        # Validación básica
         if not all([first_name, last_name, email, global_role_id, team_role]):
             messages.error(request, "Todos los campos son obligatorios.")
             return redirect("create_team_crew_member", team_id=team.id)
 
+        # Validar rol global
         global_role = get_object_or_404(
-            Role, id=global_role_id, name__in=["COACH", "STAFF"]
+            Role,
+            id=global_role_id,
+            name__in=["COACH", "STAFF"],
         )
 
+        # Validar rol de equipo
         if team_role not in dict(UserTeamMembership.ROLE_CHOICES):
             messages.error(request, "Rol de equipo inválido.")
             return redirect("create_team_crew_member", team_id=team.id)
 
-        with transaction.atomic():
+        try:
+            with transaction.atomic():
 
-            # Buscar por email — si ya existe, reutilizar
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={
-                    "username": _generate_unique_username(email),
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "is_active": True,
-                    "profile_completed": False,
-                },
-            )
+                # Buscar o crear usuario por email
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={
+                        "username": _generate_unique_username(email),
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "is_active": True,
+                        "profile_completed": False,
+                    },
+                )
 
-            # Solo actualizar password si es usuario nuevo
-            if created:
-                temp_password = _generate_temp_password()
-                user.set_password(temp_password)
-                user.save()
-            else:
-                temp_password = None  # ya tiene contraseña, no la pisamos
+                # ───────────────
+                # Usuario NUEVO
+                # ───────────────
+                if created:
+                    temp_password = _generate_temp_password()
+                    user.set_password(temp_password)
+                    user.save()
 
-            UserOwnership.objects.get_or_create(
-                owner=request.user,
-                user=user,
-                defaults={"is_active": True},
-            )
+                    messages.info(
+                        request,
+                        f"Usuario nuevo creado para {email}. "
+                        f"Se generó una contraseña temporal (envíala por canal seguro).",
+                    )
 
-            user.roles.add(global_role)
+                # ───────────────
+                # Usuario EXISTENTE
+                # ───────────────
+                else:
+                    temp_password = None
 
-            membership, _ = UserTeamMembership.objects.get_or_create(
-                user=user, team=team
-            )
-            membership.activate(role=team_role)
+                    # Detectar conflicto de nombre
+                    if user.first_name != first_name or user.last_name != last_name:
+                        messages.warning(
+                            request,
+                            f"El usuario ya existe como "
+                            f"{user.get_full_name()} y no se modificó con el nuevo nombre.",
+                        )
 
-        if created and temp_password:
+                # Ownership (relación coach → usuario)
+                UserOwnership.objects.get_or_create(
+                    owner=request.user,
+                    user=user,
+                    defaults={"is_active": True},
+                )
+
+                # Asignar rol global (sin duplicar)
+                if not user.roles.filter(id=global_role.id).exists():
+                    user.roles.add(global_role)
+
+                # Membership en equipo
+                membership, _ = UserTeamMembership.objects.get_or_create(
+                    user=user,
+                    team=team,
+                )
+
+                membership.activate(role=team_role)
+
+        except Exception as e:
+            messages.error(request, f"Error al crear miembro: {str(e)}")
+            return redirect("create_team_crew_member", team_id=team.id)
+
+        # Mensaje final
+        if created:
             messages.success(
                 request,
-                f"Crew creado: {user.get_full_name()} ({email}). "
-                f"Contraseña temporal: {temp_password} — compártela de forma segura.",
+                f"{user.get_full_name()} fue creado y agregado al equipo correctamente.",
             )
         else:
             messages.success(
-                request,
-                f"{user.get_full_name()} ya existía en el sistema y fue asignado al equipo.",
+                request, f"{user.get_full_name()} fue agregado al equipo correctamente."
             )
 
         return redirect("manage_team_members", team_id=team.id)
 
+    # ─────────────────────────────
+    # GET
+    # ─────────────────────────────
     return render(
         request,
         "coach/crew/create_crew_member.html",
