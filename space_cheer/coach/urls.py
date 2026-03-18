@@ -26,7 +26,7 @@ urlpatterns = [
     ),
     # Crew
     path(
-        "<int:team_id>/crew/",  # ← agregado / al final
+        "<int:team_id>/crew/addmember/",  # ← agregado / al final
         views.create_team_crew_member,
         name="create_team_crew_member",
     ),
