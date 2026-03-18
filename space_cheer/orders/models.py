@@ -336,7 +336,9 @@ class Order(models.Model):
             raise ValidationError("El tipo de orden no puede cambiarse una vez creada")
 
     def can_edit_general(self):
-        return self.status in ["DRAFT", "PENDING"] and not self.closed
+        return (
+            self.status in ["DRAFT", "PENDING", "DESIGN_APPROVED"] and not self.closed
+        )
 
     def can_edit_measurements(self):
         if self.measurements_locked:
