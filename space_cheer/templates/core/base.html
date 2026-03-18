@@ -273,12 +273,9 @@
     <!-- NAVBAR SUPERIOR FIJO -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
-            <!-- Botón para mostrar/ocultar sidebar principal en móvil -->
-            <button class="btn btn-outline-light me-2 d-lg-none mobile-sidebar-toggle" id="toggleMainSidebarMobile">
-                <i class="bi bi-list"></i>
-            </button>
+           
             
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard">
                 <i class="bi bi-stars me-2"></i>SPACE CHEER
             </a>
 
@@ -293,7 +290,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                      {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">
+                        <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
                             <i class="bi bi-house-door me-1"></i>Inicio
                         </a>
                     </li>
@@ -322,7 +319,7 @@
 
                     <!-- DROPDOWN DE EQUIPOS -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarTeams" role="button" 
+                        <a class="nav-link dropdown-toggle" href="" id="navbarTeams" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-people me-1"></i>Equipos
                             {% if team_notifications %}
@@ -411,7 +408,7 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarCommunity" role="button" 
+                        <a class="nav-link dropdown-toggle" href="" id="navbarCommunity" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-people me-1"></i>Comunidad
                         </a>
@@ -521,17 +518,6 @@
                     {% if user.is_authenticated %}with-main-sidebar{% endif %} 
                     {% if profile_section %}with-profile-sidebar{% endif %}"
              id="mainContent">
-            
-            <!-- Breadcrumbs (opcional por vista) -->
-            {% block breadcrumbs %}
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    {% block breadcrumb_items %}
-                    <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i></a></li>
-                    {% endblock %}
-                </ol>
-            </nav>
-            {% endblock %}
 
             <!-- System Messages -->
             {% if messages %}
@@ -595,8 +581,7 @@
                 <div class="col-md-3">
                     <h6>Contáctanos</h6>
                     <ul class="list-unstyled small">
-                        <li><i class="bi bi-envelope me-2"></i> info@spacecheer.com</li>
-                        <li><i class="bi bi-telephone me-2"></i> +1 234 567 890</li>
+                        <li><i class="bi bi-envelope me-2"></i> space.cheer.space@gmail.com</li>
                         <li class="mt-2">
                             <a href="#" class="text-light me-2"><i class="bi bi-facebook"></i></a>
                             <a href="#" class="text-light me-2"><i class="bi bi-instagram"></i></a>
@@ -632,7 +617,40 @@
         "{% static '/JS/CORE/particles-config.json' %}",
     );
    
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecciona todos los enlaces con href="#", href vacío, o que no tengan href (pero mejor limitar a #)
+    const placeholderLinks = document.querySelectorAll('a[href="#"], a[href=""]');
 
+    placeholderLinks.forEach(link => {
+      // Excluir elementos que sean toggles de dropdown o que ya tengan clase 'dropdown-toggle'
+      if (link.hasAttribute('data-bs-toggle') || link.classList.contains('dropdown-toggle')) {
+        return;
+      }
+
+      // 1. Deshabilitar el enlace con clase de Bootstrap
+      link.classList.add('disabled', 'text-muted');
+      link.setAttribute('aria-disabled', 'true');
+      link.removeAttribute('href'); // Opcional: quitar href por completo
+
+      // 2. Agregar un badge "Próximo" junto al texto
+      const badge = document.createElement('span');
+      badge.className = 'badge bg-warning text-dark ms-1';
+      badge.style.fontSize = '0.6rem';
+      badge.textContent = 'PRÓXIMO';
+      link.appendChild(badge);
+
+      // 3. (Opcional) Añadir tooltip con mensaje
+      link.setAttribute('data-bs-toggle', 'tooltip');
+      link.setAttribute('title', 'Esta función estará disponible pronto');
+      // Si usas tooltips de Bootstrap, recuerda inicializarlos después
+    });
+
+    // Inicializar tooltips (si usas Bootstrap 5)
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
     // Control del sidebar principal
     document.addEventListener('DOMContentLoaded', function() {
         const mainSidebar = document.getElementById('mainSidebar');
