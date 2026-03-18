@@ -14,6 +14,7 @@ from teams.models import UserTeamMembership
 from orders.services.measurements.MeasurementLifecycleService import (
     MeasurementLifecycleService,
 )
+from orders.services.notifications.order_notifications import OrderNotificationService
 
 logger = logging.getLogger(__name__)
 
@@ -349,7 +350,7 @@ class OrderStateService:
         if requires_design:
             OrderDesignValidator.validate(order)
 
-        MeasurementLifecycleService.lock(order, user=user)
+        MeasurementLifecycleService.close(order, user=user)
 
     @classmethod
     def _validate_to_in_production(cls, order, user=None):
@@ -386,6 +387,7 @@ class OrderStateService:
             raise ValidationError(
                 "Debe registrarse la fecha del primer pago antes de iniciar producción."
             )
+        MeasurementLifecycleService.lock(order, user=user)
 
     @classmethod
     def _validate_to_delivered(cls, order, user=None):
@@ -434,19 +436,15 @@ class OrderStateService:
     # NOTIFICACIONES
     @classmethod
     def _notify_design_approved(cls, order, user):
-        """Envía notificación cuando el diseño es aprobado."""
-        # TODO: Implementar notificaciones por email o sistema de mensajes
-        pass
+        OrderNotificationService.notify_design_approved(order, user)
 
     @classmethod
     def _notify_production_started(cls, order, user):
-        """Envía notificación cuando la producción comienza."""
-        pass
+        OrderNotificationService.notify_production_started(order, user)
 
     @classmethod
     def _notify_order_delivered(cls, order, user):
-        """Envía notificación cuando la orden es entregada."""
-        pass
+        OrderNotificationService.notify_order_delivered(order, user)
 
 
 class OrderCreationService:
