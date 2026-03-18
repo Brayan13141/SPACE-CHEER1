@@ -84,4 +84,20 @@ urlpatterns = [
         views.admin_transition_order,
         name="transition_admin",
     ),
+    # ================================================ Medidas - Lifecycle ============================
+    path(
+        "admin/orders/<int:order_id>/close-measurements/",
+        views.close_measurements,
+        name="close_measurements",
+    ),
+    path(
+        "admin/orders/<int:order_id>/reopen-measurements/",
+        views.reopen_measurements,
+        name="reopen_measurements",
+    ),
+    path(
+        "admin/orders/<int:order_id>/lock-measurements/",
+        views.lock_measurements,
+        name="lock_measurements",
+    ),
 ]
