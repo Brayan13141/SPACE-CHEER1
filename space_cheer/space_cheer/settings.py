@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import Csv, config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
-CSRF_TRUSTED_ORIGINS = [
-    "https://9389-2806-102e-25-1c6-8d48-be36-901b-2fdf.ngrok-free.app",
-]
-
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 # SECURITY WARNING: don't run with debug turned on in production!
 
 DEBUG = config("DEBUG", default=False, cast=bool)
@@ -81,7 +79,6 @@ ACCOUNT_RATE_LIMITS = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 # =================================================================
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirige al home después de logout
 ACCOUNT_LOGOUT_ON_GET = False  # Obliga a usar POST para logout (más seguro)
@@ -96,16 +93,21 @@ ACCOUNT_FORMS = {
 ACCOUNT_EMAIL_FIELD = "email"  # Campo de email
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # Campo de username
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"  # Campo de email en el modelo de usuario
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Space Cheer]"
 
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # Para desarrollo, imprime emails en consola
 # -------------------SOCIALACCOUNT----------------------------
 SOCIALACCOUNT_ADAPTER = "accounts.social_adapter.CustomSocialAccountAdapter"
 
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -242,3 +244,25 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+# ==============CELERY CONFIGURATION PARA CELERY===========================
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE = {
+    "auto-close-measurements-every-day": {
+        "task": "orders.tasks.auto_close_measurements",
+        "schedule": crontab(hour=0, minute=0),
+    },
+}
+# =========================SMTP PARA ENVÍO DE CORREOS ================================
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "space.cheer.space@gmail.com"
+EMAIL_HOST_PASSWORD = "mrwr yrtf cxtu epuh"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

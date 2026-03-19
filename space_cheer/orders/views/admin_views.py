@@ -185,6 +185,14 @@ def admin_order_detail(request, order_id):
     available_transitions = OrderStateService.get_available_transitions(
         order, request.user
     )
+    # ── Measurement actions (UI control) ─────────────────────────────
+    measurement_actions = {
+        "can_close": (order.measurements_open and not order.measurements_locked),
+        "can_reopen": (not order.measurements_locked and order.can_edit_general()),
+        "can_lock": (
+            not order.measurements_locked and order_flags["requires_measurements"]
+        ),
+    }
 
     return render(
         request,
@@ -195,6 +203,7 @@ def admin_order_detail(request, order_id):
             "available_transitions": available_transitions,
             "order_flags": order_flags,
             "measurements_summary": measurements_summary,
+            "measurement_actions": measurement_actions,  # 👈 AÑADE ESTO
         },
     )
 

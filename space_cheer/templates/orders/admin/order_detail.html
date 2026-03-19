@@ -344,6 +344,53 @@
 </div>
 {% endif %}
 
+{% if order_flags.requires_measurements %}
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-light">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-gear me-2"></i>Gestión de medidas
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <!-- Estado actual -->
+    <div class="mb-3">
+      {% if order.measurements_locked %}
+        <span class="badge bg-danger">Bloqueadas definitivamente</span>
+      {% elif order.measurements_open %}
+        <span class="badge bg-success">Abiertas</span>
+      {% else %}
+        <span class="badge bg-secondary">Cerradas</span>
+      {% endif %}
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex flex-wrap gap-2">
+
+      {% if measurement_actions.can_close %}
+        <a href="{% url 'orders:close_measurements' order.id %}" class="btn btn-warning">
+          <i class="bi bi-lock me-1"></i>Cerrar medidas
+        </a>
+      {% endif %}
+
+      {% if measurement_actions.can_reopen and not measurement_actions.can_close %}
+        <a href="{% url 'orders:reopen_measurements' order.id %}" class="btn btn-success">
+          <i class="bi bi-arrow-clockwise me-1"></i>Reabrir
+        </a>
+      {% endif %}
+
+      {% if measurement_actions.can_lock %}
+        <a href="{% url 'orders:lock_measurements' order.id %}" class="btn btn-danger">
+          <i class="bi bi-shield-lock me-1"></i>Bloquear definitivo
+        </a>
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
   <!-- ========== DESIGNS (mejorado) ========== -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-light d-flex flex-wrap align-items-center justify-content-between">

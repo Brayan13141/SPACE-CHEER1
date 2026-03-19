@@ -110,7 +110,7 @@ class UserTeamMembership(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="memberships")
 
     role_in_team = models.CharField(
-        max_length=20, choices=ROLE_CHOICES, default="member"
+        max_length=20, choices=ROLE_CHOICES, default="ATLETA"
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
 

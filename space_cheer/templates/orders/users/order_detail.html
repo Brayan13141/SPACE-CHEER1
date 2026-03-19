@@ -195,7 +195,7 @@
       {% endif %}
     </div>
   </div>
-
+  
   <!-- ========== CONTACTO Y ENVÍO ========== -->
   {% if order.has_contact_info %}
     <div class="card shadow-sm mb-4">
@@ -245,7 +245,34 @@
       </a>
     </div>
   {% endif %}
+  {% if order.measurements_locked %}
+  <div class="alert alert-danger mb-4">
+    <i class="bi bi-lock-fill me-2"></i>
+    <strong>Medidas bloqueadas</strong><br>
+    Ya no es posible modificar las medidas para esta orden.
+  </div>
 
+{% elif order.measurements_open %}
+  <div class="alert alert-success mb-4">
+    <i class="bi bi-unlock me-2"></i>
+    <strong>Medidas abiertas</strong><br>
+    Puedes agregar o editar tus medidas.
+  {% if order.measurements_due_date and not order.measurements_locked %}
+  <div class="small text-muted mb-4">
+    <i class="bi bi-calendar-event me-1"></i>
+    Fecha límite para medidas: {{ order.measurements_due_date|date:"d/m/Y" }}
+  </div>
+{% endif %}
+  </div>
+
+{% else %}
+  <div class="alert alert-warning mb-4">
+    <i class="bi bi-hourglass-split me-2"></i>
+    <strong>Medidas cerradas</strong><br>
+    Actualmente no es posible editar medidas.
+  </div>
+{% endif %}
+   
   <!-- ========== PRODUCTOS ========== -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">
@@ -255,6 +282,7 @@
       <span class="badge bg-primary rounded-pill fs-6">{{ order.items.count }} producto{{ order.items.count|pluralize:"s" }}</span>
     {% endif %}
   </div>
+
 
   {% if order.items.exists %}
     <div class="row g-3 mb-4">
@@ -351,12 +379,18 @@
                                       </span>
                                     {% endif %}
                                   </div>
-                                  {% if not athlete_item.has_complete_measurements and can_edit %}
+                                  {% if not athlete_item.has_complete_measurements %}
+                                  {% if order.measurements_open and can_edit %}
                                     <a href="{% url 'orders:order_item_detail' item.id %}" 
-                                       class="btn btn-sm btn-outline-primary w-100">
+                                      class="btn btn-sm btn-outline-primary w-100">
                                       <i class="bi bi-rulers"></i> Configurar
                                     </a>
+                                  {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                      <i class="bi bi-lock"></i> Medidas cerradas
+                                    </button>
                                   {% endif %}
+                                {% endif %}
                                   {% if athlete_item.customization %}
                                     <div class="small text-muted text-truncate" title="{{ athlete_item.customization.custom_text }}">
                                       <i class="bi bi-type"></i> {{ athlete_item.customization.custom_text|truncatechars:20 }}
@@ -624,7 +658,6 @@
   {% endif %}
 
 </div>
-
 
 
 {% if can_edit %}

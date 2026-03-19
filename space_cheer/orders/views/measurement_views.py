@@ -4,6 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from orders.models import Order, OrderItemAthlete
 from django.db import transaction
+from django.contrib.admin.views.decorators import staff_member_required
+from orders.services.measurements.MeasurementLifecycleService import (
+    MeasurementLifecycleService,
+)
 
 
 @login_required
@@ -122,3 +126,42 @@ def order_item_measurements(request, athlete_item_id):
             "can_edit": can_edit,
         },
     )
+
+
+@staff_member_required
+def close_measurements(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+
+    try:
+        MeasurementLifecycleService.close(order, user=request.user)
+        messages.success(request, "Medidas cerradas correctamente")
+    except Exception as e:
+        messages.error(request, str(e))
+
+    return redirect("orders:admin_order_detail", order_id=order.id)
+
+
+@staff_member_required
+def reopen_measurements(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+
+    try:
+        MeasurementLifecycleService.reopen(order, user=request.user)
+        messages.success(request, "Medidas reabiertas correctamente")
+    except Exception as e:
+        messages.error(request, str(e))
+
+    return redirect("orders:admin_order_detail", order_id=order.id)
+
+
+@staff_member_required
+def lock_measurements(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+
+    try:
+        MeasurementLifecycleService.lock(order, user=request.user)
+        messages.success(request, "Medidas bloqueadas definitivamente")
+    except Exception as e:
+        messages.error(request, str(e))
+
+    return redirect("orders:admin_order_detail", order_id=order.id)
