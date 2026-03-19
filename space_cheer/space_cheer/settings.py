@@ -234,17 +234,6 @@ TEMPLATE_DIR = BASE_DIR / "templates"
 
 TEMPLATES[0]["DIRS"] = [TEMPLATE_DIR]
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "SPACE",
-        "USER": "postgres",
-        "PASSWORD": "root1234",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
-}
-
 # ==============CELERY CONFIGURATION PARA CELERY===========================
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
