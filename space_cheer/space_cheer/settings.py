@@ -93,17 +93,16 @@ ACCOUNT_FORMS = {
 ACCOUNT_EMAIL_FIELD = "email"  # Campo de email
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # Campo de username
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"  # Campo de email en el modelo de usuario
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Space Cheer]"
 
+ACCOUNT_LOGIN_METHODS = {"email", "username"}
+
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 # -------------------SOCIALACCOUNT----------------------------
 SOCIALACCOUNT_ADAPTER = "accounts.social_adapter.CustomSocialAccountAdapter"
-
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
@@ -220,6 +219,12 @@ TEMPLATES = [
         },
     },
 ]
+
+CSRF_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "Strict"
+
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
