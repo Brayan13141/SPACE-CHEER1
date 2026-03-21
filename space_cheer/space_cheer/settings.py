@@ -242,12 +242,8 @@ CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = config("CELERY_ACCEPT_CONTENT", cast=Csv())
 CELERY_TASK_SERIALIZER = config("CELERY_TASK_SERIALIZER")
 CELERY_TIMEZONE = config("CELERY_TIMEZONE")
-CELERY_BEAT_SCHEDULE = {
-    "auto-close-measurements-every-day": {
-        "task": "orders.tasks.auto_close_measurements",
-        "schedule": crontab(hour=0, minute=0),
-    },
-}
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 # =========================SMTP PARA ENVÍO DE CORREOS ================================
 EMAIL_BACKEND = config("EMAIL_BACKEND")
 EMAIL_HOST = config("EMAIL_HOST")
