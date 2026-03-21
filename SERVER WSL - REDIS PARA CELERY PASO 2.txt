@@ -1,0 +1,60 @@
+REDIS PARA CELERY PASO 2
+DEPLOYMENT CELERY EN WSL (Ubuntu 24) - GUÍA COMPLETA
+🎯 ARQUITECTURA EN WSL
+WSL Ubuntu 24.04
+├── Redis Server (puerto 6379)
+├── PostgreSQL (tu DB)
+├── Django Development Server (puerto 8000)
+├── Celery Worker (procesa tareas)
+└── Celery Beat (scheduler periódico)
+
+📦 PASO 1: INSTALAR REDIS EN WSL
+bash# Actualizar paquetes
+sudo apt update && sudo apt upgrade -y
+
+# Instalar Redis
+sudo apt install redis-server -y
+
+# Verificar versión
+redis-server --version
+# Debería mostrar: Redis server v=7.0.x o superior
+
+# Verificar que esté corriendo
+sudo systemctl status redis-server
+Si Redis NO está corriendo:
+bash# Iniciar Redis
+sudo systemctl start redis-server
+
+# Habilitar inicio automático
+sudo systemctl enable redis-server
+
+# Verificar conexión
+redis-cli ping
+# Debe responder: PONG
+Configuración de Redis para desarrollo
+bash# Editar configuración
+sudo nano /etc/redis/redis.conf
+Cambios importantes (busca estas líneas):
+conf# Bind solo a localhost (SEGURIDAD)
+bind 127.0.0.1 ::1
+
+# NO requerir password en desarrollo (para producción SÍ)
+# requirepass tu_password_seguro
+
+# Persistencia de datos
+save 900 1
+save 300 10
+save 60 10000
+
+# Archivo de persistencia
+dbfilename dump.rdb
+dir /var/lib/redis
+
+# Log level
+loglevel notice
+logfile /var/log/redis/redis-server.log
+Reiniciar Redis después de cambios:
+bashsudo systemctl restart redis-server
+
+# Verificar logs
+sudo tail -f /var/log/redis/redis-server.log

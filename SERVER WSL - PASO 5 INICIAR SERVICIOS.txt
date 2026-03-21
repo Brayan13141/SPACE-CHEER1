@@ -1,0 +1,55 @@
+SERVER WSL - PASO 6: INICIAR SERVICIOS (DESARROLLO)
+Necesitas 4 terminales WSL abiertas:
+
+Terminal 1: Redis (opcional si ya es servicio)
+bash# Solo si Redis NO está como servicio systemd
+redis-server
+
+Terminal 2: Django Development Server
+bashcd /mnt/c/Users/Lenovo/Documents/SPACE-CHEER/space_cheer
+source venv/bin/activate
+python manage.py runserver 0.0.0.0:8000
+
+
+Terminal 3: Celery Worker
+bashcd /mnt/c/Users/Lenovo/Documents/SPACE-CHEER/space_cheer
+./start_celery_worker.sh
+```
+
+**Output esperado**:
+```
+ -------------- celery@DESKTOP-XXXXX v5.3.4 (emerald-rush)
+--- ***** ----- 
+-- ******* ---- Linux-5.15.133.1-microsoft-standard-WSL2-x86_64
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         space_cheer:0x7f...
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/0
+- *** --- * --- .> concurrency: 2 (solo)
+-- ******* ---- .> task events: OFF
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+
+[tasks]
+  . orders.tasks.auto_close_measurements
+  . orders.tasks.send_measurement_reminders
+
+
+Terminal 4: Celery Beat
+bashcd /mnt/c/Users/Lenovo/Documents/SPACE-CHEER/space_cheer
+./start_celery_beat.sh
+```
+
+**Output esperado**:
+```
+celery beat v5.3.4 (emerald-rush) is starting.
+__    -    ... __   -        _
+LocalTime -> 2024-XX-XX 00:05:00
+Configuration ->
+    . broker -> redis://localhost:6379/0
+    . loader -> celery.loaders.app.AppLoader
+    . scheduler -> django_celery_beat.schedulers.DatabaseScheduler
+
+DatabaseScheduler: Schedule changed.

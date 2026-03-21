@@ -37,15 +37,18 @@ class DynamicMeasurementsForm(forms.Form):
 
 # FORMULARIO PARA CREAR/EDITAR MEDIDAS
 class MeasurementFieldForm(forms.ModelForm):
+
     class Meta:
         model = MeasurementField
+
         fields = [
             "name",
             "slug",
+            "order",
             "field_type",
             "unit",
             "required",
-            "order",
+            "is_active",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
