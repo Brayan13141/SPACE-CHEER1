@@ -1,0 +1,57 @@
+SERVER PASO 1 NGINX
+INSTALAR WLS / SO LINUX ================ SE USO WHITENOISE PARA LOS STYLES EN WSL
+
+INSTALAR TODO EL ENTORNO DE PYTHON Y DJANGO 
+
+INSTALAR NGINX
+sudo apt update
+sudo apt install -y nginx
+
+============================================== COMANDOS DE EJECUCION =================================
+Reiniciar (cierre completo): sudo systemctl restart nginx
+Recargar (sin cortes): sudo systemctl reload nginx
+Detener: sudo systemctl stop nginx
+Iniciar: sudo systemctl start nginx
+Ver estado: sudo systemctl status nginx 
+===============================================================================
+
+Configurar Nginx
+Créala manualmente si no están las carpetas
+sudo mkdir -p /etc/nginx/sites-available
+sudo mkdir -p /etc/nginx/sites-enabled
+
+Luego crea el archivo:
+sudo nano /etc/nginx/sites-available/django_project
+
+server {
+    listen 80;
+    server_name localhost;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        root /home/space/SERVER/SPACE-CHEER1/space_cheer;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+============================================== COMANDOS DE EJECUCION =================================
+Remover la configuración de
+sudo rm /etc/nginx/sites-enabled/default
+
+Activar la configuración de NGINX
+sudo ln -s /etc/nginx/sites-available/django_project /etc/nginx/sites-enabled
+
+Ejecutar Gunicorn en background
+gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 TU_PROYECTO.wsgi:application
+Ejecutar Gunicorn en la terminal
+gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 space_cheer.wsgi:application
+
+Reiniciar Gunicorn
+pkill gunicorn
+gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 space_cheer.wsgi:application

@@ -1,0 +1,33 @@
+DEPENDENCIAS PYTHON PARA CELEY PASO 3
+bash# Activar tu virtual environment
+cd /mnt/c/Users/Lenovo/Documents/SPACE-CHEER/space_cheer
+source venv/bin/activate
+
+# Instalar paquetes de Celery
+pip install celery[redis]==5.3.4
+pip install django-celery-beat==2.5.0
+pip install redis==5.0.1
+
+# Opcional: Flower para monitoreo visual
+pip install flower==2.0.1
+
+# Actualizar requirements.txt
+pip freeze > requirements.txt
+
+MIGRAR TABLAS DE CELERY BEAT
+bash# Aplicar migraciones de django-celery-beat
+python manage.py migrate django_celery_beat
+
+# Verificar tablas creadas
+python manage.py dbshell
+
+============================================== COMANDOS DE EJECUCION =================================
+CELERY.PY
+# Dry-run (no modifica nada)
+python manage.py close_expired_measurements --dry-run
+
+# Ejecutar realmente
+python manage.py close_expired_measurements
+
+# Una orden específica
+python manage.py close_expired_measurements --order-id=123

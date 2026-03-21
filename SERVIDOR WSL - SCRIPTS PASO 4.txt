@@ -1,0 +1,139 @@
+PASO 5: CREAR SCRIPTS DE INICIO
+Ubicación de los scripts
+Los scripts .sh deben estar en el DIRECTORIO RAÍZ del proyecto Django (donde está manage.py):
+├── manage.py                          # ← Archivo principal de Django
+├── requirements.txt
+├── space_cheer/                       # ← Settings del proyecto
+│   ├── __init__.py
+│   ├── celery.py
+│   ├── settings.py
+│   └── wsgi.py
+├── orders/
+│   └── tasks.py
+└── scripts/                           # ← OPCIÓN 1: Subdirectorio (RECOMENDADO)
+    ├── start_redis.sh
+    ├── start_celery_worker.sh
+    ├── start_celery_beat.sh
+    ├── start_flower.sh
+    ├── stop_celery.sh
+    └── dev_all.sh
+
+Script 1: start_redis.sh ======================================================
+bash#!/bin/bash
+# start_redis.sh - Inicia Redis (solo si no está como servicio)
+
+echo "🔄 Iniciando Redis..."
+sudo systemctl start redis-server
+
+# Verificar
+if redis-cli ping > /dev/null 2>&1; then
+    echo "✅ Redis corriendo en puerto 6379"
+else
+    echo "❌ Redis NO está corriendo"
+    exit 1
+fi
+Script 2: start_celery_worker.sh ======================================================
+bash#!/bin/bash
+# start_celery_worker.sh - Worker de Celery
+
+# Colores para output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo -e "${GREEN}🔄 Iniciando Celery Worker...${NC}"
+
+# Activar virtual environment
+source venv/bin/activate
+
+# Crear directorio de logs si no existe
+mkdir -p logs
+
+# Limpiar tareas pendientes (SOLO EN DESARROLLO)
+# celery -A space_cheer purge -f
+
+# Iniciar worker
+celery -A space_cheer worker \
+    --loglevel=info \
+    --logfile=logs/celery_worker.log \
+    --pidfile=logs/celery_worker.pid \
+    --concurrency=2 \
+    --max-tasks-per-child=100 \
+    --time-limit=300 \
+    --soft-time-limit=240 \
+    --pool=solo
+
+# Nota: --pool=solo es necesario en Windows/WSL
+# En Linux nativo puedes omitirlo o usar --pool=prefork
+
+Script 3: start_celery_beat.sh======================================================
+bash#!/bin/bash
+# start_celery_beat.sh - Scheduler de Celery
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${GREEN}🔄 Iniciando Celery Beat...${NC}"
+
+source venv/bin/activate
+
+mkdir -p logs
+
+# Iniciar beat
+celery -A space_cheer beat \
+    --loglevel=info \
+    --logfile=logs/celery_beat.log \
+    --pidfile=logs/celery_beat.pid \
+    --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+# DatabaseScheduler lee la configuración desde la DB
+
+Script 4: start_flower.sh (Opcional - Monitoreo)======================================================
+bash#!/bin/bash
+# start_flower.sh - Interfaz web de monitoreo
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${GREEN}🌸 Iniciando Flower (Monitoreo)...${NC}"
+
+source venv/bin/activate
+
+celery -A space_cheer flower \
+    --port=5555 \
+    --address=127.0.0.1 \
+    --basic_auth=admin:tu_password_seguro
+
+Script 5: stop_celery.sh (Detener todo)======================================================
+bash#!/bin/bash
+# stop_celery.sh - Detiene workers y beat
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo -e "${RED}🛑 Deteniendo servicios de Celery...${NC}"
+
+# Matar procesos por PID
+if [ -f logs/celery_worker.pid ]; then
+    kill $(cat logs/celery_worker.pid) 2>/dev/null
+    rm logs/celery_worker.pid
+    echo "✅ Worker detenido"
+fi
+
+if [ -f logs/celery_beat.pid ]; then
+    kill $(cat logs/celery_beat.pid) 2>/dev/null
+    rm logs/celery_beat.pid
+    echo "✅ Beat detenido"
+fi
+
+# Alternativa: matar por nombre
+pkill -f "celery worker"
+pkill -f "celery beat"
+
+echo "✅ Todos los procesos de Celery detenidos"
+Hacer scripts ejecutables:
+bashchmod +x start_*.sh stop_celery.sh
+
+
+Hacer scripts ejecutables:
+chmod +x start_*.sh stop_celery.sh
