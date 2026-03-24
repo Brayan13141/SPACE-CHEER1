@@ -78,30 +78,27 @@ def product_create_select_type(request):
 @login_required
 @permission_required("products.add_product", raise_exception=True)
 def product_create(request):
-
     template_key = request.GET.get("template") or request.POST.get("template")
     template = PRODUCT_TEMPLATES.get(template_key)
     initial_data = template.get("defaults", {}) if template else {}
 
     if request.method == "POST":
+        post_data = request.POST.copy()
 
-        form = ProductForm(request.POST, request.FILES, template_key=template_key)
+        # Forzar los campos de la plantilla si existen
+        if template:
+            defaults = template.get("defaults", {})
+            for field_name in ["product_type", "usage_type", "size_strategy", "scope"]:
+                post_data[field_name] = defaults[field_name]
+
+        # Creamos el formulario con POST modificado
+        form = ProductForm(post_data, request.FILES, template_key=template_key)
 
         if form.is_valid():
             product = form.save(commit=False)
-
-            # Forzar valores desde la plantilla — no confiar en el POST
-            if template:
-                defaults = template["defaults"]
-                product.product_type = defaults["product_type"]
-                product.usage_type = defaults["usage_type"]
-                product.scope = defaults["scope"]
-                product.size_strategy = defaults["size_strategy"]
-
             product.save()
             messages.success(request, f"Producto '{product.name}' creado.")
             return redirect("products:product_detail", product_id=product.id)
-
     else:
         form = ProductForm(initial=initial_data, template_key=template_key)
 
