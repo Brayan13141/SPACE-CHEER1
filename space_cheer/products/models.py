@@ -242,13 +242,13 @@ class Product(models.Model):
 
         # TEAM_ONLY requiere equipo propietario
         if self.scope == "TEAM_ONLY" and not self.owner_team:
-            errors["Equipo_dueño"] = (
+            errors["owner_team"] = (
                 "Debes seleccionar el equipo dueño para productos exclusivos."
             )
 
         # CATALOG no debe tener equipo
         if self.scope == "CATALOG" and self.owner_team:
-            errors["Equipo_dueño"] = (
+            errors["owner_team"] = (
                 "Los productos de catálogo no deben estar asignados a un equipo."
             )
 
