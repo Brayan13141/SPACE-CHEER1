@@ -4,18 +4,23 @@
 {% block content %}
 <div class="container py-3 py-md-4">
 
-  <!-- ══════════════════════════════════════════════════════════ HEADER -->
+  <!-- ═══════════════════════════════════ HEADER -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3">
     <div>
-      <h1 class="h2 mb-1">{{ product.name }}</h1>
-      <div class="d-flex flex-wrap gap-2 align-items-center">
+      <h1 class="h2 mb-2">{{ product.name }}</h1>
+      <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
         <span class="badge bg-{{ product.is_active|yesno:'success,secondary' }} fs-6">
           {{ product.is_active|yesno:"Activo,Inactivo" }}
         </span>
         <span class="badge bg-light text-dark border">{{ product.get_product_type_display }}</span>
         <span class="badge bg-light text-dark border">{{ product.get_usage_type_display }}</span>
         <span class="badge bg-light text-dark border">{{ product.get_size_strategy_display }}</span>
-        {% if not product.is_configured %}
+        {% if product.owner_team %}
+          <span class="badge bg-info text-dark">
+            <i class="bi bi-people me-1"></i>{{ product.owner_team.name }}
+          </span>
+        {% endif %}
+        {% if not is_configured %}
           <span class="badge bg-warning text-dark">
             <i class="bi bi-exclamation-triangle me-1"></i>Sin configurar
           </span>
@@ -25,10 +30,23 @@
           </span>
         {% endif %}
       </div>
+      
+      <!-- Metadata secundaria -->
+      <div class="text-muted small d-flex flex-wrap gap-2">
+        <span><i class="bi bi-calendar-event me-1"></i>Creado: {{ product.created_at|date:"d/m/Y H:i" }}</span>
+        <span><i class="bi bi-tag me-1"></i>Temporada: <strong>{{ product.season.name }}</strong>
+          {% if not product.season.is_active %}<span class="badge bg-danger ms-1">Inactiva</span>{% endif %}
+        </span>
+        {% if protection_info.is_protected %}
+          <span><i class="bi bi-shield-check me-1 text-warning"></i>
+            Usado en {{ protection_info.orders_count }} orden{{ protection_info.orders_count|pluralize:"es" }}
+          </span>
+        {% endif %}
+      </div>
     </div>
 
     <div class="d-flex gap-2 flex-shrink-0">
-      <!-- Toggle activo — dispara modal -->
+      <!-- Toggle activo/inactivo -->
       <button type="button"
         class="btn btn-sm {% if product.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
         data-confirm
@@ -50,19 +68,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════ MENSAJES -->
-  {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show mb-4">
-      <i class="bi bi-{% if msg.tags == 'success' %}check-circle{% elif msg.tags == 'error' or msg.tags == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
-      {{ msg }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-
-  <div class="row g-4">
-
-    <!-- ══════════════════════════════════════════ COLUMNA IZQUIERDA -->
-    <div class="col-lg-4">
+  <!-- Contenido principal en una sola columna -->
+  <div class="row">
+    <div class="col-12">
 
       <!-- Imagen -->
       <div class="card shadow-sm mb-4">
@@ -84,112 +92,293 @@
         </div>
       </div>
 
-      <!-- Editar información básica -->
-      <div class="card shadow-sm">
+      <!-- ═══ PRICING INFO ═══ -->
+      <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
-          <h5 class="card-title mb-0">
-            <i class="bi bi-pencil me-2"></i>Información básica
-          </h5>
+          <h6 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Precios</h6>
         </div>
         <div class="card-body">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="edit_info">
-
-            {% if form.errors %}
-              <div class="alert alert-danger py-2 small mb-3">
-                {% for field, errors in form.errors.items %}
-                  {% for error in errors %}
-                    <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
-                  {% endfor %}
-                {% endfor %}
-              </div>
-            {% endif %}
-
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Nombre</label>
-              {{ form.name }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Descripción</label>
-              {{ form.description }}
-            </div>
-
-            <div class="row g-2 mb-3">
-              <div class="col-6">
-                <label class="form-label small fw-semibold">Precio base</label>
-                {{ form.base_price }}
-              </div>
-              <div class="col-6">
-                <label class="form-label small fw-semibold">Temporada</label>
-                {{ form.season }}
+          {% if pricing_info.has_variance %}
+            <div class="mb-2">
+              <small class="text-muted d-block">Rango de precio</small>
+              <div class="fs-4 fw-bold text-primary">
+                ${{ pricing_info.min_price|floatformat:2 }} - ${{ pricing_info.max_price|floatformat:2 }}
               </div>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Nueva imagen</label>
-              {{ form.image }}
-              {% if product.image %}
-                <small class="text-muted d-block mt-1">
-                  <i class="bi bi-info-circle me-1"></i>Sube una nueva para reemplazar la actual.
-                </small>
-              {% endif %}
+            <hr class="my-2">
+            <div class="small">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Base:</span>
+                <span class="fw-semibold">${{ pricing_info.base_price|floatformat:2 }}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">Con variantes:</span>
+                <span class="text-success">+${{ pricing_info.max_price|floatformat:2|cut:pricing_info.base_price|cut:"$" }}</span>
+              </div>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-sm w-100">
-              <i class="bi bi-save me-1"></i>Guardar cambios
-            </button>
-          </form>
+          {% else %}
+            <div class="text-center">
+              <div class="fs-3 fw-bold text-primary mb-1">
+                ${{ pricing_info.base_price|floatformat:2 }}
+              </div>
+              <small class="text-muted">Precio único</small>
+            </div>
+          {% endif %}
         </div>
       </div>
 
-    </div>
+      <!-- ═══ CONFIGURATION STATUS ═══ -->
+      {% if not is_configured %}
+      <div class="card shadow-sm mb-4 border-warning">
+        <div class="card-header bg-warning bg-opacity-10">
+          <h6 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Configuración pendiente</h6>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted mb-3">Este producto requiere configuración antes de poder usarse en órdenes:</p>
+          <div class="list-group list-group-flush">
+            {% for item in configuration_checklist %}
+            <div class="list-group-item px-0 py-2 border-0">
+              <div class="d-flex align-items-center">
+                {% if item.status == "complete" %}
+                  <i class="bi bi-check-circle-fill text-success me-2"></i>
+                {% else %}
+                  <i class="bi bi-circle text-warning me-2"></i>
+                {% endif %}
+                <div class="flex-grow-1">
+                  <div class="small fw-semibold">{{ item.label }}</div>
+                  <div class="small text-muted">{{ item.message }}</div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
 
-    <!-- ══════════════════════════════════════════ COLUMNA DERECHA -->
-    <div class="col-lg-8">
+      <!-- ═══ REQUIREMENTS INFO (vertical) ═══ -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Requisitos del producto</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+              <span class="small text-muted"><i class="bi bi-palette me-1"></i>Diseño personalizado</span>
+              <span class="badge {% if requirements.requires_design %}bg-primary{% else %}bg-secondary{% endif %}">
+                {{ requirements.requires_design|yesno:"Requerido,No" }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+              <span class="small text-muted"><i class="bi bi-people me-1"></i>Asignación de atletas</span>
+              <span class="badge {% if requirements.requires_athletes %}bg-primary{% else %}bg-secondary{% endif %}">
+                {{ requirements.requires_athletes|yesno:"Requerido,No" }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+              <span class="small text-muted"><i class="bi bi-rulers me-1"></i>Medidas personalizadas</span>
+              <span class="badge {% if requirements.requires_measurements %}bg-primary{% else %}bg-secondary{% endif %}">
+                {{ requirements.requires_measurements|yesno:"Requerido,No" }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+              <span class="small text-muted"><i class="bi bi-tags me-1"></i>Selección de talla</span>
+              <span class="badge {% if requirements.requires_sizes %}bg-primary{% else %}bg-secondary{% endif %}">
+                {{ requirements.requires_sizes|yesno:"Requerido,No" }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-1">
+              <span class="small text-muted"><i class="bi bi-building me-1"></i>Equipo específico</span>
+              <span class="badge {% if requirements.requires_team %}bg-primary{% else %}bg-secondary{% endif %}">
+                {{ requirements.requires_team|yesno:"Requerido,No" }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <!-- ─────────────────────────── TALLAS -->
-      {% if product.size_strategy == "STANDARD" %}
+      <!-- ═══ PROTECTION INFO ═══ -->
+      {% if protection_info.is_protected %}
+      <div class="card shadow-sm mb-4 border-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-start">
+            <i class="bi bi-shield-lock text-warning me-2 mt-1"></i>
+            <div>
+              <h6 class="mb-1">Producto protegido</h6>
+              <p class="small text-muted mb-2">
+                Este producto está siendo usado en 
+                <strong>{{ protection_info.orders_count }} orden{{ protection_info.orders_count|pluralize:"es" }}</strong>
+                {% if protection_info.active_orders_count > 0 %}
+                  ({{ protection_info.active_orders_count }} activa{{ protection_info.active_orders_count|pluralize:"s" }})
+                {% endif %}.
+              </p>
+              <p class="small text-muted mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                No puedes modificar su estructura (scope, usage_type, size_strategy) ni eliminarlo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Editar información básica (colapsable) -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-pencil me-2"></i>Editar información
+          </h5>
+          <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#editFormCollapse">
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <div class="collapse" id="editFormCollapse">
+          <div class="card-body">
+            {% if protection_info.is_protected %}
+              <div class="alert alert-warning alert-sm py-2 mb-3 small">
+                <i class="bi bi-shield-exclamation me-1"></i>
+                <strong>Producto protegido</strong> – Este producto está siendo usado en órdenes. 
+                Modificar ciertos campos puede afectar órdenes existentes.
+              </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="edit_info">
+
+              {% if form.errors %}
+                <div class="alert alert-danger py-2 small mb-3">
+                  {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                      <div><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Nombre</label>
+                {{ form.name }}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Descripción</label>
+                {{ form.description }}
+              </div>
+
+              <!-- Campos con advertencia de protección -->
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Tipo de producto</label>
+                  {{ form.product_type }}
+                  
+                    <div class="small text-warning mt-1">
+                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                    </div>
+                  
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Tipo de uso</label>
+                  {{ form.usage_type }}
+                  
+                    <div class="small text-warning mt-1">
+                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                    </div>
+                  
+                </div>
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Estrategia de tallas</label>
+                  {{ form.size_strategy }}
+                  
+                    <div class="small text-warning mt-1">
+                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                    </div>
+                  
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Alcance</label>
+                  {{ form.scope }}
+                  
+                    <div class="small text-warning mt-1">
+                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                    </div>
+                  
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Equipo propietario</label>
+                {{ form.owner_team }}
+                {% if form.owner_team.help_text %}
+                  <small class="text-muted d-block">{{ form.owner_team.help_text }}</small>
+                {% endif %}
+                
+                  <div class="small text-warning mt-1">
+                    <i class="bi bi-exclamation-triangle"></i> Cambiar el equipo puede afectar órdenes existentes.
+                  </div>
+                
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Precio base</label>
+                  {{ form.base_price }}
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold">Temporada</label>
+                  {{ form.season }}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Nueva imagen</label>
+                {{ form.image }}
+                {% if product.image %}
+                  <small class="text-muted d-block mt-1">
+                    <i class="bi bi-info-circle me-1"></i>Sube una nueva para reemplazar la actual.
+                  </small>
+                {% endif %}
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="bi bi-save me-1"></i>Guardar cambios
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- ─── TALLAS -->
+      {% if requires_sizes %}
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
             <i class="bi bi-tags me-2"></i>Tallas
             <span class="badge bg-primary ms-1">{{ size_variants|length }}</span>
           </h5>
-          <button class="btn btn-sm btn-primary"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#addSizePanel"
-                  aria-expanded="false">
+          <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addSizePanel">
             <i class="bi bi-plus me-1"></i>Agregar
           </button>
         </div>
 
-        <!-- Formulario agregar talla -->
         <div class="collapse" id="addSizePanel">
           <div class="card-body border-bottom bg-light">
             <form method="post" class="row g-2 align-items-end">
               {% csrf_token %}
               <input type="hidden" name="action" value="add_size">
-
               <div class="col-sm-4">
                 <label class="form-label small fw-semibold mb-1">Talla</label>
-                <input type="text" name="size"
-                       class="form-control form-control-sm"
-                       placeholder="XS, S, M, L, XL..."
-                       maxlength="20" required>
+                <input type="text" name="size" class="form-control form-control-sm" placeholder="XS, S, M..." maxlength="20" required>
               </div>
-
               <div class="col-sm-4">
                 <label class="form-label small fw-semibold mb-1">Precio adicional</label>
                 <div class="input-group input-group-sm">
                   <span class="input-group-text">$</span>
-                  <input type="number" name="additional_price"
-                         class="form-control"
-                         value="0" step="0.01" min="0">
+                  <input type="number" name="additional_price" class="form-control" value="0" step="0.01" min="0">
                 </div>
               </div>
-
               <div class="col-sm-4">
                 <button type="submit" class="btn btn-success btn-sm w-100">
                   <i class="bi bi-plus-circle me-1"></i>Agregar talla
@@ -199,107 +388,95 @@
           </div>
         </div>
 
-        <!-- Lista de tallas -->
         <div class="card-body p-0">
-          <table class="table table-sm align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">Talla</th>
-                <th class="text-end">Precio adicional</th>
-                <th style="width:60px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for variant in size_variants %}
-              <tr>
-                <td class="ps-4 fw-bold fs-6">{{ variant.size }}</td>
-                <td class="text-end text-muted">
-                  {% if variant.additional_price > 0 %}
-                    +${{ variant.additional_price|floatformat:2 }}
-                  {% else %}
-                    <span class="text-muted">—</span>
-                  {% endif %}
-                </td>
-                <td class="text-end pe-3">
-                  <!-- Form oculto para esta talla -->
-                  <form id="removeSize_{{ variant.id }}" method="post" class="d-none">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="remove_size">
-                    <input type="hidden" name="size_id" value="{{ variant.id }}">
-                  </form>
-                  <!-- Botón que dispara el modal -->
-                  <button type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    data-confirm
-                    data-title="Eliminar talla"
-                    data-body="¿Eliminar la talla <strong>{{ variant.size }}</strong>? Si hay órdenes que la usan, no se podrá eliminar."
-                    data-form="removeSize_{{ variant.id }}"
-                    data-variant="danger">
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="3" class="text-center text-muted py-4">
-                  <i class="bi bi-tags display-6 d-block mb-2"></i>
-                  No hay tallas configuradas.<br>
-                  <small>Agrega al menos una para poder usar este producto en órdenes.</small>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Talla</th>
+                  <th class="text-end">Precio adicional</th>
+                  <th class="text-end">Precio final</th>
+                  <th style="width:60px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for variant in size_variants %}
+                <tr>
+                  <td class="ps-4 fw-bold fs-6">{{ variant.size }}</td>
+                  <td class="text-end text-muted">
+                    {% if variant.additional_price > 0 %}
+                      <span class="text-success">+${{ variant.additional_price|floatformat:2 }}</span>
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end fw-semibold">
+                    ${{ product.base_price|add:variant.additional_price|floatformat:2 }}
+                  </td>
+                  <td class="text-end pe-3">
+                    <form id="removeSize_{{ variant.id }}" method="post" class="d-none">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove_size">
+                      <input type="hidden" name="size_id" value="{{ variant.id }}">
+                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-confirm
+                            data-title="Eliminar talla"
+                            data-body="¿Eliminar la talla <strong>{{ variant.size }}</strong>?"
+                            data-form="removeSize_{{ variant.id }}"
+                            data-variant="danger">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox d-block mb-2 fs-3"></i>
+                    No hay tallas configuradas.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       {% endif %}
 
-      <!-- ─────────────────────────── CAMPOS DE MEDIDA -->
-      {% if product.size_strategy == "MEASUREMENTS" %}
+      <!-- ─── CAMPOS DE MEDIDA -->
+      {% if requires_measurements %}
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
             <i class="bi bi-rulers me-2"></i>Campos de medida
             <span class="badge bg-primary ms-1">{{ measurement_fields|length }}</span>
           </h5>
-          <button class="btn btn-sm btn-primary"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#addMeasurePanel"
-                  aria-expanded="false">
+          <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addMeasurePanel">
             <i class="bi bi-plus me-1"></i>Agregar
           </button>
         </div>
 
-        <!-- Formulario agregar campo -->
         <div class="collapse" id="addMeasurePanel">
           <div class="card-body border-bottom bg-light">
             {% if available_fields %}
             <form method="post" class="row g-2 align-items-end">
               {% csrf_token %}
               <input type="hidden" name="action" value="add_measurement">
-
               <div class="col-sm-5">
                 <label class="form-label small fw-semibold mb-1">Campo de medida</label>
                 <select name="field_id" class="form-select form-select-sm">
                   {% for field in available_fields %}
-                    <option value="{{ field.id }}">
-                      {{ field.name }}{% if field.unit %} ({{ field.unit }}){% endif %}
-                    </option>
+                  <option value="{{ field.id }}">{{ field.name }}{% if field.unit %} ({{ field.unit }}){% endif %}</option>
                   {% endfor %}
                 </select>
               </div>
-
               <div class="col-sm-3 d-flex align-items-center" style="padding-top:1.5rem;">
                 <div class="form-check mb-0">
-                  <input type="checkbox" name="required"
-                         class="form-check-input"
-                         id="required_check" checked>
-                  <label class="form-check-label small" for="required_check">
-                    Obligatorio
-                  </label>
+                  <input type="checkbox" name="required" class="form-check-input" id="required_check" checked>
+                  <label class="form-check-label small" for="required_check">Obligatorio</label>
                 </div>
               </div>
-
               <div class="col-sm-4">
                 <button type="submit" class="btn btn-success btn-sm w-100">
                   <i class="bi bi-plus-circle me-1"></i>Agregar campo
@@ -307,82 +484,64 @@
               </div>
             </form>
             {% else %}
-              <p class="text-muted small mb-0">
-                <i class="bi bi-info-circle me-1"></i>
-                No quedan campos disponibles.
-                <a href="{% url 'manage_measurement_fields' %}">Crear nuevos campos</a>
-              </p>
+            <p class="text-muted small mb-0">
+              No quedan campos disponibles. 
+              <a href="{% url 'manage_measurement_fields' %}">Crear nuevos campos</a>
+            </p>
             {% endif %}
           </div>
         </div>
 
-        <!-- Lista de campos -->
         <div class="card-body p-0">
-          <table class="table table-sm align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">Campo</th>
-                <th>Unidad</th>
-                <th class="text-center">Requerido</th>
-                <th style="width:60px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for pmf in measurement_fields %}
-              <tr>
-                <td class="ps-4 fw-semibold">{{ pmf.field.name }}</td>
-                <td class="text-muted small">{{ pmf.field.unit|default:"—" }}</td>
-                <td class="text-center">
-                  {% if pmf.required %}
-                    <span class="badge bg-success">Sí</span>
-                  {% else %}
-                    <span class="badge bg-secondary">No</span>
-                  {% endif %}
-                </td>
-                <td class="text-end pe-3">
-                  <!-- Form oculto para este campo -->
-                  <form id="removeMeasure_{{ pmf.field.id }}" method="post" class="d-none">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="remove_measurement">
-                    <input type="hidden" name="field_id" value="{{ pmf.field.id }}">
-                  </form>
-                  <!-- Botón que dispara el modal -->
-                  <button type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    data-confirm
-                    data-title="Eliminar campo de medida"
-                    data-body="¿Eliminar el campo <strong>{{ pmf.field.name }}</strong> de este producto?"
-                    data-form="removeMeasure_{{ pmf.field.id }}"
-                    data-variant="danger">
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="4" class="text-center text-muted py-4">
-                  <i class="bi bi-rulers display-6 d-block mb-2"></i>
-                  No hay campos configurados.<br>
-                  <small>Agrega al menos uno para poder registrar medidas en órdenes.</small>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ─────────────────────────── PRODUCTO SIN TALLAS NI MEDIDAS -->
-      {% if product.size_strategy == "NONE" %}
-      <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-          <i class="bi bi-check-circle-fill text-success display-4 d-block mb-3"></i>
-          <h5>Producto simple</h5>
-          <p class="text-muted mb-0">
-            Este producto no requiere tallas ni medidas.<br>
-            <small>Estrategia: <strong>{{ product.get_size_strategy_display }}</strong></small>
-          </p>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Campo</th>
+                  <th>Unidad</th>
+                  <th class="text-center">Requerido</th>
+                  <th style="width:60px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for pmf in measurement_fields %}
+                <tr>
+                  <td class="ps-4 fw-semibold">{{ pmf.field.name }}</td>
+                  <td class="text-muted small">{{ pmf.field.unit|default:"—" }}</td>
+                  <td class="text-center">
+                    {% if pmf.required %}
+                      <span class="badge bg-success">Sí</span>
+                    {% else %}
+                      <span class="badge bg-secondary">No</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-3">
+                    <form id="removeMeasure_{{ pmf.field.id }}" method="post" class="d-none">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove_measurement">
+                      <input type="hidden" name="field_id" value="{{ pmf.field.id }}">
+                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-confirm
+                            data-title="Eliminar campo de medida"
+                            data-body="¿Eliminar el campo <strong>{{ pmf.field.name }}</strong> de este producto?"
+                            data-form="removeMeasure_{{ pmf.field.id }}"
+                            data-variant="danger">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox d-block mb-2 fs-3"></i>
+                    No hay campos configurados.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       {% endif %}
@@ -391,8 +550,7 @@
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════════════════ MODAL CONFIRMACIÓN -->
+<!-- MODAL CONFIRMACIÓN -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
@@ -414,35 +572,30 @@
     </div>
   </div>
 </div>
-{% endblock %}
 
+{% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
   const modalEl    = document.getElementById('confirmModal');
   const modal      = new bootstrap.Modal(modalEl);
   const titleEl    = document.getElementById('confirmModalTitle');
   const bodyEl     = document.getElementById('confirmModalBody');
   const confirmBtn = document.getElementById('confirmModalBtn');
-
   let pendingFormId = null;
 
   document.querySelectorAll('[data-confirm]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       const variant = this.dataset.variant || 'danger';
+      titleEl.textContent = this.dataset.title || 'Confirmar acción';
+      bodyEl.innerHTML = this.dataset.body || '¿Estás seguro?';
+      pendingFormId = this.dataset.form;
 
-      titleEl.textContent  = this.dataset.title || 'Confirmar acción';
-      bodyEl.innerHTML     = this.dataset.body  || '¿Estás seguro?';
-      pendingFormId        = this.dataset.form;
-
-      // Ajusta color del botón según la acción
       confirmBtn.className = `btn btn-${variant}`;
       confirmBtn.innerHTML = variant === 'success'
         ? '<i class="bi bi-play-circle me-1"></i>Confirmar'
-        : '<i class="bi bi-trash3 me-1"></i>Desactivar';
-
+        : '<i class="bi bi-trash3 me-1"></i>Eliminar';
       modal.show();
     });
   });
@@ -455,11 +608,9 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.hide();
   });
 
-  // Limpiar estado al cerrar el modal sin confirmar
   modalEl.addEventListener('hidden.bs.modal', function () {
     pendingFormId = null;
   });
-
 });
 </script>
 {% endblock %}
