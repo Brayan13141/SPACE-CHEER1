@@ -76,7 +76,8 @@
       </div>
     </div>
   </div>
-
+{% include "orders/partials/pagination.html" %}
+  
   <!-- Tabla de órdenes -->
   <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -250,6 +251,8 @@
     </div>
     
   </div>
+
+  {% include "orders/partials/pagination.html" %}
 </div>
 
 {% endblock %}

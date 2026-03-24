@@ -33,25 +33,34 @@
                 <td>{{ field.slug }}</td>
                 <td>{{ field.get_field_type_display }}</td>
                 <td>{{ field.unit|default:"—" }}</td>
+                <td>{% if field.required %}✔️{% else %}—{% endif %}</td>
                 <td>
-                    {% if field.required %}✔️{% else %}—{% endif %}
-                </td>
-                <td>
-                    <!-- EDITAR -->
-                    <button
-                        class="btn btn-sm btn-outline-secondary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEditar{{ field.id }}">
-                        ✏️
-                    </button>
+                    <div class="btn-group" role="group" aria-label="Acciones campo">
+                        <!-- EDITAR -->
+                        <button class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEditar{{ field.id }}">
+                            <i class="bi bi-pencil-square me-1"></i>Editar
+                        </button>
 
-                    <!-- ELIMINAR -->
-                    <button
-                        class="btn btn-sm btn-outline-danger"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalEliminar{{ field.id }}">
-                        🗑
-                    </button>
+                        <!-- ELIMINAR -->
+                        {% if field.is_active %}
+                        <button class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEliminar{{ field.id }}">
+                            <i class="bi bi-trash me-1"></i>Eliminar
+                        </button>
+                        {% else %}
+                        <!-- HABILITAR -->
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="field_id" value="{{ field.id }}">
+                            <button type="submit" name="habilitar_medida" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-check-circle me-1"></i>Habilitar
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
 
@@ -59,16 +68,30 @@
             <div class="modal fade" id="modalEditar{{ field.id }}" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <form method="post">
+                        <form method="post" action="{% url 'manage_measurement_fields' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="editar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <div class="modal-header">
                                 <h5 class="modal-title">Editar campo</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
-                                {{ form.as_p }}
-                            </div>
+                            {% for f in form %}
+                                <div class="mb-3">
+                                    <label class="form-label">{{ f.label }}</label>
+                                    {{ f }}
+                                    {% if f.errors %}
+                                        <div class="text-danger small">{{ f.errors }}</div>
+                                    {% endif %}
+
+                                    {# Si el campo está deshabilitado, enviarlo como hidden #}
+                                    {% if f.field.widget.attrs.disabled %}
+                                        <input type="hidden" name="{{ f.name }}" value="{{ f.value }}">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
                             <div class="modal-footer">
                                 <button type="submit" name="editar_medida" class="btn btn-primary">
                                     Guardar cambios
@@ -83,23 +106,17 @@
             <div class="modal fade" id="modalEliminar{{ field.id }}" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <form method="post">
+                        <form method="post" action="{% url 'manage_measurement_fields' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="eliminar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <div class="modal-header">
-                                <h5 class="modal-title text-danger">
-                                    Desactivar campo
-                                </h5>
+                                <h5 class="modal-title text-danger">Desactivar campo</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
-                                <p>
-                                    ¿Seguro que deseas desactivar el campo
-                                    <strong>{{ field.name }}</strong>?
-                                </p>
-                                <small class="text-muted">
-                                    Las medidas existentes no se perderán.
-                                </small>
+                                <p>¿Seguro que deseas desactivar el campo <strong>{{ field.name }}</strong>?</p>
+                                <small class="text-muted">Las medidas existentes no se perderán.</small>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -124,17 +141,26 @@
 <div class="modal fade" id="modalCrear" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post">
+            <form method="post" action="{% url 'manage_measurement_fields' %}">
                 {% csrf_token %}
+                <input type="hidden" name="crear_medida" value="">
                 <div class="modal-header">
                     <h5 class="modal-title">Nuevo campo de medida</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    {{ form_crear.as_p }}
+                    {% for f in form_crear %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ f.label }}</label>
+                            {{ f }}
+                            {% if f.errors %}
+                                <div class="text-danger small">{{ f.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="crear_medida" class="btn btn-success">
+                    <button type="submit" class="btn btn-success">
                         Crear
                     </button>
                 </div>

@@ -1,5 +1,6 @@
 from django import forms
 from products.models import Product, Season
+from products.product_templates import PRODUCT_TEMPLATES
 from teams.models import Team
 
 
@@ -7,11 +8,21 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, template_key=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if template_key:
-            self.fields["product_type"].disabled = True
-            self.fields["usage_type"].disabled = True
-            self.fields["scope"].disabled = True
-            self.fields["size_strategy"].disabled = True
+        # Si viene una plantilla (solo para creación)
+        if template_key and not kwargs.get("instance"):
+            template = PRODUCT_TEMPLATES.get(template_key, {})
+            defaults = template.get("defaults", {})
+
+            for field_name in ["product_type", "usage_type", "size_strategy", "scope"]:
+                if field_name in self.fields:
+                    self.fields[field_name].widget = forms.HiddenInput()
+                    self.fields[field_name].initial = defaults.get(field_name)
+                    self.fields[field_name].required = True
+
+        # Agregar clases CSS a campos select
+        for field_name in ["product_type", "usage_type", "size_strategy", "scope"]:
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs.update({"class": "form-select"})
 
     season = forms.ModelChoiceField(
         queryset=Season.objects.filter(is_active=True),
@@ -40,7 +51,6 @@ class ProductForm(forms.ModelForm):
             "base_price",
             "is_active",
         ]
-
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
@@ -50,10 +60,7 @@ class ProductForm(forms.ModelForm):
             "scope": forms.Select(attrs={"class": "form-select"}),
             "season": forms.Select(attrs={"class": "form-select"}),
             "image": forms.ClearableFileInput(
-                attrs={
-                    "class": "form-control",
-                    "accept": "image/*",
-                }
+                attrs={"class": "form-control", "accept": "image/*"}
             ),
             "base_price": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01"}
@@ -63,10 +70,7 @@ class ProductForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-
         scope = cleaned.get("scope")
-        # Si es catálogo, forzamos owner_team a None
         if scope == "CATALOG":
             cleaned["owner_team"] = None
-
         return cleaned

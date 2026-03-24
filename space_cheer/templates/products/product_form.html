@@ -29,7 +29,6 @@
   </div>
   {% endif %}
 
-  <!-- ERRORES -->
   {% if form.errors %}
   <div class="alert alert-danger mb-4">
     <i class="bi bi-exclamation-triangle me-2"></i>
@@ -69,9 +68,6 @@
               <div class="col-12">
                 <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
                 {{ form.name }}
-                {% if form.name.errors %}
-                  <div class="text-danger small mt-1">{{ form.name.errors }}</div>
-                {% endif %}
               </div>
 
               <div class="col-12">
@@ -82,17 +78,11 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Precio base <span class="text-danger">*</span></label>
                 {{ form.base_price }}
-                {% if form.base_price.errors %}
-                  <div class="text-danger small mt-1">{{ form.base_price.errors }}</div>
-                {% endif %}
               </div>
 
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Temporada <span class="text-danger">*</span></label>
                 {{ form.season }}
-                {% if form.season.errors %}
-                  <div class="text-danger small mt-1">{{ form.season.errors }}</div>
-                {% endif %}
               </div>
 
               {% if not template_key %}
@@ -112,18 +102,26 @@
                 <label class="form-label fw-semibold">Alcance</label>
                 {{ form.scope }}
               </div>
-              <div class="col-md-6" id="owner-team-container">
+              {% endif %}
+
+              <!-- Contenedor de equipo solo visible si aplica -->
+              <div class="col-md-6" id="owner-team-container" style="display:none;">
                 <label class="form-label fw-semibold">Equipo exclusivo</label>
                 {{ form.owner_team }}
                 <small class="text-muted">Solo si el alcance es "Solo un equipo"</small>
               </div>
-              {% else %}
-              {# Cuando viene de plantilla, los campos fijos se muestran como info, no editables #}
-              <div class="col-12">
+
+              {% if template_key %}
+              <div class="col-12 mt-3">
                 <div class="bg-light rounded p-3 small text-muted">
                   <i class="bi bi-lock me-1"></i>
-                  Los campos de tipo, uso y estrategia están definidos por la plantilla
-                  y no se pueden modificar aquí.
+                  Campos definidos por plantilla:
+                  <ul class="mb-0">
+                    <li>Tipo: {{ form.product_type.value|default:"-" }}</li>
+                    <li>Uso: {{ form.usage_type.value|default:"-" }}</li>
+                    <li>Estrategia de talla: {{ form.size_strategy.value|default:"-" }}</li>
+                    <li>Alcance: {{ form.scope.value|default:"-" }}</li>
+                  </ul>
                 </div>
               </div>
               {% endif %}
@@ -168,13 +166,21 @@
       </a>
     </div>
 
+    <!-- Campos ocultos de plantilla -->
+    {% if template_key %}
+      {{ form.product_type }}
+      {{ form.usage_type }}
+      {{ form.size_strategy }}
+      {{ form.scope }}
+    {% endif %}
+
   </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Preview de imagen antes de subir
+// Preview de imagen
 document.querySelector('input[type="file"]')?.addEventListener('change', function () {
   const file = this.files[0];
   if (!file) return;
@@ -188,5 +194,27 @@ document.querySelector('input[type="file"]')?.addEventListener('change', functio
   };
   reader.readAsDataURL(file);
 });
+
+// Mostrar/ocultar owner_team según alcance o plantilla
+{% if template %}
+  const requiresTeam = {{ template.flags.requires_team|yesno:"true,false" }};
+{% else %}
+  const requiresTeam = false;
+{% endif %}
+
+function toggleOwnerTeam() {
+  const container = document.getElementById('owner-team-container');
+  const scopeField = document.getElementById('id_scope');
+
+  if (requiresTeam || (scopeField && scopeField.value === "TEAM_ONLY")) {
+    container.style.display = "block";
+  } else {
+    container.style.display = "none";
+  }
+}
+
+// Ejecutar al cargar
+document.addEventListener('DOMContentLoaded', toggleOwnerTeam);
+document.getElementById('id_scope')?.addEventListener('change', toggleOwnerTeam);
 </script>
 {% endblock %}
