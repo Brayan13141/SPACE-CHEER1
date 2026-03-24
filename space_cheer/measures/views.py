@@ -1,65 +1,95 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from urllib3 import request
 from accounts.decorators import full_profile_required, role_required
 from .models import MeasurementField
 from .forms import MeasurementFieldForm
+import traceback  # Para mostrar detalles del error
 
 
 @full_profile_required
 @role_required("ADMIN")
 def manage_measurement_fields(request):
 
-    fields = MeasurementField.objects.filter(is_active=True).order_by("order", "name")
+    fields = MeasurementField.objects.order_by("order", "name")
 
     # ================= POST =================
     if request.method == "POST":
 
         # -------- CREAR --------
         if "crear_medida" in request.POST:
-            form = MeasurementFieldForm(request.POST)
-
-            if form.is_valid():
-                field = form.save()
-                messages.success(
+            try:
+                form = MeasurementFieldForm(request.POST)
+                if form.is_valid():
+                    field = form.save()
+                    messages.success(
+                        request, f"Campo '{field.name}' creado correctamente."
+                    )
+                else:
+                    messages.error(
+                        request, f"Error al crear el campo: {form.errors.as_json()}"
+                    )
+            except Exception as e:
+                messages.error(
                     request,
-                    f"Campo '{field.name}' creado correctamente.",
+                    f"Ocurrió un error inesperado al crear el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            else:
-                messages.error(request, "Error al crear el campo.")
-
             return redirect("manage_measurement_fields")
 
         # -------- EDITAR --------
         elif "editar_medida" in request.POST:
             field_id = request.POST.get("field_id")
             field = get_object_or_404(MeasurementField, id=field_id)
-
-            form = MeasurementFieldForm(request.POST, instance=field)
-
-            if form.is_valid():
-                field = form.save()
-                messages.success(
+            try:
+                form = MeasurementFieldForm(request.POST, instance=field)
+                if form.is_valid():
+                    field = form.save()
+                    messages.success(
+                        request, f"Campo '{field.name}' actualizado correctamente."
+                    )
+                else:
+                    messages.error(
+                        request,
+                        f"Error al actualizar el campo: {form.errors.as_json()}",
+                    )
+            except Exception as e:
+                messages.error(
                     request,
-                    f"Campo '{field.name}' actualizado correctamente.",
+                    f"Ocurrió un error inesperado al actualizar el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            else:
-                messages.error(request, "Error al actualizar el campo.")
-
             return redirect("manage_measurement_fields")
 
         # -------- DESACTIVAR --------
         elif "eliminar_medida" in request.POST:
             field_id = request.POST.get("field_id")
             field = get_object_or_404(MeasurementField, id=field_id)
-
-            field.is_active = False
-            field.save()
-
-            messages.success(
-                request,
-                f"Campo '{field.name}' desactivado correctamente.",
-            )
-
+            try:
+                field.is_active = False
+                field.save()
+                messages.success(
+                    request, f"Campo '{field.name}' desactivado correctamente."
+                )
+            except Exception as e:
+                messages.error(
+                    request,
+                    f"Ocurrió un error inesperado al desactivar el campo: {str(e)}\n{traceback.format_exc()}",
+                )
+            return redirect("manage_measurement_fields")
+            # -------- HABILITAR --------
+        elif "habilitar_medida" in request.POST:
+            field_id = request.POST.get("field_id")
+            field = get_object_or_404(MeasurementField, id=field_id)
+            try:
+                field.is_active = True
+                field.save()
+                messages.success(
+                    request, f"Campo '{field.name}' habilitado correctamente."
+                )
+            except Exception as e:
+                messages.error(
+                    request,
+                    f"Ocurrió un error inesperado al habilitar el campo: {str(e)}\n{traceback.format_exc()}",
+                )
             return redirect("manage_measurement_fields")
 
     # ================= GET =================
