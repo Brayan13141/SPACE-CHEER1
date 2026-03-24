@@ -8,8 +8,8 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, template_key=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Si viene una plantilla, inicializamos y ocultamos campos obligatorios
-        if template_key:
+        # Si viene una plantilla (solo para creación)
+        if template_key and not kwargs.get("instance"):
             template = PRODUCT_TEMPLATES.get(template_key, {})
             defaults = template.get("defaults", {})
 
@@ -18,6 +18,11 @@ class ProductForm(forms.ModelForm):
                     self.fields[field_name].widget = forms.HiddenInput()
                     self.fields[field_name].initial = defaults.get(field_name)
                     self.fields[field_name].required = True
+
+        # Agregar clases CSS a campos select
+        for field_name in ["product_type", "usage_type", "size_strategy", "scope"]:
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs.update({"class": "form-select"})
 
     season = forms.ModelChoiceField(
         queryset=Season.objects.filter(is_active=True),
