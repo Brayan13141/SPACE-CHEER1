@@ -1,0 +1,81 @@
+<!-- orders/templates/orders/partials/pagination.html -->
+{% if pagination.total_pages > 1 %}
+<nav aria-label="Paginación">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted">
+            Mostrando <strong>{{ pagination.start_index }}</strong> 
+            a <strong>{{ pagination.end_index }}</strong> 
+            de <strong>{{ pagination.total_items }}</strong> resultados
+        </div>
+        
+        <ul class="pagination mb-0">
+            <!-- Primera página -->
+            {% if pagination.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Primera">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&laquo;&laquo;</span>
+            </li>
+            {% endif %}
+
+            <!-- Anterior -->
+            {% if pagination.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pagination.previous_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&laquo;</span>
+            </li>
+            {% endif %}
+
+            <!-- Páginas numeradas -->
+            {% for page_num in pagination.page_range %}
+                {% if page_num == pagination.current_page %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        {{ page_num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Siguiente -->
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pagination.next_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&raquo;</span>
+            </li>
+            {% endif %}
+
+            <!-- Última página -->
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pagination.total_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&raquo;&raquo;</span>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+{% endif %}
