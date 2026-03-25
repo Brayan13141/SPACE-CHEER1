@@ -1,0 +1,155 @@
+:root {
+    --primary-color: #7f5af0; /* púrpura neón */
+    --secondary-color: #2cb1ff; /* azul ionizado */
+    --accent-color: #ff4f9a; /* rosa neón */
+    --dark-color: #0d0d1a; /* espacio profundo */
+    --light-color: #e4eaff; /* luz fría */
+    --panel-color: #1a1a2e; /* panel futurista */
+    --hover-glow: rgba(127, 90, 240, 0.25);
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    padding-top: 76px;
+}
+
+/* NAVBAR */
+.navbar {
+    background-color: rgba(13, 13, 26, 0.85) !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 15px rgba(127, 90, 240, 0.3);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--secondary-color) !important;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: var(--light-color) !important;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color) !important;
+    text-shadow: 0 0 8px var(--secondary-color);
+}
+
+.nav-link.active {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 8px var(--primary-color);
+}
+
+/* BOTONES */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #6b49d1;
+    border-color: #6b49d1;
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+}
+
+/* ICONOS */
+.feature-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.75rem;
+    background-color: var(--panel-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    box-shadow: 0 0 10px rgba(44, 177, 255, 0.3);
+}
+
+/* CARDS */
+.card {
+    background-color: var(--panel-color);
+    border: none;
+    color: var(--light-color);
+}
+
+.card-hover {
+    transition: 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--hover-glow);
+}
+
+/* FOOTER */
+.footer {
+    background-color: var(--panel-color);
+    color: var(--light-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* DROPDOWNS */
+.dropdown-menu {
+    background-color: var(--panel-color);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    border-radius: 0.5rem;
+}
+
+.dropdown-item {
+    color: var(--light-color);
+}
+
+.dropdown-item:hover {
+    background-color: rgba(127, 90, 240, 0.1);
+    color: var(--primary-color);
+}
+
+/* BADGES */
+.badge-notification {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* AVATAR */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    object-fit: cover;
+}
+
+/* PARTICLES */
+#tsparticles {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    top: 0;
+    left: 0;
+}
+
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    .hero-section {
+        padding: 2rem 0;
+    }
+}
