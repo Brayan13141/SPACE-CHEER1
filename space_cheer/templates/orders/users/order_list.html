@@ -76,8 +76,7 @@
       </div>
     </div>
   </div>
-{% include "orders/partials/pagination.html" %}
-  
+
   <!-- Tabla de órdenes -->
   <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -272,6 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var table = $('#ordersTable').DataTable({
         responsive: true,
         pageLength: 10,
+        paging: false,  // Desactivar paginación de DataTables
         lengthMenu: [10, 25, 50, 100],
         ordering: true,
         order: [[0, 'desc']],
