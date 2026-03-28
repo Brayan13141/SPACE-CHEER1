@@ -436,15 +436,18 @@ class OrderStateService:
     # NOTIFICACIONES
     @classmethod
     def _notify_design_approved(cls, order, user):
-        OrderNotificationService.notify_design_approved(order, user)
+        # OrderNotificationService.notify_design_approved(order, user)
+        pass
 
     @classmethod
     def _notify_production_started(cls, order, user):
-        OrderNotificationService.notify_production_started(order, user)
+        # OrderNotificationService.notify_production_started(order, user)
+        pass
 
     @classmethod
     def _notify_order_delivered(cls, order, user):
-        OrderNotificationService.notify_order_delivered(order, user)
+        # OrderNotificationService.notify_order_delivered(order, user)
+        pass
 
 
 class OrderCreationService:
