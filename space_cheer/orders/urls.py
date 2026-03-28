@@ -39,7 +39,7 @@ urlpatterns = [
     path(
         "items/athlete/<int:athlete_item_id>/measurements/",
         views.order_item_measurements,
-        name="item_measurements_order",
+        name="order_item_measurements",
     ),
     path(
         "items/athlete/<int:athlete_item_id>/measurements/add",
