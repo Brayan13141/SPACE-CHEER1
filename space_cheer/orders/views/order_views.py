@@ -10,15 +10,11 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 from orders.services.preconditions import OrderBlockingIssue
+from orders.pagination import OrderPaginator
+from orders.services.logging_service import OrderLogger
+import logging
 
-# =========================================================
-# TEMPLATE VIEWS
-# Views que renderizan HTML
-# =========================================================
-
-# ---------------------------------------------------------
-# Orders
-# ---------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -26,12 +22,15 @@ def order_list(request):
     """
     Lista de órdenes visibles para el usuario.
     Permite filtrar activas vs finalizadas.
+
+    **CON PAGINACIÓN**
     """
     filter_status = request.GET.get("filter", "active")
+    page_number = request.GET.get("page", 1)
 
     orders = (
         Order.objects.visible_for_user(request.user)
-        .select_related(  # ← FKs que el template usa directamente
+        .select_related(
             "owner_user",
             "owner_team",
             "created_by",
@@ -51,11 +50,19 @@ def order_list(request):
     else:
         orders = orders.exclude(status__in=["DELIVERED", "CANCELLED"])
 
+    #  PAGINACIÓN
+    page_obj, pagination_info = OrderPaginator.paginate(
+        queryset=orders.order_by("-created_at").distinct(),
+        page_number=page_number,
+    )
+
     return render(
         request,
         "orders/users/order_list.html",
         {
-            "orders": orders.order_by("-created_at").distinct(),
+            "page_obj": page_obj,  # ← Cambio de "orders" a "page_obj"
+            "orders": page_obj.object_list,
+            "pagination": pagination_info,  # ← Metadata
             "filter_status": filter_status,
         },
     )
@@ -122,7 +129,11 @@ def order_create(request):
                 contact_info.full_clean()
                 contact_info.save()
 
+                # LOGGING
+                OrderLogger.log_order_created(order, request.user)
+
         except ValidationError as e:
+            logger.error(f"Order creation failed: {e}", extra={"user": request.user.id})
             return render(
                 request,
                 "orders/users/order_create.html",
@@ -230,16 +241,14 @@ def order_detail(request, order_id):
             "design_images",
             "orderlog_set",
         ),
-        pk=order_id,  # ← pk va acá, como kwarg separado
+        pk=order_id,
     )
 
-    # Ambas fuentes producen OrderBlockingIssue — tipo uniforme
     blocking_issues = []
 
     try:
         Order.validate_order_ready(order)
     except ValidationError as e:
-
         for msg in e.messages:
             blocking_issues.append(
                 OrderBlockingIssue(code="ORDER_NOT_READY", message=msg)
