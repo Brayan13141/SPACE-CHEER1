@@ -706,19 +706,25 @@ class OrderItemAthlete(models.Model):
                 raise ValidationError("Orden personal: atleta inválido")
 
     def has_complete_measurements(self):
+        required_fields = list(
+            self.order_item.product.measurement_fields.filter(
+                required=True
+            ).values_list("field_id", flat=True)
+        )
 
-        required_fields = self.order_item.product.measurement_fields.filter(
-            required=True
-        ).values_list("field_id", flat=True)
+        if not required_fields:
+            return True
 
-        for field_id in required_fields:
+        # Con CharField: un valor es válido si existe y no está vacío
+        existing_with_values = (
+            self.measurements.filter(
+                field_id__in=required_fields,
+            )
+            .exclude(value="")  # excluir medidas vacías
+            .values_list("field_id", flat=True)
+        )
 
-            measurement = self.measurements.filter(field_id=field_id).first()
-
-            if not measurement or not measurement.value:
-                return False
-
-        return True
+        return set(required_fields) == set(existing_with_values)
 
     def save(self, *args, **kwargs):
         """Ejecuta validaciones y verifica que la orden sea editable."""
@@ -741,8 +747,14 @@ class OrderItemAthlete(models.Model):
 
 class OrderItemMeasurement(models.Model):
     """
-    Almacena el valor de una medida específica para un atleta en un producto que requiere medidas.
-    Se relaciona con OrderItemAthlete y con MeasurementField.
+    Snapshot híbrido de medidas por atleta dentro de un item.
+
+    value_original: string copiado del perfil del atleta al importar
+    value: editable dentro de la orden (inicia igual a value_original)
+    is_modified: True si el coach editó manualmente el valor de la orden
+
+    "" (vacío) = el atleta no tenía esta medida al momento del snapshot
+    valor != "" = medida registrada
     """
 
     athlete_item = models.ForeignKey(
@@ -750,11 +762,18 @@ class OrderItemMeasurement(models.Model):
         on_delete=models.CASCADE,
         related_name="measurements",
     )
-    field = models.ForeignKey(MeasurementField, on_delete=models.PROTECT)
-    # Se guardan también el nombre y unidad por si el campo original cambia en el futuro (histórico)
+    field = models.ForeignKey("measures.MeasurementField", on_delete=models.PROTECT)
+
     field_name = models.CharField(max_length=100)
     field_unit = models.CharField(max_length=20, blank=True)
-    value = models.CharField(max_length=50, blank=True)
+
+    # CharField para ser fiel a MeasurementValue.value
+    # Soporta integer, decimal y text sin conversión
+    value_original = models.CharField(max_length=50, blank=True, default="")
+    value = models.CharField(max_length=50, blank=True, default="")
+
+    is_modified = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -763,13 +782,28 @@ class OrderItemMeasurement(models.Model):
                 name="unique_measurement_per_field_per_athlete",
             )
         ]
+        indexes = [
+            models.Index(fields=["athlete_item"]),
+            models.Index(fields=["field"]),
+        ]
+
+    @property
+    def has_value(self) -> bool:
+        """True si el atleta tiene esta medida registrada."""
+        return bool(self.value and self.value.strip())
+
+    @property
+    def display_value(self) -> str:
+        """
+        Para templates: nunca muestra None ni string vacío.
+        Muestra el valor con unidad o un placeholder visual.
+        """
+        if not self.has_value:
+            return "—"  # guión largo, no "None"
+        unit = f" {self.field_unit}" if self.field_unit else ""
+        return f"{self.value}{unit}"
 
     def clean(self):
-        """
-        Validaciones:
-        - El producto debe tener estrategia MEASUREMENTS.
-        - El campo de medida debe estar asociado al producto.
-        """
         order = self.athlete_item.order_item.order
 
         if not order.can_edit_measurements():
@@ -788,8 +822,16 @@ class OrderItemMeasurement(models.Model):
             self.field_name = self.field.name
             self.field_unit = self.field.unit
 
+        # Detectar modificación: solo si el valor difiere del original
+        # y el original no estaba vacío (una medida nueva no cuenta como "modificada")
+        if self.value_original and self.value != self.value_original:
+            self.is_modified = True
+
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.athlete_item.athlete} - {self.field_name}: {self.display_value}"
 
 
 class OrderDesignImage(models.Model):
