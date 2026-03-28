@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 import secrets
+from accounts.models import User
 
 
 # -------------------------
@@ -75,6 +76,12 @@ class Team(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.coach.get_full_name() or self.coach.username}"
+
+    @property
+    def members(self):
+        return User.objects.filter(
+            team_memberships__team=self, team_memberships__is_active=True
+        )
 
 
 # -------------------------

@@ -4,11 +4,12 @@ from django.utils import timezone
 from accounts.models import (
     User,
     Role,
-    AthleteProfile,
     UserOwnership,
-    AthleteMedicalInfo,
 )
-from teams.forms import QuickAthleteRegisterForm
+from orders.models import OrderItemAthlete
+from orders.services.servicesItems.order_item_athlete_service import (
+    OrderItemAthleteService,
+)
 from django.db import transaction
 from django.db.models import Prefetch
 from django.contrib import messages
@@ -17,8 +18,6 @@ from django.http import HttpResponseNotAllowed
 from teams.models import Team, UserTeamMembership, GLOBAL_ROLE_HIERARCHY
 from measures.models import MeasurementField, MeasurementValue
 from measures.forms import DynamicMeasurementsForm
-from django.db.models import Max
-from decouple import config
 import secrets
 import string
 
@@ -464,16 +463,51 @@ def edit_athlete_measures(request, id):
         form = DynamicMeasurementsForm(request.POST, user=athlete)
 
         if form.is_valid():
+
+            #  TRACK CAMBIOS (clave)
+            changed = False
+
             for slug, value in form.cleaned_data.items():
                 field = MeasurementField.objects.get(slug=slug)
+
+                existing = MeasurementValue.objects.filter(
+                    user=athlete, field=field
+                ).first()
+
+                # -------------------------
+                # DELETE
+                # -------------------------
                 if value in ("", None):
-                    MeasurementValue.objects.filter(user=athlete, field=field).delete()
+                    if existing:
+                        existing.delete()
+                        changed = True
+
+                # -------------------------
+                # CREATE / UPDATE
+                # -------------------------
                 else:
-                    MeasurementValue.objects.update_or_create(
-                        user=athlete, field=field, defaults={"value": value}
-                    )
+                    if not existing or existing.value != value:
+                        MeasurementValue.objects.update_or_create(
+                            user=athlete,
+                            field=field,
+                            defaults={"value": value},
+                        )
+                        changed = True
+
+            # -------------------------
+            #  SYNC AUTOMÁTICO
+            # -------------------------
+            if changed:
+                athlete_items = OrderItemAthlete.objects.filter(
+                    athlete=athlete
+                ).prefetch_related("measurements")
+
+                for athlete_item in athlete_items:
+                    OrderItemAthleteService.sync_measurements_from_athlete(athlete_item)
+
             messages.success(request, "Medidas actualizadas.")
             return redirect("edit_athlete_measures", id=id)
+
     else:
         form = DynamicMeasurementsForm(user=athlete)
 

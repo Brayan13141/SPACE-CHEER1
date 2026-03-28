@@ -17,19 +17,25 @@ from orders.models import (
 from orders.services.state import OrderStateService
 from orders.forms import OrderDatesForm
 from django.db.models import Q, Sum
+from orders.pagination import OrderPaginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 logger = logging.getLogger(__name__)
 
 
 @staff_member_required
 def admin_order_list(request):
-
     status_filter = request.GET.get("status", "")
     type_filter = request.GET.get("type", "")
     search = request.GET.get("q", "").strip()
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
+    page_number = request.GET.get("page", 1)
+    page_size = request.GET.get("page_size", 15)
 
+    # ─────────────────────────────
+    # Query principal
+    # ─────────────────────────────
     orders = (
         Order.objects.select_related("owner_user", "owner_team", "created_by")
         .prefetch_related(
@@ -42,7 +48,9 @@ def admin_order_list(request):
         .order_by("-created_at")
     )
 
-    # ── Filtros ──────────────────────────────────────────────────────────
+    # ─────────────────────────────
+    # Filtros
+    # ─────────────────────────────
     if status_filter:
         orders = orders.filter(status=status_filter)
 
@@ -75,7 +83,9 @@ def admin_order_list(request):
         except ValueError:
             pass
 
-    # ── Stats por estado (siempre sobre el total sin filtrar) ─────────────
+    # ─────────────────────────────
+    # Stats globales (sin filtros)
+    # ─────────────────────────────
     all_orders = Order.objects.all()
     stats = {
         "total": all_orders.count(),
@@ -87,26 +97,102 @@ def admin_order_list(request):
         "cancelled": all_orders.filter(status="CANCELLED").count(),
     }
 
-    # ── Órdenes que necesitan atención del admin ──────────────────────────
+    # Cards para template (evita lógica compleja en HTML)
+    stats_cards = [
+        {"key": "total", "label": "Todas", "color": "primary", "value": stats["total"]},
+        {
+            "key": "DRAFT",
+            "label": "Borrador",
+            "color": "secondary",
+            "value": stats["draft"],
+        },
+        {
+            "key": "PENDING",
+            "label": "Pendiente",
+            "color": "warning",
+            "value": stats["pending"],
+        },
+        {
+            "key": "IN_PRODUCTION",
+            "label": "Producción",
+            "color": "primary",
+            "value": stats["in_production"],
+        },
+        {
+            "key": "DELIVERED",
+            "label": "Entregadas",
+            "color": "success",
+            "value": stats["delivered"],
+        },
+        {
+            "key": "CANCELLED",
+            "label": "Canceladas",
+            "color": "danger",
+            "value": stats["cancelled"],
+        },
+    ]
+
+    # ─────────────────────────────
+    # Needs attention
+    # ─────────────────────────────
     needs_attention = orders.filter(
         Q(status="PENDING", freeze_payment_date__isnull=True)
         | Q(status="PENDING", first_payment_date__isnull=True)
         | Q(status="IN_PRODUCTION", uniform_delivery_date__isnull=True)
     ).values_list("id", flat=True)
 
+    # ─────────────────────────────
+    # Paginación
+    # ─────────────────────────────
+    try:
+        page_size = int(page_size)
+        if page_size <= 0:
+            page_size = 25
+    except ValueError:
+        page_size = 25
+
+    paginator = Paginator(orders, page_size)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    pagination = {
+        "total_items": paginator.count,
+        "total_pages": paginator.num_pages,
+        "current_page": page_obj.number,
+        "has_previous": page_obj.has_previous(),
+        "has_next": page_obj.has_next(),
+        "previous_page": (
+            page_obj.previous_page_number() if page_obj.has_previous() else None
+        ),
+        "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
+        "page_range": paginator.get_elided_page_range(
+            number=page_obj.number, on_each_side=2, on_ends=1
+        ),
+        "start_index": page_obj.start_index(),
+        "end_index": page_obj.end_index(),
+    }
+
     return render(
         request,
         "orders/admin/order_list.html",
         {
-            "orders": orders,
+            "page_obj": page_obj,
+            "orders": page_obj.object_list,
+            "pagination": pagination,
             "status_filter": status_filter,
             "type_filter": type_filter,
             "search": search,
             "date_from": date_from,
             "date_to": date_to,
-            "status_choices": Order.STATUS_CHOICES,
             "stats": stats,
+            "stats_cards": stats_cards,
             "needs_attention": set(needs_attention),
+            "request": request,  # 🔥 clave para pagination.html
         },
     )
 

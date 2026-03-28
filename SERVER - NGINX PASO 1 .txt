@@ -7,6 +7,12 @@ INSTALAR NGINX
 sudo apt update
 sudo apt install -y nginx
 
+Activar config:
+sudo ln -s /etc/nginx/sites-available/space_cheer /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+
 ============================================== COMANDOS DE EJECUCION =================================
 Reiniciar (cierre completo): sudo systemctl restart nginx
 Recargar (sin cortes): sudo systemctl reload nginx
@@ -24,8 +30,8 @@ Luego crea el archivo:
 sudo nano /etc/nginx/sites-available/django_project
 
 server {
-    listen 80;
-    server_name localhost;
+    listen 8000;
+    server_name _;
 
     location = /favicon.ico { access_log off; log_not_found off; }
 
@@ -38,6 +44,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
+    client_max_body_size 40M;
 }
 
 ============================================== COMANDOS DE EJECUCION =================================
@@ -48,10 +55,12 @@ Activar la configuración de NGINX
 sudo ln -s /etc/nginx/sites-available/django_project /etc/nginx/sites-enabled
 
 Ejecutar Gunicorn en background
-gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 TU_PROYECTO.wsgi:application
+gunicorn --daemon --workers 3 --bind 127.0.0.1:8001 space_cheer.wsgi:application
+
 Ejecutar Gunicorn en la terminal
-gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 space_cheer.wsgi:application
+gunicorn space_cheer.wsgi:application --bind 127.0.0.1:8001
 
 Reiniciar Gunicorn
 pkill gunicorn
-gunicorn --daemon --workers 3 --bind 127.0.0.1:8000 space_cheer.wsgi:application
+gunicorn --daemon --workers 3 --bind 127.0.0.1:8001 space_cheer.wsgi:application
+
