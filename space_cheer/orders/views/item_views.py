@@ -173,6 +173,9 @@ def import_team_athletes(request, item_id):
             "order",
             "product",
             "order__owner_team",
+        ).prefetch_related(
+            "product__measurement_fields__field",
+            "athletes__measurements",  #  importante para sync
         ),
         pk=item_id,
         order__in=Order.objects.visible_for_user(request.user),
@@ -181,10 +184,9 @@ def import_team_athletes(request, item_id):
     order = item.order
     product = item.product
 
-    # -------------------------------------------------
+    # -------------------------
     # VALIDACIONES
-    # -------------------------------------------------
-
+    # -------------------------
     if not order.can_edit_general():
         messages.error(request, "La orden no es editable.")
         return redirect("orders:order_item_detail", item_id=item.id)
@@ -200,45 +202,66 @@ def import_team_athletes(request, item_id):
     if not order.owner_team:
         messages.error(request, "La orden no tiene equipo asignado.")
         return redirect("orders:order_item_detail", item_id=item.id)
-    if not product.requires_team:
-        messages.error(request, "Este producto no pertenece a un equipo.")
-        return redirect("orders:order_item_detail", item_id=item.id)
 
-    # -------------------------------------------------
-    # OBTENER ATLETAS DEL EQUIPO
-    # -------------------------------------------------
+    # -------------------------
+    # OBTENER ATLETAS
+    # -------------------------
+    memberships = (
+        UserTeamMembership.objects.filter(
+            team=order.owner_team,
+            status="accepted",
+            is_active=True,
+            role_in_team="ATLETA",
+        )
+        .select_related("user")
+        .prefetch_related("user__measurements")
+    )
 
-    memberships = UserTeamMembership.objects.filter(
-        team=order.owner_team,
-        status="accepted",
-        is_active=True,
-        role_in_team="ATLETA",
-    ).select_related("user")
-
-    # atletas ya agregados
-    existing_ids = set(item.athletes.values_list("athlete_id", flat=True))
+    existing_athletes = {ai.athlete_id: ai for ai in item.athletes.all()}
 
     created = 0
-
+    updated = 0
     errors = []
 
     for membership in memberships:
         athlete = membership.user
-        if athlete.id in existing_ids:
-            continue
+        print(f"Importando atleta {athlete.username} (ID: {athlete.id})")
         try:
-            OrderItemAthleteService.add_athlete(order_item=item, athlete=athlete)
-            created += 1
+            # -------------------------
+            # NUEVO ATLETA
+            # -------------------------
+            if athlete.id not in existing_athletes:
+                print(f"Creando nuevo atleta {athlete.username} (ID: {athlete.id})")
+                OrderItemAthleteService.add_athlete(item, athlete)
+                created += 1
+
+            # -------------------------
+            # ATLETA EXISTENTE → SYNC
+            # -------------------------
+            else:
+                athlete_item = existing_athletes[athlete.id]
+                print(
+                    f"Atleta {athlete.first_name + ' ' + athlete.last_name} ya existe en el item, sincronizando medidas..."
+                )
+                OrderItemAthleteService.sync_measurements_from_athlete(athlete_item)
+
+                updated += 1
+
         except ValidationError as e:
             errors.append(f"{athlete}: {', '.join(e.messages)}")
 
-    if errors:
-        for err in errors:
-            messages.warning(request, err)
+    # -------------------------
+    # MENSAJES
+    # -------------------------
+    for err in errors:
+        messages.warning(request, err)
 
-    if created:
-        messages.success(request, f"{created} atletas importados correctamente.")
+    if created or updated:
+        messages.success(
+            request,
+            f"{created} atletas creados, {updated} actualizados correctamente.",
+        )
     elif not errors:
-        messages.info(request, "No había atletas nuevos para importar.")
+        messages.info(request, "No había cambios para aplicar.")
 
     return redirect("orders:order_item_detail", item_id=item.id)
