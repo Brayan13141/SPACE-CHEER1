@@ -37,7 +37,7 @@ class OrderDatesForm(forms.ModelForm):
         }
         labels = {
             "freeze_payment_date": "Fecha de pago de congelación",
-            "measurements_due_date": "Fecha límite de entrega de medidas",
+            "measurements_due_date": "Fecha límite: entrega de medidas",
             "uniform_delivery_date": "Fecha de entrega",
             "first_payment_date": "Fecha primer pago",
             "final_payment_date": "Fecha pago final",
