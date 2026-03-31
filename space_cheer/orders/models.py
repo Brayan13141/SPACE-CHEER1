@@ -242,10 +242,6 @@ class Order(models.Model):
         if not order.has_contact_info():
             raise ValidationError("La orden no tiene información de contacto")
 
-        contact = getattr(order, "contact_info", None)
-        if contact and not contact.closed:
-            raise ValidationError("La información de contacto debe estar cerrada")
-
         team_athletes = set()
 
         if order.order_type == "TEAM":
