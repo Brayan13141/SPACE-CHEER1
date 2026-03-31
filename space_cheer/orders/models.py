@@ -239,6 +239,9 @@ class Order(models.Model):
 
     @staticmethod
     def validate_order_ready(order):
+        if not order.has_contact_info():
+            raise ValidationError("La orden no tiene información de contacto")
+
         team_athletes = set()
 
         if order.order_type == "TEAM":
@@ -250,6 +253,8 @@ class Order(models.Model):
                     role_in_team="ATLETA",
                 ).values_list("user_id", flat=True)
             )
+        if not order.items.exists():
+            raise ValidationError("La orden debe tener al menos un item")
 
         for item in order.items.select_related("product").prefetch_related(
             "athletes__athlete",

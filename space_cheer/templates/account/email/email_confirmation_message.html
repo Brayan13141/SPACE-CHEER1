@@ -1,0 +1,29 @@
+{% extends "account/email/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+    <p>Hola 
+        {% if user.first_name %}{{ user.first_name }}
+        {% elif user.username %}{{ user.username }}
+        {% else %}usuario
+        {% endif %},
+    </p>
+
+    <p>Recibiste este correo porque 
+        {% if user %}te registraste en{% else %}se solicitó cambiar el correo de tu cuenta en{% endif %} 
+        <strong>{{ site.name }}</strong>.
+    </p>
+
+    <p>Para confirmar {% if user %}tu cuenta{% else %}este cambio de correo{% endif %}, haz clic en el botón:</p>
+
+    <p style="text-align: center;">
+        <a href="{{ activate_url }}" class="button">Confirmar correo</a>
+    </p>
+
+    <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+    <p><a href="{{ activate_url }}">{{ activate_url }}</a></p>
+
+    <p>Si no solicitaste esta acción, ignora este mensaje. Tu cuenta no será activada hasta que confirmes.</p>
+
+    <p>¡Gracias por unirte a {{ site.name }}!</p>
+{% endblock %}

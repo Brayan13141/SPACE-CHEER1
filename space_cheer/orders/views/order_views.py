@@ -11,10 +11,11 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef
 from orders.services.preconditions import OrderBlockingIssue
 from orders.pagination import OrderPaginator
-from orders.services.logging_service import OrderLogger
-import logging
 
-logger = logging.getLogger(__name__)
+# from orders.services.logging_service import OrderLogger
+# import logging
+
+# logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -130,10 +131,11 @@ def order_create(request):
                 contact_info.save()
 
                 # LOGGING
-                OrderLogger.log_order_created(order, request.user)
+                # OrderLogger.log_order_created(order, request.user)
 
         except ValidationError as e:
-            logger.error(f"Order creation failed: {e}", extra={"user": request.user.id})
+            # logger.error(f"Order creation failed: {e}", extra={"user": request.user.id})
+
             return render(
                 request,
                 "orders/users/order_create.html",

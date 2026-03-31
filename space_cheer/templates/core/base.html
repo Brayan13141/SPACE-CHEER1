@@ -413,6 +413,16 @@
                             <i class="bi bi-people me-1"></i>Comunidad
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarCommunity">
+                            <li>
+                            <a href="{% url 'social:send_invite' %}" class="dropdown-item">
+                                <i class="bi bi-person-plus-fill me-1"></i>
+                                Invitar
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    +
+                                </span>
+                            </a>
+                            </li>     
+
                             <li><a class="dropdown-item" href="#">
                                 <i class="bi bi-chat-dots me-2"></i>Foros
                             </a></li>

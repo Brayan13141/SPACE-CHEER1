@@ -1,0 +1,18 @@
+{% extends "account/email/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+    <p>Hola,</p>
+
+    <p>Alguien (probablemente tú) intentó registrarse en <strong>{{ site.name }}</strong> con esta dirección de correo electrónico.</p>
+
+    <p>Sin embargo, ya existe una cuenta asociada a este correo.</p>
+
+    <p>Si olvidaste tu contraseña, puedes restablecerla haciendo clic aquí: 
+        <a href="{{ password_reset_url }}">Restablecer contraseña</a>.
+    </p>
+
+    <p>Si no solicitaste este registro, puedes ignorar este mensaje sin ningún problema.</p>
+
+    <p>Gracias,<br>El equipo de {{ site.name }}</p>
+{% endblock %}

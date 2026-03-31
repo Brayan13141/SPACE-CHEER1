@@ -1,0 +1,1 @@
+{{ inviter_name }} te ha invitado a unirte a {{ site.name }}. Haz clic en el enlace para aceptar la invitación

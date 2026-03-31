@@ -20,6 +20,11 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     # products
     path("products/", include("products.urls")),
+    path("social/", include("social.urls", namespace="social")),
+    path(
+        "invitations/",
+        include(("invitations.urls", "invitations"), namespace="invitations"),
+    ),
 ]
 
 if settings.DEBUG:
