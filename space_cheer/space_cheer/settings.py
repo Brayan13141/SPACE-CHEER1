@@ -59,11 +59,29 @@ INSTALLED_APPS = [
     # Allauth
     "allauth",
     "allauth.account",
+    # INVITATIONS
+    "invitations",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.apple",
 ]
+
+# =================================================================
+# INVITATIONS CONFIGURATION
+# =================================================================
+ACCOUNT_ADAPTER = "invitations.models.InvitationsAdapter"
+# Días antes de que expire la invitación (default=3)
+INVITATIONS_INVITATION_EXPIRY = 7
+
+# Si la invitación se acepta después del registro (default=False)
+# True: el usuario debe registrarse primero, luego se activa la invitación
+INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
+
+# Prefijo para el asunto (None usa el nombre del sitio entre corchetes)
+INVITATIONS_EMAIL_SUBJECT_PREFIX = ""
+
+INVITATIONS_ADAPTER = "social.adapters.CustomInvitationsAdapter"
 # =================================================================
 # DJANGO ALLAUTH CONFIGURATION
 # =================================================================
@@ -97,7 +115,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # Campo de username
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"  # Campo de email en el modelo de usuario
 
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Space Cheer]"
 
 ACCOUNT_LOGIN_METHODS = {"email", "username"}
@@ -105,7 +123,6 @@ ACCOUNT_LOGIN_METHODS = {"email", "username"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 # -------------------SOCIALACCOUNT----------------------------
 SOCIALACCOUNT_ADAPTER = "accounts.social_adapter.CustomSocialAccountAdapter"
-SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
