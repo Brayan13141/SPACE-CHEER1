@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Agrega esta línea para habilitar el framework de sitios
+    "django.contrib.sites",
     "django_celery_beat",
     # Apps del proyecto
     "teams",
@@ -253,3 +255,5 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "SPACE CHEER - "
