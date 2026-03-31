@@ -1,0 +1,1 @@
+{{ site.name }} - {{ inviter_name }} te ha invitado a unirte

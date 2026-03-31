@@ -1,0 +1,11 @@
+Hola 👋
+
+{{ inviter }} te ha invitado a unirte a Space Cheer.
+
+Haz clic en el siguiente enlace para aceptar la invitación:
+
+{{ invite_url }}
+
+Este enlace expirará en {{ expiration_days }} días.
+
+¡Te esperamos!

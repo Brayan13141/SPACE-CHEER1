@@ -1,0 +1,102 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación a {{ site.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d0d1a;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #1a1a2e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid #2cb1ff;
+        }
+        .header img {
+            max-width: 150px;
+            height: auto;
+        }
+        .content {
+            padding: 30px 25px;
+            color: #e4eaff;
+            line-height: 1.6;
+        }
+        .button {
+            display: inline-block;
+            background-color: #2cb1ff;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .button:hover {
+            background-color: #1e8bc9;
+        }
+        .footer {
+            background-color: #0f0f1f;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #2a2a3a;
+        }
+        .footer a {
+            color: #2cb1ff;
+            text-decoration: none;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95% !important;
+            }
+            .content {
+                padding: 20px 15px;
+            }
+            .button {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://spacecheer.com/static/images/logo.png" alt="{{ site.name }}">
+        </div>
+        <div class="content">
+            <p>Hola,</p>
+            <p><strong>{{ inviter_name }}</strong> te ha invitado a unirte a <strong>{{ site.name }}</strong>, la plataforma para equipos de cheerleading y competencias.</p>
+            <p>Para aceptar la invitación y crear tu cuenta, haz clic en el botón:</p>
+            <p style="text-align: center;">
+                <a href="{{ accept_url }}" class="button">Aceptar invitación</a>
+            </p>
+            <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+            <p><a href="{{ accept_url }}">{{ accept_url }}</a></p>
+            <p>Este enlace expirará en {{ invitation_expiry_days }} días.</p>
+            <p>Si no esperabas esta invitación, puedes ignorar este mensaje.</p>
+            <p>¡Te esperamos!<br>El equipo de {{ site.name }}</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {% now "Y" %} {{ site.name }}. Todos los derechos reservados.</p>
+            <p><a href="https://spacecheer.com/contacto/">Contacto</a> | <a href="https://spacecheer.com/privacidad/">Política de privacidad</a></p>
+        </div>
+    </div>
+</body>
+</html>

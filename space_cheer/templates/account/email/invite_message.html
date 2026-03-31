@@ -1,0 +1,23 @@
+{% extends "account/email/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+    <p>Hola,</p>
+
+    <p><strong>{{ inviter_name }}</strong> te ha invitado a unirte a <strong>{{ site.name }}</strong>, la plataforma para equipos de cheerleading y competencias.</p>
+
+    <p>Para aceptar la invitación y crear tu cuenta, haz clic en el botón:</p>
+
+    <p style="text-align: center;">
+        <a href="{{ accept_url }}" class="button">Aceptar invitación</a>
+    </p>
+
+    <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+    <p><a href="{{ accept_url }}">{{ accept_url }}</a></p>
+
+    <p>Este enlace expirará en {{ invitation_expiry_days }} días.</p>
+
+    <p>Si no esperabas esta invitación, puedes ignorar este mensaje.</p>
+
+    <p>¡Te esperamos!<br>El equipo de {{ site.name }}</p>
+{% endblock %}
