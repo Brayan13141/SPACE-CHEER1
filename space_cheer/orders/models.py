@@ -208,7 +208,7 @@ class Order(models.Model):
         # Restricción a nivel BD: garantiza que owner_user y owner_team sean consistentes con order_type
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     (
                         Q(order_type="PERSONAL")
                         & Q(owner_user__isnull=False)
