@@ -7,6 +7,57 @@
 {% block page_title %}{% trans "Accede a tu cuenta" %}{% endblock %}
 
 {% block content %}
+<style>
+/* Versión más sutil para "Powered by" */
+.powered-by-neon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 2rem;
+    font-size: 0.75rem;          /* más pequeño */
+    opacity: 0.6;                /* más discreto */
+    transition: opacity 0.2s ease;
+}
+
+.powered-by-neon:hover {
+    opacity: 0.9;                /* solo se destaca un poco al pasar el mouse */
+}
+
+.powered-text {
+    color: #a0a7d0;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+}
+
+.brand-link {
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.brand-subtle {
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #fff, var(--secondary-color, #6c5ce7));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* sin animación de pulso, solo un sutil brillo estático */
+    text-shadow: 0 0 4px rgba(108, 92, 231, 0.2);
+}
+
+.brand-link:hover .brand-subtle {
+    text-shadow: 0 0 8px rgba(108, 92, 231, 0.5);
+    background: linear-gradient(135deg, #fff, var(--secondary-color, #6c5ce7));
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+</style>
+
 <form class="login" method="POST" action="{% url 'account_login' %}" novalidate>
     {% csrf_token %}
     
@@ -113,6 +164,21 @@
     <a href="{% url 'account_signup' %}" class="btn btn-neon-outline">
         <i class="bi bi-person-plus me-2"></i>
         {% trans "Crear una cuenta nueva" %}
+    </a>
+</div>
+
+<!-- Powered by con enlace a Git -->
+<div class="powered-by-neon text-center mt-4">
+    <span class="powered-text">
+        <i class="bi bi-stars"></i> 
+        {% trans "Powered by" %}
+    </span>
+    <a href="{{ GITHUB_REPO_URL|default:'https://github.com/Brayan13141' }}" 
+       class="brand-link" 
+       target="_blank" 
+       rel="noopener noreferrer">
+        <i class="bi bi-github me-1"></i>
+        <span class="brand-subtle">BRYAN SANCHEZ</span>
     </a>
 </div>
 {% endblock %}
