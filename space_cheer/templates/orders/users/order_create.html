@@ -24,7 +24,7 @@
     {% if teams.exists %}
     <div class="mb-3 d-none" id="team-selector">
       <label class="form-label">Equipo</label>
-      <select name="order_team" class="form-select">
+      <select name="team_id" class="form-select">
         <option value="">Selecciona un equipo</option>
         {% for team in teams %}
           <option value="{{ team.id }}">{{ team.name }}</option>
