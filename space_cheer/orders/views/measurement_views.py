@@ -33,6 +33,13 @@ def item_measurements_order_add(request, athlete_item_id):
             item_id=athlete_item.order_item.id,
         )
 
+    if not order.can_edit_measurements():
+        messages.error(request, "Las medidas están bloqueadas.")
+        return redirect(
+            "orders:order_item_detail",
+            item_id=athlete_item.order_item.id,
+        )
+
     product_fields = product.measurement_fields.select_related("field")
 
     existing_measurements = {m.field_id: m for m in athlete_item.measurements.all()}

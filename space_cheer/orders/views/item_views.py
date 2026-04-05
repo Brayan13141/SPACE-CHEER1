@@ -175,93 +175,30 @@ def import_team_athletes(request, item_id):
             "order__owner_team",
         ).prefetch_related(
             "product__measurement_fields__field",
-            "athletes__measurements",  #  importante para sync
+            "athletes__measurements",
         ),
         pk=item_id,
         order__in=Order.objects.visible_for_user(request.user),
     )
 
-    order = item.order
-    product = item.product
+    try:
+        result = OrderItemAthleteService.import_from_team(item)
 
-    # -------------------------
-    # VALIDACIONES
-    # -------------------------
-    if not order.can_edit_general():
-        messages.error(request, "La orden no es editable.")
-        return redirect("orders:order_item_detail", item_id=item.id)
+        # -------------------------
+        # MENSAJES
+        # -------------------------
+        for err in result["errors"]:
+            messages.warning(request, err)
 
-    if order.order_type != "TEAM":
-        messages.error(request, "Solo órdenes TEAM permiten importar atletas.")
-        return redirect("orders:order_item_detail", item_id=item.id)
+        if result["created"] or result["updated"]:
+            messages.success(
+                request,
+                f'{result["created"]} atletas creados, {result["updated"]} actualizados correctamente.',
+            )
+        else:
+            messages.info(request, "No había cambios para aplicar.")
 
-    if not product.requires_athletes:
-        messages.error(request, "Este producto no utiliza atletas.")
-        return redirect("orders:order_item_detail", item_id=item.id)
-
-    if not order.owner_team:
-        messages.error(request, "La orden no tiene equipo asignado.")
-        return redirect("orders:order_item_detail", item_id=item.id)
-
-    # -------------------------
-    # OBTENER ATLETAS
-    # -------------------------
-    memberships = (
-        UserTeamMembership.objects.filter(
-            team=order.owner_team,
-            status="accepted",
-            is_active=True,
-            role_in_team="ATLETA",
-        )
-        .select_related("user")
-        .prefetch_related("user__measurements")
-    )
-
-    existing_athletes = {ai.athlete_id: ai for ai in item.athletes.all()}
-
-    created = 0
-    updated = 0
-    errors = []
-
-    for membership in memberships:
-        athlete = membership.user
-        print(f"Importando atleta {athlete.username} (ID: {athlete.id})")
-        try:
-            # -------------------------
-            # NUEVO ATLETA
-            # -------------------------
-            if athlete.id not in existing_athletes:
-                print(f"Creando nuevo atleta {athlete.username} (ID: {athlete.id})")
-                OrderItemAthleteService.add_athlete(item, athlete)
-                created += 1
-
-            # -------------------------
-            # ATLETA EXISTENTE → SYNC
-            # -------------------------
-            else:
-                athlete_item = existing_athletes[athlete.id]
-                print(
-                    f"Atleta {athlete.first_name + ' ' + athlete.last_name} ya existe en el item, sincronizando medidas..."
-                )
-                OrderItemAthleteService.sync_measurements_from_athlete(athlete_item)
-
-                updated += 1
-
-        except ValidationError as e:
-            errors.append(f"{athlete}: {', '.join(e.messages)}")
-
-    # -------------------------
-    # MENSAJES
-    # -------------------------
-    for err in errors:
-        messages.warning(request, err)
-
-    if created or updated:
-        messages.success(
-            request,
-            f"{created} atletas creados, {updated} actualizados correctamente.",
-        )
-    elif not errors:
-        messages.info(request, "No había cambios para aplicar.")
+    except ValidationError as e:
+        messages.error(request, e.message)
 
     return redirect("orders:order_item_detail", item_id=item.id)
