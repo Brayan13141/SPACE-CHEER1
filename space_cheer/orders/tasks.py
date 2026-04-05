@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
     retry_backoff=True,
     acks_late=True,  # ← Importante para reliability
 )
-def auto_close_measurements(self):
+def auto_close_measurements(self, *args, **kwargs):
     """
     Cierra automáticamente medidas vencidas.
 
@@ -31,9 +31,8 @@ def auto_close_measurements(self):
 
     today = timezone.now().date()
 
-    # ✅ Query SIN lock primero (lectura rápida)
+    # Query SIN lock primero (lectura rápida)
     candidates = Order.objects.filter(
-        measurements_open=True,
         measurements_locked=False,
         measurements_due_date__isnull=False,
         measurements_due_date__lte=today,
@@ -49,41 +48,40 @@ def auto_close_measurements(self):
             "total_candidates": 0,
             "successfully_closed": 0,
             "failed": 0,
+            "skipped": 0,
+            "errors": [],
+            "execution_time": timezone.now().isoformat(),
         }
 
     results = {"closed": 0, "failed": 0, "skipped": 0, "errors": []}
 
-    # ✅ Procesar una por una CON lock
+    # procesar una por una CON lock
     for order_id in order_ids:
         try:
             with transaction.atomic():
-                # ✅ Adquirir lock DENTRO de la transacción
-                order = (
-                    Order.objects.select_for_update(nowait=True)
-                    .select_related("owner_user", "owner_team")
-                    .get(id=order_id)
-                )
+                #  Adquirir lock DENTRO de la transacción
+                order = Order.objects.select_for_update(nowait=True).get(id=order_id)
 
                 # Doble verificación (puede haber cambiado)
                 if not order.measurements_open or order.measurements_locked:
                     logger.warning(
-                        f"⚠️  [TASK] Orden #{order_id} ya procesada (race condition)"
+                        f"  [TASK] Orden #{order_id} ya procesada (race condition)"
                     )
                     results["skipped"] += 1
                     continue
 
                 if not order.measurements_due_date:
-                    logger.warning(f"⚠️  [TASK] Orden #{order_id} sin fecha límite")
+                    logger.warning(f"  [TASK] Orden #{order_id} sin fecha límite")
                     results["skipped"] += 1
                     continue
 
                 # Verificar que realmente está vencida
                 if order.measurements_due_date > today:
-                    logger.warning(f"⚠️  [TASK] Orden #{order_id} no vencida todavía")
+                    logger.warning(f"  [TASK] Orden #{order_id} no vencida todavía")
                     results["skipped"] += 1
                     continue
 
-                # ✅ Cerrar medidas
+                #  Cerrar medidas
                 MeasurementLifecycleService.auto_close_if_due(order)
 
                 # Auditoría
@@ -102,10 +100,10 @@ def auto_close_measurements(self):
                 )
 
                 results["closed"] += 1
-                logger.info(f"✅ [TASK] Orden #{order_id} cerrada exitosamente")
+                logger.info(f" [TASK] Orden #{order_id} cerrada exitosamente")
 
         except Order.DoesNotExist:
-            logger.warning(f"⚠️  [TASK] Orden #{order_id} no existe")
+            logger.warning(f" [TASK] Orden #{order_id} no existe")
             results["skipped"] += 1
 
         except Exception as e:
@@ -116,7 +114,7 @@ def auto_close_measurements(self):
                     "error": str(e),
                 }
             )
-            logger.exception(f"❌ [TASK] Error procesando orden #{order_id}")
+            logger.exception(f" [TASK] Error procesando orden #{order_id}")
 
     # Resultado final
     summary = {
@@ -130,10 +128,10 @@ def auto_close_measurements(self):
 
     if results["failed"]:
         logger.error(
-            f"⚠️  [TASK] Completado con {results['failed']} errores: "
+            f"  [TASK] Completado con {results['failed']} errores: "
             f"{results['errors']}"
         )
     else:
-        logger.info(f"✅ [TASK] Completado: {results['closed']}/{total} cerradas")
+        logger.info(f" [TASK] Completado: {results['closed']}/{total} cerradas")
 
     return summary
