@@ -70,7 +70,7 @@ def order_list(request):
 
 
 @login_required
-def order_create(request):
+def create_order(request):
     """
     Crear una orden TEAM o PERSONAL.
     """

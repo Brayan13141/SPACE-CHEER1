@@ -7,7 +7,7 @@ urlpatterns = [
     # ================================== Administrar orders ============================
     path("", views.order_list, name="manage_orders"),
     # ================================== Create order ============================``
-    path("create/", views.order_create, name="create_order"),
+    path("create/", views.create_order, name="create_order"),
     # ================================== Order details ============================
     path("<int:order_id>/", views.order_detail, name="detail_order"),
     # ================================== Order item details ============================
