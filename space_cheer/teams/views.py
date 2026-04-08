@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Team, TeamCategory
 from .forms import TeamForm, TeamCategoryForm, QuickAthleteRegisterForm
-from accounts.decorators import full_profile_required, role_required
+from accounts.decorators import role_required
 from accounts.models import (
     User,
     Role,
@@ -22,7 +22,6 @@ from decouple import config
 from django.db.models import ProtectedError
 
 
-@full_profile_required
 @role_required("ADMIN", "HEADCOACH")
 def manage_categories(request):
 
@@ -104,7 +103,6 @@ def manage_categories(request):
     )
 
 
-@full_profile_required
 @role_required("ADMIN", "HEADCOACH")
 def manage_teams(request):
 
@@ -229,7 +227,8 @@ def manage_teams(request):
 
 
 # Vistas para Agregar o eliminar miembros del equipo y atletas
-@full_profile_required
+
+
 @role_required("ADMIN", "HEADCOACH")
 def manage_team_members(request, team_id):
 
@@ -297,7 +296,8 @@ def manage_team_members(request, team_id):
 
 
 # Vista para CRUD SOLO ATLETAS
-@full_profile_required
+
+
 @role_required("ADMIN", "HEADCOACH")
 def manage_athletes(request):
     # 1 verificar si el usuario tiene permiso para crear atletas
