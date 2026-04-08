@@ -1,0 +1,34 @@
+<!-- templates/accounts/headcoach/dashboard.html -->
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard HeadCoach{% endblock %}
+
+{% block content %}
+<h1>Dashboard HeadCoach</h1>
+
+<h2>Menores sin guardian ({{ count_minors }})</h2>
+
+{% if minors_without_guardian %}
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Acción</th>
+        </tr>
+
+        {% for athlete in minors_without_guardian %}
+        <tr>
+            <td>{{ athlete.get_full_name }}</td>
+            <td>{{ athlete.birth_date }}</td>
+            <td>
+                <a href="{% url 'accounts:assign_guardian' athlete.id %}">
+                    Asignar guardian
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>Todos los atletas tienen guardian ✔️</p>
+{% endif %}
+{% endblock %}
