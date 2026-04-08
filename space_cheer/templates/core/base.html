@@ -274,10 +274,15 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
            
-            
-            <a class="navbar-brand d-flex align-items-center" href="dashboard">
+            {% if not is_guardian%}
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:dashboard' %}">
                 <i class="bi bi-stars me-2"></i>SPACE CHEER
             </a>
+            {% else %}
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'guardian:dashboard' %}">
+                <i class="bi bi-stars me-2"></i>SPACE CHEER 
+            </a>
+            {% endif %}
 
             <!-- Botón de menú móvil para navbar -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
@@ -289,11 +294,18 @@
         
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                      {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
+                     {% if is_guardian %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{% url 'guardian:dashboard' %}">
+                                <i class="bi bi-house-door me-1"></i>Inicio
+                            </a>
+                    {% else %}
+                     <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'core:dashboard' %}">
                             <i class="bi bi-house-door me-1"></i>Inicio
                         </a>
                     </li>
+                    {% endif %}
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarCompetitions" role="button" 
@@ -316,7 +328,7 @@
                             </a></li>
                         </ul>
                     </li>
-
+                    {% if not is_guardian %}
                     <!-- DROPDOWN DE EQUIPOS -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="" id="navbarTeams" role="button" 
@@ -335,14 +347,14 @@
                                 {% endif %}
                             </a></li>
                              <!-- Mis Alumnos - para todos los usuarios -->
-                            <li><a class="dropdown-item" href="{% url 'manage_athletes' %}">
+                            <li><a class="dropdown-item" href="{% url 'coach:manage_athletes' %}">
                                 <i class="bi bi-person-video me-2"></i>Mis Alumnos
                                 {% if user_students_count and user_students_count > 0 %}
                                 <span class="badge bg-info rounded-pill float-end">{{ user_students_count }}</span>
                                 {% endif %}
                             </a></li>
                             <!-- Mi Crew - para todos los usuarios -->
-                            <li><a class="dropdown-item" href="{% url 'manage_owned_users' %}">
+                            <li><a class="dropdown-item" href="{% url 'coach:manage_owned_users' %}">
                                 <i class="bi bi-person-badge me-2"></i>Mi Crew
                             </a></li>
                             
@@ -363,6 +375,26 @@
                           
                         </ul>
                     </li>
+                    {% endif %}
+
+                    {% if user.is_authenticated and user.roles.all %}
+                        {% if is_headcoach or user.is_superuser %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <i class="bi bi-shield-lock me-1"></i>Guardianes
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'guardian:headcoach_dashboard' %}">
+                                             Asignar guardian
+                                        </a>
+                                    </li>
+
+                                    
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endif %}
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarStore" role="button" 
@@ -401,11 +433,6 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-book me-1"></i>Academia
-                        </a>
-                    </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="" id="navbarCommunity" role="button" 
@@ -464,11 +491,6 @@
                             </ul>
                         </div>
                         
-                        <!-- Botón para mostrar/ocultar sidebar de perfil -->
-                        <button class="btn btn-outline-light me-3" id="toggleProfileSidebar">
-                            <i class="bi bi-person-circle"></i>
-                        </button>
-                        
                         <!-- Perfil de usuario -->
                         <div class="dropdown">
                             <a class="d-flex align-items-center text-decoration-none dropdown-toggle" 
@@ -491,10 +513,12 @@
                                 <li><a class="dropdown-item" href="#">
                                     <i class="bi bi-person me-2"></i>Mi Perfil
                                 </a></li>
+
                                 <li><a class="dropdown-item" href="#">
                                     <i class="bi bi-bag me-2"></i>Mis Pedidos
                                 </a></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:list_address' %}">
+                                
+                                <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}">
                                     <i class="bi bi-heart me-2"></i>Mi Dirección
                                 </a></li>
                                 <li><a class="dropdown-item" href="#">
