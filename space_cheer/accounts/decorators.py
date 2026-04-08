@@ -1,115 +1,58 @@
 # accounts/decorators.py
 
+import logging
 from functools import wraps
 from django.shortcuts import redirect
 from django.contrib import messages
+from accounts.utils.redirect_flow import get_user_redirect_flow
 
-
-def full_profile_required(view):
-    # Si es una Class-Based View
-    if hasattr(view, "dispatch"):
-        original_dispatch = view.dispatch
-
-        @wraps(original_dispatch)
-        def new_dispatch(self, request, *args, **kwargs):
-            user = request.user
-
-            if not user.is_authenticated:
-                return redirect("account_login")
-
-            if user.is_superuser:
-                return original_dispatch(self, request, *args, **kwargs)
-
-            if not user.roles.exists():
-                return redirect("accounts:profile_setup")
-
-            role = user.roles.first()
-            if role and role.requires_curp and not user.curp:
-                return redirect("accounts:curp_verification")
-
-            return original_dispatch(self, request, *args, **kwargs)
-
-        view.dispatch = new_dispatch
-        return view
-
-    # Si es una Function-Based View
-    @wraps(view)
-    def wrapper(request, *args, **kwargs):
-        user = request.user
-
-        if not user.is_authenticated:
-            return redirect("account_login")
-
-        if user.is_superuser:
-            return view(request, *args, **kwargs)
-
-        if not user.roles.exists():
-            return redirect("accounts:profile_setup")
-
-        role = user.roles.first()
-        if role and role.requires_curp and not user.curp:
-            return redirect("accounts:curp_verification")
-
-        return view(request, *args, **kwargs)
-
-    return wrapper
+logger = logging.getLogger(__name__)
 
 
 def role_required(*allowed_roles):
+    """
+    Verifica que el usuario tenga alguno de los roles permitidos.
+    También respeta el flujo global (onboarding, CURP, etc).
+    """
 
-    def decorator(view):
-        if hasattr(view, "dispatch"):
-            # Es una class-based view
-            original_dispatch = view.dispatch
+    def decorator(view_func):
 
-            @wraps(original_dispatch)
-            def new_dispatch(self, request, *args, **kwargs):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            user = request.user
 
-                user = request.user
+            # 1. Autenticación
+            if not user.is_authenticated:
+                messages.error(request, "Debes iniciar sesión.")
+                return redirect("account_login")
 
-                if not user.is_authenticated:
-                    messages.error(request, "Debes iniciar sesión.")
-                    return redirect("account_login")
+            # 2. Superuser bypass
+            if user.is_superuser:
+                return view_func(request, *args, **kwargs)
 
-                if user.is_superuser:
-                    return original_dispatch(self, request, *args, **kwargs)
+            # 4. Validación de roles
+            user_roles = set(user.roles.values_list("name", flat=True))
+            allowed_roles_set = set(allowed_roles)
 
-                user_roles = set(user.roles.values_list("name", flat=True))
+            if user_roles.intersection(allowed_roles_set):
+                return view_func(request, *args, **kwargs)
 
-                if not user_roles.intersection(allowed_roles):
-                    messages.error(
-                        request, "No tienes permisos para acceder a esta sección."
-                    )
-                    return redirect("dashboard")
+            # 5. Acceso denegado
+            messages.error(request, "No tienes permisos para acceder a esta sección.")
 
-                return original_dispatch(self, request, *args, **kwargs)
+            logger.warning(
+                "Acceso denegado: user=%s roles=%s requiere=%s",
+                user.username,
+                list(user_roles),
+                list(allowed_roles_set),
+            )
 
-            view.dispatch = new_dispatch
-            return view
+            # 👇 redirige a su dashboard correcto, no hardcodeado
+            if not user.profile_completed:
+                return redirect(get_user_redirect_flow(user))
 
-        else:
-            # Es una función normal
-            @wraps(view)
-            def wrapped(request, *args, **kwargs):
-                user = request.user
+            return redirect(get_user_redirect_flow(user))
 
-                if not user.is_authenticated:
-                    messages.error(request, "Debes iniciar sesión.")
-                    return redirect("account_login")
-
-                if user.is_superuser:
-                    return view(request, *args, **kwargs)
-
-                user_roles = set(user.roles.values_list("name", flat=True))
-
-                if not user_roles.intersection(allowed_roles):
-                    messages.error(
-                        request, "No tienes permisos para acceder a esta sección."
-                    )
-                    return redirect("dashboard")
-
-                return view(request, *args, **kwargs)
-
-            return wrapped
+        return wrapper
 
     return decorator
