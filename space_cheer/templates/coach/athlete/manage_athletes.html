@@ -94,7 +94,7 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a href="{% url 'edit_athlete_measures' athlete.id %}" 
+                                    <a href="{% url 'coach:edit_athlete_measures' athlete.id %}" 
                                        class="btn btn-outline-primary btn-sm d-flex align-items-center">
                                         <i class="bi bi-rulers me-1 d-none d-md-inline"></i>
                                         <span>Medidas</span>
@@ -149,7 +149,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'edit_athlete_measures' athlete.id %}">
+                                        <a class="dropdown-item" href="{% url 'coach:edit_athlete_measures' athlete.id %}">
                                             <i class="bi bi-rulers me-2"></i>Editar medidas
                                         </a>
                                     </li>
@@ -180,7 +180,7 @@
                                 {% endif %}
                             </div>
                             <div class="col-12 mt-2">
-                                <a href="{% url 'edit_athlete_measures' athlete.id %}" 
+                                <a href="{% url 'coach:edit_athlete_measures' athlete.id %}" 
                                    class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center">
                                     <i class="bi bi-rulers me-2"></i>
                                     Gestionar medidas

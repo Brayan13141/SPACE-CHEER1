@@ -89,7 +89,7 @@
               <td class="text-end pe-4">
                 <!-- Form oculto para liberar -->
                 <form id="releaseAthlete_{{ ownership.id }}" method="post"
-                      action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                      action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
                   {% csrf_token %}
                 </form>
                 <button type="button"
