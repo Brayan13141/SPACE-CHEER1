@@ -5,11 +5,12 @@ from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Include allauth and accounts URLs for authentication
-    path("accounts/", include("allauth.urls")),
-    path("accounts/", include("accounts.urls")),
     # Core app URLs
     path("", include("core.urls")),
+    # Include allauth and accounts URLs for authentication
+    path("accounts/", include("allauth.urls")),
+    path("accounts/", include("accounts.urls.views_accounts_urls")),
+    path("guardian/", include("accounts.urls.views_guardian_urls")),
     # teams
     path("teams/", include("teams.urls")),
     # Measures
