@@ -14,7 +14,6 @@ from accounts.models import (
 
 from django.db import models
 from teams.models import UserTeamMembership
-from django.utils import timezone
 from django.db import transaction
 from django.db.models import Max
 from django.core.exceptions import PermissionDenied
@@ -105,7 +104,6 @@ def manage_categories(request):
 
 @role_required("ADMIN", "HEADCOACH")
 def manage_teams(request):
-
     if request.user.roles.filter(name__in=["HEADCOACH"]).exists():
         teams = Team.objects.select_related("coach", "category").filter(
             coach=request.user
@@ -153,6 +151,13 @@ def manage_teams(request):
                 )
                 messages.success(request, f"Equipo '{team.name}' creado exitosamente.")
                 return redirect("manage_teams")
+            # ❗ MOSTRAR ERRORES EN MESSAGES
+            for field, errors in form_crear.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"{error}")
+                    else:
+                        messages.error(request, f"{field}: {error}")
             abrir_modal_crear = True
 
         # EDITAR
@@ -170,6 +175,12 @@ def manage_teams(request):
                 )
                 return redirect("manage_teams")
 
+            for field, errors in form_editar.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"{error}")
+                    else:
+                        messages.error(request, f"{field}: {error}")
             # Volver a abrir modal con errores
             abrir_modal_editar = True
             team_editar_id = team_id
