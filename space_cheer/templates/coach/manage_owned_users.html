@@ -17,19 +17,10 @@
         {{ crew|length }} miembro{{ crew|length|pluralize }} de crew
       </p>
     </div>
-    <a href="{% url 'manage_athletes' %}" class="btn btn-outline-secondary btn-sm">
+    <a href="{% url 'teams:manage_athletes' %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
   </div>
-
-  <!-- MENSAJES DEL SISTEMA -->
-  {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show mb-4">
-      {{ msg }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-
   <!-- ══════════════════════════════════════════ ATLETAS (con DataTables y vista móvil) -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-black border-bottom py-3 d-flex justify-content-between align-items-center">
@@ -155,7 +146,7 @@
         <div class="text-center py-5">
           <i class="bi bi-person-slash display-4 text-muted d-block mb-3"></i>
           <h5 class="text-muted">No tienes atletas asignados</h5>
-          <a href="{% url 'manage_athletes' %}" class="btn btn-primary btn-sm mt-2">
+          <a href="{% url 'teams:manage_athletes' %}" class="btn btn-primary btn-sm mt-2">
             <i class="bi bi-person-plus me-1"></i>Crear atleta
           </a>
         </div>
@@ -326,7 +317,7 @@
           <p class="text-muted small mb-4">
             El crew se agrega desde la vista de miembros de cada equipo.
           </p>
-          <a href="{% url 'manage_teams' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'teams:manage_teams' %}" class="btn btn-primary btn-sm">
             <i class="bi bi-people me-1"></i>Ir a mis equipos
           </a>
         </div>
