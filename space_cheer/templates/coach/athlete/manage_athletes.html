@@ -2,50 +2,58 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-3">
+<div class="container py-4">
 
-    <!-- HEADER CON BOTONES -->
-    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-4">
-        <div class="d-flex align-items-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
-                 style="width: 50px; height: 50px;">
-                <i class="bi bi-people fs-4"></i>
-            </div>
-            <div>
-                <h1 class="h4 fw-bold mb-0">Gestión de Alumnos</h1>
-                <p class="text-muted mb-0 small">
-                    {{ athletes|length }} alumno{{ athletes|pluralize }}
-                </p>
+    <!-- HEADER MEJORADO (sin buscador manual) -->
+    <div class="row g-3 mb-4 align-items-end">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                     style="width: 55px; height: 55px;">
+                    <i class="bi bi-people fs-3"></i>
+                </div>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">Gestión de Alumnos</h1>
+                    <p class="text-muted mb-0 small">
+                        Administra los perfiles y medidas de tus deportistas
+                    </p>
+                </div>
             </div>
         </div>
-        
-        {% if puede_crear %}
-        <button class="btn btn-primary d-flex align-items-center shadow-sm" 
-                data-bs-toggle="modal" data-bs-target="#modalCrear">
-            <i class="bi bi-person-plus me-2"></i>
-            <span class="d-none d-md-inline">Crear Alumno</span>
-            <span class="d-inline d-md-none">Nuevo</span>
-        </button>
-        {% endif %}
+
+        <div class="col-md-4">
+            <div class="d-flex justify-content-md-end">
+                {% if puede_crear %}
+                <button class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" 
+                        data-bs-toggle="modal" data-bs-target="#modalCrear">
+                    <i class="bi bi-person-plus fs-5"></i>
+                    <span class="d-none d-sm-inline">Crear Alumno</span>
+                    <span class="d-inline d-sm-none">Nuevo</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
     <!-- TARJETA DE LISTADO -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3">
-            <div class="d-flex align-items-center justify-content-between">
-                <h2 class="h5 fw-bold mb-0">Lista de Alumnos</h2>
-                <span class="badge bg-primary rounded-pill">
-                    {{ athletes|length }}
-                </span>
+        <div class="card-header bg-black border-bottom py-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h2 class="h5 fw-bold mb-0">
+                    <i class="bi bi-table me-2"></i>Lista de Alumnos
+                </h2>
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i> Usa el buscador y los filtros de la tabla
+                </div>
             </div>
         </div>
 
         <div class="card-body p-0">
             {% if athletes %}
-            <!-- TABLA PARA ESCRITORIO -->
-            <div class="table-responsive d-none d-md-block">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+            <!-- TABLA PARA ESCRITORIO (con DataTables) -->
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0" id="athletesTable">
+                    <thead class="table-dark">
                         <tr>
                             <th scope="col" class="ps-4">#</th>
                             <th scope="col">Alumno</th>
@@ -61,9 +69,9 @@
                             <td class="ps-4 text-muted">{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 40px; height: 40px;">
-                                        <i class="bi bi-person text-primary"></i>
+                                    <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 42px; height: 42px;">
+                                        <i class="bi bi-person fs-5 text-primary"></i>
                                     </div>
                                     <div>
                                         <div class="fw-bold">{{ athlete.get_full_name|default:athlete.username }}</div>
@@ -72,55 +80,45 @@
                                 </div>
                             </td>
                             <td>
-                                <code class="bg-light px-2 py-1 rounded">{{ athlete.username }}</code>
+                                <code class="bg-dark text-light px-2 py-1 rounded small">{{ athlete.username }}</code>
                             </td>
                             <td>
                                 {% if athlete.email %}
-                                <a href="mailto:{{ athlete.email }}" class="text-decoration-none">
-                                    {{ athlete.email }}
+                                <a href="mailto:{{ athlete.email }}" class="text-decoration-none text-light">
+                                    <i class="bi bi-envelope me-1"></i>{{ athlete.email }}
                                 </a>
                                 {% else %}
-                                <span class="text-muted">—</span>
+                                <span class="text-muted"><i class="bi bi-dash-circle"></i> No registrado</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if athlete.phone %}
-                                <a href="tel:{{ athlete.phone }}" class="text-decoration-none">
-                                    {{ athlete.phone }}
+                                <a href="tel:{{ athlete.phone }}" class="text-decoration-none text-light">
+                                    <i class="bi bi-telephone me-1"></i>{{ athlete.phone }}
                                 </a>
                                 {% else %}
-                                <span class="text-muted">—</span>
+                                <span class="text-muted"><i class="bi bi-dash-circle"></i> —</span>
                                 {% endif %}
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="{% url 'coach:edit_athlete_measures' athlete.id %}" 
-                                       class="btn btn-outline-primary btn-sm d-flex align-items-center">
-                                        <i class="bi bi-rulers me-1 d-none d-md-inline"></i>
-                                        <span>Medidas</span>
+                                       class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                                       data-bs-toggle="tooltip" title="Gestionar medidas">
+                                        <i class="bi bi-rulers"></i>
+                                        <span class="d-none d-xl-inline">Medidas</span>
                                     </a>
-                                    <button class="btn btn-outline-secondary btn-sm" 
-                                            data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="#">
-                                                <i class="bi bi-eye me-2"></i>Ver perfil
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="#">
-                                                <i class="bi bi-pencil me-2"></i>Editar datos
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" href="#">
-                                                <i class="bi bi-trash me-2"></i>Eliminar
-                                            </a>
-                                        </li>
-                                    </ul>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>Ver perfil</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Editar datos</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -129,62 +127,55 @@
                 </table>
             </div>
 
-            <!-- LISTA PARA MÓVIL -->
+            <!-- VISTA MÓVIL (alternativa para pantallas pequeñas) -->
             <div class="d-block d-md-none">
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush" id="athletesMobileList">
                     {% for athlete in athletes %}
                     <div class="list-group-item border-bottom py-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="bi bi-person text-primary"></i>
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                 style="width: 48px; height: 48px;">
+                                <i class="bi bi-person fs-4 text-primary"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-0">{{ athlete.get_full_name|default:athlete.username }}</h6>
-                                <small class="text-muted">@{{ athlete.username }}</small>
-                            </div>
-                            <div class="dropdown">
-                                <button class="btn btn-link text-dark" data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'coach:edit_athlete_measures' athlete.id %}">
-                                            <i class="bi bi-rulers me-2"></i>Editar medidas
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="bi bi-eye me-2"></i>Ver perfil
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="row g-2 mt-2">
-                            <div class="col-12">
-                                {% if athlete.email %}
-                                <div class="d-flex align-items-center text-muted small">
-                                    <i class="bi bi-envelope me-2"></i>
-                                    <span class="text-truncate">{{ athlete.email }}</span>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-0">{{ athlete.get_full_name|default:athlete.username }}</h6>
+                                        <small class="text-muted">@{{ athlete.username }}</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-light p-0" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li><a class="dropdown-item" href="{% url 'coach:edit_athlete_measures' athlete.id %}"><i class="bi bi-rulers me-2"></i>Medidas</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>Ver perfil</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-12">
-                                {% if athlete.phone %}
-                                <div class="d-flex align-items-center text-muted small">
-                                    <i class="bi bi-telephone me-2"></i>
-                                    <span>{{ athlete.phone }}</span>
+                                <div class="mt-2 d-flex flex-column gap-1">
+                                    {% if athlete.email %}
+                                    <div class="d-flex align-items-center small text-muted">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        <span class="text-truncate">{{ athlete.email }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if athlete.phone %}
+                                    <div class="d-flex align-items-center small text-muted">
+                                        <i class="bi bi-telephone me-2"></i>
+                                        <span>{{ athlete.phone }}</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-12 mt-2">
-                                <a href="{% url 'coach:edit_athlete_measures' athlete.id %}" 
-                                   class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-rulers me-2"></i>
-                                    Gestionar medidas
-                                </a>
+                                <div class="mt-3">
+                                    <a href="{% url 'coach:edit_athlete_measures' athlete.id %}" 
+                                       class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-rulers"></i> Gestionar medidas
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -192,67 +183,33 @@
                 </div>
             </div>
 
-            <!-- PAGINACIÓN (SI LA HAY) -->
-            {% if athletes.has_other_pages %}
-            <nav class="border-top p-3">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if athletes.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ athletes.previous_page_number }}">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                    
-                    {% for num in athletes.paginator.page_range %}
-                        {% if athletes.number == num %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                        {% else %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if athletes.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ athletes.next_page_number }}">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-
             {% else %}
-            <!-- ESTADO VACÍO -->
+            <!-- ESTADO VACÍO MEJORADO -->
             <div class="text-center py-5">
                 <div class="mb-4">
-                    <i class="bi bi-people display-1 text-muted opacity-50"></i>
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-people display-3 text-primary"></i>
+                    </div>
                 </div>
-                <h5 class="text-muted mb-3">No hay alumnos registrados</h5>
+                <h5 class="text-muted mb-2">No hay alumnos registrados</h5>
                 <p class="text-muted mb-4">Comienza agregando tu primer alumno al sistema.</p>
                 {% if puede_crear %}
-                <button class="btn btn-primary d-flex align-items-center mx-auto" 
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2" 
                         data-bs-toggle="modal" data-bs-target="#modalCrear">
-                    <i class="bi bi-person-plus me-2"></i>
-                    Crear primer alumno
+                    <i class="bi bi-person-plus fs-5"></i> Crear primer alumno
                 </button>
                 {% endif %}
             </div>
             {% endif %}
         </div>
     </div>
-
 </div>
 
-<!-- ================= MODAL CREAR ALUMNO ================= -->
+<!-- ================= MODAL CREAR ALUMNO (mejorado) ================= -->
 {% if puede_crear %}
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
             <form method="POST" novalidate>
                 {% csrf_token %}
@@ -268,14 +225,12 @@
 
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        <!-- NOMBRE -->
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                <i class="bi bi-person me-1 text-primary"></i>
-                                Nombre
+                                <i class="bi bi-person me-1 text-primary"></i> Nombre *
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark text-white border-secondary">
                                     <i class="bi bi-fonts"></i>
                                 </span>
                                 {{ form_crear.first_name }}
@@ -289,14 +244,12 @@
                             {% endif %}
                         </div>
 
-                        <!-- APELLIDO -->
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                <i class="bi bi-person me-1 text-primary"></i>
-                                Apellido
+                                <i class="bi bi-person me-1 text-primary"></i> Apellido *
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark text-white border-secondary">
                                     <i class="bi bi-fonts"></i>
                                 </span>
                                 {{ form_crear.last_name }}
@@ -310,14 +263,12 @@
                             {% endif %}
                         </div>
 
-                        <!-- EMAIL -->
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                <i class="bi bi-envelope me-1 text-primary"></i>
-                                Email
+                                <i class="bi bi-envelope me-1 text-primary"></i> Email
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark text-white border-secondary">
                                     <i class="bi bi-at"></i>
                                 </span>
                                 {{ form_crear.email }}
@@ -331,14 +282,12 @@
                             {% endif %}
                         </div>
 
-                        <!-- TELÉFONO -->
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">
-                                <i class="bi bi-telephone me-1 text-primary"></i>
-                                Teléfono
+                                <i class="bi bi-telephone me-1 text-primary"></i> Teléfono
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark text-white border-secondary">
                                     <i class="bi bi-phone"></i>
                                 </span>
                                 {{ form_crear.phone }}
@@ -352,14 +301,13 @@
                             {% endif %}
                         </div>
 
-                        <!-- INFORMACIÓN ADICIONAL -->
                         <div class="col-12">
-                            <div class="alert alert-info border-0 bg-light small mb-0">
+                            <div class="alert alert-dark border-secondary small mb-0">
                                 <div class="d-flex">
-                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    <i class="bi bi-info-circle text-primary me-2 fs-5"></i>
                                     <div>
                                         <strong>Información importante:</strong>
-                                        <p class="mb-0">El sistema generará automáticamente un usuario y contraseña temporal para el alumno.</p>
+                                        <p class="mb-0">El sistema generará automáticamente un nombre de usuario y una contraseña temporal que se enviarán al email proporcionado.</p>
                                     </div>
                                 </div>
                             </div>
@@ -367,14 +315,12 @@
                     </div>
                 </div>
 
-                <div class="modal-footer border-top-0 bg-light">
+                <div class="modal-footer border-top-0 bg-dark">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i>
-                        Cancelar
+                        <i class="bi bi-x-lg me-1"></i> Cancelar
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg me-1"></i>
-                        Crear Alumno
+                        <i class="bi bi-check-lg me-1"></i> Crear Alumno
                     </button>
                 </div>
             </form>
@@ -387,30 +333,49 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Añadir clases Bootstrap a los inputs del formulario modal
+    // Inicializar DataTables en la tabla principal (solo en escritorio)
+    if (typeof $.fn.DataTable !== 'undefined' && $('#athletesTable').length) {
+        $('#athletesTable').DataTable({
+            responsive: false,  // No responsive porque ya tenemos vista móvil aparte
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"  // Español
+            },
+            order: [[1, 'asc']],  // Ordenar por nombre (columna 1)
+            pageLength: 10,
+            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+            columnDefs: [
+                { orderable: false, targets: [5] }  // Desactivar orden en columna de acciones
+            ]
+        });
+    }
+
+    // --- MEJORAS A INPUTS DEL MODAL ---
     const modalInputs = document.querySelectorAll('#modalCrear input');
     modalInputs.forEach(input => {
         input.classList.add('form-control');
-        input.placeholder = 'Ej: ' + input.name.replace('_', ' ');
+        if (input.name === 'first_name') input.placeholder = 'Ej: Juan';
+        if (input.name === 'last_name') input.placeholder = 'Ej: Pérez';
+        if (input.name === 'email') input.placeholder = 'Ej: juan@example.com';
+        if (input.name === 'phone') input.placeholder = 'Ej: +34 600 123 456';
     });
 
-    // Auto-abrir modal si hay error
+    // Auto-abrir modal si hay errores
     {% if abrir_modal_crear %}
     const modalCrear = new bootstrap.Modal(document.getElementById('modalCrear'));
     modalCrear.show();
     {% endif %}
 
-    // Validación en tiempo real para email
+    // Validación de email en tiempo real
     const emailInput = document.querySelector('#modalCrear input[name="email"]');
     if (emailInput) {
         emailInput.addEventListener('blur', function() {
             const email = this.value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
             if (email && !emailRegex.test(email)) {
                 this.classList.add('is-invalid');
-                if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
-                    const errorDiv = document.createElement('div');
+                let errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
                     errorDiv.className = 'invalid-feedback';
                     errorDiv.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Formato de email inválido';
                     this.parentNode.appendChild(errorDiv);
@@ -418,35 +383,35 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 this.classList.remove('is-invalid');
                 const errorDiv = this.parentNode.querySelector('.invalid-feedback');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
+                if (errorDiv) errorDiv.remove();
             }
         });
     }
 
-    // Enfoque automático en el primer campo al abrir el modal
+    // Enfoque automático al abrir modal
     document.getElementById('modalCrear')?.addEventListener('shown.bs.modal', function () {
         const firstInput = this.querySelector('input');
         if (firstInput) firstInput.focus();
     });
 
-    // Confirmación antes de enviar el formulario
+    // Validación antes de enviar
     const crearForm = document.querySelector('#modalCrear form');
     if (crearForm) {
         crearForm.addEventListener('submit', function(e) {
-            const nombre = this.querySelector('input[name="first_name"]').value;
-            const apellido = this.querySelector('input[name="last_name"]').value;
-            
+            const nombre = this.querySelector('input[name="first_name"]').value.trim();
+            const apellido = this.querySelector('input[name="last_name"]').value.trim();
             if (!nombre || !apellido) {
                 e.preventDefault();
-                alert('Por favor, completa al menos el nombre y apellido del alumno.');
+                alert('Por favor, completa el nombre y apellido del alumno.');
                 return false;
             }
-            
             return true;
         });
     }
+
+    // Inicializar tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 });
 </script>
 {% endblock %}

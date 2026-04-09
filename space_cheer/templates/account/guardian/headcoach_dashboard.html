@@ -1,34 +1,51 @@
-<!-- templates/accounts/headcoach/dashboard.html -->
 {% extends "core/base.html" %}
 
-{% block title %}Dashboard HeadCoach{% endblock %}
-
 {% block content %}
-<h1>Dashboard HeadCoach</h1>
+<div class="container mt-4">
 
-<h2>Menores sin guardian ({{ count_minors }})</h2>
+    <h2>Panel de Guardianes 🛡️</h2>
 
-{% if minors_without_guardian %}
-    <table border="1">
-        <tr>
-            <th>Nombre</th>
-            <th>Edad</th>
-            <th>Acción</th>
-        </tr>
+    <div class="alert alert-warning">
+        ⚠️ Tienes <strong>{{ count_minors }}</strong> atletas menores sin guardian.
+    </div>
 
-        {% for athlete in minors_without_guardian %}
-        <tr>
-            <td>{{ athlete.get_full_name }}</td>
-            <td>{{ athlete.birth_date }}</td>
-            <td>
-                <a href="{% url 'accounts:assign_guardian' athlete.id %}">
-                    Asignar guardian
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>Todos los atletas tienen guardian ✔️</p>
-{% endif %}
+    <div class="card">
+        <div class="card-header">
+            Menores sin guardian
+        </div>
+
+        <div class="card-body">
+
+            {% if minors_without_guardian %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for athlete in minors_without_guardian %}
+                        <tr>
+                            <td>{{ athlete.get_full_name }}</td>
+                            <td>{{ athlete.email }}</td>
+                            <td>
+                                <a href="{% url 'guardian:assign_guardian' athlete.id %}" 
+                                   class="btn btn-primary btn-sm">
+                                   Asignar Guardian
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No hay menores pendientes 🎉</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
 {% endblock %}

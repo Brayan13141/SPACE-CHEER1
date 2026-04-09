@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">   <!-- Modo oscuro activado -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +10,16 @@
     <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
-
     <!-- Font Awesome -->
-     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/fontawesome-free-7.1.0-web/css/all.min.css' %}">
-    
-
+    <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/fontawesome-free-7.1.0-web/css/all.min.css' %}">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{% static 'CSS/CORE/base.css' %}">
 
     <style>
-       
-        /* Sidebar de perfil - Red Social */
+        .bg-ligth,bg-secondary {
+            background-color: #000000 !important;
+        }
+        /* ===== TUS ESTILOS EXISTENTES (sin cambios) ===== */
         .profile-sidebar {
             width: var(--sidebar-width);
             min-height: calc(100vh - var(--navbar-height));
@@ -35,42 +34,32 @@
             overflow-y: auto;
             box-shadow: -3px 0 10px rgba(0,0,0,0.2);
         }
-
         .profile-sidebar.collapsed {
             width: var(--sidebar-collapsed);
         }
-
-        /* Contenido principal */
         .main-content {
             flex: 1;
             transition: all var(--transition-speed) ease;
             min-height: calc(100vh - var(--navbar-height));
             padding: 20px;
         }
-
         .with-main-sidebar {
             margin-left: var(--sidebar-width);
         }
-
         .with-main-sidebar.collapsed {
             margin-left: var(--sidebar-collapsed);
         }
-
         .with-profile-sidebar {
             margin-right: var(--sidebar-width);
         }
-
         .with-profile-sidebar.collapsed {
             margin-right: var(--sidebar-collapsed);
         }
-
-        /* Estilos del sidebar */
         .sidebar-header {
             padding: 20px 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             text-align: center;
         }
-
         .sidebar-header h4 {
             margin: 0;
             font-size: 1.2rem;
@@ -78,11 +67,9 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .sidebar-menu {
             padding: 15px 0;
         }
-
         .sidebar-menu .nav-link {
             color: rgba(255,255,255,0.8);
             padding: 12px 20px;
@@ -94,19 +81,16 @@
             white-space: nowrap;
             overflow: hidden;
         }
-
         .sidebar-menu .nav-link:hover {
             color: white;
             background: rgba(255,255,255,0.1);
             text-decoration: none;
         }
-
         .sidebar-menu .nav-link.active {
             color: white;
             background: rgba(0,123,255,0.2);
             border-left: 3px solid #007bff;
         }
-
         .sidebar-menu .nav-link i {
             width: 30px;
             text-align: center;
@@ -114,18 +98,14 @@
             margin-right: 10px;
             flex-shrink: 0;
         }
-
         .sidebar-menu .nav-text {
             transition: opacity var(--transition-speed) ease;
         }
-
         .main-sidebar.collapsed .nav-text,
         .profile-sidebar.collapsed .nav-text {
             opacity: 0;
             width: 0;
         }
-
-        /* Botón para colapsar sidebar */
         .toggle-sidebar-btn {
             background: rgba(255,255,255,0.1);
             border: none;
@@ -141,44 +121,34 @@
             width: 40px;
             height: 40px;
         }
-
         .toggle-sidebar-btn:hover {
             background: rgba(255,255,255,0.2);
         }
-
-        /* Submenú en sidebar */
         .sidebar-submenu {
             padding-left: 40px;
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
-
         .sidebar-submenu.show {
             max-height: 300px;
         }
-
         .sidebar-submenu .nav-link {
             padding: 8px 20px;
             font-size: 0.9rem;
         }
-
         .sidebar-submenu .nav-link i {
             width: 20px;
             font-size: 1rem;
             margin-right: 10px;
         }
-
-        /* Estilos para dropdown de equipos en navbar */
         .dropdown-menu .dropdown-item {
             transition: all 0.2s ease;
         }
-
         .dropdown-menu .dropdown-item:hover {
             background-color: rgba(0, 123, 255, 0.1);
             transform: translateX(5px);
         }
-
         .dropdown-menu .badge-notification {
             position: absolute;
             top: 8px;
@@ -186,8 +156,6 @@
             font-size: 0.6rem;
             padding: 0.15em 0.4em;
         }
-
-        /* Badge flotante en navbar */
         .badge-notification {
             position: relative;
             top: -8px;
@@ -195,8 +163,6 @@
             font-size: 0.6rem;
             padding: 0.15em 0.4em;
         }
-
-        /* Avatar de usuario */
         .user-avatar {
             width: 32px;
             height: 32px;
@@ -205,37 +171,29 @@
             margin-right: 8px;
             object-fit: cover;
         }
-
-        /* Ajustes para móvil */
         @media (max-width: 768px) {
             .main-sidebar,
             .profile-sidebar {
                 transform: translateX(-100%);
                 width: var(--sidebar-width);
             }
-            
             .main-sidebar.show,
             .profile-sidebar.show {
                 transform: translateX(0);
             }
-            
             .main-sidebar.collapsed,
             .profile-sidebar.collapsed {
                 transform: translateX(-100%);
             }
-            
             .with-main-sidebar,
             .with-profile-sidebar {
                 margin-left: 0 !important;
                 margin-right: 0 !important;
             }
-            
             .mobile-sidebar-toggle {
                 display: block;
             }
         }
-
-        /* Indicador de sección activa */
         .section-indicator {
             padding: 5px 10px;
             background: rgba(0,123,255,0.1);
@@ -244,14 +202,11 @@
             border-radius: 3px;
             font-size: 0.9rem;
         }
-
-        /* Perfil en sidebar */
         .sidebar-profile {
             text-align: center;
             padding: 20px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
         .sidebar-profile-img {
             width: 70px;
             height: 70px;
@@ -261,6 +216,7 @@
             object-fit: cover;
         }
     </style>
+
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
     {% block extra_css %}{% endblock %}
@@ -273,7 +229,6 @@
     <!-- NAVBAR SUPERIOR FIJO -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
-           
             {% if not is_guardian%}
             <a class="navbar-brand d-flex align-items-center" href="{% url 'core:dashboard' %}">
                 <i class="bi bi-stars me-2"></i>SPACE CHEER
@@ -284,202 +239,154 @@
             </a>
             {% endif %}
 
-            <!-- Botón de menú móvil para navbar -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
                     aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarMain">
-        
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                     {% if user.is_authenticated %}
-                     {% if is_guardian %}
+                    {% if user.is_authenticated %}
+                        {% if is_guardian %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'guardian:dashboard' %}">
+                            <a class="nav-link active" href="{% url 'guardian:dashboard' %}">
                                 <i class="bi bi-house-door me-1"></i>Inicio
                             </a>
-                    {% else %}
-                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{% url 'core:dashboard' %}">
-                            <i class="bi bi-house-door me-1"></i>Inicio
-                        </a>
-                    </li>
-                    {% endif %}
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'core:dashboard' %}">
+                                <i class="bi bi-house-door me-1"></i>Inicio
+                            </a>
+                        </li>
+                        {% endif %}
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarCompetitions" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-trophy me-1"></i>Competencias
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarCompetitions">
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-eye me-2"></i>Ver Competencias
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-plus-circle me-2"></i>Crear Competencia
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-calendar-event me-2"></i>Calendario
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-graph-up me-2"></i>Resultados
-                            </a></li>
-                        </ul>
-                    </li>
-                    {% if not is_guardian %}
-                    <!-- DROPDOWN DE EQUIPOS -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="" id="navbarTeams" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-people me-1"></i>Equipos
-                            {% if team_notifications %}
-                            <span class="badge bg-danger badge-notification">{{ team_notifications }}</span>
-                            {% endif %}
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarTeams">
-                            <!-- Mis Equipos - para todos los usuarios -->
-                            <li><a class="dropdown-item" href="{% url 'manage_teams' %}">
-                                <i class="bi bi-people-fill me-2"></i>Mis Equipos
-                                {% if user_teams_count and user_teams_count > 0 %}
-                                <span class="badge bg-primary rounded-pill float-end">{{ user_teams_count }}</span>
-                                {% endif %}
-                            </a></li>
-                             <!-- Mis Alumnos - para todos los usuarios -->
-                            <li><a class="dropdown-item" href="{% url 'coach:manage_athletes' %}">
-                                <i class="bi bi-person-video me-2"></i>Mis Alumnos
-                                {% if user_students_count and user_students_count > 0 %}
-                                <span class="badge bg-info rounded-pill float-end">{{ user_students_count }}</span>
-                                {% endif %}
-                            </a></li>
-                            <!-- Mi Crew - para todos los usuarios -->
-                            <li><a class="dropdown-item" href="{% url 'coach:manage_owned_users' %}">
-                                <i class="bi bi-person-badge me-2"></i>Mi Crew
-                            </a></li>
-                            
-                            <!-- Categorías - solo para superuser -->
-                            {% if user.is_superuser or user.is_staff %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'manage_categories' %}">
-                                <i class="bi bi-grid me-2"></i>Categorías
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'manage_measurement_fields' %}">
-                                <i class="bi bi-grid me-2"></i>Medidas
-                            </a></li>
-                            {% endif %}
-                            
-                           
-                            
-                            <!-- Separador para admin options -->
-                          
-                        </ul>
-                    </li>
-                    {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarCompetitions" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-trophy me-1"></i>Competencias
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarCompetitions">
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>Ver Competencias</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-plus-circle me-2"></i>Crear Competencia</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-calendar-event me-2"></i>Calendario</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-graph-up me-2"></i>Resultados</a></li>
+                            </ul>
+                        </li>
 
-                    {% if user.is_authenticated and user.roles.all %}
-                        {% if is_headcoach or user.is_superuser %}
+                        {% if not is_guardian %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarTeams" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-people me-1"></i>Equipos
+                                {% if team_notifications %}
+                                <span class="badge bg-danger badge-notification">{{ team_notifications }}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarTeams">
+                                <li><a class="dropdown-item" href="{% url 'teams:manage_teams' %}">
+                                    <i class="bi bi-people-fill me-2"></i>Mis Equipos
+                                    {% if user_teams_count and user_teams_count > 0 %}
+                                    <span class="badge bg-primary rounded-pill float-end">{{ user_teams_count }}</span>
+                                    {% endif %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'teams:manage_athletes' %}">
+                                    <i class="bi bi-person-video me-2"></i>Mis Alumnos
+                                    {% if user_students_count and user_students_count > 0 %}
+                                    <span class="badge bg-info rounded-pill float-end">{{ user_students_count }}</span>
+                                    {% endif %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'coach:manage_owned_users' %}">
+                                    <i class="bi bi-person-badge me-2"></i>Mi Crew
+                                </a></li>
+                                {% if user.is_superuser or user.is_staff %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'manage_categories' %}">
+                                    <i class="bi bi-grid me-2"></i>Categorías
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'manage_measurement_fields' %}">
+                                    <i class="bi bi-grid me-2"></i>Medidas
+                                </a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        {% if user.is_authenticated and user.roles.all %}
+                            {% if is_headcoach or user.is_superuser %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                     <i class="bi bi-shield-lock me-1"></i>Guardianes
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'guardian:headcoach_dashboard' %}">
-                                             Asignar guardian
-                                        </a>
-                                    </li>
-
-                                    
+                                    <li><a class="dropdown-item" href="{% url 'guardian:headcoach_dashboard' %}">Guardianes</a></li>                                    
                                 </ul>
                             </li>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarStore" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bag me-1"></i>Tienda
-                            <span class="badge bg-danger badge-notification">3</span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarStore">
-                            {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'products:list_products' %}">
-                                <i class="bi bi-grid me-2"></i>Productos
-                            </a></li>
-                            {% endif %}
-                           
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-person-standing-dress me-2"></i>Uniformes
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-gift me-2"></i>Ofertas
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                             {% if user.is_superuser or user.is_staff%}
-                            <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}">
-                                <i class="bi bi-grid me-2"></i>Administrar pedidos
-                            </a></li>
-                            {% else %}
-                            <li><a class="dropdown-item" href="{% url 'orders:manage_orders' %}">
-                                <i class="bi bi-grid me-2"></i>Pedidos
-                            </a></li>
-                            {% endif %}
-
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-cart me-2"></i>Mi Carrito
-                                <span class="badge bg-primary rounded-pill ms-1">2</span>
-                            </a></li>
-                        </ul>
-                    </li>
-
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="" id="navbarCommunity" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-people me-1"></i>Comunidad
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarCommunity">
-                            <li>
-                            <a href="{% url 'social:send_invite' %}" class="dropdown-item">
-                                <i class="bi bi-person-plus-fill me-1"></i>
-                                Invitar
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    +
-                                </span>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarStore" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bag me-1"></i>Tienda
+                                <span class="badge bg-danger badge-notification">3</span>
                             </a>
-                            </li>     
+                            <ul class="dropdown-menu" aria-labelledby="navbarStore">
+                                {% if user.is_superuser %}
+                                <li><a class="dropdown-item" href="{% url 'products:list_products' %}">
+                                    <i class="bi bi-grid me-2"></i>Productos
+                                </a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="bi bi-person-standing-dress me-2"></i>Uniformes
+                                </a></li>
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="bi bi-gift me-2"></i>Ofertas
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.is_superuser or user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'orders:admin_order_list' %}">
+                                    <i class="bi bi-grid me-2"></i>Administrar pedidos
+                                </a></li>
+                                {% else %}
+                                <li><a class="dropdown-item" href="{% url 'orders:manage_orders' %}">
+                                    <i class="bi bi-grid me-2"></i>Pedidos
+                                </a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="bi bi-cart me-2"></i>Mi Carrito
+                                    <span class="badge bg-primary rounded-pill ms-1">2</span>
+                                </a></li>
+                            </ul>
+                        </li>
 
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-chat-dots me-2"></i>Foros
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-camera-video me-2"></i>Rutinas
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-share me-2"></i>Red Social
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-question-circle me-2"></i>Ayuda
-                            </a></li>
-                        </ul>
-                    </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarCommunity" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-people me-1"></i>Comunidad
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarCommunity">
+                                <li><a href="{% url 'social:send_invite' %}" class="dropdown-item">
+                                    <i class="bi bi-person-plus-fill me-1"></i> Invitar
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">+</span>
+                                </a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i>Foros</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-camera-video me-2"></i>Rutinas</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-share me-2"></i>Red Social</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle me-2"></i>Ayuda</a></li>
+                            </ul>
+                        </li>
                     {% endif %}
                 </ul>
                 
                 <!-- Menú de usuario -->
                 <div class="d-flex align-items-center">
-                    {% if user.is_authenticated%}
-                        
-                        <!-- Notificaciones -->
+                    {% if user.is_authenticated %}
                         <div class="dropdown me-3">
-                            <a class="btn btn-outline-light position-relative" data-bs-toggle="dropdown" 
-                               aria-expanded="false">
+                            <a class="btn btn-outline-light position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    5
-                                </span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">5</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><h6 class="dropdown-header">Notificaciones</h6></li>
@@ -490,48 +397,31 @@
                                 <li><a class="dropdown-item text-center" href="#">Ver todas</a></li>
                             </ul>
                         </div>
-                        
-                        <!-- Perfil de usuario -->
                         <div class="dropdown">
-                            <a class="d-flex align-items-center text-decoration-none dropdown-toggle" 
-                               href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" 
-                               aria-expanded="false">
+                            <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="https://via.placeholder.com/32" alt="Avatar" class="user-avatar">
                                 <span class="text-light">{{ user.username }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUser">
                                 <li>
-                                    <div class="d-flex align-items-center px-3 py-2">
+                                    <div class="d-flex align-items-center px-3 py-2 text-white">
                                         <img src="https://via.placeholder.com/40" alt="Avatar" class="user-avatar" style="width: 40px; height: 40px;">
                                         <div>
                                             <div class="fw-bold">{{ user.username }}</div>
-                                            <small class="text-muted">{{ user.email }}</small>
+                                            <small class="">{{ user.email }}</small>
                                         </div>
                                     </div>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="bi bi-person me-2"></i>Mi Perfil
-                                </a></li>
-
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="bi bi-bag me-2"></i>Mis Pedidos
-                                </a></li>
-                                
-                                <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}">
-                                    <i class="bi bi-heart me-2"></i>Mi Dirección
-                                </a></li>
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="bi bi-gear me-2"></i>Configuración
-                                </a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-bag me-2"></i>Mis Pedidos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:address_list' %}"><i class="bi bi-heart me-2"></i>Mi Dirección</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configuración</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'account_logout' %}">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
                             </ul>
                         </div>
                     {% else %}
-                        <!-- Usuario no autenticado -->
                         <a class="btn btn-outline-light me-2" href="{% url 'account_login' %}">
                             <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
                         </a>
@@ -546,8 +436,6 @@
 
     <!-- CONTENEDOR PRINCIPAL CON SIDEBARS Y CONTENIDO -->
     <div class="main-wrapper">
-
-        <!-- CONTENIDO PRINCIPAL -->
         <div class="main-content 
                     {% if user.is_authenticated %}with-main-sidebar{% endif %} 
                     {% if profile_section %}with-profile-sidebar{% endif %}"
@@ -580,20 +468,16 @@
             {% block content %}
             {% endblock %}
         </div>
-
     </div>
 
-    <!-- FOOTER -->
-    <footer class=" py-4 text-light">
+    <!-- FOOTER (con fondo oscuro) -->
+    <footer class="bg-dark py-4 text-light">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4 mb-md-0">
                     <h5 class="text-primary">SPACE CHEER</h5>
-                    <p class="small">
-                        Especialistas en competencias de cheerleading y venta de uniformes.
-                    </p>
+                    <p class="small">Especialistas en competencias de cheerleading y venta de uniformes.</p>
                 </div>
-
                 <div class="col-md-2 mb-4 mb-md-0">
                     <h6>Enlaces</h6>
                     <ul class="list-unstyled small">
@@ -602,7 +486,6 @@
                         <li><a href="#" class="text-light text-decoration-none">Competencias</a></li>
                     </ul>
                 </div>
-
                 <div class="col-md-3 mb-4 mb-md-0">
                     <h6>Soporte</h6>
                     <ul class="list-unstyled small">
@@ -611,7 +494,6 @@
                         <li><a href="#" class="text-light text-decoration-none">Términos</a></li>
                     </ul>
                 </div>
-
                 <div class="col-md-3">
                     <h6>Contáctanos</h6>
                     <ul class="list-unstyled small">
@@ -624,227 +506,200 @@
                     </ul>
                 </div>
             </div>
-
             <hr class="my-3 bg-secondary">
-
             <div class="d-flex justify-content-between small">
                 <span>&copy; {% now "Y" %} SPACE CHEER - Todos los derechos reservados.</span>
-               
             </div>
         </div>
     </footer>
 
     <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
-
-        <!-- jQuery (requerido por DataTables) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/bundle@3/tsparticles.bundle.min.js"></script>
     <script src="{% static '/JS/CORE/particles.min.js' %}"></script>
     <script>
-    particlesJS.load(
-        'tsparticles',
-        "{% static '/JS/CORE/particles-config.json' %}",
-    );
-   
-document.addEventListener('DOMContentLoaded', function() {
-    // Selecciona todos los enlaces con href="#", href vacío, o que no tengan href (pero mejor limitar a #)
-    const placeholderLinks = document.querySelectorAll('a[href="#"], a[href=""]');
+        // Inicializar partículas
+        particlesJS.load('tsparticles', "{% static '/JS/CORE/particles-config.json' %}");
 
-    placeholderLinks.forEach(link => {
-      // Excluir elementos que sean toggles de dropdown o que ya tengan clase 'dropdown-toggle'
-      if (link.hasAttribute('data-bs-toggle') || link.classList.contains('dropdown-toggle')) {
-        return;
-      }
+        document.addEventListener('DOMContentLoaded', function() {
+            // =====================================================
+            // FUNCIÓN PARA BLOQUEAR ENLACES SIN LINK (placeholder)
+            // =====================================================
+            // 1. Bloquear todos los <a> con href="#", href="" o sin href
+            const placeholderLinks = document.querySelectorAll('a[href="#"], a[href=""], a:not([href])');
+            placeholderLinks.forEach(link => {
+                // Evitar que se procesen los dropdown-toggle y los que ya tienen data-bs-toggle
+                if (link.hasAttribute('data-bs-toggle') || link.classList.contains('dropdown-toggle')) {
+                    return;
+                }
+                // Deshabilitar visualmente
+                link.classList.add('disabled', 'text-muted');
+                link.setAttribute('aria-disabled', 'true');
+                // Quitar href para que no navegue
+                link.removeAttribute('href');
+                // Agregar badge "Próximo"
+                if (!link.querySelector('.badge-placeholder')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-warning text-dark ms-1 badge-placeholder';
+                    badge.style.fontSize = '0.6rem';
+                    badge.textContent = 'PRÓXIMO';
+                    link.appendChild(badge);
+                }
+                // Tooltip informativo
+                link.setAttribute('data-bs-toggle', 'tooltip');
+                link.setAttribute('title', 'Esta función estará disponible pronto');
+            });
 
-      // 1. Deshabilitar el enlace con clase de Bootstrap
-      link.classList.add('disabled', 'text-muted');
-      link.setAttribute('aria-disabled', 'true');
-      link.removeAttribute('href'); // Opcional: quitar href por completo
-
-      // 2. Agregar un badge "Próximo" junto al texto
-      const badge = document.createElement('span');
-      badge.className = 'badge bg-warning text-dark ms-1';
-      badge.style.fontSize = '0.6rem';
-      badge.textContent = 'PRÓXIMO';
-      link.appendChild(badge);
-
-      // 3. (Opcional) Añadir tooltip con mensaje
-      link.setAttribute('data-bs-toggle', 'tooltip');
-      link.setAttribute('title', 'Esta función estará disponible pronto');
-      // Si usas tooltips de Bootstrap, recuerda inicializarlos después
-    });
-
-    // Inicializar tooltips (si usas Bootstrap 5)
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  });
-    // Control del sidebar principal
-    document.addEventListener('DOMContentLoaded', function() {
-        const mainSidebar = document.getElementById('mainSidebar');
-        const profileSidebar = document.getElementById('profileSidebar');
-        const mainContent = document.getElementById('mainContent');
-        const toggleMainSidebar = document.getElementById('toggleMainSidebar');
-        const toggleMainSidebarMobile = document.getElementById('toggleMainSidebarMobile');
-        const toggleProfileSidebar = document.getElementById('toggleProfileSidebar');
-        const toggleProfileSidebarBtn = document.getElementById('toggleProfileSidebarBtn');
-
-        // Toggle sidebar principal
-        if (toggleMainSidebar) {
-            toggleMainSidebar.addEventListener('click', function() {
-                mainSidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('collapsed');
-                const icon = this.querySelector('i');
-                icon.classList.toggle('bi-chevron-left');
-                icon.classList.toggle('bi-chevron-right');
-                
-                // Cerrar submenús al colapsar el sidebar
-                if (mainSidebar.classList.contains('collapsed')) {
-                    const submenus = mainSidebar.querySelectorAll('.sidebar-submenu.show');
-                    submenus.forEach(submenu => {
-                        submenu.classList.remove('show');
-                    });
+            // 2. Bloquear botones que tengan la clase 'btn-placeholder' (para botones <button> sin funcionalidad)
+            const placeholderButtons = document.querySelectorAll('button.btn-placeholder');
+            placeholderButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+                btn.setAttribute('data-bs-toggle', 'tooltip');
+                btn.setAttribute('title', 'Próximamente');
+                // Si no tiene badge, se lo agregamos
+                if (!btn.querySelector('.badge-placeholder')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-warning text-dark ms-1 badge-placeholder';
+                    badge.textContent = 'PRÓXIMO';
+                    btn.appendChild(badge);
                 }
             });
-        }
 
-        // Toggle sidebar principal en móvil
-        if (toggleMainSidebarMobile) {
-            toggleMainSidebarMobile.addEventListener('click', function() {
-                mainSidebar.classList.toggle('show');
+            // Inicializar tooltips de Bootstrap
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-        }
 
-        // Toggle sidebar de perfil desde navbar
-        if (toggleProfileSidebar) {
-            toggleProfileSidebar.addEventListener('click', function() {
-                if (profileSidebar) {
+            // =====================================================
+            // LÓGICA DE SIDEBARS (tus funciones existentes)
+            // =====================================================
+            const mainSidebar = document.getElementById('mainSidebar');
+            const profileSidebar = document.getElementById('profileSidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleMainSidebar = document.getElementById('toggleMainSidebar');
+            const toggleMainSidebarMobile = document.getElementById('toggleMainSidebarMobile');
+            const toggleProfileSidebar = document.getElementById('toggleProfileSidebar');
+            const toggleProfileSidebarBtn = document.getElementById('toggleProfileSidebarBtn');
+
+            if (toggleMainSidebar) {
+                toggleMainSidebar.addEventListener('click', function() {
+                    mainSidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('collapsed');
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('bi-chevron-left');
+                    icon.classList.toggle('bi-chevron-right');
+                    if (mainSidebar.classList.contains('collapsed')) {
+                        const submenus = mainSidebar.querySelectorAll('.sidebar-submenu.show');
+                        submenus.forEach(submenu => submenu.classList.remove('show'));
+                    }
+                });
+            }
+            if (toggleMainSidebarMobile) {
+                toggleMainSidebarMobile.addEventListener('click', function() {
+                    mainSidebar.classList.toggle('show');
+                });
+            }
+            if (toggleProfileSidebar) {
+                toggleProfileSidebar.addEventListener('click', function() {
+                    if (profileSidebar) {
+                        profileSidebar.classList.toggle('collapsed');
+                        mainContent.classList.toggle('collapsed');
+                    }
+                });
+            }
+            if (toggleProfileSidebarBtn) {
+                toggleProfileSidebarBtn.addEventListener('click', function() {
                     profileSidebar.classList.toggle('collapsed');
                     mainContent.classList.toggle('collapsed');
-                }
-            });
-        }
-
-        // Toggle sidebar de perfil desde el botón interno
-        if (toggleProfileSidebarBtn) {
-            toggleProfileSidebarBtn.addEventListener('click', function() {
-                profileSidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('collapsed');
-                const icon = this.querySelector('i');
-                icon.classList.toggle('bi-chevron-right');
-                icon.classList.toggle('bi-chevron-left');
-            });
-        }
-
-        // Cerrar sidebar en móvil al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                if (mainSidebar && !mainSidebar.contains(event.target) && 
-                    toggleMainSidebarMobile && !toggleMainSidebarMobile.contains(event.target)) {
-                    mainSidebar.classList.remove('show');
-                }
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('bi-chevron-right');
+                    icon.classList.toggle('bi-chevron-left');
+                });
             }
-        });
-
-        // Manejar submenús en sidebar
-        const equipoSubmenuTrigger = document.querySelector('[data-bs-target="#equiposSubmenu"]');
-        if (equipoSubmenuTrigger) {
-            equipoSubmenuTrigger.addEventListener('click', function(e) {
-                if (mainSidebar.classList.contains('collapsed')) {
-                    e.preventDefault();
-                    // Si el sidebar está colapsado, expandirlo primero
-                    mainSidebar.classList.remove('collapsed');
-                    mainContent.classList.remove('collapsed');
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768) {
+                    if (mainSidebar && !mainSidebar.contains(event.target) && 
+                        toggleMainSidebarMobile && !toggleMainSidebarMobile.contains(event.target)) {
+                        mainSidebar.classList.remove('show');
+                    }
+                }
+            });
+            const equipoSubmenuTrigger = document.querySelector('[data-bs-target="#equiposSubmenu"]');
+            if (equipoSubmenuTrigger) {
+                equipoSubmenuTrigger.addEventListener('click', function(e) {
+                    if (mainSidebar.classList.contains('collapsed')) {
+                        e.preventDefault();
+                        mainSidebar.classList.remove('collapsed');
+                        mainContent.classList.remove('collapsed');
+                        const icon = toggleMainSidebar?.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('bi-chevron-right');
+                            icon.classList.add('bi-chevron-left');
+                        }
+                        setTimeout(() => {
+                            const submenu = document.getElementById('equiposSubmenu');
+                            submenu.classList.toggle('show');
+                        }, 300);
+                    }
+                });
+            }
+            function saveSidebarState() {
+                if (mainSidebar) localStorage.setItem('mainSidebarCollapsed', mainSidebar.classList.contains('collapsed'));
+                if (profileSidebar) localStorage.setItem('profileSidebarCollapsed', profileSidebar.classList.contains('collapsed'));
+            }
+            function loadSidebarState() {
+                if (mainSidebar && localStorage.getItem('mainSidebarCollapsed') === 'true') {
+                    mainSidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
                     const icon = toggleMainSidebar?.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-chevron-left');
+                        icon.classList.add('bi-chevron-right');
+                    }
+                }
+                if (profileSidebar && localStorage.getItem('profileSidebarCollapsed') === 'true') {
+                    profileSidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
+                    const icon = toggleProfileSidebarBtn?.querySelector('i');
                     if (icon) {
                         icon.classList.remove('bi-chevron-right');
                         icon.classList.add('bi-chevron-left');
                     }
-                    // Luego mostrar el submenú
-                    setTimeout(() => {
-                        const submenu = document.getElementById('equiposSubmenu');
-                        submenu.classList.toggle('show');
-                    }, 300);
+                }
+            }
+            if (toggleMainSidebar) toggleMainSidebar.addEventListener('click', saveSidebarState);
+            if (toggleProfileSidebarBtn) toggleProfileSidebarBtn.addEventListener('click', saveSidebarState);
+            loadSidebarState();
+
+            const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+            if (!isAuthenticated) {
+                if (mainSidebar) mainSidebar.classList.add('collapsed');
+                if (mainContent) mainContent.classList.remove('with-main-sidebar');
+            }
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768) {
+                    const submenus = document.querySelectorAll('.sidebar-submenu.show');
+                    submenus.forEach(submenu => {
+                        if (!submenu.contains(event.target) && !event.target.closest('[data-bs-target="#equiposSubmenu"]')) {
+                            submenu.classList.remove('show');
+                        }
+                    });
                 }
             });
-        }
-
-        // Guardar estado del sidebar en localStorage
-        function saveSidebarState() {
-            if (mainSidebar) {
-                localStorage.setItem('mainSidebarCollapsed', mainSidebar.classList.contains('collapsed'));
-            }
-            if (profileSidebar) {
-                localStorage.setItem('profileSidebarCollapsed', profileSidebar.classList.contains('collapsed'));
-            }
-        }
-
-        // Cargar estado del sidebar desde localStorage
-        function loadSidebarState() {
-            if (mainSidebar && localStorage.getItem('mainSidebarCollapsed') === 'true') {
-                mainSidebar.classList.add('collapsed');
-                mainContent.classList.add('collapsed');
-                const icon = toggleMainSidebar?.querySelector('i');
-                if (icon) {
-                    icon.classList.remove('bi-chevron-left');
-                    icon.classList.add('bi-chevron-right');
-                }
-            }
-            
-            if (profileSidebar && localStorage.getItem('profileSidebarCollapsed') === 'true') {
-                profileSidebar.classList.add('collapsed');
-                mainContent.classList.add('collapsed');
-                const icon = toggleProfileSidebarBtn?.querySelector('i');
-                if (icon) {
-                    icon.classList.remove('bi-chevron-right');
-                    icon.classList.add('bi-chevron-left');
-                }
-            }
-        }
-
-        // Event listeners para guardar estado
-        if (toggleMainSidebar) toggleMainSidebar.addEventListener('click', saveSidebarState);
-        if (toggleProfileSidebarBtn) toggleProfileSidebarBtn.addEventListener('click', saveSidebarState);
-
-        // Cargar estado al iniciar
-        loadSidebarState();
-
-        // Ajustar contenido según autenticación
-        const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
-        if (!isAuthenticated) {
-            if (mainSidebar) mainSidebar.classList.add('collapsed');
-            if (mainContent) mainContent.classList.remove('with-main-sidebar');
-        }
-
-        // Cerrar submenús al hacer clic fuera en móvil
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                const submenus = document.querySelectorAll('.sidebar-submenu.show');
-                submenus.forEach(submenu => {
-                    if (!submenu.contains(event.target) && !event.target.closest('[data-bs-target="#equiposSubmenu"]')) {
-                        submenu.classList.remove('show');
-                    }
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    const buttons = form.querySelectorAll('button[type="submit"]');
+                    buttons.forEach(function (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+                    });
                 });
-            }
-        });
-
-          document.querySelectorAll('form').forEach(function (form) {
-            form.addEventListener('submit', function () {
-            const buttons = form.querySelectorAll('button[type="submit"]');
-            buttons.forEach(function (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
-            });
             });
         });
-    });
-
     </script>
     
     {% block extra_js %}{% endblock %}

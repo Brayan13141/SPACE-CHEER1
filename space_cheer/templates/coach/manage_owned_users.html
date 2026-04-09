@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container py-4">
 
-  <!-- HEADER -->
+  <!-- HEADER MEJORADO -->
   <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
       <h1 class="h3 fw-bold mb-1">
@@ -22,7 +22,7 @@
     </a>
   </div>
 
-  <!-- MENSAJES -->
+  <!-- MENSAJES DEL SISTEMA -->
   {% for msg in messages %}
     <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show mb-4">
       {{ msg }}
@@ -30,233 +30,322 @@
     </div>
   {% endfor %}
 
-  <!-- ══════════════════════════════════════════ ATLETAS -->
+  <!-- ══════════════════════════════════════════ ATLETAS (con DataTables y vista móvil) -->
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+    <div class="card-header bg-black border-bottom py-3 d-flex justify-content-between align-items-center">
       <h5 class="mb-0 fw-bold">
         <i class="bi bi-person-running me-2"></i>Mis Atletas
       </h5>
-      <span class="badge bg-light text-primary rounded-pill fs-6">{{ athletes|length }}</span>
+      <span class="badge bg-primary rounded-pill fs-6">{{ athletes|length }}</span>
     </div>
 
     <div class="card-body p-0">
       {% if athletes %}
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-4">Atleta</th>
-              <th class="d-none d-md-table-cell">Email</th>
-              <th class="d-none d-lg-table-cell">Equipos activos</th>
-              <th class="text-end pe-4">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for ownership in athletes %}
-            <tr>
-              <td class="ps-4">
-                <div class="d-flex align-items-center gap-2">
-                  <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center
-                              justify-content-center flex-shrink-0"
-                       style="width:38px;height:38px;">
-                    <i class="bi bi-person text-primary"></i>
-                  </div>
-                  <div>
-                    <div class="fw-semibold">
-                      {{ ownership.user.get_full_name|default:ownership.user.username }}
+        <!-- TABLA PARA ESCRITORIO (con DataTables) -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-dark table-hover align-middle mb-0" id="athletesTable">
+            <thead class="table-dark">
+              <tr>
+                <th class="ps-4">Atleta</th>
+                <th class="d-none d-md-table-cell">Email</th>
+                <th class="d-none d-lg-table-cell">Equipos activos</th>
+                <th class="text-end pe-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ownership in athletes %}
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:38px;height:38px;">
+                      <i class="bi bi-person text-primary"></i>
                     </div>
-                    <small class="text-muted d-md-none">{{ ownership.user.email|default:"Sin email" }}</small>
-                  </div>
-                </div>
-              </td>
-
-              <td class="d-none d-md-table-cell text-muted small">
-                {{ ownership.user.email|default:"—" }}
-              </td>
-
-              <td class="d-none d-lg-table-cell">
-                <div class="d-flex flex-wrap gap-1">
-                  {% for membership in ownership.user.active_memberships %}
-                    <span class="badge bg-light text-dark border">
-                      <i class="bi bi-people me-1"></i>{{ membership.team.name }}
-                    </span>
-                  {% empty %}
-                    <span class="text-muted small">Sin equipos</span>
-                  {% endfor %}
-                </div>
-              </td>
-
-              <td class="text-end pe-4">
-                <!-- Form oculto para liberar -->
-                <form id="releaseAthlete_{{ ownership.id }}" method="post"
-                      action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
-                  {% csrf_token %}
-                </form>
-                <button type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  data-confirm
-                  data-title="Liberar atleta"
-                  data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong> de tu equipo? Se desactivarán sus membresías activas."
-                  data-form="releaseAthlete_{{ ownership.id }}"
-                  data-variant="danger">
-                  <i class="bi bi-person-dash me-1"></i>
-                  <span class="d-none d-md-inline">Liberar</span>
-                </button>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="text-center py-5">
-        <i class="bi bi-person-slash display-4 text-muted d-block mb-3"></i>
-        <h5 class="text-muted">No tienes atletas asignados</h5>
-        <a href="{% url 'manage_athletes' %}" class="btn btn-primary btn-sm mt-2">
-          <i class="bi bi-person-plus me-1"></i>Crear atleta
-        </a>
-      </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════ CREW -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center py-3">
-      <h5 class="mb-0 fw-bold">
-        <i class="bi bi-person-badge me-2"></i>Mi Crew
-      </h5>
-      <span class="badge bg-light text-secondary rounded-pill fs-6">{{ crew|length }}</span>
-    </div>
-
-    <div class="card-body p-0">
-      {% if crew %}
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-4">Miembro</th>
-              <th class="d-none d-md-table-cell">Email</th>
-              <th class="d-none d-md-table-cell">Rol global</th>
-              <th class="d-none d-lg-table-cell">Equipos activos</th>
-              <th class="text-end pe-4">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for ownership in crew %}
-            <tr>
-              <td class="ps-4">
-                <div class="d-flex align-items-center gap-2">
-                  <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center
-                              justify-content-center flex-shrink-0"
-                       style="width:38px;height:38px;">
-                    <i class="bi bi-person-badge text-secondary"></i>
-                  </div>
-                  <div>
-                    <div class="fw-semibold">
-                      {{ ownership.user.get_full_name|default:ownership.user.username }}
-                    </div>
-                    <div class="d-flex flex-wrap gap-1 mt-1 d-md-none">
-                      {% for role in ownership.user.roles.all %}
-                        <span class="badge bg-secondary bg-opacity-25 text-dark" style="font-size:.7rem;">
-                          {{ role.name }}
-                        </span>
-                      {% endfor %}
+                    <div>
+                      <div class="fw-semibold">
+                        {{ ownership.user.get_full_name|default:ownership.user.username }}
+                      </div>
+                      <small class="d-md-none text-muted">{{ ownership.user.email|default:"Sin email" }}</small>
                     </div>
                   </div>
-                </div>
-              </td>
-
-              <td class="d-none d-md-table-cell text-muted small">
-                {{ ownership.user.email|default:"—" }}
-              </td>
-
-              <td class="d-none d-md-table-cell">
-                <div class="d-flex flex-wrap gap-1">
-                  {% for role in ownership.user.roles.all %}
-                    <span class="badge bg-secondary bg-opacity-10 text-dark border">
-                      {{ role.name }}
-                    </span>
-                  {% empty %}
-                    <span class="text-muted small">Sin roles</span>
-                  {% endfor %}
-                </div>
-              </td>
-
-              <td class="d-none d-lg-table-cell">
-                <div class="d-flex flex-wrap gap-1">
-                  {% for membership in ownership.user.active_memberships %}
-                    <span class="badge bg-light text-dark border">
-                      <i class="bi bi-people me-1"></i>{{ membership.team.name }}
-                      <small class="text-muted">({{ membership.role_in_team }})</small>
-                    </span>
-                  {% empty %}
-                    <span class="text-muted small">Sin equipos</span>
-                  {% endfor %}
-                </div>
-              </td>
-
-              <td class="text-end pe-4">
-                <div class="d-flex justify-content-end gap-2">
-
-                  {% if is_admin %}
-                  <a href="{% url 'edit_owned_user' ownership.id %}"
-                     class="btn btn-sm btn-outline-warning"
-                     data-bs-toggle="tooltip" title="Reasignar coach">
-                    <i class="bi bi-arrow-left-right"></i>
-                  </a>
-                  {% endif %}
-
-                  <!-- Form oculto para liberar -->
-                  <form id="releaseCrew_{{ ownership.id }}" method="post"
-                        action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                </td>
+                <td class="d-none d-md-table-cell small">
+                  {{ ownership.user.email|default:"—" }}
+                </td>
+                <td class="d-none d-lg-table-cell">
+                  <div class="d-flex flex-wrap gap-1">
+                    {% for membership in ownership.user.active_memberships %}
+                      <span class="badge bg-secondary bg-opacity-25 text-light border-0">
+                        <i class="bi bi-people me-1"></i>{{ membership.team.name }}
+                      </span>
+                    {% empty %}
+                      <span class="text-muted small">Sin equipos</span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td class="text-end pe-4">
+                  <form id="releaseAthlete_{{ ownership.id }}" method="post"
+                        action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
                     {% csrf_token %}
                   </form>
                   <button type="button"
                     class="btn btn-sm btn-outline-danger"
                     data-confirm
-                    data-title="Liberar miembro de crew"
-                    data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong>? Se desactivarán sus membresías activas en tus equipos."
-                    data-form="releaseCrew_{{ ownership.id }}"
+                    data-title="Liberar atleta"
+                    data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong> de tu equipo? Se desactivarán sus membresías activas."
+                    data-form="releaseAthlete_{{ ownership.id }}"
                     data-variant="danger">
                     <i class="bi bi-person-dash me-1"></i>
-                    <span class="d-none d-md-inline">Liberar</span>
+                    <span class="d-none d-xl-inline">Liberar</span>
                   </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
+        <!-- VISTA MÓVIL (tarjetas) -->
+        <div class="d-block d-md-none">
+          <div class="list-group list-group-flush">
+            {% for ownership in athletes %}
+            <div class="list-group-item border-bottom py-3">
+              <div class="d-flex align-items-start gap-3">
+                <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:48px;height:48px;">
+                  <i class="bi bi-person fs-4 text-primary"></i>
                 </div>
-              </td>
-            </tr>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="fw-bold mb-0">{{ ownership.user.get_full_name|default:ownership.user.username }}</h6>
+                      <small class="text-muted">{{ ownership.user.email|default:"Sin email" }}</small>
+                    </div>
+                    <form id="releaseAthleteMobile_{{ ownership.id }}" method="post"
+                          action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
+                      {% csrf_token %}
+                    </form>
+                    <button type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      data-confirm
+                      data-title="Liberar atleta"
+                      data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong>?"
+                      data-form="releaseAthleteMobile_{{ ownership.id }}">
+                      <i class="bi bi-person-dash"></i>
+                    </button>
+                  </div>
+                  <div class="mt-2">
+                    <div class="d-flex flex-wrap gap-1">
+                      {% for membership in ownership.user.active_memberships %}
+                        <span class="badge bg-secondary bg-opacity-25 text-light">
+                          {{ membership.team.name }}
+                        </span>
+                      {% empty %}
+                        <span class="text-muted small">Sin equipos activos</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
       {% else %}
-<div class="text-center py-5">
-  <i class="bi bi-people-slash display-4 text-muted d-block mb-3"></i>
-  <h5 class="text-muted">No tienes crew asignado</h5>
-  <p class="text-muted small mb-4">
-    El crew se agrega desde la vista de miembros de cada equipo.
-  </p>
-  <a href="{% url 'manage_teams' %}" class="btn btn-primary btn-sm">
-    <i class="bi bi-people me-1"></i>Ir a mis equipos
-  </a>
-</div>
-{% endif %}
+        <div class="text-center py-5">
+          <i class="bi bi-person-slash display-4 text-muted d-block mb-3"></i>
+          <h5 class="text-muted">No tienes atletas asignados</h5>
+          <a href="{% url 'manage_athletes' %}" class="btn btn-primary btn-sm mt-2">
+            <i class="bi bi-person-plus me-1"></i>Crear atleta
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ CREW (con DataTables y vista móvil) -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-black border-bottom py-3 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold">
+        <i class="bi bi-person-badge me-2"></i>Mi Crew
+      </h5>
+      <span class="badge bg-primary rounded-pill fs-6">{{ crew|length }}</span>
+    </div>
+
+    <div class="card-body p-0">
+      {% if crew %}
+        <!-- TABLA PARA ESCRITORIO -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-dark table-hover align-middle mb-0" id="crewTable">
+            <thead class="table-dark">
+              <tr>
+                <th class="ps-4">Miembro</th>
+                <th class="d-none d-md-table-cell">Email</th>
+                <th class="d-none d-md-table-cell">Rol global</th>
+                <th class="d-none d-lg-table-cell">Equipos activos</th>
+                <th class="text-end pe-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ownership in crew %}
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:38px;height:38px;">
+                      <i class="bi bi-person-badge text-secondary"></i>
+                    </div>
+                    <div>
+                      <div class="fw-semibold">
+                        {{ ownership.user.get_full_name|default:ownership.user.username }}
+                      </div>
+                      <div class="d-flex flex-wrap gap-1 mt-1 d-md-none">
+                        {% for role in ownership.user.roles.all %}
+                          <span class="badge bg-secondary bg-opacity-25 text-light">{{ role.name }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="d-none d-md-table-cell small">
+                  {{ ownership.user.email|default:"—" }}
+                </td>
+                <td class="d-none d-md-table-cell">
+                  <div class="d-flex flex-wrap gap-1">
+                    {% for role in ownership.user.roles.all %}
+                      <span class="badge bg-secondary bg-opacity-25 text-light border-0">{{ role.name }}</span>
+                    {% empty %}
+                      <span class="text-muted small">Sin roles</span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td class="d-none d-lg-table-cell">
+                  <div class="d-flex flex-wrap gap-1">
+                    {% for membership in ownership.user.active_memberships %}
+                      <span class="badge bg-secondary bg-opacity-25 text-light">
+                        <i class="bi bi-people me-1"></i>{{ membership.team.name }}
+                        <small class="text-muted">({{ membership.role_in_team }})</small>
+                      </span>
+                    {% empty %}
+                      <span class="text-muted small">Sin equipos</span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="d-flex justify-content-end gap-2">
+                    {% if is_admin %}
+                    <a href="{% url 'edit_owned_user' ownership.id %}"
+                       class="btn btn-sm btn-outline-warning"
+                       data-bs-toggle="tooltip" title="Reasignar coach">
+                      <i class="bi bi-arrow-left-right"></i>
+                    </a>
+                    {% endif %}
+                    <form id="releaseCrew_{{ ownership.id }}" method="post"
+                          action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                      {% csrf_token %}
+                    </form>
+                    <button type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      data-confirm
+                      data-title="Liberar miembro de crew"
+                      data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong>? Se desactivarán sus membresías activas en tus equipos."
+                      data-form="releaseCrew_{{ ownership.id }}">
+                      <i class="bi bi-person-dash me-1"></i>
+                      <span class="d-none d-xl-inline">Liberar</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- VISTA MÓVIL PARA CREW -->
+        <div class="d-block d-md-none">
+          <div class="list-group list-group-flush">
+            {% for ownership in crew %}
+            <div class="list-group-item border-bottom py-3">
+              <div class="d-flex align-items-start gap-3">
+                <div class="bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:48px;height:48px;">
+                  <i class="bi bi-person-badge fs-4 text-secondary"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="fw-bold mb-0">{{ ownership.user.get_full_name|default:ownership.user.username }}</h6>
+                      <small class="text-muted">{{ ownership.user.email|default:"Sin email" }}</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                      {% if is_admin %}
+                      <a href="{% url 'edit_owned_user' ownership.id %}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-arrow-left-right"></i>
+                      </a>
+                      {% endif %}
+                      <form id="releaseCrewMobile_{{ ownership.id }}" method="post"
+                            action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                        {% csrf_token %}
+                      </form>
+                      <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        data-confirm
+                        data-title="Liberar miembro"
+                        data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong>?"
+                        data-form="releaseCrewMobile_{{ ownership.id }}">
+                        <i class="bi bi-person-dash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <div class="d-flex flex-wrap gap-1 mb-1">
+                      {% for role in ownership.user.roles.all %}
+                        <span class="badge bg-secondary bg-opacity-25 text-light">{{ role.name }}</span>
+                      {% endfor %}
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                      {% for membership in ownership.user.active_memberships %}
+                        <span class="badge bg-secondary bg-opacity-25 text-light">
+                          {{ membership.team.name }} ({{ membership.role_in_team }})
+                        </span>
+                      {% empty %}
+                        <span class="text-muted small">Sin equipos activos</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-people-slash display-4 text-muted d-block mb-3"></i>
+          <h5 class="text-muted">No tienes crew asignado</h5>
+          <p class="text-muted small mb-4">
+            El crew se agrega desde la vista de miembros de cada equipo.
+          </p>
+          <a href="{% url 'manage_teams' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-people me-1"></i>Ir a mis equipos
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 
 </div>
 
-<!-- MODAL DE CONFIRMACIÓN -->
+<!-- MODAL DE CONFIRMACIÓN (mejorado visualmente) -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
+    <div class="modal-content border-0 shadow-lg">
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title fw-bold" id="confirmModalTitle"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body pt-2 pb-1">
-        <p class="text-muted mb-0" id="confirmModalBody"></p>
+        <p class="mb-0" id="confirmModalBody"></p>
       </div>
       <div class="modal-footer border-0 pt-2">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -274,11 +363,36 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // Inicializar DataTables en las tablas de escritorio
+  if (typeof $.fn.DataTable !== 'undefined') {
+    if ($('#athletesTable').length) {
+      $('#athletesTable').DataTable({
+        language: { url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+        columnDefs: [
+          { orderable: false, targets: [3] } // desactivar orden en columna acciones
+        ]
+      });
+    }
+    if ($('#crewTable').length) {
+      $('#crewTable').DataTable({
+        language: { url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+        columnDefs: [
+          { orderable: false, targets: [4] } // columna acciones
+        ]
+      });
+    }
+  }
 
   // Tooltips
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
-  // Modal de confirmación
+  // Modal de confirmación (funcionalidad existente)
   const modalEl    = document.getElementById('confirmModal');
   const modal      = new bootstrap.Modal(modalEl);
   const titleEl    = document.getElementById('confirmModalTitle');
@@ -286,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const confirmBtn = document.getElementById('confirmModalBtn');
   let pendingFormId = null;
 
-  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+  document.querySelectorAll('[data-confirm]').forEach(btn => {
     btn.addEventListener('click', function () {
       titleEl.textContent = this.dataset.title || 'Confirmar';
       bodyEl.innerHTML    = this.dataset.body  || '¿Estás seguro?';
@@ -302,10 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.hide();
   });
 
-  modalEl.addEventListener('hidden.bs.modal', function () {
-    pendingFormId = null;
-  });
-
+  modalEl.addEventListener('hidden.bs.modal', () => pendingFormId = null);
 });
 </script>
 {% endblock %}
