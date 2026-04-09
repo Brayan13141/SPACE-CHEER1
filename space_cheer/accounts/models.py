@@ -82,26 +82,16 @@ class User(AbstractUser):
         """
         Validación personalizada a nivel de modelo
         """
-        # Regex oficial de la CURP mexicana
-        CURP_REGEX = re.compile(
-            r"^[A-Z]{4}"  # 4 letras iniciales
-            r"\d{6}"  # fecha YYMMDD
-            r"[HM]"  # sexo
-            r"(AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)"  # estado
-            r"[B-DF-HJ-NP-TV-Z]{3}"  # 3 consonantes internas
-            r"[A-Z0-9]"  # homoclave
-            r"\d$"  # dígito verificador
-        )
+        #  NO validar en superuser
+        if self.is_superuser:
+            return super().clean()
+
+        if not self.profile_completed:
+            return super().clean()
 
         if self.email:
             # Normalizar email (lowercase y trim)
             self.email = self.email.lower().strip()
-
-            # Verificar duplicados excluyendo la instancia actual
-            if User.objects.filter(email=self.email).exclude(pk=self.pk).exists():
-                raise ValidationError(
-                    {"email": "Ya existe un usuario con este correo electrónico."}
-                )
 
         if self.phone:
             # Normalizar teléfono (eliminar espacios, guiones y paréntesis)
@@ -131,17 +121,12 @@ class User(AbstractUser):
                     {"phone": "Ya existe un usuario con este número de teléfono."}
                 )
 
-        # ═══════════════════════════════════════════════════════════
-        # VALIDACIÓN DE CURP (código original)
-        # ═══════════════════════════════════════════════════════════
-
+        # Evitar validaciones si roles aún no están listos
         if not self.pk:
             return super().clean()
 
         if self.roles.filter(requires_curp=True).exists() and not self.curp:
-            raise ValidationError(
-                {"curp": "Este usuario requiere CURP debido a su rol."}
-            )
+            raise ValidationError({"curp": "Este usuario requiere CURP."})
 
         if self.curp:
             curp = self.curp.upper().strip()
@@ -149,20 +134,9 @@ class User(AbstractUser):
             if len(curp) != 18:
                 raise ValidationError({"curp": "La CURP debe tener 18 caracteres."})
 
-            if not CURP_REGEX.match(curp):
-                raise ValidationError({"curp": "El formato de CURP no es válido."})
-
             self.curp = curp  # Normalizar a mayúsculas
 
         super().clean()
-
-    def save(self, *args, **kwargs):
-        """
-        Override save para ejecutar clean() automáticamente
-        """
-        # Ejecuta validaciones antes de guardar
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     @property
     def is_headcoach(self):

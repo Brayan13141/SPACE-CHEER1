@@ -1,10 +1,9 @@
 from django.shortcuts import render
-from accounts.decorators import full_profile_required
+from teams.models import UserTeamMembership
+from django.contrib.auth.decorators import login_required
 
-from teams.models import Team, UserTeamMembership
 
-
-@full_profile_required
+@login_required
 def home(request):
     IsAdm = (
         request.user.roles.filter(name="ADMIN").exists()

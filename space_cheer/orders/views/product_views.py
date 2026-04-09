@@ -84,11 +84,18 @@ def order_add_product(request, order_id):
                     item_id=item.id,
                 )
 
-        except ValidationError as e:
-            for msg in e.messages:
-                messages.error(request, msg)
+            return redirect("orders:detail_order", order_id=order.id)
 
-        return redirect("orders:detail_order", order_id=order.id)
+        except ValidationError as e:
+            if hasattr(e, "message_dict"):
+                for field, errors in e.message_dict.items():
+                    for msg in errors:
+                        messages.error(request, msg)
+            else:
+                for msg in e.messages:
+                    messages.error(request, msg)
+
+            return redirect("orders:detail_order", order_id=order.id)
 
     seasons = Season.objects.filter(is_active=True)
 

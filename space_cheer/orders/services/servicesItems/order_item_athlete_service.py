@@ -1,12 +1,17 @@
 from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
 from django.db import transaction
+
 from orders.models import OrderItemAthlete, OrderItemMeasurement
 from orders.services.validators import OrderAthleteValidator
+from teams.models import UserTeamMembership
 
 
 class OrderItemAthleteService:
 
+    # =========================================================
+    # ADD ATHLETE
+    # =========================================================
     @staticmethod
     @transaction.atomic
     def add_athlete(order_item, athlete):
@@ -21,36 +26,132 @@ class OrderItemAthleteService:
         )
 
         OrderItemAthleteService._create_measurement_snapshot(athlete_item)
+
         return athlete_item
 
+    # =========================================================
+    # IMPORT FROM TEAM (CORE FLOW)
+    # =========================================================
+
+    @staticmethod
+    @transaction.atomic
+    def import_from_team(order_item):
+
+        # 🔒 LOCK para evitar race conditions
+        order_item = (
+            order_item.__class__.objects.select_for_update()
+            .select_related("order", "product")
+            .get(pk=order_item.pk)
+        )
+
+        order = order_item.order
+        product = order_item.product
+
+        # -------------------------
+        # VALIDACIONES
+        # -------------------------
+        if not order.can_edit_general():
+            raise ValidationError("La orden no es editable.")
+
+        if order.order_type != "TEAM":
+            raise ValidationError("Solo órdenes TEAM permiten importar atletas.")
+
+        if not product.requires_athletes:
+            raise ValidationError("Este producto no usa atletas.")
+
+        if not order.owner_team:
+            raise ValidationError("La orden no tiene equipo asignado.")
+
+        # -------------------------
+        # QUERY
+        # -------------------------
+        memberships = (
+            UserTeamMembership.objects.filter(
+                team=order.owner_team,
+                status="accepted",
+                is_active=True,
+                role_in_team="ATLETA",
+            )
+            .select_related("user")
+            .prefetch_related("user__measurements")
+        )
+
+        existing_athletes = {
+            ai.athlete_id: ai
+            for ai in order_item.athletes.all().prefetch_related("measurements")
+        }
+
+        created = 0
+        updated = 0
+        errors = []
+
+        valid_athlete_ids = []
+
+        # -------------------------
+        # LOOP PRINCIPAL
+        # -------------------------
+        for membership in memberships:
+            athlete = membership.user
+            valid_athlete_ids.append(athlete.id)
+
+            try:
+                if athlete.id not in existing_athletes:
+                    OrderItemAthleteService.add_athlete(order_item, athlete)
+                    created += 1
+                else:
+                    athlete_item = existing_athletes[athlete.id]
+                    OrderItemAthleteService.sync_measurements_from_athlete(athlete_item)
+                    updated += 1
+
+            except ValidationError as e:
+                errors.append(f"{athlete}: {', '.join(e.messages)}")
+
+        # -------------------------
+        # LIMPIEZA DE ATLETAS OBSOLETOS
+        # -------------------------
+        OrderItemAthleteService._remove_stale_athletes(
+            order_item, valid_athlete_ids, existing_athletes
+        )
+
+        return {
+            "created": created,
+            "updated": updated,
+            "errors": errors,
+        }
+
+    # =========================================================
+    # REMOVE STALE ATHLETES
+    # =========================================================
+    @staticmethod
+    def _remove_stale_athletes(order_item, valid_athlete_ids, existing_athletes):
+        """
+        Elimina atletas que ya no pertenecen al equipo.
+        Optimizado usando sets.
+        """
+        existing_ids = set(existing_athletes.keys())
+        valid_ids = set(valid_athlete_ids)
+
+        to_delete = existing_ids - valid_ids
+
+        if to_delete:
+            order_item.athletes.filter(athlete_id__in=to_delete).delete()
+
+    # =========================================================
+    # CREATE SNAPSHOT
+    # =========================================================
     @staticmethod
     def _create_measurement_snapshot(athlete_item):
-        """
-        Crea snapshot fiel de las medidas del atleta.
-        - Si tiene valor: lo copia tal cual (string)
-        - Si no tiene valor: guarda "" (vacío, no None)
-        - NO hace juicios sobre si el valor es válido o no
-        """
         product = athlete_item.order_item.product
         athlete = athlete_item.athlete
 
-        # Dict: field_id → valor string (o None si no existe)
-        athlete_measurements = {
-            m.field_id: m.value
-            for m in athlete.measurements.all()
-            # m.value es CharField, puede ser "" pero no None
-        }
+        athlete_measurements = {m.field_id: m.value for m in athlete.measurements.all()}
 
         snapshots = []
 
         for pmf in product.measurement_fields.select_related("field").all():
             field = pmf.field
 
-            # Lo que tiene el atleta (string) o None si no tiene el campo
             raw_value = athlete_measurements.get(pmf.field_id)
-
-            # Normalización: None → "" para consistencia
-            # El valor "" significa "no tiene esta medida aún"
             snapshot_value = raw_value if raw_value is not None else ""
 
             snapshots.append(
@@ -70,33 +171,23 @@ class OrderItemAthleteService:
                 snapshots,
                 update_conflicts=True,
                 unique_fields=["athlete_item", "field"],
-                # NO actualizar is_modified — respetar ediciones previas
                 update_fields=["value_original", "value"],
             )
 
+    # =========================================================
+    # SYNC MEASUREMENTS
+    # =========================================================
     @staticmethod
     @transaction.atomic
     def sync_measurements_from_athlete(athlete_item):
-        """
-        Sincroniza medidas del perfil del atleta al snapshot de la orden.
 
-        Reglas:
-        - Si el row tiene is_modified=True: NO tocar (el coach editó manualmente)
-        - Si el valor cambió en el perfil: actualizar value y value_original
-        - Si existe un campo nuevo en el producto que no tiene row: crearlo
-        - Si el atleta no tiene la medida: dejar "" (no None)
-        """
         athlete = athlete_item.athlete
         product = athlete_item.order_item.product
 
-        # Medidas actuales del perfil del atleta
-        # key: field_id, value: string tal cual (CharField)
         athlete_measurements = {m.field_id: m.value for m in athlete.measurements.all()}
 
-        # Rows existentes en la orden para este atleta+item
         existing_measurements = {m.field_id: m for m in athlete_item.measurements.all()}
 
-        # Campos configurados en el producto (fuente de verdad del schema)
         product_fields = list(product.measurement_fields.select_related("field").all())
 
         updates = []
@@ -106,25 +197,20 @@ class OrderItemAthleteService:
             field_id = pmf.field_id
             field = pmf.field
 
-            # Valor del perfil del atleta ("" si no tiene esa medida)
             profile_value = athlete_measurements.get(field_id, "")
 
             if field_id in existing_measurements:
-                # ── Row ya existe ──────────────────────────────────────
                 measurement = existing_measurements[field_id]
 
-                # Respetar edición manual del coach
                 if measurement.is_modified:
                     continue
 
-                # Solo actualizar si realmente cambió
                 if measurement.value != profile_value:
                     measurement.value = profile_value
                     measurement.value_original = profile_value
                     updates.append(measurement)
 
             else:
-                # ── Row no existe (campo nuevo en el producto) ─────────
                 new_snapshots.append(
                     OrderItemMeasurement(
                         athlete_item=athlete_item,

@@ -61,7 +61,7 @@ Ejecutar Gunicorn en background
 gunicorn --daemon --workers 3 --bind 127.0.0.1:8001 space_cheer.wsgi:application
 
 Ejecutar Gunicorn en la terminal
-gunicorn space_cheer.wsgi:application --bind 127.0.0.1:8001
+python -m gunicorn space_cheer.wsgi:application --bind 127.0.0.1:8001
 
 Reiniciar Gunicorn
 pkill gunicorn

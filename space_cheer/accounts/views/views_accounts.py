@@ -2,23 +2,13 @@
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import UserAddress
-from .forms import UserAddressForm, UserProfilingForm, CurpForm
+from accounts.models import UserAddress
+from accounts.forms import UserAddressForm, UserProfilingForm, CurpForm
 
 
+@login_required
 def profile_setup_view(request):
-    """
-    Primer paso: completar datos del usuario (sin CURP).
-    """
     user = request.user
-
-    if user.roles.filter(requires_curp=True).exists() and not user.curp:
-        return redirect("accounts:curp_verification")
-
-    # Si ya tiene un rol y nombre, saltar este paso
-    if user.roles.exists() and user.first_name:
-        return redirect("dashboard")
-
     if request.method == "POST":
         form = UserProfilingForm(request.POST, instance=user)
 
@@ -26,17 +16,13 @@ def profile_setup_view(request):
             user_instance = form.save(commit=False)
             selected_role = form.cleaned_data["role"]
 
-            # Guardamos el usuario
             user_instance.save()
-
-            # Guardamos el rol ManyToMany
             user_instance.roles.set([selected_role])
-
-            # Si su rol exige CURP → ir al segundo formulario
+            user_instance.profile_completed = True
+            user_instance.save()
             if selected_role.requires_curp:
                 return redirect("accounts:curp_verification")
 
-            # Si NO requiere CURP, ir al dashboard directamente
             return redirect("dashboard")
 
     else:
@@ -45,7 +31,7 @@ def profile_setup_view(request):
     return render(
         request,
         "account/profile_setup.html",
-        {"form": form, "title": "Completa tu Perfil"},
+        {"form": form},
     )
 
 
@@ -53,16 +39,21 @@ def profile_setup_view(request):
 def curp_verification(request):
     user = request.user
 
-    # Si ya tiene CURP, no tiene sentido volver aquí
     if user.curp:
-        return redirect("dashboard")
+        if user.roles.filter(name="GUARDIAN").exists():
+            return redirect("guardian:dashboard")
+        else:
+            return redirect("core:dashboard")
 
     if request.method == "POST":
         form = CurpForm(request.POST, instance=user)
 
         if form.is_valid():
             form.save()
-            return redirect("dashboard")
+            if user.roles.filter(name="GUARDIAN").exists():
+                return redirect("guardian:dashboard")
+            else:
+                return redirect("dashboard")
 
     else:
         form = CurpForm(instance=user)

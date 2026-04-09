@@ -17,14 +17,16 @@
       <label class="form-label">Tipo de orden</label>
       <select name="order_type" id="order_type" class="form-select" required>
         <option value="PERSONAL">Personal</option>
-        <option value="TEAM">Equipo</option>
+        {% if teams.exists and not is_guardian%}
+          <option value="TEAM">Equipo</option>
+        {% endif %}
       </select>
     </div>
 
-    {% if teams.exists %}
+    {% if teams.exists and not is_guardian %}
     <div class="mb-3 d-none" id="team-selector">
       <label class="form-label">Equipo</label>
-      <select name="order_team" class="form-select">
+      <select name="team_id" class="form-select">
         <option value="">Selecciona un equipo</option>
         {% for team in teams %}
           <option value="{{ team.id }}">{{ team.name }}</option>
@@ -32,9 +34,11 @@
       </select>
     </div>
     {% else %}
+    {% if not is_guardian %}
       <div class="alert alert-info">
         No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo.
       </div>
+      {% endif %}
     {% endif %}
    
     

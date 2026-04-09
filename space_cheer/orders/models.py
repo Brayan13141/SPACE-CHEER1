@@ -4,13 +4,10 @@
 # imágenes de diseño y registro de cambios.
 
 from functools import cached_property
-
-from django.utils import timezone
 from django.db import models
 from django.conf import settings
-from accounts.models import User, UserAddress
+from accounts.models import User
 from teams.models import Team
-from measures.models import MeasurementField
 from django.core.exceptions import ValidationError
 from teams.models import UserTeamMembership
 from products.models import Product

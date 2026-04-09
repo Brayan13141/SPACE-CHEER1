@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db import IntegrityError
-from django.db.models import Count, Prefetch
+from django.db import IntegrityError, transaction
+from django.db.models import Count, Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.views.decorators.http import require_POST
@@ -16,8 +16,8 @@ from orders.models import (
 )
 from orders.services.state import OrderStateService
 from orders.forms import OrderDatesForm
-from django.db.models import Q, Sum
-from orders.pagination import OrderPaginator
+from django.core.exceptions import ValidationError
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 logger = logging.getLogger(__name__)
@@ -307,6 +307,7 @@ def admin_upload_design(request, order_id):
         if not image:
             messages.error(request, "Debes subir una imagen.")
             return redirect("orders:admin_order_detail", order_id=order.id)
+
         ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
         MAX_SIZE_MB = 10
 
@@ -319,15 +320,28 @@ def admin_upload_design(request, order_id):
             return redirect("orders:admin_order_detail", order_id=order.id)
 
         try:
-            OrderDesignImage.objects.create(
-                order=order,
-                image=image,
-                uploaded_by=request.user,
-                is_final=is_final,
-            )
+            with transaction.atomic():
+                #  Validación previa (mejor UX que depender del DB error)
+                if is_final and order.design_images.filter(is_final=True).exists():
+                    raise ValidationError(
+                        "Ya existe un diseño marcado como final. "
+                        "Desmárcalo antes de subir uno nuevo."
+                    )
+
+                OrderDesignImage.objects.create(
+                    order=order,
+                    image=image,
+                    uploaded_by=request.user,
+                    is_final=is_final,
+                )
+
             messages.success(request, "Diseño subido correctamente.")
 
+        except ValidationError as e:
+            messages.error(request, str(e))
+
         except IntegrityError:
+            # fallback por si hay constraint en DB
             messages.error(
                 request,
                 "Ya existe un diseño marcado como final. "

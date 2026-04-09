@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>Panel de Guardianes 🛡️</h2>
+
+    <div class="alert alert-warning">
+        ⚠️ Tienes <strong>{{ count_minors }}</strong> atletas menores sin guardian.
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Menores sin guardian
+        </div>
+
+        <div class="card-body">
+
+            {% if minors_without_guardian %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for athlete in minors_without_guardian %}
+                        <tr>
+                            <td>{{ athlete.get_full_name }}</td>
+                            <td>{{ athlete.email }}</td>
+                            <td>
+                                <a href="{% url 'guardian:assign_guardian' athlete.id %}" 
+                                   class="btn btn-primary btn-sm">
+                                   Asignar Guardian
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No hay menores pendientes 🎉</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from urllib3 import request
-from accounts.decorators import full_profile_required, role_required
+from accounts.decorators import role_required
 from .models import MeasurementField
 from .forms import MeasurementFieldForm
 import traceback  # Para mostrar detalles del error
 
 
-@full_profile_required
 @role_required("ADMIN")
 def manage_measurement_fields(request):
 

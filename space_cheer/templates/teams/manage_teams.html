@@ -13,12 +13,12 @@
             </div>
             <div>
                 <h1 class="h4 fw-bold mb-0">Gestión de Equipos</h1>
-                <p class="text-muted mb-0 small">{{ teams|length }} equipo{{ teams|pluralize }}</p>
+                <p class=" mb-0 small">{{ teams|length }} equipo{{ teams|pluralize }}</p>
             </div>
         </div>
         
         {% if puede_crear %}
-        <button class="btn btn-primary d-flex align-items-center shadow-sm" 
+        <button class="btn btn-success  d-flex align-items-center shadow-sm" 
                 data-bs-toggle="modal" data-bs-target="#modalCrear">
             <i class="bi bi-plus-circle me-2"></i>
             <span class="d-none d-md-inline">Crear Equipo</span>
@@ -29,7 +29,7 @@
 
     <!-- TARJETA DE LISTADO -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3">
+        <div class="card-header bg-black border-bottom py-3">
             <div class="d-flex align-items-center justify-content-between">
                 <h2 class="h5 fw-bold mb-0">Lista de Equipos</h2>
                 <span class="badge bg-primary rounded-pill">{{ teams|length }}</span>
@@ -56,7 +56,7 @@
                     <tbody>
                         {% for team in teams %}
                         <tr class="border-bottom">
-                            <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                            <td class="ps-4 ">{{ forloop.counter }}</td>
                             <td>
                                 {% if team.logo %}
                                 <img src="{{ team.logo.url }}" alt="{{ team.name }}" 
@@ -70,7 +70,7 @@
                             </td>
                             <td>
                                 <div class="fw-bold">{{ team.name }}</div>
-                                <small class="text-muted">ID: {{ team.id }}</small>
+                                <small class="">ID: {{ team.id }}</small>
                             </td>
                             <td>
                                 {% if team.coach %}
@@ -81,11 +81,11 @@
                                     </div>
                                     <div>
                                         <div class="small fw-bold">{{ team.coach.get_full_name|default:team.coach.username }}</div>
-                                        <small class="text-muted">Coach</small>
+                                        <small class="">Coach</small>
                                     </div>
                                 </div>
                                 {% else %}
-                                <span class="text-muted small">Sin entrenador</span>
+                                <span class=" small">Sin entrenador</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -98,12 +98,12 @@
                                 {% if team.phone %}
                                 <a href="tel:{{ team.phone }}" class="text-decoration-none">{{ team.phone }}</a>
                                 {% else %}
-                                <span class="text-muted">—</span>
+                                <span class="">—</span>
                                 {% endif %}
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a href="{% url 'manage_team_members' team.id %}" 
+                                    <a href="{% url 'teams:manage_team_members' team.id %}" 
                                        class="btn btn-outline-success btn-sm d-flex align-items-center">
                                         <i class="bi bi-people me-1 d-none d-md-inline"></i>
                                         <span>Miembros</span>
@@ -175,7 +175,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'manage_team_members' team.id %}">
+                                        <a class="dropdown-item" href="{% url 'teams:manage_team_members' team.id %}">
                                             <i class="bi bi-people me-2"></i>Gestionar miembros
                                         </a>
                                     </li>
@@ -212,7 +212,7 @@
                         <div class="row g-2 mt-2">
                             {% if team.coach %}
                             <div class="col-12">
-                                <div class="d-flex align-items-center text-muted small">
+                                <div class="d-flex align-items-center  small">
                                     <i class="bi bi-person me-2"></i>
                                     <span>{{ team.coach.get_full_name|default:team.coach.username }}</span>
                                 </div>
@@ -220,14 +220,14 @@
                             {% endif %}
                             {% if team.phone %}
                             <div class="col-12">
-                                <div class="d-flex align-items-center text-muted small">
+                                <div class="d-flex align-items-center  small">
                                     <i class="bi bi-telephone me-2"></i>
                                     <span>{{ team.phone }}</span>
                                 </div>
                             </div>
                             {% endif %}
                             <div class="col-12 mt-2">
-                                <a href="{% url 'manage_team_members' team.id %}" 
+                                <a href="{% url 'teams:manage_team_members' team.id %}" 
                                    class="btn btn-outline-primary w-100 btn-sm d-flex align-items-center justify-content-center">
                                     <i class="bi bi-people me-2"></i>
                                     Gestionar miembros
@@ -243,12 +243,12 @@
             <!-- ESTADO VACÍO -->
             <div class="text-center py-5">
                 <div class="mb-4">
-                    <i class="bi bi-people display-1 text-muted opacity-50"></i>
+                    <i class="bi bi-people display-1  opacity-50"></i>
                 </div>
-                <h5 class="text-muted mb-3">No hay equipos registrados</h5>
-                <p class="text-muted mb-4">Comienza creando tu primer equipo.</p>
+                <h5 class=" mb-3">No hay equipos registrados</h5>
+                <p class=" mb-4">Comienza creando tu primer equipo.</p>
                 {% if puede_crear %}
-                <button class="btn btn-primary d-flex align-items-center mx-auto" 
+                <button class="btn btn-success d-flex align-items-center mx-auto" 
                         data-bs-toggle="modal" data-bs-target="#modalCrear">
                     <i class="bi bi-plus-circle me-2"></i>
                     Crear primer equipo
@@ -382,7 +382,7 @@
                             <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
                         </div>
                         <h5 class="fw-bold mb-3">¿Estás seguro?</h5>
-                        <p class="text-muted mb-4">
+                        <p class=" mb-4">
                             Estás a punto de eliminar el equipo 
                             <strong>"{{ team.name }}"</strong>.
                             <br>
@@ -420,7 +420,7 @@
                 <i class="bi bi-info-circle me-2"></i>
                 Gestión de equipos
             </h6>
-            <ul class="mb-0 small ps-3 text-muted">
+            <ul class="mb-0 small ps-3 ">
                 <li>Desliza horizontalmente para ver más columnas en la tabla</li>
                 <li>Toca los tres puntos verticales para ver más opciones</li>
                 <li>Los badges indican la categoría y ciudad del equipo</li>

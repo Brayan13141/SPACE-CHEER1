@@ -70,7 +70,7 @@ INSTALLED_APPS = [
 # =================================================================
 # INVITATIONS CONFIGURATION
 # =================================================================
-ACCOUNT_ADAPTER = "invitations.models.InvitationsAdapter"
+
 # Días antes de que expire la invitación (default=3)
 INVITATIONS_INVITATION_EXPIRY = 7
 
@@ -80,8 +80,6 @@ INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
 
 # Prefijo para el asunto (None usa el nombre del sitio entre corchetes)
 INVITATIONS_EMAIL_SUBJECT_PREFIX = ""
-
-INVITATIONS_ADAPTER = "social.adapters.CustomInvitationsAdapter"
 # =================================================================
 # DJANGO ALLAUTH CONFIGURATION
 # =================================================================
@@ -103,7 +101,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirige al home después de logout
 ACCOUNT_LOGOUT_ON_GET = False  # Obliga a usar POST para logout (más seguro)
 # Redirige a esta URL después de un inicio de sesión exitoso o después de la configuración inicial
-LOGIN_REDIRECT_URL = "/accounts/complete-profile/"
+LOGIN_REDIRECT_URL = "/"
 # settings.py
 
 ACCOUNT_FORMS = {
@@ -122,10 +120,14 @@ ACCOUNT_LOGIN_METHODS = {"email", "username"}
 
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 # -------------------SOCIALACCOUNT----------------------------
-SOCIALACCOUNT_ADAPTER = "accounts.social_adapter.CustomSocialAccountAdapter"
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 
+ACCOUNT_ADAPTER = "accounts.adapters.account_adapter.CustomAccountAdapter"
+
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.social_adapter.CustomSocialAccountAdapter"
+
+INVITATIONS_ADAPTER = "accounts.adapters.invitations_adapter.CustomInvitationsAdapter"
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -159,10 +161,10 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "accounts.context_processors.user_roles",
+                "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.request",
-                "teams.context_processors.user_teams_context",  #
             ],
         },
     },
@@ -170,6 +172,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "space_cheer.wsgi.application"
 
+SESSION_COOKIE_HTTPONLY = True  # JS no puede leer la cookie
+# SESSION_COOKIE_SECURE = True  # Solo HTTPS (actívalo en producción)
+SESSION_COOKIE_SAMESITE = "Lax"  # Protección CSRF adicional
+CSRF_COOKIE_SECURE = True  # Cookie CSRF solo sobre HTTPS
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -223,21 +229,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 # TEMPLATES EN UNA SOLA SECCION
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
 
 CSRF_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_HTTPONLY = True
@@ -274,3 +265,59 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "SPACE CHEER - "
+
+
+# LOGG
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": LOG_DIR / "django.log",
+            "formatter": "verbose",
+        },
+        "error_file": {
+            "class": "logging.FileHandler",
+            "filename": LOG_DIR / "errors.log",
+            "level": "ERROR",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        # Logger específico de tu proyecto (muy importante)
+        "space_cheer": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        # Logger solo para errores críticos
+        "django.request": {
+            "handlers": ["error_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}

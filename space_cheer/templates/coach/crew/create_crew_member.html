@@ -16,7 +16,7 @@
         <i class="bi bi-people me-1"></i>Equipo: <strong>{{ team.name }}</strong>
       </p>
     </div>
-    <a href="{% url 'manage_team_members' team.id %}" class="btn btn-outline-secondary btn-sm">
+    <a href="{% url 'teams:manage_team_members' team.id %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left me-1"></i>Volver
     </a>
   </div>
@@ -138,7 +138,7 @@
               <button type="submit" class="btn btn-primary flex-fill">
                 <i class="bi bi-person-check me-2"></i>Crear y asignar
               </button>
-              <a href="{% url 'manage_team_members' team.id %}"
+              <a href="{% url 'teams:manage_team_members' team.id %}"
                  class="btn btn-outline-secondary">
                 Cancelar
               </a>

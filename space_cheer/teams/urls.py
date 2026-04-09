@@ -3,6 +3,8 @@
 from django.urls import path
 from . import views
 
+app_name = "teams"
+
 urlpatterns = [
     # Rutas para la gestión de categorías
     path("categories/", views.manage_categories, name="manage_categories"),

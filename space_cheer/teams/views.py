@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Team, TeamCategory
 from .forms import TeamForm, TeamCategoryForm, QuickAthleteRegisterForm
-from accounts.decorators import full_profile_required, role_required
+from accounts.decorators import role_required
 from accounts.models import (
     User,
     Role,
@@ -14,7 +14,6 @@ from accounts.models import (
 
 from django.db import models
 from teams.models import UserTeamMembership
-from django.utils import timezone
 from django.db import transaction
 from django.db.models import Max
 from django.core.exceptions import PermissionDenied
@@ -22,7 +21,6 @@ from decouple import config
 from django.db.models import ProtectedError
 
 
-@full_profile_required
 @role_required("ADMIN", "HEADCOACH")
 def manage_categories(request):
 
@@ -104,10 +102,8 @@ def manage_categories(request):
     )
 
 
-@full_profile_required
 @role_required("ADMIN", "HEADCOACH")
 def manage_teams(request):
-
     if request.user.roles.filter(name__in=["HEADCOACH"]).exists():
         teams = Team.objects.select_related("coach", "category").filter(
             coach=request.user
@@ -155,6 +151,13 @@ def manage_teams(request):
                 )
                 messages.success(request, f"Equipo '{team.name}' creado exitosamente.")
                 return redirect("manage_teams")
+            # ❗ MOSTRAR ERRORES EN MESSAGES
+            for field, errors in form_crear.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"{error}")
+                    else:
+                        messages.error(request, f"{field}: {error}")
             abrir_modal_crear = True
 
         # EDITAR
@@ -172,6 +175,12 @@ def manage_teams(request):
                 )
                 return redirect("manage_teams")
 
+            for field, errors in form_editar.errors.items():
+                for error in errors:
+                    if field == "__all__":
+                        messages.error(request, f"{error}")
+                    else:
+                        messages.error(request, f"{field}: {error}")
             # Volver a abrir modal con errores
             abrir_modal_editar = True
             team_editar_id = team_id
@@ -229,7 +238,8 @@ def manage_teams(request):
 
 
 # Vistas para Agregar o eliminar miembros del equipo y atletas
-@full_profile_required
+
+
 @role_required("ADMIN", "HEADCOACH")
 def manage_team_members(request, team_id):
 
@@ -297,7 +307,8 @@ def manage_team_members(request, team_id):
 
 
 # Vista para CRUD SOLO ATLETAS
-@full_profile_required
+
+
 @role_required("ADMIN", "HEADCOACH")
 def manage_athletes(request):
     # 1 verificar si el usuario tiene permiso para crear atletas
