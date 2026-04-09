@@ -26,6 +26,9 @@ def role_required(*allowed_roles):
                 messages.error(request, "Debes iniciar sesión.")
                 return redirect("account_login")
 
+            if not user.profile_completed:
+                return redirect(get_user_redirect_flow(user))
+
             # 2. Superuser bypass
             if user.is_superuser:
                 return view_func(request, *args, **kwargs)
@@ -46,10 +49,6 @@ def role_required(*allowed_roles):
                 list(user_roles),
                 list(allowed_roles_set),
             )
-
-            # 👇 redirige a su dashboard correcto, no hardcodeado
-            if not user.profile_completed:
-                return redirect(get_user_redirect_flow(user))
 
             return redirect(get_user_redirect_flow(user))
 
