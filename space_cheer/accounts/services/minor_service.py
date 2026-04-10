@@ -257,7 +257,7 @@ class MinorAthleteService:
     # =========================================================================
     @staticmethod
     def get_minors_without_guardian(coach: User):
-        print("Obteniendo atletas menores sin guardian para coach:", coach)
+
         owned_ids = UserOwnership.objects.filter(
             owner=coach,
             is_active=True,
@@ -280,10 +280,7 @@ class MinorAthleteService:
             .select_related("athleteprofile")
             .distinct()
         )
-        print("Atletas menores sin guardian encontrados:", alumnos.count())
-        for u in User.objects.filter(id__in=[3, 4, 5]):
-            print(u.id, u.birth_date, u.is_minor)
-        print("Owned IDs:", list(owned_ids))
+
         return (
             User.objects.filter(
                 id__in=owned_ids,
