@@ -318,12 +318,12 @@ def manage_athletes(request):
     # headcoach solo ve atletas que posee
     if request.user.roles.filter(name="HEADCOACH").exists():
         athletes = User.objects.filter(
-            roles__name="ATLETA",
+            roles__name="ATHLETE",
             owner_links__owner=request.user,
             owner_links__is_active=True,
         ).distinct()
     else:
-        athletes = User.objects.filter(roles__name="ATLETA").distinct()
+        athletes = User.objects.filter(roles__name="ATHLETE").distinct()
 
     # 3 formulario de creacion rapida
     form_crear = QuickAthleteRegisterForm()
@@ -341,7 +341,7 @@ def manage_athletes(request):
                 with transaction.atomic():
                     # 6 generar username incremental seguro
                     max_num = (
-                        User.objects.filter(username__startswith="ATHLETE-")
+                        User.objects.filter(username__startswith="ATLETA-")
                         .annotate(
                             num=models.functions.Cast(
                                 models.functions.Substr("username", 9),
@@ -351,7 +351,7 @@ def manage_athletes(request):
                         .aggregate(max_num=Max("num"))["max_num"]
                     ) or 0
 
-                    username = f"ATHLETE-{max_num + 1}"
+                    username = f"ATLETA-{max_num + 1}"
 
                     # 7 crear usuario base
                     user = User.objects.create_user(
@@ -360,9 +360,7 @@ def manage_athletes(request):
                         last_name=cd["last_name"],
                         email=cd.get("email", ""),
                         phone=cd.get("phone", ""),
-                        password=config(
-                            "ATHLETE_TEMP_PASSWORD", default="$Temporal123"
-                        ),
+                        password=config("ATLETA_TEMP_PASSWORD"),
                         profile_completed=False,
                     )
 
