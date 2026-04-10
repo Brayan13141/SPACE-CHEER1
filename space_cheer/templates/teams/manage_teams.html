@@ -41,7 +41,7 @@
             <!-- TABLA PARA ESCRITORIO -->
             <div class="table-responsive d-none d-md-block">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th>#</th>
                             <th>Logo</th>
@@ -50,7 +50,7 @@
                             <th>Categoría</th>
                             <th>Ciudad</th>
                             <th>Teléfono</th>
-                            <th class="text-end pe-4">Acciones</th>
+                            <th class="text-center pe-4">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,7 +101,7 @@
                                 <span class="">—</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end pe-4">
+                            <td class="text-center pe-4">
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="{% url 'teams:manage_team_members' team.id %}" 
                                        class="btn btn-outline-success btn-sm d-flex align-items-center">
