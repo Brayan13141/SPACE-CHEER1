@@ -1,5 +1,3 @@
-import re
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -82,6 +80,7 @@ class User(AbstractUser):
         """
         Validación personalizada a nivel de modelo
         """
+
         #  NO validar en superuser
         if self.is_superuser:
             return super().clean()
@@ -92,6 +91,14 @@ class User(AbstractUser):
         if self.email:
             # Normalizar email (lowercase y trim)
             self.email = self.email.lower().strip()
+
+        if self.birth_date:
+            if self.birth_date > timezone.now().date():
+                raise ValidationError(
+                    {
+                        "birth_date": "La fecha de nacimiento no puede estar en el futuro."
+                    }
+                )
 
         if self.phone:
             # Normalizar teléfono (eliminar espacios, guiones y paréntesis)
