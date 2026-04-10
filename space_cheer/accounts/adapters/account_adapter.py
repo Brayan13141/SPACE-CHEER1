@@ -10,6 +10,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return True
 
     def get_login_redirect_url(self, request):
-        if not request.user.profile_completed:
-            return get_user_redirect_flow(request.user)
-        return settings.LOGIN_REDIRECT_URL  # fallback seguro
+        return get_user_redirect_flow(request.user)
+
+    def get_signup_redirect_url(self, request):
+        return get_user_redirect_flow(request.user)
