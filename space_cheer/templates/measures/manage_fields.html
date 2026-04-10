@@ -68,7 +68,7 @@
             <div class="modal fade" id="modalEditar{{ field.id }}" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <form method="post" action="{% url 'manage_measurement_fields' %}">
+                        <form method="post" action="{% url 'measures:manage_measurement_fields' %}">
                             {% csrf_token %}
                             <input type="hidden" name="editar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
@@ -106,7 +106,7 @@
             <div class="modal fade" id="modalEliminar{{ field.id }}" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <form method="post" action="{% url 'manage_measurement_fields' %}">
+                        <form method="post" action="{% url 'measures:manage_measurement_fields' %}">
                             {% csrf_token %}
                             <input type="hidden" name="eliminar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
@@ -141,7 +141,7 @@
 <div class="modal fade" id="modalCrear" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="{% url 'manage_measurement_fields' %}">
+            <form method="post" action="{% url 'measures:manage_measurement_fields' %}">
                 {% csrf_token %}
                 <input type="hidden" name="crear_medida" value="">
                 <div class="modal-header">
