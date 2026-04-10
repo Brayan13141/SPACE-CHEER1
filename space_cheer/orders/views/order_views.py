@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from accounts.decorators import role_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied, ValidationError
 from orders.models import Order, OrderItem
@@ -6,7 +6,6 @@ from orders.services.state import OrderCreationService, OrderStateService
 from orders.services.factories import OrderContactInfoFactory
 from orders.services.preconditions import can_submit_order
 from teams.models import Team
-from django.utils import timezone
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 from orders.services.preconditions import OrderBlockingIssue
@@ -18,7 +17,7 @@ from orders.pagination import OrderPaginator
 # logger = logging.getLogger(__name__)
 
 
-@login_required
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def order_list(request):
     """
     Lista de órdenes visibles para el usuario.
@@ -69,7 +68,7 @@ def order_list(request):
     )
 
 
-@login_required
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def create_order(request):
     """
     Crear una orden TEAM o PERSONAL.
@@ -151,7 +150,7 @@ def create_order(request):
     )
 
 
-@login_required
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def order_edit(request, order_id):
     """
     Editar notas de diseño de la orden.
@@ -178,7 +177,7 @@ def order_edit(request, order_id):
     )
 
 
-@login_required
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def order_contact_info(request, order_id):
 
     order = get_object_or_404(
@@ -228,7 +227,7 @@ def order_contact_info(request, order_id):
     )
 
 
-@login_required
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def order_detail(request, order_id):
 
     order = get_object_or_404(

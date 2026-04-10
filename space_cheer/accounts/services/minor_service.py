@@ -20,6 +20,7 @@ import logging
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 # Importamos modelos de accounts — ciclo de import seguro porque estamos en el mismo app
@@ -254,13 +255,9 @@ class MinorAthleteService:
     # =========================================================================
     # QUERIES DE CONVENIENCIA
     # =========================================================================
-
     @staticmethod
     def get_minors_without_guardian(coach: User):
-        """
-        Retorna atletas menores sin guardian asignados al coach.
-        Útil para mostrar alertas en el dashboard del coach.
-        """
+        print("Obteniendo atletas menores sin guardian para coach:", coach)
         owned_ids = UserOwnership.objects.filter(
             owner=coach,
             is_active=True,
@@ -268,20 +265,36 @@ class MinorAthleteService:
 
         today = timezone.now().date()
 
-        # Atletas owned por este coach que son menores y no tienen guardian
+        cutoff_date = today.replace(year=today.year - 18)
+        alumnos = (
+            User.objects.filter(
+                id__in=owned_ids,
+                roles__name="ATHLETE",
+                birth_date__isnull=False,
+                birth_date__gt=cutoff_date,
+            )
+            .filter(
+                Q(athleteprofile__isnull=True)
+                | Q(athleteprofile__guardian__isnull=True)
+            )
+            .select_related("athleteprofile")
+            .distinct()
+        )
+        print("Atletas menores sin guardian encontrados:", alumnos.count())
+        for u in User.objects.filter(id__in=[3, 4, 5]):
+            print(u.id, u.birth_date, u.is_minor)
+        print("Owned IDs:", list(owned_ids))
         return (
             User.objects.filter(
                 id__in=owned_ids,
-                roles__name="ATLETA",
-                birth_date__isnull=False,  # solo si tienen fecha
+                roles__name="ATHLETE",
+                birth_date__isnull=False,
+                birth_date__lte=today,  # Aseguramos que no incluya futuros nacimientos
+                birth_date__gt=cutoff_date,
             )
             .filter(
-                # Nacidos hace menos de 18 años
-                birth_date__gt=today.replace(year=today.year - 18)
-            )
-            .filter(
-                # Sin guardian o perfil sin guardian
-                athleteprofile__guardian__isnull=True
+                Q(athleteprofile__isnull=True)
+                | Q(athleteprofile__guardian__isnull=True)
             )
             .select_related("athleteprofile")
             .distinct()
