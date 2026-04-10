@@ -225,7 +225,7 @@
                 <td class="text-end pe-4">
                   <div class="d-flex justify-content-end gap-2">
                     {% if is_admin %}
-                    <a href="{% url 'edit_owned_user' ownership.id %}"
+                    <a href="{% url 'coach:edit_owned_user' ownership.id %}"
                        class="btn btn-sm btn-outline-warning"
                        data-bs-toggle="tooltip" title="Reasignar coach">
                       <i class="bi bi-arrow-left-right"></i>
