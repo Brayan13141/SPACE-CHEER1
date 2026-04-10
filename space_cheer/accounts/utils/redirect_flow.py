@@ -42,7 +42,7 @@ def get_user_redirect_flow(user):
     if user.roles.filter(name="GUARDIAN").exists():
         return reverse("guardian:dashboard")
 
-    if user.roles.filter(name="ATLETA").exists():
+    if user.roles.filter(name="ATHLETE").exists():
         return reverse("core:dashboard")
 
     return reverse("core:dashboard")
