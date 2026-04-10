@@ -124,7 +124,10 @@ def manage_owned_users(request):
     if is_headcoach and not is_admin:
         ownerships_qs = ownerships_qs.filter(owner=request.user)
 
-    athletes = ownerships_qs.filter(user__roles__name="ATLETA").distinct()
+    athletes = OwnershipService.get_owned_athletes(request.user)
+    athletes = athletes.select_related("athleteprofile__guardian").prefetch_related(
+        "roles", "team_memberships__team"
+    )
     crew = ownerships_qs.exclude(user__roles__name="ATLETA").distinct()
 
     # --- Alerta de menores sin guardian ---

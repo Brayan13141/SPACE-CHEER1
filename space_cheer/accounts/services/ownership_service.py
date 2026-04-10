@@ -238,7 +238,7 @@ class OwnershipService:
         return User.objects.filter(
             owner_links__owner=coach,
             owner_links__is_active=True,
-            roles__name="ATLETA",
+            roles__name="ATHLETE",
         ).distinct()
 
     @staticmethod

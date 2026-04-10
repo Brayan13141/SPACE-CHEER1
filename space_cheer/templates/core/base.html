@@ -301,10 +301,10 @@
                                 </a></li>
                                 {% if user.is_superuser or user.is_staff %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'manage_categories' %}">
+                                <li><a class="dropdown-item" href="{% url 'teams:manage_categories' %}">
                                     <i class="bi bi-grid me-2"></i>Categorías
                                 </a></li>
-                                <li><a class="dropdown-item" href="{% url 'manage_measurement_fields' %}">
+                                <li><a class="dropdown-item" href="{% url 'measures:manage_measurement_fields' %}">
                                     <i class="bi bi-grid me-2"></i>Medidas
                                 </a></li>
                                 {% endif %}
@@ -471,7 +471,7 @@
     </div>
 
     <!-- FOOTER (con fondo oscuro) -->
-    <footer class="bg-dark py-4 text-light">
+    <footer class=" py-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4 mb-md-0">

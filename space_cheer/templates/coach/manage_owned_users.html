@@ -54,18 +54,18 @@
                     </div>
                     <div>
                       <div class="fw-semibold">
-                        {{ ownership.user.get_full_name|default:ownership.user.username }}
+                        {{ ownership.get_full_name|default:ownership.username }}
                       </div>
                       <small class="d-md-none text-muted">{{ ownership.user.email|default:"Sin email" }}</small>
                     </div>
                   </div>
                 </td>
                 <td class="d-none d-md-table-cell small">
-                  {{ ownership.user.email|default:"—" }}
+                  {{ ownership.email|default:"—" }}
                 </td>
                 <td class="d-none d-lg-table-cell">
                   <div class="d-flex flex-wrap gap-1">
-                    {% for membership in ownership.user.active_memberships %}
+                    {% for membership in ownership.active_memberships %}
                       <span class="badge bg-secondary bg-opacity-25 text-light border-0">
                         <i class="bi bi-people me-1"></i>{{ membership.team.name }}
                       </span>
@@ -83,7 +83,7 @@
                     class="btn btn-sm btn-outline-danger"
                     data-confirm
                     data-title="Liberar atleta"
-                    data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong> de tu equipo? Se desactivarán sus membresías activas."
+                    data-body="¿Liberar a <strong>{{ ownership.get_full_name|default:ownership.username }}</strong> de tu equipo? Se desactivarán sus membresías activas."
                     data-form="releaseAthlete_{{ ownership.id }}"
                     data-variant="danger">
                     <i class="bi bi-person-dash me-1"></i>
@@ -109,8 +109,8 @@
                 <div class="flex-grow-1">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
-                      <h6 class="fw-bold mb-0">{{ ownership.user.get_full_name|default:ownership.user.username }}</h6>
-                      <small class="text-muted">{{ ownership.user.email|default:"Sin email" }}</small>
+                      <h6 class="fw-bold mb-0">{{ ownership.get_full_name|default:ownership.username }}</h6>
+                      <small class="text-muted">{{ ownership.email|default:"Sin email" }}</small>
                     </div>
                     <form id="releaseAthleteMobile_{{ ownership.id }}" method="post"
                           action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
@@ -120,7 +120,7 @@
                       class="btn btn-sm btn-outline-danger"
                       data-confirm
                       data-title="Liberar atleta"
-                      data-body="¿Liberar a <strong>{{ ownership.user.get_full_name|default:ownership.user.username }}</strong>?"
+                      data-body="¿Liberar a <strong>{{ ownership.get_full_name|default:ownership.username }}</strong>?"
                       data-form="releaseAthleteMobile_{{ ownership.id }}">
                       <i class="bi bi-person-dash"></i>
                     </button>
@@ -225,14 +225,14 @@
                 <td class="text-end pe-4">
                   <div class="d-flex justify-content-end gap-2">
                     {% if is_admin %}
-                    <a href="{% url 'edit_owned_user' ownership.id %}"
+                    <a href="{% url 'coach:edit_owned_user' ownership.id %}"
                        class="btn btn-sm btn-outline-warning"
                        data-bs-toggle="tooltip" title="Reasignar coach">
                       <i class="bi bi-arrow-left-right"></i>
                     </a>
                     {% endif %}
                     <form id="releaseCrew_{{ ownership.id }}" method="post"
-                          action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                          action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
                       {% csrf_token %}
                     </form>
                     <button type="button"
@@ -270,12 +270,12 @@
                     </div>
                     <div class="d-flex gap-2">
                       {% if is_admin %}
-                      <a href="{% url 'edit_owned_user' ownership.id %}" class="btn btn-sm btn-outline-warning">
+                      <a href="{% url 'coach:edit_owned_user' ownership.id %}" class="btn btn-sm btn-outline-warning">
                         <i class="bi bi-arrow-left-right"></i>
                       </a>
                       {% endif %}
                       <form id="releaseCrewMobile_{{ ownership.id }}" method="post"
-                            action="{% url 'remove_owned_user' ownership.id %}" class="d-none">
+                            action="{% url 'coach:remove_owned_user' ownership.id %}" class="d-none">
                         {% csrf_token %}
                       </form>
                       <button type="button"

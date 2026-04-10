@@ -53,7 +53,7 @@ def curp_verification(request):
             if user.roles.filter(name="GUARDIAN").exists():
                 return redirect("guardian:dashboard")
             else:
-                return redirect("dashboard")
+                return redirect("core:dashboard")
 
     else:
         form = CurpForm(instance=user)

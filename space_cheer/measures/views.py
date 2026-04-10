@@ -33,7 +33,7 @@ def manage_measurement_fields(request):
                     request,
                     f"Ocurrió un error inesperado al crear el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            return redirect("manage_measurement_fields")
+            return redirect("measures:manage_measurement_fields")
 
         # -------- EDITAR --------
         elif "editar_medida" in request.POST:
@@ -56,7 +56,7 @@ def manage_measurement_fields(request):
                     request,
                     f"Ocurrió un error inesperado al actualizar el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            return redirect("manage_measurement_fields")
+            return redirect("measures:manage_measurement_fields")
 
         # -------- DESACTIVAR --------
         elif "eliminar_medida" in request.POST:
@@ -73,7 +73,7 @@ def manage_measurement_fields(request):
                     request,
                     f"Ocurrió un error inesperado al desactivar el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            return redirect("manage_measurement_fields")
+            return redirect("measures:manage_measurement_fields")
             # -------- HABILITAR --------
         elif "habilitar_medida" in request.POST:
             field_id = request.POST.get("field_id")
@@ -89,7 +89,7 @@ def manage_measurement_fields(request):
                     request,
                     f"Ocurrió un error inesperado al habilitar el campo: {str(e)}\n{traceback.format_exc()}",
                 )
-            return redirect("manage_measurement_fields")
+            return redirect("measures:manage_measurement_fields")
 
     # ================= GET =================
     fields_with_forms = [

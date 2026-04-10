@@ -51,7 +51,7 @@ def manage_categories(request):
                     request,
                     f"Categoría '{form_crear.cleaned_data['name']}' creada exitosamente.",
                 )
-                return redirect("manage_categories")
+                return redirect("teams:manage_categories")
             abrir_modal_crear = True
 
         # EDITAR
@@ -67,7 +67,7 @@ def manage_categories(request):
                     request,
                     f"Categoría '{form_editar.cleaned_data['name']}' actualizada exitosamente.",
                 )
-                return redirect("manage_categories")
+                return redirect("teams:manage_categories")
 
             # Error → volvemos a mostrar el modal
             abrir_modal_editar = True
@@ -83,7 +83,7 @@ def manage_categories(request):
                 messages.success(
                     request, f"Categoría '{nombre_eliminado}' eliminada exitosamente."
                 )
-            return redirect("manage_categories")
+            return redirect("teams:manage_categories")
 
     return render(
         request,
@@ -150,7 +150,7 @@ def manage_teams(request):
                     is_active=True,
                 )
                 messages.success(request, f"Equipo '{team.name}' creado exitosamente.")
-                return redirect("manage_teams")
+                return redirect("teams:manage_teams")
             # ❗ MOSTRAR ERRORES EN MESSAGES
             for field, errors in form_crear.errors.items():
                 for error in errors:
@@ -173,7 +173,7 @@ def manage_teams(request):
                     request,
                     f"Equipo '{form_editar.cleaned_data['name']}' actualizado exitosamente.",
                 )
-                return redirect("manage_teams")
+                return redirect("teams:manage_teams")
 
             for field, errors in form_editar.errors.items():
                 for error in errors:
@@ -217,7 +217,7 @@ def manage_teams(request):
                     f"Cancela o reasigna esos registros antes de eliminarlo.",
                 )
 
-            return redirect("manage_teams")
+            return redirect("teams:manage_teams")
 
     # ---------------- RENDER ----------------
     return render(
@@ -389,7 +389,7 @@ def manage_athletes(request):
                     request,
                     f"Alumno creado usuario {username} password temporal {config('ATHLETE_TEMP_PASSWORD', default='$Temporal123')}",
                 )
-                return redirect("manage_athletes")
+                return redirect("teams:manage_athletes")
 
             # 12 si hay error se reabre el modal
             abrir_modal_crear = True
