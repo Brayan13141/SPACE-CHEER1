@@ -37,7 +37,7 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
         # -----------------------------
         # ATLETA
         # -----------------------------
-        if role_name == "atleta":
+        if role_name == "athlete":
             try:
                 athlete_profile, created = AthleteProfile.objects.get_or_create(
                     user=instance
