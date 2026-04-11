@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth import get_user_model
-
+from django.db.models import Q
 from accounts.models import UserOwnership
 from accounts.services.minor_service import MinorAthleteService
 from accounts.services.ownership_service import OwnershipService
@@ -77,9 +77,9 @@ def assign_guardian(request, athlete_id):
     # =========================================================
 
     # Validar que sea atleta
-    if not athlete.roles.filter(name="ATLETA").exists():
+    if not athlete.roles.filter(name="ATHLETE").exists():
         messages.error(request, "El usuario seleccionado no es un atleta.")
-        return redirect("manage_athletes")
+        return redirect("teams:manage_athletes")
 
     # Validar que sea menor
     if not MinorAthleteService.is_minor(athlete):
@@ -87,7 +87,7 @@ def assign_guardian(request, athlete_id):
             request,
             f"{athlete.get_full_name()} no es menor de edad.",
         )
-        return redirect("manage_athletes")
+        return redirect("teams:manage_athletes")
 
     # Validar ownership si es HEADCOACH (no admin)
     if (
@@ -103,7 +103,7 @@ def assign_guardian(request, athlete_id):
 
         if not owns:
             messages.error(request, "No tienes permiso sobre este atleta.")
-            return redirect("manage_athletes")
+            return redirect("teams:manage_athletes")
 
     # =========================================================
     # 📩 POST → ASIGNAR GUARDIAN
@@ -115,7 +115,7 @@ def assign_guardian(request, athlete_id):
 
         if not guardian_id:
             messages.error(request, "Debes seleccionar un guardian.")
-            return redirect("accounts:assign_guardian", athlete_id=athlete.id)
+            return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 
         guardian = get_object_or_404(User, id=guardian_id)
 
@@ -143,11 +143,11 @@ def assign_guardian(request, athlete_id):
                 f"Guardian {guardian.get_full_name()} asignado a {athlete.get_full_name()} ✔️",
             )
 
-            return redirect("accounts:minors_without_guardian")
+            return redirect("guardian:minors_without_guardian")
 
         except (ValidationError, PermissionDenied) as e:
             messages.error(request, str(e))
-            return redirect("accounts:assign_guardian", athlete_id=athlete.id)
+            return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 
     # =========================================================
     # 📊 GET → MOSTRAR FORMULARIO
@@ -172,9 +172,11 @@ def assign_guardian(request, athlete_id):
     today = timezone.now().date()
     eighteen_years_ago = today.replace(year=today.year - 18)
 
-    potential_guardians = potential_guardians.filter(
-        birth_date__lte=eighteen_years_ago
-    ) | potential_guardians.filter(birth_date__isnull=True)
+    potential_guardians = (
+        potential_guardians.filter(roles__name="GUARDIAN")
+        .filter(Q(birth_date__lte=eighteen_years_ago) | Q(birth_date__isnull=True))
+        .distinct()
+    )
 
     # --- Obtener guardian actual ---
     try:
@@ -196,7 +198,7 @@ def assign_guardian(request, athlete_id):
 
     return render(
         request,
-        "accounts/guardian/assign_guardian.html",
+        "account/guardian/assign_guardian.html",
         {
             "athlete": athlete,
             "potential_guardians": potential_guardians.distinct(),
@@ -230,7 +232,7 @@ def remove_guardian(request, athlete_id):
     except (ValidationError, PermissionDenied) as e:
         messages.error(request, str(e))
 
-    return redirect("manage_athletes")
+    return redirect("guardian:minors_without_guardian")
 
 
 @role_required("HEADCOACH", "ADMIN")

@@ -8,11 +8,6 @@ urlpatterns = [
     # ATHLETES
     # =============================
     path(
-        "athletes/",
-        views.manage_athletes,
-        name="manage_athletes",
-    ),
-    path(
         "athletes/<int:id>/edit-measures/",
         views.edit_athlete_measures,
         name="edit_athlete_measures",

@@ -286,7 +286,7 @@ class MinorAthleteService:
                 id__in=owned_ids,
                 roles__name="ATHLETE",
                 birth_date__isnull=False,
-                birth_date__lte=today,  # Aseguramos que no incluya futuros nacimientos
+                birth_date__lte=today,  # Aseguramos que no incluya futuros
                 birth_date__gt=cutoff_date,
             )
             .filter(

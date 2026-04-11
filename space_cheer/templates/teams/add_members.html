@@ -316,7 +316,7 @@
                     </td>
                     <td class="text-center">
                       <div class="d-flex gap-2 justify-content-center">
-                        <form method="post" action="{% url 'add_team_member' team.id %}">
+                        <form method="post" action="{% url 'coach:add_team_member' team.id %}">
                           {% csrf_token %}
                           <input type="hidden" name="user_id" value="{{ membership.user.id }}">
                           <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
@@ -325,7 +325,7 @@
                           </button>
                         </form>
                         <form id="rejectMember_{{ membership.id }}" method="post"
-                              action="{% url 'remove_team_member' membership.id %}" class="d-none">
+                              action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
                           {% csrf_token %}
                         </form>
                         <button type="button"
@@ -362,7 +362,7 @@
                         </div>
                       </div>
                       <div class="mt-2 d-flex flex-wrap gap-2">
-                        <form method="post" action="{% url 'add_team_member' team.id %}">
+                        <form method="post" action="{% url 'coach:add_team_member' team.id %}">
                           {% csrf_token %}
                           <input type="hidden" name="user_id" value="{{ membership.user.id }}">
                           <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
@@ -371,7 +371,7 @@
                           </button>
                         </form>
                         <form id="rejectMemberMobile_{{ membership.id }}" method="post"
-                              action="{% url 'remove_team_member' membership.id %}" class="d-none">
+                              action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
                           {% csrf_token %}
                         </form>
                         <button type="button"
@@ -451,7 +451,7 @@
                       {{ membership.end_date|date:"d/m/Y"|default:"—" }}
                     </td>
                     <td class="text-center">
-                      <form method="post" action="{% url 'add_team_member' team.id %}">
+                      <form method="post" action="{% url 'coach:add_team_member' team.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="user_id" value="{{ membership.user.id }}">
                         <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
@@ -492,7 +492,7 @@
                         Salida: {{ membership.end_date|date:"d/m/Y"|default:"—" }}
                       </div>
                       <div class="mt-2">
-                        <form method="post" action="{% url 'add_team_member' team.id %}">
+                        <form method="post" action="{% url 'coach:add_team_member' team.id %}">
                           {% csrf_token %}
                           <input type="hidden" name="user_id" value="{{ membership.user.id }}">
                           <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
@@ -591,7 +591,7 @@
               Todos tus usuarios ya están en este equipo, o aún no tienes usuarios asignados.
             </p>
             <div class="d-flex gap-2 justify-content-center flex-wrap">
-              <a href="{% url 'manage_athletes' %}" class="btn btn-primary btn-sm">
+              <a href="{% url 'coach:manage_athletes' %}" class="btn btn-primary btn-sm">
                 <i class="bi bi-person-plus me-1"></i>Crear atleta
               </a>
               <a href="{% url 'coach:create_team_crew_member' team.id %}" class="btn btn-outline-primary btn-sm">

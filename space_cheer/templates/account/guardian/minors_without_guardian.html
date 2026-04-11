@@ -1,0 +1,242 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Menores sin Guardián{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-minors th {
+        background-color: #f8f9fc;
+    }
+    .action-buttons .btn {
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+    @media (max-width: 768px) {
+        .table-responsive-stack {
+            border: 0;
+        }
+        .table-responsive-stack thead {
+            display: none;
+        }
+        .table-responsive-stack tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .table-responsive-stack td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .table-responsive-stack td:before {
+            content: attr(data-label);
+            font-weight: bold;
+            width: 40%;
+            color: #495057;
+        }
+        .table-responsive-stack td:last-child {
+            border-bottom: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-2">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-people text-warning me-2"></i>
+                Menores sin Guardián
+            </h1>
+            <p class="text-muted">
+                Atletas menores de edad que aún no tienen un adulto responsable asignado.
+                <strong class="text-danger">{{ count }}</strong> pendiente{{ count|pluralize }}
+            </p>
+        </div>
+        <a href="{% url 'guardian:headcoach_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Mis Alumnos
+        </a>
+    </div>
+
+    <!-- Tabla de menores -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white border-0 pt-4 pb-0">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                Lista de menores sin guardián
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if minors %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-minors table-responsive-stack" id="minorsTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre completo</th>
+                                <th>Email</th>
+                                <th>Fecha de nacimiento</th>
+                                <th>Edad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for minor in minors %}
+                            <tr>
+                                <td data-label="Nombre">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-placeholder bg-primary rounded-circle text-white d-inline-flex align-items-center justify-content-center me-2" 
+                                             style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                            {{ minor.first_name|slice:":1" }}{{ minor.last_name|slice:":1" }}
+                                        </div>
+                                        {{ minor.get_full_name }}
+                                    </div>
+                                </td>
+                                <td data-label="Email">{{ minor.email }}</td>
+                                <td data-label="Fecha nacimiento">
+                                    {{ minor.birth_date|date:"d/m/Y" }}
+                                    {% if not minor.birth_date %}
+                                        <span class="badge bg-warning">No registrada</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Edad">
+                                    {% if minor.birth_date %}
+                                        {% now "Y" as current_year %}
+                                        {% with birth_year=minor.birth_date|date:"Y" %}
+                                            {{ current_year|add:birth_year|add:"-1" }} años
+                                        {% endwith %}
+                                    {% else %}
+                                        ?
+                                    {% endif %}
+                                </td>
+                                <td data-label="Acciones" class="action-buttons">
+                                    <a href="{% url 'guardian:assign_guardian' athlete_id=minor.id %}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-person-plus me-1"></i> Asignar
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                            data-bs-toggle="modal" data-bs-target="#infoModal{{ minor.id }}">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Modal de información (opcional) -->
+                            <div class="modal fade" id="infoModal{{ minor.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">{{ minor.get_full_name }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Email:</strong> {{ minor.email }}</p>
+                                            <p><strong>Teléfono:</strong> {{ minor.phone|default:"No registrado" }}</p>
+                                            <p><strong>Fecha nacimiento:</strong> {{ minor.birth_date|date:"d/m/Y"|default:"No registrada" }}</p>
+                                            <hr>
+                                            <div class="alert alert-warning small">
+                                                <i class="bi bi-shield-exclamation"></i> 
+                                                Este atleta necesita un guardián para participar en competencias y realizar pedidos.
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href="{% url 'guardian:assign_guardian' athlete_id=minor.id %}" 
+                                               class="btn btn-primary">Asignar ahora</a>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Opción masiva (si es necesario) -->
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-link text-decoration-none" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#bulkActions">
+                        <i class="bi bi-gear"></i> Acciones masivas
+                    </button>
+                </div>
+                <div class="collapse mt-2" id="bulkActions">
+                    <div class="card card-body bg-light">
+                        <p class="small text-muted mb-2">Puedes exportar esta lista o enviar recordatorios.</p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportTableToCSV()">
+                                <i class="bi bi-download"></i> Exportar CSV
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                <i class="bi bi-envelope"></i> Enviar recordatorio (próximamente)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-emoji-smile fs-1 text-success"></i>
+                    <h4 class="mt-3">¡No hay menores sin guardián!</h4>
+                    <p class="text-muted">Todos los atletas menores tienen un adulto responsable asignado.</p>
+                    <a href="{% url 'teams:manage_athletes' %}" class="btn btn-outline-primary mt-2">
+                        <i class="bi bi-people"></i> Ver mis alumnos
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tarjeta de recomendaciones -->
+    <div class="row mt-4">
+        <div class="col-md-6 mx-auto">
+            <div class="card border-0 bg-primary bg-opacity-10 rounded-3">
+                <div class="card-body p-3">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3 small">
+                            <strong>Recomendación:</strong> Asigna un guardián a cada menor antes de inscribirlo en competencias. 
+                            Los guardians pueden autorizar la participación y recibir notificaciones importantes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportTableToCSV() {
+        let csv = [];
+        let rows = document.querySelectorAll('#minorsTable tr');
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            for (let j = 0; j < cols.length; j++) {
+                let text = cols[j].innerText.replace(/,/g, ';');
+                row.push(text);
+            }
+            csv.push(row.join(','));
+        }
+        let blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'menores_sin_guardian.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    // Inicializar tooltips si existen
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+{% endblock %}
