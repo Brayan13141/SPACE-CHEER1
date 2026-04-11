@@ -126,12 +126,3 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
                 role.name,
                 instance.id,
             )
-
-
-@receiver(post_save, sender=User)
-def create_user_preferences(sender, instance, created, **kwargs):
-    if created:
-        from accounts.models import NotificationPreferences, PrivacySettings
-
-        NotificationPreferences.objects.get_or_create(user=instance)
-        PrivacySettings.objects.get_or_create(user=instance)
