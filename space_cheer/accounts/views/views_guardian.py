@@ -12,6 +12,8 @@ IMPORTANTE: Estas views complementan las de coach/views.py
 Se mantienen en accounts porque son dominio de accounts (User, Guardian).
 """
 
+from asyncio.log import logger
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -48,14 +50,57 @@ def headcoach_dashboard(request):
 
 @role_required("GUARDIAN", "ADMIN")
 def guardian_dashboard(request):
-    from accounts.services.minor_service import MinorAthleteService
+    """
+    Dashboard del guardian.
 
+    Muestra:
+    - Atletas bajo su custodia
+    - Información de cada atleta (equipo, medidas básicas, estado)
+    - Alertas si algún atleta tiene datos incompletos
+
+    Solo ve sus propios atletas asignados.
+    """
+    from accounts.services.minor_service import MinorAthleteService
+    from accounts.models import AthleteProfile
+
+    # Atletas asignados a este guardian
     athletes = MinorAthleteService.get_athletes_for_guardian(request.user)
+
+    # Enriquecer con datos de equipo para el template
+    athletes = athletes.prefetch_related(
+        "roles",
+        "team_memberships__team",
+        "athleteprofile",
+    )
+
+    # Alertas: atletas sin información completa
+    alerts = []
+    for athlete in athletes:
+        if not athlete.birth_date:
+            alerts.append(
+                {
+                    "athlete": athlete,
+                    "message": "Sin fecha de nacimiento registrada.",
+                    "level": "warning",
+                }
+            )
+        if not athlete.phone and not athlete.email:
+            alerts.append(
+                {
+                    "athlete": athlete,
+                    "message": "Sin datos de contacto.",
+                    "level": "info",
+                }
+            )
 
     return render(
         request,
         "account/guardian/dashboard.html",
-        {"athletes": athletes},
+        {
+            "athletes": athletes,
+            "alerts": alerts,
+            "guardian_profile": getattr(request.user, "guardianprofile", None),
+        },
     )
 
 
@@ -64,32 +109,29 @@ def assign_guardian(request, athlete_id):
     """
     Vista para asignar guardian a un atleta menor.
 
-    Flujo:
-    - Solo HEADCOACH / ADMIN
-    - Solo atletas menores
-    - Solo si el coach tiene ownership del atleta
-    """
+    Dos paths:
+    A) Guardian ya registrado → asignar directamente
+    B) Guardian no registrado → enviar invitación por email
 
+    El guardian debe haberse registrado con rol GUARDIAN para aparecer
+    en la lista. No se crean usuarios guardian desde aquí.
+    """
     athlete = get_object_or_404(User, id=athlete_id)
 
-    # =========================================================
-    # 🔐 VALIDACIONES INICIALES
-    # =========================================================
-
-    # Validar que sea atleta
+    # --- Validaciones de acceso ---
     if not athlete.roles.filter(name="ATHLETE").exists():
         messages.error(request, "El usuario seleccionado no es un atleta.")
         return redirect("teams:manage_athletes")
 
-    # Validar que sea menor
     if not MinorAthleteService.is_minor(athlete):
         messages.warning(
             request,
-            f"{athlete.get_full_name()} no es menor de edad.",
+            f"{athlete.get_full_name()} no es menor de edad. "
+            "Los guardians solo aplican a menores.",
         )
-        return redirect("teams:manage_athletes")
+        return redirect("guardian:minors_without_guardian")
 
-    # Validar ownership si es HEADCOACH (no admin)
+    # HEADCOACH: validar ownership
     if (
         not request.user.is_superuser
         and request.user.roles.filter(name="HEADCOACH").exists()
@@ -105,106 +147,164 @@ def assign_guardian(request, athlete_id):
             messages.error(request, "No tienes permiso sobre este atleta.")
             return redirect("teams:manage_athletes")
 
-    # =========================================================
-    # 📩 POST → ASIGNAR GUARDIAN
-    # =========================================================
-
+    # --- POST: asignar guardian O enviar invitación ---
     if request.method == "POST":
-        guardian_id = request.POST.get("guardian_id")
-        relation = request.POST.get("relation", "ACOMP")
+        action = request.POST.get("action")
 
-        if not guardian_id:
-            messages.error(request, "Debes seleccionar un guardian.")
+        # PATH A: Asignar guardian existente
+        if action == "assign":
+            guardian_id = request.POST.get("guardian_id")
+            relation = request.POST.get("relation", "ACOMP")
+
+            if not guardian_id:
+                messages.error(request, "Debes seleccionar un guardian.")
+                return redirect("guardian:assign_guardian", athlete_id=athlete.id)
+
+            guardian = get_object_or_404(User, id=guardian_id)
+
+            try:
+                MinorAthleteService.assign_guardian(
+                    athlete=athlete,
+                    guardian=guardian,
+                    assigned_by=request.user,
+                )
+
+                # Actualizar relación si se especificó
+                if relation in {"PADRE", "TUTOR", "ACOMP"}:
+                    try:
+                        MinorAthleteService.update_guardian_relation(
+                            athlete=athlete,
+                            relation=relation,
+                            updated_by=request.user,
+                        )
+                    except ValidationError:
+                        pass  # No crítico si falla esto
+
+                messages.success(
+                    request,
+                    f"{guardian.get_full_name()} asignado como guardian "
+                    f"de {athlete.get_full_name()}.",
+                )
+                return redirect("guardian:minors_without_guardian")
+
+            except (ValidationError, PermissionDenied) as e:
+                messages.error(request, str(e))
+                return redirect("guardian:assign_guardian", athlete_id=athlete.id)
+
+        # PATH B: Invitar por email a alguien que aún no está registrado
+        elif action == "invite":
+            email = request.POST.get("invite_email", "").strip().lower()
+
+            if not email:
+                messages.error(request, "Ingresa un email para enviar la invitación.")
+                return redirect("guardian:assign_guardian", athlete_id=athlete.id)
+
+            # Verificar si ya existe un usuario con ese email
+            if User.objects.filter(email=email).exists():
+                existing = User.objects.get(email=email)
+                messages.warning(
+                    request,
+                    f"El email {email} ya está registrado como "
+                    f"{existing.get_full_name()}. "
+                    "Búscalo en la lista de guardians disponibles.",
+                )
+                return redirect("guardian:assign_guardian", athlete_id=athlete.id)
+
+            # Enviar invitación usando django-invitations
+            try:
+                from django.utils import timezone as tz
+                from invitations.utils import get_invitation_model
+
+                Invitation = get_invitation_model()
+
+                # Limpiar invitación anterior si existe y está expirada
+                existing_inv = Invitation.objects.filter(
+                    email=email, accepted=False
+                ).first()
+
+                if existing_inv:
+                    if existing_inv.key_expired():
+                        existing_inv.delete()
+                    else:
+                        messages.warning(
+                            request, f"Ya existe una invitación pendiente para {email}."
+                        )
+                        return redirect(
+                            "guardian:assign_guardian", athlete_id=athlete.id
+                        )
+
+                invite = Invitation.create(email=email, inviter=request.user)
+                invite.sent = tz.now()
+                invite.save()
+                invite.send_invitation(request)
+
+                messages.success(
+                    request,
+                    f"Invitación enviada a {email}. "
+                    "Cuando se registre como GUARDIAN, podrás asignarlo aquí.",
+                )
+
+            except Exception as e:
+                logger.error("Error enviando invitación: %s", str(e), exc_info=True)
+                messages.error(request, f"Error enviando invitación: {str(e)}")
+
             return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 
-        guardian = get_object_or_404(User, id=guardian_id)
+    # --- GET: mostrar formulario ---
 
-        try:
-            # Asignar guardian
-            MinorAthleteService.assign_guardian(
-                athlete=athlete,
-                guardian=guardian,
-                assigned_by=request.user,
-            )
-
-            # Actualizar relación (opcional)
-            if relation in {"PADRE", "TUTOR", "ACOMP"}:
-                try:
-                    MinorAthleteService.update_guardian_relation(
-                        athlete=athlete,
-                        relation=relation,
-                        updated_by=request.user,
-                    )
-                except ValidationError:
-                    pass
-
-            messages.success(
-                request,
-                f"Guardian {guardian.get_full_name()} asignado a {athlete.get_full_name()} ✔️",
-            )
-
-            return redirect("guardian:minors_without_guardian")
-
-        except (ValidationError, PermissionDenied) as e:
-            messages.error(request, str(e))
-            return redirect("guardian:assign_guardian", athlete_id=athlete.id)
-
-    # =========================================================
-    # 📊 GET → MOSTRAR FORMULARIO
-    # =========================================================
-
-    # --- Obtener usuarios del coach ---
-    owned_ids = UserOwnership.objects.filter(
-        owner=request.user,
-        is_active=True,
-    ).values_list("user_id", flat=True)
-
-    # --- Base queryset ---
-    potential_guardians = User.objects.filter(
-        is_active=True,
-    ).exclude(id=athlete.id)
-
-    # --- Si es HEADCOACH → limitar a su ecosistema ---
-    if not request.user.is_superuser:
-        potential_guardians = potential_guardians.filter(id__in=owned_ids)
-
-    # --- Filtrar adultos ---
+    # Guardians registrados en el sistema
+    # Scope: si es HEADCOACH, solo los de su ownership + los globales sin ownership
     today = timezone.now().date()
     eighteen_years_ago = today.replace(year=today.year - 18)
 
-    potential_guardians = (
-        potential_guardians.filter(roles__name="GUARDIAN")
-        .filter(Q(birth_date__lte=eighteen_years_ago) | Q(birth_date__isnull=True))
+    # Base: usuarios con rol GUARDIAN, activos, mayores de edad
+    guardian_qs = (
+        User.objects.filter(
+            roles__name="GUARDIAN",
+            is_active=True,
+        )
+        .filter(Q(birth_date__isnull=True) | Q(birth_date__lte=eighteen_years_ago))
+        .exclude(id=athlete.id)
         .distinct()
     )
 
-    # --- Obtener guardian actual ---
+    # Para HEADCOACH: limitar a su ecosistema de owned users
+    if (
+        not request.user.is_superuser
+        and not request.user.roles.filter(name="ADMIN").exists()
+    ):
+        owned_ids = UserOwnership.objects.filter(
+            owner=request.user,
+            is_active=True,
+        ).values_list("user_id", flat=True)
+
+        guardian_qs = guardian_qs.filter(id__in=owned_ids)
+
+    # Guardian actual del atleta
     try:
         current_guardian = MinorAthleteService.get_guardian(athlete)
     except ValidationError:
         current_guardian = None
 
-    # --- Menores sin guardian (para UX lateral) ---
-    minors_without_guardian = MinorAthleteService.get_minors_without_guardian(
+    # Menores pendientes (para navegación lateral)
+    minors_pending = MinorAthleteService.get_minors_without_guardian(
         request.user
-    )
-
-    # --- Relaciones ---
-    relation_choices = [
-        ("PADRE", "Padre / Madre"),
-        ("TUTOR", "Tutor legal"),
-        ("ACOMP", "Acompañante"),
-    ]
+    ).exclude(id=athlete.id)
 
     return render(
         request,
         "account/guardian/assign_guardian.html",
         {
             "athlete": athlete,
-            "potential_guardians": potential_guardians.distinct(),
+            "potential_guardians": guardian_qs,
             "current_guardian": current_guardian,
-            "relation_choices": relation_choices,
-            "minors_without_guardian": minors_without_guardian,
+            "minors_pending": minors_pending,
+            "minors_pending_count": minors_pending.count(),
+            "relation_choices": [
+                ("PADRE", "Padre / Madre"),
+                ("TUTOR", "Tutor legal"),
+                ("ACOMP", "Acompañante"),
+            ],
         },
     )
 
@@ -295,7 +395,7 @@ def ownership_add_user(request, user_id):
     except (ValidationError, PermissionDenied) as e:
         messages.error(request, str(e))
 
-    return redirect("manage_owned_users")
+    return redirect("coach:manage_owned_users")
 
 
 @role_required("HEADCOACH", "ADMIN")
@@ -310,7 +410,7 @@ def ownership_transfer(request, ownership_id):
     new_owner_id = request.POST.get("new_owner_id")
     if not new_owner_id:
         messages.error(request, "Debes seleccionar el nuevo coach.")
-        return redirect("manage_owned_users")
+        return redirect("coach:manage_owned_users")
 
     new_owner = get_object_or_404(User, id=new_owner_id)
 
@@ -327,4 +427,4 @@ def ownership_transfer(request, ownership_id):
     except (ValidationError, PermissionDenied) as e:
         messages.error(request, str(e))
 
-    return redirect("manage_owned_users")
+    return redirect("coach:manage_owned_users")

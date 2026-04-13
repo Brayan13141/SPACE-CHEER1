@@ -126,3 +126,36 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
                 role.name,
                 instance.id,
             )
+
+
+@receiver(post_save, sender=User)
+def create_user_preferences(sender, instance, created, **kwargs):
+    """
+    Crea NotificationPreferences y PrivacySettings automáticamente
+    cuando se crea un nuevo usuario.
+
+    Se ejecuta en post_save (no en m2m_changed) porque estas preferencias
+    no dependen del rol — todo usuario las necesita.
+
+    Nota: Para usuarios existentes que no tienen preferencias,
+    ejecutar: python manage.py seed_roles
+    """
+    if not created:
+        return
+
+    try:
+        from .models import NotificationPreferences, PrivacySettings
+
+        NotificationPreferences.objects.get_or_create(user=instance)
+        PrivacySettings.objects.get_or_create(
+            user=instance,
+            defaults={"profile_visibility": "PRIVATE"},  # Default conservador
+        )
+
+    except Exception as e:
+        logger.error(
+            "Error creando preferencias para usuario %s: %s",
+            instance.username,
+            e,
+            exc_info=True,
+        )

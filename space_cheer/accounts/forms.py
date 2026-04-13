@@ -6,33 +6,59 @@ from .models import UserAddress
 from django.core.exceptions import ValidationError
 
 
+# Roles que un usuario puede elegirse a sí mismo durante el onboarding.
+# ADMIN, JUEZ, STAFF nunca se auto-asignan — los asigna un admin.
+SELF_ASSIGNABLE_ROLES = ["HEADCOACH", "ATHLETE", "GUARDIAN"]
+
+
 class UserProfilingForm(forms.ModelForm):
+    """
+    Formulario de onboarding inicial.
+
+    Solo expone roles que un usuario puede elegirse a sí mismo.
+    Roles privilegiados (ADMIN, STAFF, JUEZ) los asigna un administrador
+    desde el panel de Django o desde coach/views.py.
+    """
 
     role = forms.ModelChoiceField(
-        queryset=Role.objects.all(),
+        # Filtrar solo roles auto-asignables y que permitan acceso al dashboard
+        queryset=Role.objects.filter(
+            name__in=SELF_ASSIGNABLE_ROLES,
+            allow_dashboard_access=True,
+        ).order_by("name"),
         required=True,
-        label="Selecciona tu Rol",
-        empty_label=None,
+        label="¿Cuál es tu rol?",
+        empty_label="Selecciona tu rol...",
+        # Widget con ayuda visual — el template puede usar esto
+        widget=forms.RadioSelect,
     )
 
     class Meta:
         model = User
         fields = ("first_name", "last_name", "phone", "birth_date", "gender")
-
         widgets = {
             "birth_date": forms.DateInput(attrs={"type": "date"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # first_name y last_name son obligatorios en onboarding
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+
+        # phone y birth_date opcionales en onboarding (pueden completarse después)
+        self.fields["phone"].required = False
+        self.fields["birth_date"].required = False
+        self.fields["gender"].required = False
+
     def clean_phone(self):
-        """
-        Valida que el teléfono sea único si se proporciona
-        """
         phone = self.cleaned_data.get("phone")
 
         if not phone:
             return phone
 
-        # Normalizar teléfono (eliminar espacios, guiones, paréntesis)
+        # Normalizar
         phone = (
             phone.strip()
             .replace(" ", "")
@@ -41,26 +67,35 @@ class UserProfilingForm(forms.ModelForm):
             .replace(")", "")
         )
 
-        # Validar formato básico (solo números)
         if not phone.isdigit():
             raise ValidationError("El teléfono solo debe contener números.")
 
-        # Validar longitud (10 dígitos para México)
         if len(phone) != 10:
             raise ValidationError("El teléfono debe tener exactamente 10 dígitos.")
 
-        # Verificar si ya existe (excluyendo el usuario actual si es edición)
-        queryset = User.objects.filter(phone=phone)
+        # Verificar duplicado excluyendo instancia actual
+        qs = User.objects.filter(phone=phone)
         if self.instance and self.instance.pk:
-            queryset = queryset.exclude(pk=self.instance.pk)
+            qs = qs.exclude(pk=self.instance.pk)
 
-        if queryset.exists():
-            raise ValidationError(
-                "Ya existe un usuario con este número de teléfono. "
-                "Por favor, usa otro número o contacta al administrador."
-            )
+        if qs.exists():
+            raise ValidationError("Ya existe un usuario con este número de teléfono.")
 
         return phone
+
+    def clean_birth_date(self):
+        """
+        Validar que la fecha de nacimiento no sea futura.
+        Relevante para detectar menores de edad correctamente.
+        """
+        from django.utils import timezone
+
+        birth_date = self.cleaned_data.get("birth_date")
+
+        if birth_date and birth_date > timezone.now().date():
+            raise ValidationError("La fecha de nacimiento no puede estar en el futuro.")
+
+        return birth_date
 
 
 class CurpForm(forms.ModelForm):

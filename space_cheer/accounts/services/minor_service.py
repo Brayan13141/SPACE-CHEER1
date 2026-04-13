@@ -266,36 +266,41 @@ class MinorAthleteService:
         today = timezone.now().date()
 
         cutoff_date = today.replace(year=today.year - 18)
-        alumnos = (
-            User.objects.filter(
-                id__in=owned_ids,
-                roles__name="ATHLETE",
-                birth_date__isnull=False,
-                birth_date__gt=cutoff_date,
-            )
-            .filter(
-                Q(athleteprofile__isnull=True)
-                | Q(athleteprofile__guardian__isnull=True)
-            )
-            .select_related("athleteprofile")
-            .distinct()
-        )
 
-        return (
-            User.objects.filter(
-                id__in=owned_ids,
-                roles__name="ATHLETE",
-                birth_date__isnull=False,
-                birth_date__lte=today,  # Aseguramos que no incluya futuros
-                birth_date__gt=cutoff_date,
+        if coach.is_superuser or coach.roles.filter(name="ADMIN").exists():
+
+            return (
+                User.objects.filter(
+                    roles__name="ATHLETE",
+                    birth_date__isnull=False,
+                    birth_date__lte=today,
+                    birth_date__gt=cutoff_date,
+                )
+                .filter(
+                    Q(athleteprofile__isnull=True)
+                    | Q(athleteprofile__guardian__isnull=True)
+                )
+                .select_related("athleteprofile")
+                .distinct()
             )
-            .filter(
-                Q(athleteprofile__isnull=True)
-                | Q(athleteprofile__guardian__isnull=True)
+        elif coach.roles.filter(name="HEADCOACH").exists():
+            return (
+                User.objects.filter(
+                    id__in=owned_ids,
+                    roles__name="ATHLETE",
+                    birth_date__isnull=False,
+                    birth_date__lte=today,  # Aseguramos que no incluya futuros
+                    birth_date__gt=cutoff_date,
+                )
+                .filter(
+                    Q(athleteprofile__isnull=True)
+                    | Q(athleteprofile__guardian__isnull=True)
+                )
+                .select_related("athleteprofile")
+                .distinct()
             )
-            .select_related("athleteprofile")
-            .distinct()
-        )
+        else:
+            raise PermissionDenied("No tienes permisos para ver esta información.")
 
     @staticmethod
     def get_athletes_for_guardian(guardian: User):
