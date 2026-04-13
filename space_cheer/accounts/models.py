@@ -319,3 +319,180 @@ class GuardianProfile(models.Model):
 
     def __str__(self):
         return f"Tutor/Acompañante: {self.user}"
+
+
+# Ejecutar: python manage.py seed_roles  (management command incluido abajo)
+
+
+# =============================================================================
+# AUDIT LOG — Acceso a datos PII
+# =============================================================================
+
+
+class PiiAccessLog(models.Model):
+    """
+    Registro de auditoría para accesos a datos sensibles (PII).
+
+    ¿Por qué existe?
+    La LGDNNA (México) y la LFPDPPP requieren que los sistemas que manejan
+    datos de menores puedan demostrar quién accedió a qué dato y cuándo.
+    Este modelo es la evidencia ante cualquier requerimiento legal.
+
+    ¿Qué se loggea?
+    - Acceso a CURP
+    - Acceso a datos médicos del atleta
+    - Acceso a medidas corporales de menores
+    - Visualización de dirección de un menor
+    - Cualquier exportación masiva de datos
+
+    ¿Quién lo escribe?
+    PiiAuditService.log() — nunca directamente desde views.
+
+    ¿Cuánto tiempo guardar?
+    Mínimo 5 años según LFPDPPP. Configurar en CRON o celery beat.
+    """
+
+    # Tipos de acceso predefinidos para queries y reportes
+    ACCESS_TYPES = [
+        ("VIEW_CURP", "Ver CURP"),
+        ("VIEW_MEDICAL", "Ver datos médicos"),
+        ("VIEW_MEASUREMENTS", "Ver medidas corporales"),
+        ("VIEW_ADDRESS", "Ver dirección"),
+        ("EXPORT_DATA", "Exportar datos"),
+        ("EDIT_PROFILE", "Editar perfil"),
+        ("BULK_IMPORT", "Importación masiva"),
+    ]
+
+    # Quién accedió
+    accessed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="pii_accesses_made",
+    )
+    # A quién pertenecen los datos
+    target_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="pii_accesses_received",
+    )
+    access_type = models.CharField(max_length=30, choices=ACCESS_TYPES)
+    # Campo específico accedido (ej: "curp", "birth_date", "measurements")
+    field_accessed = models.CharField(max_length=100, blank=True)
+    # IP del cliente
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    # Contexto adicional (ej: "desde vista manage_athletes")
+    notes = models.TextField(blank=True)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        indexes = [
+            models.Index(fields=["accessed_by", "timestamp"]),
+            models.Index(fields=["target_user", "timestamp"]),
+            models.Index(fields=["access_type", "timestamp"]),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.accessed_by} → {self.target_user} "
+            f"[{self.access_type}] {self.timestamp:%Y-%m-%d %H:%M}"
+        )
+
+
+# =============================================================================
+# NOTIFICATION PREFERENCES
+# =============================================================================
+
+
+class NotificationPreferences(models.Model):
+    """
+    Preferencias de notificación por usuario.
+
+    Se crea automáticamente cuando el usuario completa su perfil
+    (via signal post_save en User o en profile_setup_view).
+
+    ¿Por qué ahora?
+    El módulo de Events va a necesitar notificar:
+    - Inicio de inscripción a evento
+    - Confirmación de inscripción
+    - Recordatorio de fechas límite
+    - Cambio de estado de orden (ya existe lógicamente en orders)
+
+    Si no creas el modelo ahora, cuando llegues a Events tendrás una
+    migración en producción en el peor momento posible.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notification_preferences",
+    )
+
+    # Canal email
+    email_order_updates = models.BooleanField(default=True)
+    email_event_updates = models.BooleanField(default=True)
+    email_team_updates = models.BooleanField(default=True)
+
+    # En el futuro: push notifications, SMS
+    # push_enabled = models.BooleanField(default=False)
+    # sms_enabled = models.BooleanField(default=False)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferencias de notificación — {self.user}"
+
+
+# =============================================================================
+# PRIVACY SETTINGS
+# =============================================================================
+
+
+class PrivacySettings(models.Model):
+    """
+    Controla la visibilidad del perfil del usuario.
+
+    Niveles de visibilidad:
+    - PUBLIC: cualquiera con el link puede ver el perfil básico
+    - TEAM: solo miembros del mismo equipo
+    - PRIVATE: solo el propio usuario y su coach/admin
+
+    Importante para menores: el default es PRIVATE.
+    Para adultos: default TEAM.
+
+    ¿Por qué aquí y no en User?
+    Separación de responsabilidades. User ya tiene demasiados campos.
+    Además, PrivacySettings puede evolucionar independientemente.
+    """
+
+    VISIBILITY_CHOICES = [
+        ("PUBLIC", "Público"),
+        ("TEAM", "Solo mi equipo"),
+        ("PRIVATE", "Privado"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="privacy_settings",
+    )
+
+    # Visibilidad del perfil completo
+    profile_visibility = models.CharField(
+        max_length=10,
+        choices=VISIBILITY_CHOICES,
+        default="PRIVATE",
+    )
+    # ¿Mostrar foto de perfil a público?
+    show_photo = models.BooleanField(default=False)
+    # ¿Mostrar estadísticas deportivas?
+    show_stats = models.BooleanField(default=True)
+    # ¿Permitir que otros coaches vean las medidas? (importante para jueces en Events)
+    share_measurements_with_judges = models.BooleanField(default=False)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Privacy — {self.user} ({self.profile_visibility})"
