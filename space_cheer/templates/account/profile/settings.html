@@ -1,0 +1,119 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Configuración — SPACE CHEER{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="mb-0 text-white"><i class="bi bi-gear me-2" style="color:#7f5af0;"></i>Configuración</h4>
+      <p class="text-secondary small mb-0">Notificaciones y privacidad</p>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-4">
+
+    <!-- NOTIFICACIONES -->
+    <div class="col-12 col-lg-6">
+      <div class="card bg-dark border-0 shadow-sm h-100" style="border: 1px solid rgba(127,90,240,0.2) !important;">
+        <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
+          <h6 class="mb-0 text-white">
+            <i class="bi bi-bell me-2" style="color:#2cb1ff;"></i>Notificaciones por email
+          </h6>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="section" value="notifications">
+
+            {% for field in notif_form %}
+              <div class="d-flex justify-content-between align-items-center py-3"
+                   style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div>
+                  <div class="text-white small">{{ field.label }}</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                  {{ field }}
+                </div>
+              </div>
+            {% endfor %}
+
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-sm px-4"
+                      style="background:linear-gradient(45deg,#2cb1ff,#1a8fcc);border:none;color:white;">
+                <i class="bi bi-check-lg me-1"></i>Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACIDAD -->
+    <div class="col-12 col-lg-6">
+      <div class="card bg-dark border-0 shadow-sm h-100" style="border: 1px solid rgba(127,90,240,0.2) !important;">
+        <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
+          <h6 class="mb-0 text-white">
+            <i class="bi bi-shield-lock me-2" style="color:#ff4f9a;"></i>Privacidad del perfil
+          </h6>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="section" value="privacy">
+
+            <!-- Visibilidad (select aparte) -->
+            <div class="mb-4">
+              <label for="{{ privacy_form.profile_visibility.id_for_label }}"
+                     class="form-label text-secondary small">
+                {{ privacy_form.profile_visibility.label }}
+              </label>
+              {{ privacy_form.profile_visibility }}
+              <div class="text-muted mt-1" style="font-size:0.75rem;">
+                Público: visible para todos · Equipo: solo tu equipo · Privado: solo tú y tu coach
+              </div>
+            </div>
+
+            <!-- Toggles -->
+            {% for field in privacy_form %}
+              {% if field.field.widget.input_type == "checkbox" %}
+                <div class="d-flex justify-content-between align-items-center py-3"
+                     style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                  <div class="text-white small">{{ field.label }}</div>
+                  <div class="form-check form-switch mb-0">
+                    {{ field }}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-sm px-4"
+                      style="background:linear-gradient(45deg,#ff4f9a,#cc3a7a);border:none;color:white;">
+                <i class="bi bi-check-lg me-1"></i>Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
