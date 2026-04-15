@@ -14,7 +14,6 @@ from .models import (
     AthleteMedicalInfo,
     CoachProfile,
     StaffProfile,
-    GuardianProfile,
 )
 
 
@@ -191,18 +190,6 @@ class StaffProfileInline(admin.StackedInline):
     model = StaffProfile
     can_delete = False
     fields = ("role_description", "staff_id")
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-
-# ============================================================
-# GUARDIAN PROFILE INLINE
-# ============================================================
-class GuardianProfileInline(admin.StackedInline):
-    model = GuardianProfile
-    can_delete = False
-    fields = ("relation",)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -475,8 +462,9 @@ class CustomUserAdmin(BaseUserAdmin):
                 if hasattr(obj, "staffprofile"):
                     inlines.insert(0, StaffProfileInline)
 
-            if obj.roles.filter(name="ACOMPANANTE").exists():
+            if obj.roles.filter(name__in=["GUARDIAN", "ACOMPANANTE"]).exists():
                 if hasattr(obj, "guardianprofile"):
+                    from custody.admin import GuardianProfileInline
                     inlines.insert(0, GuardianProfileInline)
 
         return inlines

@@ -7,7 +7,7 @@ Antes de este servicio, la lógica de "¿puede X hacer Y?" estaba dispersa en:
 - coach/views.py
 - orders/permissions.py
 - accounts/decorators.py
-- accounts/services/minor_service.py
+- custody/services/minor_service.py
 
 Eso es un problema de mantenimiento: cambiar una regla requiere buscar en 4 archivos.
 Ahora hay una sola fuente de verdad.

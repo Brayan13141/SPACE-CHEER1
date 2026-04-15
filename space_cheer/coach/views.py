@@ -10,7 +10,7 @@ Gestiona:
 
 Todos los servicios de dominio viven en:
 - accounts/services/ownership_service.py → OwnershipService
-- accounts/services/minor_service.py     → MinorAthleteService
+- custody/services/minor_service.py      → MinorAthleteService
 
 Las views solo orquestan: obtener datos → llamar servicio → mensaje → redirect.
 """
@@ -37,7 +37,7 @@ from accounts.models import (
     Role,
     UserOwnership,
 )
-from accounts.services.minor_service import MinorAthleteService
+from custody.services.minor_service import MinorAthleteService
 from accounts.services.ownership_service import OwnershipService
 from measures.forms import DynamicMeasurementsForm
 from measures.models import MeasurementField, MeasurementValue

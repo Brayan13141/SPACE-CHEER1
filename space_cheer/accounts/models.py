@@ -301,26 +301,7 @@ class StaffProfile(models.Model):
         return f"Staff: {self.user}"
 
 
-# -------------------------------------------------------------
-#  GUARDIAN / ACOMPANANTE PROFILE
-# -------------------------------------------------------------
-class GuardianProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    relation = models.CharField(
-        max_length=50,
-        choices=[
-            ("PADRE", "Padre / Madre"),
-            ("TUTOR", "Tutor legal"),
-            ("ACOMP", "Acompañante"),
-        ],
-        default="ACOMP",
-    )
-
-    def __str__(self):
-        return f"Tutor/Acompañante: {self.user}"
-
-
+# GuardianProfile vive en custody/models.py
 # Ejecutar: python manage.py seed_roles  (management command incluido abajo)
 
 
