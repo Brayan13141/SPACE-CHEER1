@@ -1,3 +1,10 @@
+#claude
+.agents/
+.agents/skills/
+.claude
+.continue/
+.continue/skills/
+claude.md
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
