@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "measures",
     "core",
     "accounts.apps.AccountsConfig",
+    "custody",
     "commerce",
     "events",
     "social",
