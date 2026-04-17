@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from core.file_utils import user_profile_photo_path, validate_image_magic
+
 
 # -------------------------------------------------------------
 #   ROLES
@@ -28,7 +30,10 @@ class User(AbstractUser):
 
     roles = models.ManyToManyField(Role, related_name="users", blank=True)
     foto_perfil = models.ImageField(
-        upload_to="accounts/perfiles/", null=True, blank=True
+        upload_to=user_profile_photo_path,
+        null=True,
+        blank=True,
+        validators=[validate_image_magic]
     )
     curp_validator = RegexValidator(
         regex=r"^[A-Z]{4}\d{6}[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$",
