@@ -71,7 +71,8 @@ def _generate_temp_password(length=12) -> str:
 
 def _generate_unique_username(base: str) -> str:
     """Genera username único basado en email, sin colisiones."""
-    base = base.split("@")[0].lower().replace(".", "_")
+    # Truncamos a 140 caracteres para asegurar espacio para el contador
+    base = base.split("@")[0].lower().replace(".", "_")[:140]
     username = base
     counter = 1
     while User.objects.filter(username=username).exists():
@@ -82,6 +83,10 @@ def _generate_unique_username(base: str) -> str:
 
 def _validate_team_access(user, team):
     """Verifica que un HEADCOACH es el coach del equipo."""
+    # Permiso total para superusuarios o administradores
+    if user.is_superuser or user.roles.filter(name="ADMIN").exists():
+        return
+
     if user.roles.filter(name="HEADCOACH").exists():
         if team.coach != user:
             raise PermissionDenied("No tienes acceso a este equipo.")
