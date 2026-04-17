@@ -64,11 +64,6 @@
             min-height: calc(100vh - var(--navbar-height));
             padding: 20px;
         }
-        .with-main-sidebar  { margin-left: var(--sidebar-width); }
-        .with-main-sidebar.collapsed { margin-left: var(--sidebar-collapsed); }
-        .with-profile-sidebar { margin-right: var(--sidebar-width); }
-        .with-profile-sidebar.collapsed { margin-right: var(--sidebar-collapsed); }
-
         .sidebar-header {
             padding: 20px 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -232,19 +227,6 @@
             padding: 0.15em 0.4em;
         }
 
-        /* ─── RESPONSIVE ─────────────────────────────────── */
-        @media (max-width: 768px) {
-            .main-sidebar, .profile-sidebar {
-                transform: translateX(-100%);
-                width: var(--sidebar-width);
-            }
-            .main-sidebar.show, .profile-sidebar.show { transform: translateX(0); }
-            .main-sidebar.collapsed, .profile-sidebar.collapsed { transform: translateX(-100%); }
-            .with-main-sidebar, .with-profile-sidebar {
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-        }
         .section-indicator {
             padding: 5px 10px;
             background: rgba(127,90,240,0.1);
@@ -583,174 +565,10 @@
         </div>
     </nav>
 
-    {# ═══════════════════════════════════════════════════════ SIDEBAR IZQUIERDO #}
-    {% if user.is_authenticated %}
-    <div id="mainSidebar" class="main-sidebar">
-
-        {# Botón toggle (desktop) #}
-        <button id="toggleMainSidebar" class="toggle-sidebar-btn" title="Colapsar menú">
-            <i class="bi bi-chevron-left"></i>
-        </button>
-
-        {# Avatar + nombre #}
-        <div class="sidebar-profile">
-            {% if user.foto_perfil %}
-                <img src="{{ user.foto_perfil.url }}" alt="" class="sidebar-profile-img">
-            {% else %}
-                <div class="user-avatar-placeholder-lg mx-auto mb-2">
-                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-                </div>
-            {% endif %}
-            <div class="fw-semibold nav-text" style="font-size:.9rem;">
-                {{ user.get_full_name|default:user.username|truncatechars:20 }}
-            </div>
-            <small class="text-white-50 nav-text">
-                {% with role=user.roles.first %}{% if role %}{{ role.name }}{% endif %}{% endwith %}
-            </small>
-        </div>
-
-        {# ── Menú principal ── #}
-        <nav class="sidebar-menu">
-
-            {# INICIO #}
-            <a class="nav-link"
-               href="{% if is_guardian %}{% url 'guardian:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}">
-                <i class="bi bi-house-door"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-
-            {# EQUIPOS — can_manage (admin, headcoach, coach) #}
-            {% if can_manage %}
-            <div class="section-indicator nav-text">Equipos</div>
-
-            <a class="nav-link" href="{% url 'teams:manage_teams' %}">
-                <i class="bi bi-people-fill"></i>
-                <span class="nav-text">Mis Equipos</span>
-            </a>
-
-            {% if is_headcoach or is_admin %}
-            <a class="nav-link" href="{% url 'teams:manage_athletes' %}">
-                <i class="bi bi-person-video"></i>
-                <span class="nav-text">Mis Alumnos</span>
-            </a>
-            {% endif %}
-
-            <a class="nav-link" href="{% url 'coach:manage_owned_users' %}">
-                <i class="bi bi-person-badge"></i>
-                <span class="nav-text">Mi Crew</span>
-            </a>
-            {% endif %}
-
-            {# MI EQUIPO — atletas sin rol de gestión #}
-            {% if is_athlete and not can_manage %}
-            <a class="nav-link" href="{% url 'teams:manage_teams' %}">
-                <i class="bi bi-people"></i>
-                <span class="nav-text">Mi Equipo</span>
-            </a>
-            {% endif %}
-
-            {# CUSTODIA — headcoach y admin #}
-            {% if is_headcoach or is_admin %}
-            <div class="section-indicator nav-text">Custodia</div>
-            <a class="nav-link" href="{% url 'guardian:headcoach_dashboard' %}">
-                <i class="bi bi-person-exclamation"></i>
-                <span class="nav-text">Menores sin guardian</span>
-            </a>
-            <a class="nav-link" href="{% url 'guardian:minors_without_guardian' %}">
-                <i class="bi bi-list-check"></i>
-                <span class="nav-text">Lista de menores</span>
-            </a>
-            {% endif %}
-
-            {# IMPORTAR ATLETAS — headcoach y admin #}
-            {% if is_headcoach or is_admin %}
-            <a class="nav-link" href="{% url 'accounts:bulk_import_athletes' %}">
-                <i class="bi bi-upload"></i>
-                <span class="nav-text">Importar Atletas</span>
-            </a>
-            {% endif %}
-
-            {# PEDIDOS #}
-            <div class="section-indicator nav-text">Pedidos</div>
-            {% if is_admin or is_staff_role %}
-            <a class="nav-link" href="{% url 'orders:admin_order_list' %}">
-                <i class="bi bi-list-ul"></i>
-                <span class="nav-text">Administrar Pedidos</span>
-            </a>
-            {% else %}
-            <a class="nav-link" href="{% url 'orders:manage_orders' %}">
-                <i class="bi bi-bag-check"></i>
-                <span class="nav-text">Mis Pedidos</span>
-            </a>
-            {% endif %}
-
-            {# ADMINISTRACIÓN — solo admin/superuser #}
-            {% if is_admin or user.is_superuser %}
-            <div class="section-indicator nav-text">Administración</div>
-            <a class="nav-link" href="{% url 'products:list_products' %}">
-                <i class="bi bi-grid"></i>
-                <span class="nav-text">Productos</span>
-            </a>
-            <a class="nav-link" href="{% url 'teams:manage_categories' %}">
-                <i class="bi bi-tag"></i>
-                <span class="nav-text">Categorías</span>
-            </a>
-            <a class="nav-link" href="{% url 'measures:manage_measurement_fields' %}">
-                <i class="bi bi-rulers"></i>
-                <span class="nav-text">Campos de medidas</span>
-            </a>
-            <a class="nav-link" href="{% url 'admin:index' %}">
-                <i class="bi bi-shield-shaded" style="color:var(--sc-pink);"></i>
-                <span class="nav-text">Panel Admin</span>
-            </a>
-            {% endif %}
-
-            {# GUARDIAN — dashboard del acompañante #}
-            {% if is_guardian and not can_manage %}
-            <div class="section-indicator nav-text">Mi Familia</div>
-            <a class="nav-link" href="{% url 'guardian:dashboard' %}">
-                <i class="bi bi-people-fill"></i>
-                <span class="nav-text">Mis Atletas</span>
-            </a>
-            {% endif %}
-
-            {# MI CUENTA — todos los roles #}
-            <div class="section-indicator nav-text">Mi Cuenta</div>
-            <a class="nav-link" href="{% url 'accounts:profile_edit' %}">
-                <i class="bi bi-person"></i>
-                <span class="nav-text">Mi Perfil</span>
-            </a>
-            <a class="nav-link" href="{% url 'accounts:list_address' %}">
-                <i class="bi bi-geo-alt"></i>
-                <span class="nav-text">Mis Direcciones</span>
-            </a>
-            <a class="nav-link" href="{% url 'accounts:profile_settings' %}">
-                <i class="bi bi-gear"></i>
-                <span class="nav-text">Configuración</span>
-            </a>
-            <a class="nav-link text-danger" href="{% url 'account_logout' %}">
-                <i class="bi bi-box-arrow-right"></i>
-                <span class="nav-text">Cerrar Sesión</span>
-            </a>
-
-        </nav>
-    </div>
-
-    {# Botón toggle mobile (esquina inferior izquierda) #}
-    <button id="toggleMainSidebarMobile"
-            class="btn btn-sm btn-outline-secondary d-lg-none"
-            style="position:fixed;bottom:20px;left:20px;z-index:1100;"
-            title="Abrir menú">
-        <i class="bi bi-list fs-5"></i>
-    </button>
-    {% endif %}
-
+  
     {# ═══════════════════════════════════════════════════════ CONTENIDO #}
     <div class="main-wrapper">
-        <div class="main-content
-                    {% if user.is_authenticated %}with-main-sidebar{% endif %}
-                    {% if profile_section %}with-profile-sidebar{% endif %}"
-             id="mainContent">
+        <div class="main-content" id="mainContent">
 
             {# Messages del sistema #}
             {% if messages %}
@@ -930,12 +748,6 @@
             mainContent.classList.add('collapsed');
             const icon = toggleProfile?.querySelector('i');
             if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-left'); }
-        }
-
-        // Sin login: quitar margen de sidebar
-        const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
-        if (!isAuthenticated && mainContent) {
-            mainContent.classList.remove('with-main-sidebar');
         }
 
         // Spinner en submit de forms

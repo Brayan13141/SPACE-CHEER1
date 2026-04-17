@@ -5,9 +5,7 @@
 
 {% block extra_css %}
 <style>
-    .table-minors th {
-        background-color: #f8f9fc;
-    }
+
     .action-buttons .btn {
         margin-right: 0.25rem;
         margin-bottom: 0.25rem;
@@ -67,7 +65,7 @@
 
     <!-- Tabla de menores -->
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-white border-0 pt-4 pb-0">
+        <div class="card-header bg-black border-0 pt-4 pb-0 text-center">
             <h5 class="card-title mb-0">
                 <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
                 Lista de menores sin guardián
@@ -76,8 +74,8 @@
         <div class="card-body">
             {% if minors %}
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle table-minors table-responsive-stack" id="minorsTable">
-                        <thead>
+                    <table class="table table-hover align-middle table-responsive-stack" id="minorsTable">
+                        <thead >
                             <tr>
                                 <th>Nombre completo</th>
                                 <th>Email</th>
