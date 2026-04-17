@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from urllib3 import request
 from accounts.decorators import role_required
 from .models import MeasurementField
 from .forms import MeasurementFieldForm
