@@ -1,0 +1,133 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Resultado de Importación — SPACE CHEER{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                <i class="bi bi-clipboard-check text-success me-2"></i>Resultado de Importación
+            </h1>
+            <p class="text-muted small mb-0">{{ result.total_processed }} fila(s) procesadas</p>
+        </div>
+        <a href="{% url 'accounts:bulk_import_athletes' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Nueva importación
+        </a>
+    </div>
+
+    {# ── Tarjetas de resumen ── #}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="card text-center border-0" style="background:rgba(25,135,84,0.15);">
+                <div class="card-body py-3">
+                    <div class="display-5 fw-bold text-success">{{ result.success_count }}</div>
+                    <div class="small text-muted mt-1">Importados correctamente</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card text-center border-0" style="background:rgba(13,202,240,0.1);">
+                <div class="card-body py-3">
+                    <div class="display-5 fw-bold text-info">{{ result.skipped_count }}</div>
+                    <div class="small text-muted mt-1">Omitidos (ya en tu grupo)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card text-center border-0" style="background:rgba(220,53,69,0.15);">
+                <div class="card-body py-3">
+                    <div class="display-5 fw-bold text-danger">{{ result.error_rows|length }}</div>
+                    <div class="small text-muted mt-1">Filas con error</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Tabla de atletas creados ── #}
+    {% if result.created_users %}
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-person-check text-success"></i>
+            <h6 class="mb-0">Atletas importados ({{ result.success_count }})</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre completo</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for atleta in result.created_users %}
+                        <tr>
+                            <td class="fw-semibold">{{ atleta.get_full_name }}</td>
+                            <td><code>{{ atleta.username }}</code></td>
+                            <td class="text-muted small">{{ atleta.email }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Tabla de errores ── #}
+    {% if result.error_rows %}
+    <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle text-danger"></i>
+            <h6 class="mb-0">Filas con error ({{ result.error_rows|length }})</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">Fila</th>
+                            <th>Nombre en CSV</th>
+                            <th>Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for err in result.error_rows %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-danger">{{ err.row_number }}</span>
+                            </td>
+                            <td class="small">
+                                {{ err.data.first_name|default:"—" }} {{ err.data.last_name|default:"" }}
+                            </td>
+                            <td class="small text-warning">{{ err.error }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'accounts:bulk_import_template' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-download me-1"></i>Descargar plantilla para corregir
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Sin errores y sin importados — CSV vacío o todo omitido #}
+    {% if not result.created_users and not result.error_rows %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+            <p class="text-muted mb-0">No se procesó ninguna fila nueva. Todos los atletas ya existían en tu grupo.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

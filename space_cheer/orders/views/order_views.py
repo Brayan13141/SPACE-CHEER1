@@ -17,7 +17,7 @@ from orders.pagination import OrderPaginator
 # logger = logging.getLogger(__name__)
 
 
-@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
+@role_required("ATHLETE", "HEADCOACH", "COACH","GUARDIAN","ADMIN")
 def order_list(request):
     """
     Lista de órdenes visibles para el usuario.

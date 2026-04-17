@@ -1,21 +1,20 @@
 from django.shortcuts import render
-from accounts.decorators import role_required
 from teams.models import UserTeamMembership
 
 
-@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
 def home(request):
-    IsAdm = (
-        request.user.roles.filter(name="ADMIN").exists()
-        or request.user.roles.filter(name="HEADCOACH").exists()
-    )
-    return render(
-        request,
-        "core/home.html",
-        {
-            "roles": IsAdm,
-        },
-    )
+    if request.user.is_authenticated:
+        memberships = UserTeamMembership.objects.select_related("team").filter(
+            user=request.user, is_active=True, status="accepted"
+        ).order_by("team__name")
+        teams = [m.team for m in memberships]
+
+        return render(request, "core/dashboard.html", {
+            "user_teams": teams,
+            "user_teams_count": len(teams),
+        })
+
+    return render(request, "core/home.html")
 
 
 def user_teams_context(request):
@@ -26,7 +25,7 @@ def user_teams_context(request):
         user=request.user,
         is_active=True,
         status="accepted",
-    )
+    ).order_by("team__name")
 
     teams = [m.team for m in memberships]
 

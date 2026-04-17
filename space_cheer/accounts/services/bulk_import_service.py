@@ -244,7 +244,7 @@ class BulkImportService:
                 )
 
                 # Asignar rol ATLETA — la señal crea AthleteProfile
-                atleta_role, _ = Role.objects.get_or_create(name="ATLETA")
+                atleta_role, _ = Role.objects.get_or_create(name="ATHLETE")
                 new_user.roles.add(atleta_role)
 
                 # Crear ownership

@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Desactivar cuenta — SPACE CHEER{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:540px;">
+
+  <!-- Alertas -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card border-0 shadow-sm text-center"
+       style="background:rgba(26,26,46,0.95);border:1px solid rgba(220,53,69,0.3) !important;">
+
+    <!-- Ícono -->
+    <div class="card-body p-5">
+      <div class="mb-4">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center"
+             style="width:80px;height:80px;background:rgba(220,53,69,0.1);border:2px solid rgba(220,53,69,0.3);">
+          <i class="bi bi-person-x" style="font-size:2rem;color:#dc3545;"></i>
+        </div>
+      </div>
+
+      <h4 class="text-white mb-2">¿Desactivar tu cuenta?</h4>
+      <p class="text-secondary mb-1">
+        Tu cuenta se desactivará inmediatamente y serás desconectado.
+      </p>
+      <p class="text-secondary mb-4">
+        No se eliminarán tus datos. Para reactivarla, deberás contactar al administrador.
+      </p>
+
+      <!-- Lo que pasará -->
+      <div class="text-start mb-4 p-3 rounded"
+           style="background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.2);">
+        <p class="text-danger small fw-semibold mb-2">
+          <i class="bi bi-exclamation-triangle me-1"></i>Esto ocurrirá al confirmar:
+        </p>
+        <ul class="text-secondary small mb-0 ps-3">
+          <li>No podrás iniciar sesión</li>
+          <li>Tus órdenes activas continuarán</li>
+          <li>Tu historial y datos se conservan</li>
+          <li>Tu coach seguirá pudiendo verte</li>
+        </ul>
+      </div>
+
+      <!-- Formulario de confirmación -->
+      <form method="post" action="{% url 'accounts:account_deactivate' %}">
+        {% csrf_token %}
+
+        <div class="mb-4 text-start">
+          <label for="confirm_deactivate" class="form-label text-secondary small">
+            Escribe <strong class="text-white">CONFIRMAR</strong> para continuar
+          </label>
+          <input type="text"
+                 id="confirm_deactivate"
+                 name="confirm_deactivate"
+                 class="form-control text-center"
+                 style="background:rgba(255,255,255,0.05);border:1px solid rgba(220,53,69,0.3);color:white;letter-spacing:0.1em;"
+                 autocomplete="off"
+                 placeholder="CONFIRMAR">
+        </div>
+
+        <div class="d-flex gap-3">
+          <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-secondary flex-fill">
+            <i class="bi bi-arrow-left me-1"></i>Cancelar
+          </a>
+          <button type="submit" class="btn btn-danger flex-fill">
+            <i class="bi bi-person-x me-1"></i>Desactivar cuenta
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

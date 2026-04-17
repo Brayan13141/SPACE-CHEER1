@@ -212,7 +212,7 @@ class ProfileService:
         Llamar al final de profile_setup_view cuando el usuario completa onboarding.
         """
         from accounts.models import NotificationPreferences, PrivacySettings
-        from accounts.services.minor_service import MinorAthleteService
+        from custody.services.minor_service import MinorAthleteService
 
         NotificationPreferences.objects.get_or_create(user=user)
 

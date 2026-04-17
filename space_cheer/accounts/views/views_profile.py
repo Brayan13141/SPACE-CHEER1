@@ -15,6 +15,8 @@ Incluye:
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_GET
@@ -36,46 +38,75 @@ from accounts.services.pii_audit_service import PiiAuditService
 # =============================================================================
 
 
+def _style_password_form(form):
+    """Aplica clases de bootstrap al formulario de contraseña."""
+    for field in form.fields.values():
+        # Preservar estilos existentes si los hay y agregar form-control
+        existing = field.widget.attrs.get('class', '')
+        field.widget.attrs.update({'class': f'{existing} form-control'.strip()})
+
 @login_required
 def profile_edit(request):
     """
-    Permite al usuario editar sus propios datos básicos.
+    Permite al usuario editar sus propios datos básicos y actualizar su contraseña.
     Cualquier usuario autenticado puede acceder.
     """
     user = request.user
 
     if request.method == "POST":
-        form = ProfileEditForm(request.POST, instance=user)
+        action = request.POST.get("action")
 
-        if form.is_valid():
-            try:
-                ProfileService.update_profile(
-                    user=user,
-                    first_name=form.cleaned_data.get("first_name"),
-                    last_name=form.cleaned_data.get("last_name"),
-                    phone=form.cleaned_data.get("phone"),
-                    birth_date=form.cleaned_data.get("birth_date"),
-                    gender=form.cleaned_data.get("gender"),
-                )
-                messages.success(request, "Perfil actualizado correctamente.")
+        if action == "change_password":
+            password_form = PasswordChangeForm(user, request.POST)
+            _style_password_form(password_form)
+            form = ProfileEditForm(instance=user)
+            
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Evita que el usuario pierda la sesión
+                messages.success(request, "Tu contraseña ha sido actualizada correctamente.")
                 return redirect("accounts:profile_edit")
-
-            except ValidationError as e:
-                for msg in e.messages:
-                    messages.error(request, msg)
+            else:
+                for field, errors in password_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{error}")
         else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{form.fields[field].label}: {error}")
+            form = ProfileEditForm(request.POST, instance=user)
+            password_form = PasswordChangeForm(user)
+            _style_password_form(password_form)
+
+            if form.is_valid():
+                try:
+                    ProfileService.update_profile(
+                        user=user,
+                        first_name=form.cleaned_data.get("first_name"),
+                        last_name=form.cleaned_data.get("last_name"),
+                        phone=form.cleaned_data.get("phone"),
+                        birth_date=form.cleaned_data.get("birth_date"),
+                        gender=form.cleaned_data.get("gender"),
+                    )
+                    messages.success(request, "Perfil actualizado correctamente.")
+                    return redirect("accounts:profile_edit")
+
+                except ValidationError as e:
+                    for msg in e.messages:
+                        messages.error(request, msg)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{form.fields[field].label}: {error}")
 
     else:
         form = ProfileEditForm(instance=user)
+        password_form = PasswordChangeForm(user)
+        _style_password_form(password_form)
 
     return render(
         request,
-        "accounts/profile/edit.html",
+        "account/profile/edit.html",
         {
             "form": form,
+            "password_form": password_form,
             "user": user,
         },
     )
@@ -171,7 +202,7 @@ def profile_settings(request):
 
     return render(
         request,
-        "accounts/profile/settings.html",
+        "account/profile/settings.html",
         {
             "notif_form": notif_form,
             "privacy_form": privacy_form,
@@ -293,7 +324,7 @@ def bulk_import_athletes(request):
 
             return render(
                 request,
-                "accounts/bulk_import/result.html",
+                "account/bulk_import/result.html",
                 {"result": result},
             )
 
@@ -303,7 +334,7 @@ def bulk_import_athletes(request):
 
         return redirect("accounts:bulk_import_athletes")
 
-    return render(request, "accounts/bulk_import/form.html")
+    return render(request, "account/bulk_import/form.html")
 
 
 @role_required("HEADCOACH", "ADMIN")
@@ -315,61 +346,6 @@ def bulk_import_template_download(request):
     )
     response["Content-Disposition"] = 'attachment; filename="plantilla_atletas.csv"'
     return response
-
-
-# =============================================================================
-# DASHBOARD DEL GUARDIAN
-# =============================================================================
-
-
-@role_required("GUARDIAN")
-def guardian_dashboard(request):
-    """
-    Dashboard para tutores/padres de atletas menores.
-    Muestra:
-    - Lista de atletas bajo su tutela
-    - Estado de órdenes de sus atletas
-    - Medidas pendientes
-    - Próximos eventos (cuando Events exista)
-    """
-    from accounts.services.minor_service import MinorAthleteService
-
-    # Atletas a cargo de este guardian
-    athletes = MinorAthleteService.get_athletes_by_guardian(request.user)
-
-    # Para cada atleta, obtener sus órdenes activas
-    athlete_data = []
-    for athlete in athletes:
-        orders = []
-        try:
-            from orders.models import Order
-
-            orders = (
-                Order.objects.filter(
-                    owner_user=athlete,
-                )
-                .exclude(status__in=["DELIVERED", "CANCELLED"])
-                .select_related("created_by")[:5]
-            )
-        except Exception:
-            pass
-
-        athlete_data.append(
-            {
-                "athlete": athlete,
-                "orders": orders,
-                "is_minor": MinorAthleteService.is_minor(athlete),
-            }
-        )
-
-    return render(
-        request,
-        "accounts/guardian/dashboard.html",
-        {
-            "athlete_data": athlete_data,
-            "total_athletes": len(athlete_data),
-        },
-    )
 
 
 # =============================================================================
@@ -412,4 +388,4 @@ def account_deactivate(request):
         except Exception as e:
             messages.error(request, f"Error al desactivar cuenta: {e}")
 
-    return render(request, "accounts/profile/deactivate_confirm.html")
+    return render(request, "account/profile/deactivate_confirm.html")

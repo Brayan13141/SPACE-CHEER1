@@ -10,7 +10,7 @@ urlpatterns = [
     # Include allauth and accounts URLs for authentication
     path("accounts/", include("allauth.urls")),
     path("accounts/", include("accounts.urls.views_accounts_urls")),
-    path("guardian/", include("accounts.urls.views_guardian_urls")),
+    path("guardian/", include("custody.urls")),
     # teams
     path("teams/", include("teams.urls")),
     # Measures

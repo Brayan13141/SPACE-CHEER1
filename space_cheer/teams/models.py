@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 import secrets
 from accounts.models import User
+from core.file_utils import team_photo_path, team_song_path, validate_audio_magic, validate_image_magic
 
 
 # -------------------------
@@ -47,7 +48,7 @@ class Team(models.Model):
     address = models.CharField(max_length=255, blank=True, null=False)
     city = models.CharField(max_length=100, blank=False, null=False)
     phone = models.CharField(max_length=20, blank=False, null=False)
-    logo = models.ImageField(upload_to="team_logos/", blank=True, null=True)
+    logo = models.ImageField(upload_to=team_photo_path, blank=True, null=True, validators=[validate_image_magic])
     category = models.ForeignKey(
         TeamCategory, on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -175,7 +176,10 @@ class TeamSong(models.Model):
         related_name="songs",
     )
     name = models.CharField(max_length=200, help_text="Nombre de la canción / pista")
-    audio = models.FileField(upload_to="teams/songs/")
+    audio = models.FileField(
+        upload_to=team_song_path,
+        validators=[validate_audio_magic]
+    )
     order = models.PositiveIntegerField(
         default=0, help_text="Orden dentro de la lista (0 = primero)"
     )

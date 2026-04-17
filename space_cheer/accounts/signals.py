@@ -104,7 +104,7 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
         # -----------------------------
         elif role_name == "guardian":
             try:
-                from accounts.models import GuardianProfile
+                from custody.models import GuardianProfile
 
                 profile, created = GuardianProfile.objects.get_or_create(user=instance)
 

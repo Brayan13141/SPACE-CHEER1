@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from core.file_utils import user_profile_photo_path, validate_image_magic
+
 
 # -------------------------------------------------------------
 #   ROLES
@@ -28,7 +30,10 @@ class User(AbstractUser):
 
     roles = models.ManyToManyField(Role, related_name="users", blank=True)
     foto_perfil = models.ImageField(
-        upload_to="accounts/perfiles/", null=True, blank=True
+        upload_to=user_profile_photo_path,
+        null=True,
+        blank=True,
+        validators=[validate_image_magic]
     )
     curp_validator = RegexValidator(
         regex=r"^[A-Z]{4}\d{6}[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$",
@@ -301,26 +306,7 @@ class StaffProfile(models.Model):
         return f"Staff: {self.user}"
 
 
-# -------------------------------------------------------------
-#  GUARDIAN / ACOMPANANTE PROFILE
-# -------------------------------------------------------------
-class GuardianProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    relation = models.CharField(
-        max_length=50,
-        choices=[
-            ("PADRE", "Padre / Madre"),
-            ("TUTOR", "Tutor legal"),
-            ("ACOMP", "Acompañante"),
-        ],
-        default="ACOMP",
-    )
-
-    def __str__(self):
-        return f"Tutor/Acompañante: {self.user}"
-
-
+# GuardianProfile vive en custody/models.py
 # Ejecutar: python manage.py seed_roles  (management command incluido abajo)
 
 
