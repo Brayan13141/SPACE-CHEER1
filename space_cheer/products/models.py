@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from measures.models import MeasurementField
 from teams.models import Team
 from django.core.validators import MinValueValidator
+from core.file_utils import product_image_path, validate_image_magic
 
 
 class Season(models.Model):
@@ -89,7 +90,12 @@ class Product(models.Model):
     )
 
     # Multimedia y metadata
-    image = models.ImageField(upload_to="products/images/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to=product_image_path,
+        blank=True,
+        null=True,
+        validators=[validate_image_magic]
+    )
     season = models.ForeignKey(
         Season, on_delete=models.PROTECT
     )  # Temporada a la que pertenece

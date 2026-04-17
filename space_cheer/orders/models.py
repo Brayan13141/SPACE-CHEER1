@@ -9,9 +9,10 @@ from django.conf import settings
 from accounts.models import User
 from teams.models import Team
 from django.core.exceptions import ValidationError
-from teams.models import UserTeamMembership
 from products.models import Product
 from django.db.models import Sum, Q
+from core.file_utils import design_upload_path, validate_image_magic
+from teams.models import UserTeamMembership
 
 
 # models.py — dentro de OrderQuerySet
@@ -847,7 +848,10 @@ class OrderDesignImage(models.Model):
         on_delete=models.CASCADE,
         related_name="design_images",
     )
-    image = models.ImageField(upload_to="orders/designs/")
+    image = models.ImageField(
+        upload_to=design_upload_path,
+        validators=[validate_image_magic]
+    )
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
