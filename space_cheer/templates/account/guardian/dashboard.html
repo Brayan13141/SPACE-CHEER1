@@ -3,51 +3,129 @@
 {% block content %}
 <div class="container mt-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>👨‍👩‍👧 Panel de Guardian</h2>
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">
+        <i class="bi bi-shield-heart me-2" style="color: var(--sc-purple);"></i>
+        Panel de Guardian
+      </h2>
+      <p class="text-muted mb-0">
+        {{ request.user.get_full_name }}
+        {% if guardian_profile %}
+          <span class="badge ms-2" style="background-color: var(--sc-purple);">
+            {{ guardian_profile.get_relation_display|default:guardian_profile.relation }}
+          </span>
+        {% endif %}
+      </p>
     </div>
+  </div>
 
-    <!-- ACCIONES PRINCIPALES -->
-    <div class="row g-3 mb-4">
-
-        
-    </div>
-
-    <!-- ATLETAS -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <i class="bi bi-people"></i> Mis Atletas
+  <!-- ALERTAS -->
+  {% if alerts %}
+  <div class="mb-4">
+    <h5 class="text-warning mb-3">
+      <i class="bi bi-exclamation-triangle-fill me-1"></i> Alertas activas
+    </h5>
+    {% for alert in alerts %}
+      <div class="alert alert-{{ alert.level }} d-flex align-items-center gap-2 mb-2" role="alert">
+        {% if alert.level == "warning" %}
+          <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+        {% else %}
+          <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+        {% endif %}
+        <div>
+          <strong>{{ alert.athlete.get_full_name }}</strong> — {{ alert.message }}
         </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
-        <div class="card-body">
-            {% if athletes %}
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Edad</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for athlete in athletes %}
-                        <tr>
-                            <td>{{ athlete.get_full_name }}</td>
-                            <td>{{ athlete.age }}</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary">
-                                    Ver perfil
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="text-muted">No tienes atletas asignados.</p>
-            {% endif %}
-        </div>
+  <!-- ATLETAS BAJO CUSTODIA -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header d-flex align-items-center gap-2" style="border-bottom: 1px solid rgba(255,255,255,.1);">
+      <i class="bi bi-people-fill" style="color: var(--sc-cyan);"></i>
+      <span class="fw-semibold">Mis Atletas</span>
+      {% if athletes %}
+        <span class="badge rounded-pill ms-auto" style="background-color: var(--sc-cyan); color: #000;">
+          {{ athletes|length }}
+        </span>
+      {% endif %}
     </div>
+
+    <div class="card-body p-0">
+      {% if athletes %}
+        <div class="row g-3 p-3">
+          {% for athlete in athletes %}
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border-0" style="background: rgba(255,255,255,.05);">
+              <div class="card-body">
+                <!-- Nombre -->
+                <h6 class="card-title fw-bold mb-1">
+                  <i class="bi bi-person-fill me-1" style="color: var(--sc-pink);"></i>
+                  {{ athlete.get_full_name }}
+                </h6>
+
+                <!-- Edad aproximada -->
+                {% if athlete.birth_date %}
+                  <p class="text-muted small mb-2">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Nacimiento: {{ athlete.birth_date|date:"d/m/Y" }}
+                  </p>
+                {% else %}
+                  <p class="text-muted small mb-2">
+                    <i class="bi bi-calendar-x me-1"></i>
+                    Sin fecha de nacimiento
+                  </p>
+                {% endif %}
+
+                <!-- Equipos -->
+                {% with memberships=athlete.team_memberships.all %}
+                  {% if memberships %}
+                    <div class="mb-2">
+                      {% for membership in memberships %}
+                        <span class="badge me-1 mb-1" style="background-color: rgba(44,177,255,.2); color: var(--sc-cyan); border: 1px solid var(--sc-cyan);">
+                          <i class="bi bi-people me-1"></i>{{ membership.team.name }}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <p class="text-muted small mb-2">
+                      <i class="bi bi-dash-circle me-1"></i> Sin equipo asignado
+                    </p>
+                  {% endif %}
+                {% endwith %}
+
+                <!-- Roles -->
+                {% with roles=athlete.roles.all %}
+                  {% if roles %}
+                    <div class="mb-3">
+                      {% for role in roles %}
+                        <span class="badge me-1" style="background-color: rgba(127,90,240,.2); color: var(--sc-purple); border: 1px solid var(--sc-purple);">
+                          {{ role.name }}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+                <a href="#" class="btn btn-sm w-100" style="background-color: var(--sc-purple); color: #fff;">
+                  <i class="bi bi-eye me-1"></i> Ver perfil
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-person-x display-4 text-muted"></i>
+          <p class="mt-3 text-muted">No tienes atletas asignados bajo tu custodia.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
 </div>
 {% endblock %}
