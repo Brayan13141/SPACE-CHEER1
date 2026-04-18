@@ -9,15 +9,15 @@
       <h1 class="h2 mb-1">{{ product.name }}</h1>
 
       <div class="d-flex flex-wrap gap-2 mt-2">
-        <span class="badge bg-light text-dark border">
+        <span class="badge bg-secondary border">
           <i class="bi bi-tag me-1"></i>{{ product.get_product_type_display }}
         </span>
 
-        <span class="badge bg-light text-dark border">
+        <span class="badge bg-secondary border">
           <i class="bi bi-gear me-1"></i>{{ product.get_usage_type_display }}
         </span>
 
-        <span class="badge bg-light text-dark border">
+        <span class="badge bg-secondary border">
           <i class="bi bi-globe me-1"></i>{{ product.get_scope_display }}
         </span>
 
@@ -106,7 +106,7 @@
 
 
     <div class="col-lg-4">
-      <div class="card shadow-sm bg-light h-100">
+      <div class="card shadow-sm h-100" style="background: var(--sc-panel, #1a1a2e)">
         <div class="card-body">
 
           <h5 class="card-title mb-3">
@@ -119,11 +119,10 @@
             <form method="post" action="{% url 'orders:item_import_team_athletes' item.id %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-outline-success w-100">
-
                 <i class="bi bi-person-plus me-2"></i>
                 Importar atletas
-
               </button>
+            </form>
             {% endif %}
 
             {% if can_delete_item %}
@@ -215,14 +214,14 @@
 
               {% for measurement in athlete_item.measurements.all|slice:":3" %}
 
-              <span class="badge bg-light text-dark border">
+              <span class="badge bg-secondary border">
                 {{ measurement.field_name }}: {{ measurement.value }}{{ measurement.field_unit }}
               </span>
 
               {% endfor %}
 
               {% if athlete_item.measurements.count > 3 %}
-              <span class="badge bg-light border">
+              <span class="badge bg-secondary border">
                 +{{ athlete_item.measurements.count|add:"-3" }}
               </span>
               {% endif %}
@@ -235,7 +234,7 @@
 
           {% if athlete_item.customization %}
 
-          <div class="bg-light p-2 rounded mb-3">
+          <div class="p-2 rounded mb-3" style="background: var(--sc-dark, #0d0d1a)">
             <span class="small text-muted d-block">Personalización</span>
             <span class="fw-semibold">{{ athlete_item.customization.custom_text }}</span>
           </div>
@@ -290,7 +289,7 @@
 
   <hr class="my-4">
 
-  <div class="card bg-light">
+  <div class="card" style="background: var(--sc-panel, #1a1a2e)">
 
     <div class="card-body">
 
@@ -304,7 +303,7 @@
 
         {% for field in measurement_fields %}
 
-        <span class="badge bg-white text-dark border px-3 py-2">
+        <span class="badge bg-secondary border px-3 py-2">
 
           {{ field.field.name }}
 
@@ -341,19 +340,25 @@
       </div>
 
       <div class="modal-body">
-
         ¿Eliminar <strong>{{ product.name }}</strong> de la orden?
-
-        <p class="text-danger small mt-2">
-          Esta acción eliminará atletas y medidas asociadas.
+        <p class="text-danger small mt-2 mb-0">
+          <i class="bi bi-exclamation-circle me-1"></i>
+          Esta acción eliminará atletas y medidas asociadas. No se puede deshacer.
         </p>
+      </div>
 
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form method="post" action="{% url 'orders:order_item_delete' item.id %}" class="d-inline mb-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash me-1"></i>Sí, eliminar
+          </button>
+        </form>
       </div>
 
     </div>
-
   </div>
-
 </div>
 
 {% endif %}
