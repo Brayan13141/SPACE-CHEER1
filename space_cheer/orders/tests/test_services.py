@@ -102,7 +102,7 @@ class OrderStateTransitionTests(TestCase):
         item = OrderItemFactory(order=self.order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
 
@@ -144,7 +144,7 @@ class OrderStateTransitionTests(TestCase):
         item = OrderItemFactory(order=self.order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
 
@@ -249,7 +249,7 @@ class OrderStateTransitionMeasurementsTests(TestCase):
         item = OrderItemFactory(order=order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
 
@@ -284,7 +284,7 @@ class OrderStateTransitionMeasurementsTests(TestCase):
         item = OrderItemFactory(order=order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
 
         for pmf in product.measurement_fields.all():

@@ -135,7 +135,7 @@ class ImportTeamAthletesViewTests(TestCase):
         UserTeamMembershipFactory(
             user=athlete,
             team=self.team,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )
