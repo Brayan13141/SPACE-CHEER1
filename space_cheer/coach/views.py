@@ -133,7 +133,7 @@ def manage_owned_users(request):
     athletes = athletes.select_related("athleteprofile__guardian").prefetch_related(
         "roles", "team_memberships__team"
     )
-    crew = ownerships_qs.exclude(user__roles__name="ATLETA").distinct()
+    crew = ownerships_qs.exclude(user__roles__name="ATHLETE").distinct()
 
     # --- Alerta de menores sin guardian ---
     minors_without_guardian_count = 0
@@ -422,7 +422,7 @@ def add_team_member(request, team_id):
     _validate_team_access(request.user, team)
 
     user_id = request.POST.get("user_id")
-    role_in_team = request.POST.get("role_in_team", "ATLETA")
+    role_in_team = request.POST.get("role_in_team", "ATHLETE")
 
     if role_in_team not in dict(UserTeamMembership.ROLE_CHOICES):
         messages.error(request, "Rol de equipo inválido.")
@@ -473,7 +473,7 @@ def create_team_crew_member(request, team_id):
     allowed_team_roles = [
         (value, label)
         for value, label in UserTeamMembership.ROLE_CHOICES
-        if value != "ATLETA"
+        if value != "ATHLETE"
     ]
 
     if request.method == "POST":

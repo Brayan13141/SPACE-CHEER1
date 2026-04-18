@@ -275,7 +275,7 @@ class BulkImportService:
         # Remover caracteres especiales
         base = "".join(c for c in base if c.isalnum())
         if not base:
-            base = "atleta"
+            base = "ATHLETE"
 
         username = base
         counter = 1

@@ -224,7 +224,7 @@ def user_search_api(request):
 
     Query params:
         q: texto de búsqueda (mínimo 2 caracteres)
-        role: filtro de rol (opcional, ej: "ATLETA")
+        role: filtro de rol (opcional, ej: "ATHLETE")
         exclude: IDs a excluir separados por coma (opcional)
 
     Ejemplo:
