@@ -214,7 +214,7 @@ class TeamAdmin(admin.ModelAdmin):
 
         stats = {
             "atletas": memberships.filter(
-                role_in_team="ATLETA", is_active=True
+                role_in_team="ATHLETE", is_active=True
             ).count(),
             "coaches": memberships.filter(role_in_team="COACH", is_active=True).count(),
             "staff": memberships.filter(role_in_team="STAFF", is_active=True).count(),
@@ -341,7 +341,7 @@ class UserTeamMembershipAdmin(admin.ModelAdmin):
 
     def role_badge(self, obj):
         colors = {
-            "ATLETA": "#007bff",
+            "ATHLETE": "#007bff",
             "COACH": "#28a745",
             "STAFF": "#ffc107",
         }
