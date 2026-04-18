@@ -41,6 +41,17 @@ def validate_image_magic(file):
             f'Archivo no soportado ({file_mime_type}). Solo se permiten imágenes JPG, PNG y WEBP.'
         )
 
+def validate_min_size_35mb(file):
+    """
+    Valida que el archivo subido pese al menos 35 MB.
+    """
+    thirty_five_mb = 35 * 1024 * 1024
+    if file.size < thirty_five_mb:
+        raise ValidationError(
+            f'El diseño debe tener un tamaño mínimo de 35 MB para asegurar una alta resolución. '
+            f'Archivo actual: {file.size / (1024 * 1024):.2f} MB.'
+        )
+
 # =============================================================================
 # GENERADORES DE RUTAS DINÁMICAS (upload_to)
 # =============================================================================
