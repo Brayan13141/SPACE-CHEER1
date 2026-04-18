@@ -357,7 +357,7 @@ class CustomUserAdmin(BaseUserAdmin):
             "ADMIN": "#dc3545",
             "HEADCOACH": "#28a745",
             "COACH": "#17a2b8",
-            "ATLETA": "#007bff",
+            "ATHLETE": "#007bff",
             "STAFF": "#6c757d",
             "ACOMPANANTE": "#ffc107",
         }
@@ -448,7 +448,7 @@ class CustomUserAdmin(BaseUserAdmin):
 
         if obj:
             # Agregar inline de perfil según rol
-            if obj.roles.filter(name="ATLETA").exists():
+            if obj.roles.filter(name="ATHLETE").exists():
                 if hasattr(obj, "athleteprofile"):
                     inlines.insert(0, AthleteProfileInline)
                     if hasattr(obj.athleteprofile, "athletemedicalinfo"):
