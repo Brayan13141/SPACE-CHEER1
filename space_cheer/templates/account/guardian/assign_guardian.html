@@ -53,13 +53,22 @@
                 </a>
             </div>
 
-            <!-- Alerta si ya tiene guardian -->
+            <!-- Alerta si ya tiene guardian (Transferir o Remover) -->
             {% if current_guardian %}
-            <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Atención:</strong> {{ athlete.get_full_name }} ya tiene un guardián asignado 
-                ({{ current_guardian.get_full_name }}). Si asignas uno nuevo, reemplazará al actual.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="alert alert-warning d-flex flex-column flex-md-row justify-content-between align-items-md-center px-4 py-3 border-warning shadow-sm rounded-4 mb-4 bg-warning bg-opacity-10 text-dark">
+                <div class="mb-3 mb-md-0">
+                    <h5 class="alert-heading text-white fw-bold mb-1">
+                        <i class="bi bi-shield-check me-2"></i> Guardián Actual: {{ current_guardian.get_full_name }}
+                    </h5>
+                    <p class="mb-0 text-white small" style="opacity: 0.85;">
+                        Si seleccionas otro guardián de la lista y guardas, el actual será <strong class="text-danger">reemplazado (Transferencia)</strong>.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-danger btn-sm rounded-pill fw-semibold shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#removeGuardianModal">
+                        <i class="bi bi-person-x-fill me-1"></i> Remover Guardián
+                    </button>
+                </div>
             </div>
             {% endif %}
 
@@ -86,7 +95,7 @@
                         <!-- TAB A: Asignar guardián existente (radio buttons) -->
                         <div class="tab-pane fade show active" id="assign-pane" role="tabpanel">
                             {% if potential_guardians %}
-                                <form method="post" id="assignForm">
+                                <form method="post" id="assignForm" class="needs-validation" novalidate>
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="assign">
                                     
@@ -94,7 +103,7 @@
                                         <label class="form-label fw-semibold">
                                             <i class="bi bi-people me-1"></i> Selecciona un guardián
                                         </label>
-                                        <div class="list-group">
+                                        <div class="list-group" id="guardianListGroup">
                                             {% for guardian in potential_guardians %}
                                             <div class="list-group-item list-group-item-action p-3 guardian-card list-group-item-radio">
                                                 <div class="form-check">
@@ -125,6 +134,9 @@
                                             </div>
                                             {% endfor %}
                                         </div>
+                                        <div id="guardianSelectionFeedback" class="invalid-feedback mt-2" style="display: none;">
+                                            Por favor, selecciona un guardián de la lista.
+                                        </div>
                                     </div>
 
                                     <!-- Tipo de relación -->
@@ -143,8 +155,12 @@
                                     </div>
 
                                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
-                                        <button type="submit" class="btn btn-primary px-4">
+                                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
+                                            {% if current_guardian %}
+                                            <i class="bi bi-arrow-left-right me-2"></i> Transferir a este Guardián
+                                            {% else %}
                                             <i class="bi bi-save me-2"></i> Asignar Guardián
+                                            {% endif %}
                                         </button>
                                     </div>
                                 </form>
@@ -166,7 +182,7 @@
                                 seleccione el rol <strong>GUARDIAN</strong>, aparecerá en la lista
                                 de guardians disponibles.
                             </p>
-                            <form method="post" id="inviteForm">
+                            <form method="post" id="inviteForm" class="needs-validation" novalidate>
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="invite">
                                 <div class="mb-3">
@@ -175,6 +191,9 @@
                                     </label>
                                     <input type="email" name="invite_email" class="form-control"
                                            placeholder="padre@ejemplo.com" required>
+                                    <div class="invalid-feedback">
+                                        Por favor, ingresa un correo electrónico válido.
+                                    </div>
                                 </div>
                                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
                                     <button type="submit" class="btn btn-outline-primary">
@@ -234,28 +253,84 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Remover Guardian -->
+{% if current_guardian %}
+<div class="modal fade" id="removeGuardianModal" tabindex="-1" aria-labelledby="removeGuardianModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: #1a1a2e;">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title text-danger fw-bold" id="removeGuardianModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Remover Guardián
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-light">
+                <p>¿Estás completamente seguro de que deseas <strong>remover a {{ current_guardian.get_full_name }}</strong> como guardián de {{ athlete.get_full_name }}?</p>
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger small mb-0">
+                    <i class="bi bi-info-circle-fill me-1"></i> Esto dejará al atleta sin tutor legal registrado en el sistema. Debe realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se reasignará un tutor después.
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'guardian:remove_guardian' athlete.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger fw-semibold shadow-sm">
+                        <i class="bi bi-trash me-1"></i> Sí, Remover
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Validación para el formulario de asignación: asegurar que se seleccione un guardián
-        const assignForm = document.getElementById('assignForm');
-        if (assignForm) {
-            assignForm.addEventListener('submit', function(e) {
-                const selected = document.querySelector('input[name="guardian_id"]:checked');
-                if (!selected) {
-                    e.preventDefault();
-                    alert('Por favor, selecciona un guardián de la lista.');
+        // Bootstrap 5 form validation logic
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                let isValid = form.checkValidity();
+                
+                // Validación custom para los radios de guardian_id
+                if (form.id === 'assignForm') {
+                    const selected = form.querySelector('input[name="guardian_id"]:checked');
+                    if (!selected) {
+                        isValid = false;
+                        const listGroup = document.getElementById('guardianListGroup');
+                        const feedback = document.getElementById('guardianSelectionFeedback');
+                        if (listGroup) listGroup.style.border = '1px solid var(--bs-danger)';
+                        if (feedback) feedback.style.display = 'block';
+                    }
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Limpiar el error de validación cuando se selecciona un radio
+        const radios = document.querySelectorAll('input[name="guardian_id"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const listGroup = document.getElementById('guardianListGroup');
+                const feedback = document.getElementById('guardianSelectionFeedback');
+                if (listGroup) {
+                    listGroup.style.border = '';
+                }
+                if (feedback) {
+                    feedback.style.display = 'none';
                 }
             });
-        }
-
-        // Opcional: auto-seleccionar el primer radio si la lista tiene al menos uno y ninguno está marcado
-        const radios = document.querySelectorAll('input[name="guardian_id"]');
-        if (radios.length > 0 && !Array.from(radios).some(r => r.checked)) {
-            radios[0].checked = true;
-        }
+        });
     });
 </script>
 {% endblock %}
