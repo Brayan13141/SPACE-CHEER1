@@ -1,8 +1,12 @@
+import logging
+
 from decouple import config
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+
+logger = logging.getLogger(__name__)
 
 from accounts.models import User
 from accounts.decorators import role_required
@@ -227,12 +231,14 @@ def manage_athletes(request):
                     )
                     messages.success(
                         request,
-                        f"Alumno creado usuario {user.username} "
-                        f"password temporal {config('ATHLETE_TEMP_PASSWORD', default='$Temporal123')}",
+                        f"Alumno creado. Usuario: {user.username}. "
+                        "La contraseña temporal fue enviada al correo",
                     )
                     return redirect("teams:manage_athletes")
                 except Exception as e:
-                    messages.error(request, f"Error al crear atleta: {e}")
+                    # No exponer detalles internos al usuario — solo loggear
+                    logger.exception("Error al crear atleta rápido por user=%s: %s", request.user.id, e)
+                    messages.error(request, "Error al crear el atleta. Contacta al administrador.")
 
             abrir_modal_crear = True
 
