@@ -1,4 +1,5 @@
 import os
+import re
 import magic
 from django.core.exceptions import ValidationError
 
@@ -56,29 +57,38 @@ def validate_min_size_35mb(file):
 # GENERADORES DE RUTAS DINÁMICAS (upload_to)
 # =============================================================================
 
+def _sanitize_path_component(value: str) -> str:
+    """
+    Elimina caracteres peligrosos de un componente de ruta de archivo.
+    Previene path traversal (../) y caracteres especiales de sistema de archivos.
+    """
+    # Conservar solo alfanuméricos, guión y guión bajo
+    return re.sub(r'[^a-zA-Z0-9_-]', '_', value)
+
+
 def user_profile_photo_path(instance, filename):
     """
-    Genera: media/accounts/perfiles/<username>/<filename>
+    Genera: media/accounts/perfiles/<username_sanitizado>/<filename>
+    Sanitiza el username para prevenir path traversal.
     """
-    # Usamos os.path.basename para limpiar el nombre del archivo de la ruta original (seguridad)
     safe_filename = os.path.basename(filename)
-    return f'accounts/perfiles/{instance.username}/{safe_filename}'
+    safe_username = _sanitize_path_component(instance.username)
+    return f'accounts/perfiles/{safe_username}/{safe_filename}'
 
 def team_photo_path(instance, filename):
     """
-    Genera: media/teams/fotos/<team_name>/<filename>
+    Genera: media/teams/fotos/<team_name_sanitizado>/<filename>
     """
     safe_filename = os.path.basename(filename)
-    # Limpiamos espacios para el path del equipo
-    safe_team_name = instance.name.replace(" ", "_").lower()
+    safe_team_name = _sanitize_path_component(instance.name.replace(" ", "_").lower())
     return f'teams/fotos/{safe_team_name}/{safe_filename}'
 
 def team_song_path(instance, filename):
     """
-    Genera: media/teams/songs/<team_name>/<filename>
+    Genera: media/teams/songs/<team_name_sanitizado>/<filename>
     """
     safe_filename = os.path.basename(filename)
-    safe_team_name = instance.team.name.replace(" ", "_").lower()
+    safe_team_name = _sanitize_path_component(instance.team.name.replace(" ", "_").lower())
     return f'teams/songs/{safe_team_name}/{safe_filename}'
 
 def product_image_path(instance, filename):
