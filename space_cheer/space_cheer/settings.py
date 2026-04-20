@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "custody",
     "commerce",
     "events",
+    "hospitality",
     "social",
     "orders",
     "products",
@@ -143,6 +144,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+#    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -174,9 +176,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "space_cheer.wsgi.application"
 
 SESSION_COOKIE_HTTPONLY = True  # JS no puede leer la cookie
-# SESSION_COOKIE_SECURE = True  # Solo HTTPS (actívalo en producción)
+# Solo HTTPS (actívalo en producción)
+#SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
 SESSION_COOKIE_SAMESITE = "Lax"  # Protección CSRF adicional
-CSRF_COOKIE_SECURE = True  # Cookie CSRF solo sobre HTTPS
+#CSRF_COOKIE_SECURE = True  # Cookie CSRF solo sobre HTTPS
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -201,7 +204,9 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
+        # Mínimo 12 caracteres — plataforma maneja datos de menores (LGDNNA/LFPDPPP)
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -215,7 +220,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "es"
+
+LANGUAGES = [
+    ("es", "Español"),
+    ("en", "English"),
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 TIME_ZONE = "UTC"
 
@@ -233,8 +245,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 CSRF_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = "Strict"
+
+# =================================================================
+# SECURITY HEADERS (A05 — Security Misconfiguration)
+# =================================================================
+# Redirige todo el tráfico HTTP a HTTPS. Desactivar solo en desarrollo local.
+#SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+
+#HSTS: indica al navegador que solo use HTTPS por 1 año
+#SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)
+#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#SECURE_HSTS_PRELOAD = True
+
+# Protección contra clickjacking (complementa XFrameOptionsMiddleware)
+X_FRAME_OPTIONS = "DENY"
+
+# Evita que el navegador detecte el MIME type por sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Activa XSS filter del navegador (legacy, pero útil para IE/Edge antiguos)
+SECURE_BROWSER_XSS_FILTER = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [

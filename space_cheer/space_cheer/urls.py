@@ -21,6 +21,8 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     # products
     path("products/", include("products.urls")),
+    # events
+    path("events/", include("events.urls", namespace="events")),
     path("social/", include("social.urls", namespace="social")),
     path(
         "invitations/",
