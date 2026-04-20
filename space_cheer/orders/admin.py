@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.db.models import Count, Sum, Q
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -404,13 +403,9 @@ class OrderAdmin(admin.ModelAdmin):
     @admin.display(description="Acciones")
     def actions_column(self, obj):
         """Botones de acción rápida"""
-        buttons = []
-
-        # Link a vista de admin custom
         url = reverse("orders:admin_order_detail", args=[obj.id])
-        buttons.append(f'<a href="{url}" class="button">📋 Ver Detalle</a>')
-
-        return mark_safe(" ".join(buttons))
+        # format_html escapa automáticamente — reemplaza mark_safe con concatenación de strings
+        return format_html('<a href="{}" class="button">Ver Detalle</a>', url)
 
     # ── Admin Actions ─────────────────────────────────────
 
