@@ -1,6 +1,6 @@
 {% extends "core/base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Staff" %} — {{ event.name }}{% endblock %}
+{% block title %}{% trans "Staff y Jueces" %} — {{ event.name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -9,85 +9,224 @@
       <i class="bi bi-arrow-left"></i>
     </a>
     <div>
-      <h1 class="h3 mb-0">{% trans "Gestión de Staff" %}</h1>
+      <h1 class="h3 mb-0">{% trans "Staff y Jueces" %}</h1>
       <p class="text-secondary small mb-0">{{ event.name }}</p>
     </div>
   </div>
 
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header"><h6 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% trans "Agregar Staff" %}</h6></div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add">
-            <div class="mb-3">
-              <label class="form-label">{{ form.user.label }}</label>
-              {{ form.user }}
+  {# Tabs #}
+  <ul class="nav nav-tabs mb-4" id="staffTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="staff-tab" data-bs-toggle="tab" data-bs-target="#staff-pane"
+              type="button" role="tab">
+        <i class="bi bi-people me-1"></i>{% trans "Staff General" %}
+        {% if staff %}<span class="badge bg-secondary ms-1">{{ staff|length }}</span>{% endif %}
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="judges-tab" data-bs-toggle="tab" data-bs-target="#judges-pane"
+              type="button" role="tab">
+        <i class="bi bi-clipboard-check me-1"></i>{% trans "Jueces" %}
+        {% if judges %}<span class="badge bg-secondary ms-1">{{ judges|length }}</span>{% endif %}
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="staffTabsContent">
+
+    {# ── Tab Staff General ── #}
+    <div class="tab-pane fade show active" id="staff-pane" role="tabpanel">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% trans "Agregar Staff" %}</h6>
             </div>
-            <div class="mb-3">
-              <label class="form-label">{{ form.role.label }}</label>
-              {{ form.role }}
+            <div class="card-body">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_staff">
+                <div class="mb-3">
+                  <label class="form-label">{{ staff_form.user.label }}</label>
+                  {{ staff_form.user }}
+                  {% for e in staff_form.user.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">{{ staff_form.role.label }}</label>
+                  {{ staff_form.role }}
+                  {% for e in staff_form.role.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">{{ staff_form.notes.label }}</label>
+                  {{ staff_form.notes }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                  <i class="bi bi-plus-circle me-1"></i>{% trans "Asignar Staff" %}
+                </button>
+              </form>
+              <div class="mt-3">
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  {% trans "Solo usuarios con rol global STAFF pueden ser asignados aquí." %}
+                </small>
+              </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label">{{ form.notes.label }}</label>
-              {{ form.notes }}
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                {% blocktrans with count=staff|length %}Staff asignado ({{ count }}){% endblocktrans %}
+              </h6>
             </div>
-            <button type="submit" class="btn btn-primary btn-sm w-100">
-              <i class="bi bi-plus-circle me-1"></i>{% trans "Asignar" %}
-            </button>
-          </form>
+            {% if staff %}
+            <div class="card-body p-0">
+              <table class="table table-hover mb-0">
+                <thead><tr>
+                  <th>{% trans "Usuario" %}</th>
+                  <th>{% trans "Rol en evento" %}</th>
+                  <th>{% trans "Asignado por" %}</th>
+                  <th></th>
+                </tr></thead>
+                <tbody>
+                  {% for a in staff %}
+                  <tr>
+                    <td>
+                      <span class="fw-semibold">{{ a.user.get_full_name|default:a.user.username }}</span>
+                      <br><small class="text-secondary">{{ a.user.email }}</small>
+                    </td>
+                    <td>{{ a.role.name }}</td>
+                    <td class="small text-secondary">{{ a.assigned_by.get_full_name|default:"—" }}</td>
+                    <td>
+                      <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="assignment_pk" value="{{ a.pk }}">
+                        <button class="btn btn-outline-danger btn-sm" title="{% trans 'Remover' %}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-secondary py-4">
+              <i class="bi bi-people display-4 opacity-50"></i>
+              <p class="mt-2 mb-0 small">{% trans "No hay staff asignado aún." %}</p>
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h6 class="mb-0">{% blocktrans with count=staff.count %}Staff asignado ({{ count }}){% endblocktrans %}</h6>
+    {# ── Tab Jueces ── #}
+    <div class="tab-pane fade" id="judges-pane" role="tabpanel">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>{% trans "Agregar Juez" %}</h6>
+            </div>
+            <div class="card-body">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_judge">
+                <div class="mb-3">
+                  <label class="form-label">{{ judge_form.user.label }}</label>
+                  {{ judge_form.user }}
+                  {% for e in judge_form.user.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">{{ judge_form.role.label }}</label>
+                  {{ judge_form.role }}
+                  {% for e in judge_form.role.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">{{ judge_form.notes.label }}</label>
+                  {{ judge_form.notes }}
+                </div>
+                <button type="submit" class="btn btn-info btn-sm w-100">
+                  <i class="bi bi-plus-circle me-1"></i>{% trans "Asignar Juez" %}
+                </button>
+              </form>
+              <div class="mt-3">
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  {% trans "Solo usuarios con rol global JUEZ pueden ser asignados como jueces." %}
+                </small>
+              </div>
+            </div>
+          </div>
         </div>
-        {% if staff %}
-        <div class="card-body p-0">
-          <table class="table table-hover mb-0">
-            <thead><tr>
-              <th>{% trans "Usuario" %}</th><th>{% trans "Rol" %}</th>
-              <th>{% trans "Asignado por" %}</th><th></th>
-            </tr></thead>
-            <tbody>
-              {% for assignment in staff %}
-              <tr>
-                <td>
-                  <span class="fw-semibold">{{ assignment.user.get_full_name|default:assignment.user.username }}</span>
-                  <br><small class="text-secondary">{{ assignment.user.email }}</small>
-                </td>
-                <td>{{ assignment.role.name }}</td>
-                <td class="small text-secondary">
-                  {{ assignment.assigned_by.get_full_name|default:"—" }}
-                </td>
-                <td>
-                  <form method="post" class="d-inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="assignment_pk" value="{{ assignment.pk }}">
-                    <button class="btn btn-outline-danger btn-sm" title="{% trans 'Remover' %}">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                {% blocktrans with count=judges|length %}Jueces asignados ({{ count }}){% endblocktrans %}
+              </h6>
+            </div>
+            {% if judges %}
+            <div class="card-body p-0">
+              <table class="table table-hover mb-0">
+                <thead><tr>
+                  <th>{% trans "Juez" %}</th>
+                  <th>{% trans "Rol" %}</th>
+                  <th>{% trans "Asignado por" %}</th>
+                  <th></th>
+                </tr></thead>
+                <tbody>
+                  {% for a in judges %}
+                  <tr>
+                    <td>
+                      <span class="fw-semibold">{{ a.user.get_full_name|default:a.user.username }}</span>
+                      <br><small class="text-secondary">{{ a.user.email }}</small>
+                    </td>
+                    <td><span class="badge bg-info text-dark">{{ a.role.name }}</span></td>
+                    <td class="small text-secondary">{{ a.assigned_by.get_full_name|default:"—" }}</td>
+                    <td>
+                      <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="assignment_pk" value="{{ a.pk }}">
+                        <button class="btn btn-outline-danger btn-sm" title="{% trans 'Remover' %}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-secondary py-4">
+              <i class="bi bi-clipboard display-4 opacity-50"></i>
+              <p class="mt-2 mb-0 small">{% trans "No hay jueces asignados aún." %}</p>
+            </div>
+            {% endif %}
+          </div>
         </div>
-        {% else %}
-        <div class="card-body text-center text-secondary py-4">
-          <i class="bi bi-people display-4"></i>
-          <p class="mt-2 mb-0">{% trans "No hay staff asignado aún." %}</p>
-        </div>
-        {% endif %}
       </div>
     </div>
+
   </div>
 </div>
+
+{# Mantener el tab activo si el POST fue a jueces #}
+{% if judge_form.errors %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tab = new bootstrap.Tab(document.getElementById('judges-tab'));
+  tab.show();
+});
+</script>
+{% endif %}
+
 {% endblock %}
