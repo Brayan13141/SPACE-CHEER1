@@ -287,7 +287,7 @@ class OrderStateService:
                     team=order.owner_team,
                     status="accepted",
                     is_active=True,
-                    role_in_team="ATLETA",
+                    role_in_team="ATHLETE",
                 ).values_list("user_id", flat=True)
             )
 

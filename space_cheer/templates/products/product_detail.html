@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
@@ -22,24 +22,24 @@
         {% endif %}
         {% if not is_configured %}
           <span class="badge bg-warning text-dark">
-            <i class="bi bi-exclamation-triangle me-1"></i>Sin configurar
+            <i class="bi bi-exclamation-triangle me-1"></i>{% trans "Sin configurar" %}
           </span>
         {% else %}
           <span class="badge bg-success">
-            <i class="bi bi-check-circle me-1"></i>Configurado
+            <i class="bi bi-check-circle me-1"></i>{% trans "Configurado" %}
           </span>
         {% endif %}
       </div>
-      
+
       <!-- Metadata secundaria -->
       <div class="text-muted small d-flex flex-wrap gap-2">
-        <span><i class="bi bi-calendar-event me-1"></i>Creado: {{ product.created_at|date:"d/m/Y H:i" }}</span>
-        <span><i class="bi bi-tag me-1"></i>Temporada: <strong>{{ product.season.name }}</strong>
-          {% if not product.season.is_active %}<span class="badge bg-danger ms-1">Inactiva</span>{% endif %}
+        <span><i class="bi bi-calendar-event me-1"></i>{% trans "Creado:" %} {{ product.created_at|date:"d/m/Y H:i" }}</span>
+        <span><i class="bi bi-tag me-1"></i>{% trans "Temporada:" %} <strong>{{ product.season.name }}</strong>
+          {% if not product.season.is_active %}<span class="badge bg-danger ms-1">{% trans "Inactiva" %}</span>{% endif %}
         </span>
         {% if protection_info.is_protected %}
           <span><i class="bi bi-shield-check me-1 text-warning"></i>
-            Usado en {{ protection_info.orders_count }} orden{{ protection_info.orders_count|pluralize:"es" }}
+            {% blocktrans with count=protection_info.orders_count %}Usado en {{ count }} orden{% endblocktrans %}{{ protection_info.orders_count|pluralize:"es" }}
           </span>
         {% endif %}
       </div>
@@ -63,7 +63,7 @@
       </form>
 
       <a href="{% url 'products:list_products' %}" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
       </a>
     </div>
   </div>
@@ -85,7 +85,7 @@
                  style="height:160px;">
               <div class="text-center text-muted">
                 <i class="bi bi-image display-4 d-block mb-2"></i>
-                <small>Sin imagen</small>
+                <small>{% trans "Sin imagen" %}</small>
               </div>
             </div>
           {% endif %}
@@ -95,12 +95,12 @@
       <!-- ═══ PRICING INFO ═══ -->
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
-          <h6 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Precios</h6>
+          <h6 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>{% trans "Precios" %}</h6>
         </div>
         <div class="card-body">
           {% if pricing_info.has_variance %}
             <div class="mb-2">
-              <small class="text-muted d-block">Rango de precio</small>
+              <small class="text-muted d-block">{% trans "Rango de precio" %}</small>
               <div class="fs-4 fw-bold text-primary">
                 ${{ pricing_info.min_price|floatformat:2 }} - ${{ pricing_info.max_price|floatformat:2 }}
               </div>
@@ -108,11 +108,11 @@
             <hr class="my-2">
             <div class="small">
               <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">Base:</span>
+                <span class="text-muted">{% trans "Base:" %}</span>
                 <span class="fw-semibold">${{ pricing_info.base_price|floatformat:2 }}</span>
               </div>
               <div class="d-flex justify-content-between">
-                <span class="text-muted">Con variantes:</span>
+                <span class="text-muted">{% trans "Con variantes:" %}</span>
                 <span class="text-success">+${{ pricing_info.max_price|floatformat:2|cut:pricing_info.base_price|cut:"$" }}</span>
               </div>
             </div>
@@ -121,7 +121,7 @@
               <div class="fs-3 fw-bold text-primary mb-1">
                 ${{ pricing_info.base_price|floatformat:2 }}
               </div>
-              <small class="text-muted">Precio único</small>
+              <small class="text-muted">{% trans "Precio único" %}</small>
             </div>
           {% endif %}
         </div>
@@ -131,10 +131,10 @@
       {% if not is_configured %}
       <div class="card shadow-sm mb-4 border-warning">
         <div class="card-header bg-warning bg-opacity-10">
-          <h6 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Configuración pendiente</h6>
+          <h6 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>{% trans "Configuración pendiente" %}</h6>
         </div>
         <div class="card-body">
-          <p class="small text-muted mb-3">Este producto requiere configuración antes de poder usarse en órdenes:</p>
+          <p class="small text-muted mb-3">{% trans "Este producto requiere configuración antes de poder usarse en órdenes:" %}</p>
           <div class="list-group list-group-flush">
             {% for item in configuration_checklist %}
             <div class="list-group-item px-0 py-2 border-0">
@@ -159,36 +159,36 @@
       <!-- ═══ REQUIREMENTS INFO (vertical) ═══ -->
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
-          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Requisitos del producto</h6>
+          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>{% trans "Requisitos del producto" %}</h6>
         </div>
         <div class="card-body">
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-              <span class="small text-muted"><i class="bi bi-palette me-1"></i>Diseño personalizado</span>
+              <span class="small text-muted"><i class="bi bi-palette me-1"></i>{% trans "Diseño personalizado" %}</span>
               <span class="badge {% if requirements.requires_design %}bg-primary{% else %}bg-secondary{% endif %}">
                 {{ requirements.requires_design|yesno:"Requerido,No" }}
               </span>
             </div>
             <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-              <span class="small text-muted"><i class="bi bi-people me-1"></i>Asignación de atletas</span>
+              <span class="small text-muted"><i class="bi bi-people me-1"></i>{% trans "Asignación de atletas" %}</span>
               <span class="badge {% if requirements.requires_athletes %}bg-primary{% else %}bg-secondary{% endif %}">
                 {{ requirements.requires_athletes|yesno:"Requerido,No" }}
               </span>
             </div>
             <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-              <span class="small text-muted"><i class="bi bi-rulers me-1"></i>Medidas personalizadas</span>
+              <span class="small text-muted"><i class="bi bi-rulers me-1"></i>{% trans "Medidas personalizadas" %}</span>
               <span class="badge {% if requirements.requires_measurements %}bg-primary{% else %}bg-secondary{% endif %}">
                 {{ requirements.requires_measurements|yesno:"Requerido,No" }}
               </span>
             </div>
             <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-              <span class="small text-muted"><i class="bi bi-tags me-1"></i>Selección de talla</span>
+              <span class="small text-muted"><i class="bi bi-tags me-1"></i>{% trans "Selección de talla" %}</span>
               <span class="badge {% if requirements.requires_sizes %}bg-primary{% else %}bg-secondary{% endif %}">
                 {{ requirements.requires_sizes|yesno:"Requerido,No" }}
               </span>
             </div>
             <div class="d-flex justify-content-between align-items-center py-1">
-              <span class="small text-muted"><i class="bi bi-building me-1"></i>Equipo específico</span>
+              <span class="small text-muted"><i class="bi bi-building me-1"></i>{% trans "Equipo específico" %}</span>
               <span class="badge {% if requirements.requires_team %}bg-primary{% else %}bg-secondary{% endif %}">
                 {{ requirements.requires_team|yesno:"Requerido,No" }}
               </span>
@@ -204,17 +204,18 @@
           <div class="d-flex align-items-start">
             <i class="bi bi-shield-lock text-warning me-2 mt-1"></i>
             <div>
-              <h6 class="mb-1">Producto protegido</h6>
+              <h6 class="mb-1">{% trans "Producto protegido" %}</h6>
               <p class="small text-muted mb-2">
-                Este producto está siendo usado en 
-                <strong>{{ protection_info.orders_count }} orden{{ protection_info.orders_count|pluralize:"es" }}</strong>
+                {% blocktrans with count=protection_info.orders_count %}
+                  Este producto está siendo usado en <strong>{{ count }} orden</strong>
+                {% endblocktrans %}{{ protection_info.orders_count|pluralize:"es" }}
                 {% if protection_info.active_orders_count > 0 %}
-                  ({{ protection_info.active_orders_count }} activa{{ protection_info.active_orders_count|pluralize:"s" }})
+                  ({{ protection_info.active_orders_count }} {% trans "activa" %}{{ protection_info.active_orders_count|pluralize:"s" }})
                 {% endif %}.
               </p>
               <p class="small text-muted mb-0">
                 <i class="bi bi-info-circle me-1"></i>
-                No puedes modificar su estructura (scope, usage_type, size_strategy) ni eliminarlo.
+                {% trans "No puedes modificar su estructura (scope, usage_type, size_strategy) ni eliminarlo." %}
               </p>
             </div>
           </div>
@@ -226,7 +227,7 @@
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
-            <i class="bi bi-pencil me-2"></i>Editar información
+            <i class="bi bi-pencil me-2"></i>{% trans "Editar información" %}
           </h5>
           <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#editFormCollapse">
             <i class="bi bi-chevron-down"></i>
@@ -237,8 +238,7 @@
             {% if protection_info.is_protected %}
               <div class="alert alert-warning alert-sm py-2 mb-3 small">
                 <i class="bi bi-shield-exclamation me-1"></i>
-                <strong>Producto protegido</strong> – Este producto está siendo usado en órdenes. 
-                Modificar ciertos campos puede afectar órdenes existentes.
+                <strong>{% trans "Producto protegido" %}</strong> – {% trans "Este producto está siendo usado en órdenes. Modificar ciertos campos puede afectar órdenes existentes." %}
               </div>
             {% endif %}
 
@@ -257,94 +257,94 @@
               {% endif %}
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Nombre</label>
+                <label class="form-label small fw-semibold">{% trans "Nombre" %}</label>
                 {{ form.name }}
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Descripción</label>
+                <label class="form-label small fw-semibold">{% trans "Descripción" %}</label>
                 {{ form.description }}
               </div>
 
               <!-- Campos con advertencia de protección -->
               <div class="row g-2 mb-3">
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Tipo de producto</label>
+                  <label class="form-label small fw-semibold">{% trans "Tipo de producto" %}</label>
                   {{ form.product_type }}
-                  
+
                     <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
                     </div>
-                  
+
                 </div>
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Tipo de uso</label>
+                  <label class="form-label small fw-semibold">{% trans "Tipo de uso" %}</label>
                   {{ form.usage_type }}
-                  
+
                     <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
                     </div>
-                  
+
                 </div>
               </div>
 
               <div class="row g-2 mb-3">
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Estrategia de tallas</label>
+                  <label class="form-label small fw-semibold">{% trans "Estrategia de tallas" %}</label>
                   {{ form.size_strategy }}
-                  
+
                     <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
                     </div>
-                  
+
                 </div>
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Alcance</label>
+                  <label class="form-label small fw-semibold">{% trans "Alcance" %}</label>
                   {{ form.scope }}
-                  
+
                     <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> Cambiar esto puede afectar órdenes existentes.
+                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
                     </div>
-                  
+
                 </div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Equipo propietario</label>
+                <label class="form-label small fw-semibold">{% trans "Equipo propietario" %}</label>
                 {{ form.owner_team }}
                 {% if form.owner_team.help_text %}
                   <small class="text-muted d-block">{{ form.owner_team.help_text }}</small>
                 {% endif %}
-                
+
                   <div class="small text-warning mt-1">
-                    <i class="bi bi-exclamation-triangle"></i> Cambiar el equipo puede afectar órdenes existentes.
+                    <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar el equipo puede afectar órdenes existentes." %}
                   </div>
-                
+
               </div>
 
               <div class="row g-2 mb-3">
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Precio base</label>
+                  <label class="form-label small fw-semibold">{% trans "Precio base" %}</label>
                   {{ form.base_price }}
                 </div>
                 <div class="col-6">
-                  <label class="form-label small fw-semibold">Temporada</label>
+                  <label class="form-label small fw-semibold">{% trans "Temporada" %}</label>
                   {{ form.season }}
                 </div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold">Nueva imagen</label>
+                <label class="form-label small fw-semibold">{% trans "Nueva imagen" %}</label>
                 {{ form.image }}
                 {% if product.image %}
                   <small class="text-muted d-block mt-1">
-                    <i class="bi bi-info-circle me-1"></i>Sube una nueva para reemplazar la actual.
+                    <i class="bi bi-info-circle me-1"></i>{% trans "Sube una nueva para reemplazar la actual." %}
                   </small>
                 {% endif %}
               </div>
 
               <button type="submit" class="btn btn-primary btn-sm w-100">
-                <i class="bi bi-save me-1"></i>Guardar cambios
+                <i class="bi bi-save me-1"></i>{% trans "Guardar cambios" %}
               </button>
             </form>
           </div>
@@ -355,11 +355,11 @@
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
-            <i class="bi bi-tags me-2"></i>Tallas
+            <i class="bi bi-tags me-2"></i>{% trans "Tallas" %}
             <span class="badge bg-primary ms-1">{{ size_variants|length }}</span>
           </h5>
           <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addSizePanel">
-            <i class="bi bi-plus me-1"></i>Agregar
+            <i class="bi bi-plus me-1"></i>{% trans "Agregar" %}
           </button>
         </div>
 
@@ -369,11 +369,11 @@
               {% csrf_token %}
               <input type="hidden" name="action" value="add_size">
               <div class="col-sm-4">
-                <label class="form-label small fw-semibold mb-1">Talla</label>
-                <input type="text" name="size" class="form-control form-control-sm" placeholder="XS, S, M..." maxlength="20" required>
+                <label class="form-label small fw-semibold mb-1">{% trans "Talla" %}</label>
+                <input type="text" name="size" class="form-control form-control-sm" placeholder="{% trans 'XS, S, M...' %}" maxlength="20" required>
               </div>
               <div class="col-sm-4">
-                <label class="form-label small fw-semibold mb-1">Precio adicional</label>
+                <label class="form-label small fw-semibold mb-1">{% trans "Precio adicional" %}</label>
                 <div class="input-group input-group-sm">
                   <span class="input-group-text">$</span>
                   <input type="number" name="additional_price" class="form-control" value="0" step="0.01" min="0">
@@ -381,7 +381,7 @@
               </div>
               <div class="col-sm-4">
                 <button type="submit" class="btn btn-success btn-sm w-100">
-                  <i class="bi bi-plus-circle me-1"></i>Agregar talla
+                  <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar talla" %}
                 </button>
               </div>
             </form>
@@ -393,9 +393,9 @@
             <table class="table table-sm align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th class="ps-4">Talla</th>
-                  <th class="text-end">Precio adicional</th>
-                  <th class="text-end">Precio final</th>
+                  <th class="ps-4">{% trans "Talla" %}</th>
+                  <th class="text-end">{% trans "Precio adicional" %}</th>
+                  <th class="text-end">{% trans "Precio final" %}</th>
                   <th style="width:60px;"></th>
                 </tr>
               </thead>
@@ -421,7 +421,7 @@
                     </form>
                     <button type="button" class="btn btn-sm btn-outline-danger"
                             data-confirm
-                            data-title="Eliminar talla"
+                            data-title="{% trans 'Eliminar talla' %}"
                             data-body="¿Eliminar la talla <strong>{{ variant.size }}</strong>?"
                             data-form="removeSize_{{ variant.id }}"
                             data-variant="danger">
@@ -433,7 +433,7 @@
                 <tr>
                   <td colspan="4" class="text-center text-muted py-4">
                     <i class="bi bi-inbox d-block mb-2 fs-3"></i>
-                    No hay tallas configuradas.
+                    {% trans "No hay tallas configuradas." %}
                   </td>
                 </tr>
                 {% endfor %}
@@ -449,11 +449,11 @@
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
-            <i class="bi bi-rulers me-2"></i>Campos de medida
+            <i class="bi bi-rulers me-2"></i>{% trans "Campos de medida" %}
             <span class="badge bg-primary ms-1">{{ measurement_fields|length }}</span>
           </h5>
           <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addMeasurePanel">
-            <i class="bi bi-plus me-1"></i>Agregar
+            <i class="bi bi-plus me-1"></i>{% trans "Agregar" %}
           </button>
         </div>
 
@@ -464,7 +464,7 @@
               {% csrf_token %}
               <input type="hidden" name="action" value="add_measurement">
               <div class="col-sm-5">
-                <label class="form-label small fw-semibold mb-1">Campo de medida</label>
+                <label class="form-label small fw-semibold mb-1">{% trans "Campo de medida" %}</label>
                 <select name="field_id" class="form-select form-select-sm">
                   {% for field in available_fields %}
                   <option value="{{ field.id }}">{{ field.name }}{% if field.unit %} ({{ field.unit }}){% endif %}</option>
@@ -474,19 +474,19 @@
               <div class="col-sm-3 d-flex align-items-center" style="padding-top:1.5rem;">
                 <div class="form-check mb-0">
                   <input type="checkbox" name="required" class="form-check-input" id="required_check" checked>
-                  <label class="form-check-label small" for="required_check">Obligatorio</label>
+                  <label class="form-check-label small" for="required_check">{% trans "Obligatorio" %}</label>
                 </div>
               </div>
               <div class="col-sm-4">
                 <button type="submit" class="btn btn-success btn-sm w-100">
-                  <i class="bi bi-plus-circle me-1"></i>Agregar campo
+                  <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar campo" %}
                 </button>
               </div>
             </form>
             {% else %}
             <p class="text-muted small mb-0">
-              No quedan campos disponibles. 
-              <a href="{% url 'manage_measurement_fields' %}">Crear nuevos campos</a>
+              {% trans "No quedan campos disponibles." %}
+              <a href="{% url 'manage_measurement_fields' %}">{% trans "Crear nuevos campos" %}</a>
             </p>
             {% endif %}
           </div>
@@ -497,9 +497,9 @@
             <table class="table table-sm align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th class="ps-4">Campo</th>
-                  <th>Unidad</th>
-                  <th class="text-center">Requerido</th>
+                  <th class="ps-4">{% trans "Campo" %}</th>
+                  <th>{% trans "Unidad" %}</th>
+                  <th class="text-center">{% trans "Requerido" %}</th>
                   <th style="width:60px;"></th>
                 </tr>
               </thead>
@@ -510,9 +510,9 @@
                   <td class="text-muted small">{{ pmf.field.unit|default:"—" }}</td>
                   <td class="text-center">
                     {% if pmf.required %}
-                      <span class="badge bg-success">Sí</span>
+                      <span class="badge bg-success">{% trans "Sí" %}</span>
                     {% else %}
-                      <span class="badge bg-secondary">No</span>
+                      <span class="badge bg-secondary">{% trans "No" %}</span>
                     {% endif %}
                   </td>
                   <td class="text-end pe-3">
@@ -523,7 +523,7 @@
                     </form>
                     <button type="button" class="btn btn-sm btn-outline-danger"
                             data-confirm
-                            data-title="Eliminar campo de medida"
+                            data-title="{% trans 'Eliminar campo de medida' %}"
                             data-body="¿Eliminar el campo <strong>{{ pmf.field.name }}</strong> de este producto?"
                             data-form="removeMeasure_{{ pmf.field.id }}"
                             data-variant="danger">
@@ -535,7 +535,7 @@
                 <tr>
                   <td colspan="4" class="text-center text-muted py-4">
                     <i class="bi bi-inbox d-block mb-2 fs-3"></i>
-                    No hay campos configurados.
+                    {% trans "No hay campos configurados." %}
                   </td>
                 </tr>
                 {% endfor %}
@@ -563,10 +563,10 @@
       </div>
       <div class="modal-footer border-0 pt-2">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Cancelar
+          <i class="bi bi-x me-1"></i>{% trans "Cancelar" %}
         </button>
         <button type="button" class="btn" id="confirmModalBtn">
-          <i class="bi bi-check me-1"></i>Confirmar
+          <i class="bi bi-check me-1"></i>{% trans "Confirmar" %}
         </button>
       </div>
     </div>

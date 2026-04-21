@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Nuevo miembro de crew — {{ team.name }}{% endblock %}
+{% block title %}{% blocktrans with name=team.name %}Nuevo miembro de crew — {{ name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -10,14 +10,14 @@
   <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
       <h1 class="h3 fw-bold mb-1">
-        <i class="bi bi-person-plus text-primary me-2"></i>Nuevo miembro de crew
+        <i class="bi bi-person-plus text-primary me-2"></i>{% trans "Nuevo miembro de crew" %}
       </h1>
       <p class="text-muted mb-0 small">
-        <i class="bi bi-people me-1"></i>Equipo: <strong>{{ team.name }}</strong>
+        <i class="bi bi-people me-1"></i>{% trans "Equipo:" %} <strong>{{ team.name }}</strong>
       </p>
     </div>
     <a href="{% url 'teams:manage_team_members' team.id %}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-arrow-left me-1"></i>Volver
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
     </a>
   </div>
 
@@ -35,7 +35,7 @@
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <h5 class="card-title mb-0">
-            <i class="bi bi-person-badge me-2"></i>Datos del nuevo miembro
+            <i class="bi bi-person-badge me-2"></i>{% trans "Datos del nuevo miembro" %}
           </h5>
         </div>
 
@@ -45,8 +45,7 @@
           <div class="alert alert-info d-flex gap-2 mb-4">
             <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
             <div class="small">
-              Si el email ya está registrado en el sistema, se reutilizará ese usuario
-              y se asignará al equipo. Solo se crea uno nuevo si el email no existe.
+              {% trans "Si el email ya está registrado en el sistema, se reutilizará ese usuario y se asignará al equipo. Solo se crea uno nuevo si el email no existe." %}
             </div>
           </div>
 
@@ -55,32 +54,32 @@
 
             <!-- Datos personales -->
             <h6 class="fw-bold text-primary mb-3">
-              <i class="bi bi-person me-1"></i>Datos personales
+              <i class="bi bi-person me-1"></i>{% trans "Datos personales" %}
             </h6>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold small">
-                  Nombre <span class="text-danger">*</span>
+                  {% trans "Nombre" %} <span class="text-danger">*</span>
                 </label>
                 <input type="text" name="first_name" class="form-control"
-                       placeholder="Nombre" required>
+                       placeholder="{% trans 'Nombre' %}" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold small">
-                  Apellido <span class="text-danger">*</span>
+                  {% trans "Apellido" %} <span class="text-danger">*</span>
                 </label>
                 <input type="text" name="last_name" class="form-control"
-                       placeholder="Apellido" required>
+                       placeholder="{% trans 'Apellido' %}" required>
               </div>
               <div class="col-12">
                 <label class="form-label fw-semibold small">
-                  Email <span class="text-danger">*</span>
+                  {% trans "Email" %} <span class="text-danger">*</span>
                 </label>
                 <input type="email" name="email" class="form-control"
-                       placeholder="correo@ejemplo.com" required>
+                       placeholder="{% trans 'correo@ejemplo.com' %}" required>
                 <div class="form-text">
-                  Se usará para acceder al sistema. Si ya existe, se reutiliza el usuario.
+                  {% trans "Se usará para acceder al sistema. Si ya existe, se reutiliza el usuario." %}
                 </div>
               </div>
             </div>
@@ -89,37 +88,37 @@
 
             <!-- Roles -->
             <h6 class="fw-bold text-primary mb-3">
-              <i class="bi bi-diagram-3 me-1"></i>Roles y permisos
+              <i class="bi bi-diagram-3 me-1"></i>{% trans "Roles y permisos" %}
             </h6>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold small">
-                  Rol global <span class="text-danger">*</span>
+                  {% trans "Rol global" %} <span class="text-danger">*</span>
                 </label>
                 <select name="global_role" class="form-select" required>
-                  <option value="" disabled selected>Seleccionar rol global…</option>
+                  <option value="" disabled selected>{% trans "Seleccionar rol global…" %}</option>
                   {% for role in global_roles %}
                     <option value="{{ role.id }}">{{ role.name }}</option>
                   {% endfor %}
                 </select>
                 <div class="form-text">
-                  Permisos generales en la plataforma.
+                  {% trans "Permisos generales en la plataforma." %}
                 </div>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label fw-semibold small">
-                  Rol en el equipo <span class="text-danger">*</span>
+                  {% trans "Rol en el equipo" %} <span class="text-danger">*</span>
                 </label>
                 <select name="team_role" class="form-select" required>
-                  <option value="" disabled selected>Seleccionar rol en equipo…</option>
+                  <option value="" disabled selected>{% trans "Seleccionar rol en equipo…" %}</option>
                   {% for value, label in team_roles %}
                     <option value="{{ value }}">{{ label }}</option>
                   {% endfor %}
                 </select>
                 <div class="form-text">
-                  Función específica dentro de {{ team.name }}.
+                  {% blocktrans with name=team.name %}Función específica dentro de {{ name }}.{% endblocktrans %}
                 </div>
               </div>
             </div>
@@ -128,19 +127,18 @@
             <div class="alert alert-warning d-flex gap-2 mb-4">
               <i class="bi bi-key-fill flex-shrink-0 mt-1"></i>
               <div class="small">
-                Se generará una contraseña temporal aleatoria. Aparecerá en el
-                mensaje de confirmación — guárdala y compártela de forma segura con el miembro.
+                {% trans "Se generará una contraseña temporal aleatoria. Aparecerá en el mensaje de confirmación — guárdala y compártela de forma segura con el miembro." %}
               </div>
             </div>
 
             <!-- Botones -->
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-primary flex-fill">
-                <i class="bi bi-person-check me-2"></i>Crear y asignar
+                <i class="bi bi-person-check me-2"></i>{% trans "Crear y asignar" %}
               </button>
               <a href="{% url 'teams:manage_team_members' team.id %}"
                  class="btn btn-outline-secondary">
-                Cancelar
+                {% trans "Cancelar" %}
               </a>
             </div>
 

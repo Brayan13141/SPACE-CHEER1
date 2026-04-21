@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Desactivar cuenta — SPACE CHEER{% endblock %}
 
@@ -28,25 +28,25 @@
         </div>
       </div>
 
-      <h4 class="text-white mb-2">¿Desactivar tu cuenta?</h4>
+      <h4 class="text-white mb-2">{% trans "¿Desactivar tu cuenta?" %}</h4>
       <p class="text-secondary mb-1">
-        Tu cuenta se desactivará inmediatamente y serás desconectado.
+        {% trans "Tu cuenta se desactivará inmediatamente y serás desconectado." %}
       </p>
       <p class="text-secondary mb-4">
-        No se eliminarán tus datos. Para reactivarla, deberás contactar al administrador.
+        {% trans "No se eliminarán tus datos. Para reactivarla, deberás contactar al administrador." %}
       </p>
 
       <!-- Lo que pasará -->
       <div class="text-start mb-4 p-3 rounded"
            style="background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.2);">
         <p class="text-danger small fw-semibold mb-2">
-          <i class="bi bi-exclamation-triangle me-1"></i>Esto ocurrirá al confirmar:
+          <i class="bi bi-exclamation-triangle me-1"></i>{% trans "Esto ocurrirá al confirmar:" %}
         </p>
         <ul class="text-secondary small mb-0 ps-3">
-          <li>No podrás iniciar sesión</li>
-          <li>Tus órdenes activas continuarán</li>
-          <li>Tu historial y datos se conservan</li>
-          <li>Tu coach seguirá pudiendo verte</li>
+          <li>{% trans "No podrás iniciar sesión" %}</li>
+          <li>{% trans "Tus órdenes activas continuarán" %}</li>
+          <li>{% trans "Tu historial y datos se conservan" %}</li>
+          <li>{% trans "Tu coach seguirá pudiendo verte" %}</li>
         </ul>
       </div>
 
@@ -56,7 +56,7 @@
 
         <div class="mb-4 text-start">
           <label for="confirm_deactivate" class="form-label text-secondary small">
-            Escribe <strong class="text-white">CONFIRMAR</strong> para continuar
+            {% trans "Escribe" %} <strong class="text-white">CONFIRMAR</strong> {% trans "para continuar" %}
           </label>
           <input type="text"
                  id="confirm_deactivate"
@@ -69,10 +69,10 @@
 
         <div class="d-flex gap-3">
           <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-secondary flex-fill">
-            <i class="bi bi-arrow-left me-1"></i>Cancelar
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Cancelar" %}
           </a>
           <button type="submit" class="btn btn-danger flex-fill">
-            <i class="bi bi-person-x me-1"></i>Desactivar cuenta
+            <i class="bi bi-person-x me-1"></i>{% trans "Desactivar cuenta" %}
           </button>
         </div>
 

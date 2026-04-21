@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Registrar Equipo" %} — {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:600px;">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="h3 mb-0">{% trans "Registrar Equipo" %}</h1>
+      <p class="text-secondary small mb-0">{{ event.name }}</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h5 class="mb-1">{{ event.name }}</h5>
+          <p class="text-secondary small mb-0">
+            <i class="bi bi-calendar3 me-1"></i>{{ event.start_date|date:"d/m/Y" }}
+            {% if event.venue_city %} · <i class="bi bi-geo-alt me-1"></i>{{ event.venue_city }}{% endif %}
+          </p>
+        </div>
+        {% include "events/partials/status_badge.html" with status=event.status display=event.get_status_display %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header"><h6 class="mb-0">{% trans "Tu equipo" %}</h6></div>
+    <div class="card-body">
+      <p class="fw-semibold mb-0">{{ team.name }}</p>
+      <p class="text-secondary small mb-0">{{ team.city }}</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h6 class="mb-0">{% trans "Datos de inscripción" %}</h6></div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ form.category.label }}</label>
+          {{ form.category }}
+          <div class="form-text">{% trans "Selecciona la categoría en la que competirá tu equipo" %}</div>
+          {% for error in form.category.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="mb-4">
+          <label class="form-label">{{ form.notes.label }}</label>
+          {{ form.notes }}
+          <div class="form-text">{% trans "Notas adicionales para los organizadores (opcional)" %}</div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-person-check me-1"></i>{% trans "Registrar Equipo" %}
+          </button>
+          <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary">
+            {% trans "Cancelar" %}
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

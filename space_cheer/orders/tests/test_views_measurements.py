@@ -42,7 +42,7 @@ class OrderItemMeasurementsViewTests(TestCase):
         UserTeamMembershipFactory(
             user=self.athlete,
             team=self.team,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )
@@ -137,7 +137,7 @@ class ItemMeasurementsAddViewTests(TestCase):
         UserTeamMembershipFactory(
             user=self.athlete,
             team=self.team,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )

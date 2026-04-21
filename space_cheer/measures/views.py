@@ -1,9 +1,12 @@
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from accounts.decorators import role_required
 from .models import MeasurementField
 from .forms import MeasurementFieldForm
-import traceback  # Para mostrar detalles del error
+
+logger = logging.getLogger(__name__)
 
 
 @role_required("ADMIN")
@@ -28,10 +31,8 @@ def manage_measurement_fields(request):
                         request, f"Error al crear el campo: {form.errors.as_json()}"
                     )
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Ocurrió un error inesperado al crear el campo: {str(e)}\n{traceback.format_exc()}",
-                )
+                logger.exception("Error inesperado al crear campo de medida")
+                messages.error(request, "Ocurrió un error inesperado al crear el campo.")
             return redirect("measures:manage_measurement_fields")
 
         # -------- EDITAR --------
@@ -51,10 +52,8 @@ def manage_measurement_fields(request):
                         f"Error al actualizar el campo: {form.errors.as_json()}",
                     )
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Ocurrió un error inesperado al actualizar el campo: {str(e)}\n{traceback.format_exc()}",
-                )
+                logger.exception("Error inesperado al actualizar campo de medida id=%s", field_id)
+                messages.error(request, "Ocurrió un error inesperado al actualizar el campo.")
             return redirect("measures:manage_measurement_fields")
 
         # -------- DESACTIVAR --------
@@ -68,10 +67,8 @@ def manage_measurement_fields(request):
                     request, f"Campo '{field.name}' desactivado correctamente."
                 )
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Ocurrió un error inesperado al desactivar el campo: {str(e)}\n{traceback.format_exc()}",
-                )
+                logger.exception("Error inesperado al desactivar campo de medida id=%s", field_id)
+                messages.error(request, "Ocurrió un error inesperado al desactivar el campo.")
             return redirect("measures:manage_measurement_fields")
             # -------- HABILITAR --------
         elif "habilitar_medida" in request.POST:
@@ -84,10 +81,8 @@ def manage_measurement_fields(request):
                     request, f"Campo '{field.name}' habilitado correctamente."
                 )
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Ocurrió un error inesperado al habilitar el campo: {str(e)}\n{traceback.format_exc()}",
-                )
+                logger.exception("Error inesperado al habilitar campo de medida id=%s", field_id)
+                messages.error(request, "Ocurrió un error inesperado al habilitar el campo.")
             return redirect("measures:manage_measurement_fields")
 
     # ================= GET =================

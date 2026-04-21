@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="container py-3 py-md-5">
@@ -7,13 +7,13 @@
   <!-- Cabecera con título y descripción opcional -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
     <div>
-      <h1 class="h2 mb-1">Seleccionar tipo de producto</h1>
-      <p class="text-muted">Elige la plantilla que mejor se adapte a tu producto</p>
+      <h1 class="h2 mb-1">{% trans "Seleccionar tipo de producto" %}</h1>
+      <p class="text-muted">{% trans "Elige la plantilla que mejor se adapte a tu producto" %}</p>
     </div>
     <!-- Botón de volver (opcional, si existe una vista anterior) -->
     <div class="mt-3 mt-md-0">
       <a href="{% url 'products:list_products' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver a productos
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver a productos" %}
       </a>
     </div>
   </div>
@@ -38,7 +38,7 @@
             <!-- Ejemplo de producto asociado -->
             <div class="mb-3">
               <span class="badge bg-light text-dark border">
-                <i class="bi bi-box-seam me-1"></i>Ejemplo:
+                <i class="bi bi-box-seam me-1"></i>{% trans "Ejemplo:" %}
               </span>
               <div class="mt-2">
                 <strong class="d-block">{{ template.example.name }}</strong>
@@ -49,7 +49,7 @@
             <!-- Botón de acción -->
             <a href="{% url 'products:create_product' %}?template={{ key }}"
                class="btn btn-primary mt-auto w-100">
-              <i class="bi bi-plus-circle me-1"></i>Usar plantilla
+              <i class="bi bi-plus-circle me-1"></i>{% trans "Usar plantilla" %}
             </a>
           </div>
         </div>
@@ -59,8 +59,8 @@
       <div class="col-12">
         <div class="text-center py-5">
           <i class="bi bi-emoji-frown display-4 text-muted mb-3"></i>
-          <h5 class="text-muted">No hay plantillas disponibles</h5>
-          <p class="text-muted">Contacta con el administrador</p>
+          <h5 class="text-muted">{% trans "No hay plantillas disponibles" %}</h5>
+          <p class="text-muted">{% trans "Contacta con el administrador" %}</p>
         </div>
       </div>
     {% endfor %}

@@ -187,6 +187,14 @@ class AccountPermissions:
         return team.coach == user
 
     @staticmethod
+    def can_manage_teams(user) -> bool:
+        """ADMIN y HEADCOACH pueden crear/editar/eliminar equipos y categorías."""
+        return (
+            user.is_superuser
+            or user.roles.filter(name__in=["ADMIN", "HEADCOACH"]).exists()
+        )
+
+    @staticmethod
     def can_reassign_ownership(user) -> bool:
         """Solo ADMIN puede reasignar ownership entre coaches."""
         return user.is_superuser or user.roles.filter(name="ADMIN").exists()

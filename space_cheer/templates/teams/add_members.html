@@ -568,7 +568,7 @@
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <select name="role_in_team" class="form-select form-select-sm flex-grow-1 bg-dark text-light border-secondary">
                       {% for value, label in role_choices %}
-                        <option value="{{ value }}" {% if value == "ATLETA" %}selected{% endif %}>
+                        <option value="{{ value }}" {% if value == "ATHLETE" %}selected{% endif %}>
                           {{ label }}
                         </option>
                       {% endfor %}

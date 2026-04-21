@@ -1,6 +1,7 @@
 from accounts.decorators import role_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.contrib import messages
 from orders.models import Order, OrderItem
 from orders.services.state import OrderCreationService, OrderStateService
 from orders.services.factories import OrderContactInfoFactory
@@ -141,7 +142,7 @@ def create_order(request):
                 {"teams": teams, "error": e.messages[0]},
             )
 
-        return redirect("orders:detail_order", order_id=order.id)
+        return redirect("orders:contact_info_order", order_id=order.id)
 
     return render(
         request,
@@ -162,7 +163,8 @@ def order_edit(request, order_id):
     )
 
     if not order.can_edit_general():
-        raise PermissionDenied("La orden no es editable.")
+        messages.error(request, "La orden ya está cerrada o en producción y no se pueden hacer cambios.")
+        return redirect("orders:detail_order", order_id=order.id)
 
     if request.method == "POST":
         order.design_notes = request.POST.get("design_notes", "").strip()[:5000]
@@ -187,7 +189,8 @@ def order_contact_info(request, order_id):
     )
 
     if not order.can_edit_general():
-        raise PermissionDenied("No se puede editar contacto en esta orden")
+        messages.error(request, "La orden ya está cerrada o en producción y no se puede editar el contacto.")
+        return redirect("orders:detail_order", order_id=order.id)
 
     # Obtener o crear contact_info
     if not order.has_contact_info():
@@ -196,7 +199,8 @@ def order_contact_info(request, order_id):
     else:
         contact_info = order.contact_info
         if contact_info.closed:
-            raise PermissionDenied("La información de envío está cerrada")
+            messages.error(request, "La información de envío está cerrada y no puede ser modificada.")
+            return redirect("orders:detail_order", order_id=order.id)
 
     if request.method == "POST":
         contact_info.contact_name = request.POST.get("contact_name", "")

@@ -1,13 +1,13 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Campos de Medidas</h2>
+        <h2>{% trans "Campos de Medidas" %}</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">
-            ➕ Nuevo campo
+            ➕ {% trans "Nuevo campo" %}
         </button>
     </div>
 
@@ -15,13 +15,13 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Orden</th>
-                <th>Nombre</th>
-                <th>Slug</th>
-                <th>Tipo</th>
-                <th>Unidad</th>
-                <th>Requerido</th>
-                <th>Acciones</th>
+                <th>{% trans "Orden" %}</th>
+                <th>{% trans "Nombre" %}</th>
+                <th>{% trans "Slug" %}</th>
+                <th>{% trans "Tipo" %}</th>
+                <th>{% trans "Unidad" %}</th>
+                <th>{% trans "Requerido" %}</th>
+                <th>{% trans "Acciones" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -35,12 +35,12 @@
                 <td>{{ field.unit|default:"—" }}</td>
                 <td>{% if field.required %}✔️{% else %}—{% endif %}</td>
                 <td>
-                    <div class="btn-group" role="group" aria-label="Acciones campo">
+                    <div class="btn-group" role="group" aria-label="{% trans 'Acciones campo' %}">
                         <!-- EDITAR -->
                         <button class="btn btn-sm btn-outline-primary"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalEditar{{ field.id }}">
-                            <i class="bi bi-pencil-square me-1"></i>Editar
+                            <i class="bi bi-pencil-square me-1"></i>{% trans "Editar" %}
                         </button>
 
                         <!-- ELIMINAR -->
@@ -48,7 +48,7 @@
                         <button class="btn btn-sm btn-outline-danger"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalEliminar{{ field.id }}">
-                            <i class="bi bi-trash me-1"></i>Eliminar
+                            <i class="bi bi-trash me-1"></i>{% trans "Eliminar" %}
                         </button>
                         {% else %}
                         <!-- HABILITAR -->
@@ -56,7 +56,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <button type="submit" name="habilitar_medida" class="btn btn-sm btn-outline-success">
-                                <i class="bi bi-check-circle me-1"></i>Habilitar
+                                <i class="bi bi-check-circle me-1"></i>{% trans "Habilitar" %}
                             </button>
                         </form>
                         {% endif %}
@@ -73,7 +73,7 @@
                             <input type="hidden" name="editar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <div class="modal-header">
-                                <h5 class="modal-title">Editar campo</h5>
+                                <h5 class="modal-title">{% trans "Editar campo" %}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
@@ -94,7 +94,7 @@
                         </div>
                             <div class="modal-footer">
                                 <button type="submit" name="editar_medida" class="btn btn-primary">
-                                    Guardar cambios
+                                    {% trans "Guardar cambios" %}
                                 </button>
                             </div>
                         </form>
@@ -111,19 +111,19 @@
                             <input type="hidden" name="eliminar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <div class="modal-header">
-                                <h5 class="modal-title text-danger">Desactivar campo</h5>
+                                <h5 class="modal-title text-danger">{% trans "Desactivar campo" %}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
-                                <p>¿Seguro que deseas desactivar el campo <strong>{{ field.name }}</strong>?</p>
-                                <small class="text-muted">Las medidas existentes no se perderán.</small>
+                                <p>{% blocktrans with name=field.name %}¿Seguro que deseas desactivar el campo <strong>{{ name }}</strong>?{% endblocktrans %}</p>
+                                <small class="text-muted">{% trans "Las medidas existentes no se perderán." %}</small>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    Cancelar
+                                    {% trans "Cancelar" %}
                                 </button>
                                 <button type="submit" name="eliminar_medida" class="btn btn-danger">
-                                    Desactivar
+                                    {% trans "Desactivar" %}
                                 </button>
                             </div>
                         </form>
@@ -145,7 +145,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="crear_medida" value="">
                 <div class="modal-header">
-                    <h5 class="modal-title">Nuevo campo de medida</h5>
+                    <h5 class="modal-title">{% trans "Nuevo campo de medida" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -161,7 +161,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">
-                        Crear
+                        {% trans "Crear" %}
                     </button>
                 </div>
             </form>

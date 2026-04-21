@@ -146,9 +146,10 @@ def order_item_delete(request, item_id):
 
     order = item.order
 
-    # Verificación de seguridad en el servidor — nunca confíes solo en el template
+    # Verificación de seguridad en el servidor
     if not _can_user_delete_item(request.user, order, item):
-        raise PermissionDenied("No tienes permiso para eliminar este producto.")
+        messages.error(request, "La orden ya está cerrada o en producción y no se pueden hacer cambios.")
+        return redirect("orders:detail_order", order_id=order.id)
 
     product_name = item.product.name
     item.delete()

@@ -69,7 +69,7 @@ class OrderAthleteValidator:
                 team=order.owner_team,
                 status="accepted",
                 is_active=True,
-                role_in_team="ATLETA",
+                role_in_team="ATHLETE",
             ).exists():
                 raise ValidationError("El usuario no es atleta activo del equipo")
 

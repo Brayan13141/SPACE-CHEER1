@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Mi Perfil — SPACE CHEER{% endblock %}
+{% block title %}{% trans "Mi Perfil" %} — SPACE CHEER{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -45,7 +45,7 @@
             <form method="post" action="{% url 'accounts:profile_photo_delete' %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-sm btn-outline-danger w-100 mb-2">
-                <i class="bi bi-trash me-1"></i>Eliminar foto
+                <i class="bi bi-trash me-1"></i>{% trans "Eliminar foto" %}
               </button>
             </form>
           {% endif %}
@@ -55,7 +55,7 @@
             <label for="photo-input" class="btn btn-sm w-100"
                    style="background:rgba(127,90,240,0.15);border:1px solid rgba(127,90,240,0.4);color:#a78bfa;cursor:pointer;">
               <i class="bi bi-camera me-1"></i>
-              {% if user.foto_perfil %}Cambiar foto{% else %}Subir foto{% endif %}
+              {% if user.foto_perfil %}{% trans "Cambiar foto" %}{% else %}{% trans "Subir foto" %}{% endif %}
             </label>
             <input type="file" id="photo-input" name="photo"
                    accept="image/jpeg,image/png,image/webp"
@@ -63,7 +63,7 @@
                    onchange="document.getElementById('photo-form').submit()">
           </form>
 
-          <p class="text-muted mt-2" style="font-size:0.75rem;">JPG, PNG o WEBP · Máx. 5 MB</p>
+          <p class="text-muted mt-2" style="font-size:0.75rem;">{% trans "JPG, PNG o WEBP · Máx. 5 MB" %}</p>
         </div>
       </div>
 
@@ -71,28 +71,28 @@
       <div class="card bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
         <div class="card-body p-4">
           <h6 class="text-secondary text-uppercase mb-3" style="font-size:0.75rem;letter-spacing:.05em;">
-            <i class="bi bi-info-circle me-1"></i>Información de cuenta
+            <i class="bi bi-info-circle me-1"></i>{% trans "Información de cuenta" %}
           </h6>
           <ul class="list-unstyled mb-0 small">
             <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
-              <span class="text-secondary">Usuario</span>
+              <span class="text-secondary">{% trans "Usuario" %}</span>
               <span class="text-white font-monospace">{{ user.username }}</span>
             </li>
             <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
-              <span class="text-secondary">Registrado</span>
+              <span class="text-secondary">{% trans "Registrado" %}</span>
               <span class="text-white">{{ user.date_joined|date:"d M Y" }}</span>
             </li>
             <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
-              <span class="text-secondary">Perfil</span>
+              <span class="text-secondary">{% trans "Perfil" %}</span>
               {% if user.profile_completed %}
-                <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Completo</span>
+                <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>{% trans "Completo" %}</span>
               {% else %}
-                <span class="text-warning"><i class="bi bi-exclamation-circle me-1"></i>Incompleto</span>
+                <span class="text-warning"><i class="bi bi-exclamation-circle me-1"></i>{% trans "Incompleto" %}</span>
               {% endif %}
             </li>
             {% if user.curp %}
             <li class="d-flex justify-content-between py-2">
-              <span class="text-secondary">CURP</span>
+              <span class="text-secondary">{% trans "CURP" %}</span>
               <span class="text-white font-monospace" style="font-size:0.7rem;">{{ user.curp }}</span>
             </li>
             {% endif %}
@@ -108,7 +108,7 @@
       <div class="card bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
         <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
           <h5 class="mb-0 text-white">
-            <i class="bi bi-pencil-square me-2" style="color:#7f5af0;"></i>Editar perfil
+            <i class="bi bi-pencil-square me-2" style="color:#7f5af0;"></i>{% trans "Editar perfil" %}
           </h5>
         </div>
 
@@ -121,7 +121,7 @@
               <!-- Nombre -->
               <div class="col-12 col-sm-6">
                 <label for="{{ form.first_name.id_for_label }}" class="form-label text-secondary small">
-                  Nombre(s) <span class="text-danger">*</span>
+                  {% trans "Nombre(s)" %} <span class="text-danger">*</span>
                 </label>
                 {{ form.first_name }}
                 {% if form.first_name.errors %}
@@ -132,7 +132,7 @@
               <!-- Apellidos -->
               <div class="col-12 col-sm-6">
                 <label for="{{ form.last_name.id_for_label }}" class="form-label text-secondary small">
-                  Apellidos <span class="text-danger">*</span>
+                  {% trans "Apellidos" %} <span class="text-danger">*</span>
                 </label>
                 {{ form.last_name }}
                 {% if form.last_name.errors %}
@@ -143,7 +143,7 @@
               <!-- Teléfono -->
               <div class="col-12 col-sm-6">
                 <label for="{{ form.phone.id_for_label }}" class="form-label text-secondary small">
-                  Teléfono
+                  {% trans "Teléfono" %}
                 </label>
                 {{ form.phone }}
                 {% if form.phone.errors %}
@@ -155,7 +155,7 @@
               <!-- Género -->
               <div class="col-12 col-sm-6">
                 <label for="{{ form.gender.id_for_label }}" class="form-label text-secondary small">
-                  Género
+                  {% trans "Género" %}
                 </label>
                 {{ form.gender }}
                 {% if form.gender.errors %}
@@ -166,7 +166,7 @@
               <!-- Fecha de nacimiento -->
               <div class="col-12 col-sm-6">
                 <label for="{{ form.birth_date.id_for_label }}" class="form-label text-secondary small">
-                  Fecha de nacimiento
+                  {% trans "Fecha de nacimiento" %}
                 </label>
                 {{ form.birth_date }}
                 {% if form.birth_date.errors %}
@@ -196,7 +196,7 @@
               </a>
               <button type="submit" class="btn px-4"
                       style="background:linear-gradient(45deg,#7f5af0,#6b49d1);border:none;color:white;">
-                <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                <i class="bi bi-check-lg me-1"></i>{% trans "Guardar cambios" %}
               </button>
             </div>
 
@@ -208,7 +208,7 @@
       <div class="card mt-4 bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
         <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
           <h5 class="mb-0 text-white">
-            <i class="bi bi-key me-2" style="color:#7f5af0;"></i>Cambiar contraseña
+            <i class="bi bi-key me-2" style="color:#7f5af0;"></i>{% trans "Cambiar contraseña" %}
           </h5>
         </div>
         <div class="card-body p-4">
@@ -236,7 +236,7 @@
             <div class="d-flex justify-content-end mt-4">
               <button type="submit" class="btn px-4"
                       style="background:rgba(127,90,240,0.15);border:1px solid rgba(127,90,240,0.4);color:#a78bfa;">
-                Actualizar contraseña
+                {% trans "Actualizar contraseña" %}
               </button>
             </div>
           </form>
@@ -247,11 +247,11 @@
       <div class="card mt-4 border-0 shadow-sm" style="border: 1px solid rgba(220,53,69,0.2) !important;background:rgba(220,53,69,0.05);">
         <div class="card-body p-4 d-flex justify-content-between align-items-center">
           <div>
-            <h6 class="text-danger mb-1"><i class="bi bi-exclamation-triangle me-2"></i>Zona de peligro</h6>
-            <p class="text-secondary small mb-0">Desactivar tu cuenta es reversible, pero requerirá contactar al administrador.</p>
+            <h6 class="text-danger mb-1"><i class="bi bi-exclamation-triangle me-2"></i>{% trans "Zona de peligro" %}</h6>
+            <p class="text-secondary small mb-0">{% trans "Desactivar tu cuenta es reversible, pero requerirá contactar al administrador." %}</p>
           </div>
           <a href="{% url 'accounts:account_deactivate' %}" class="btn btn-sm btn-outline-danger text-nowrap ms-3">
-            Desactivar cuenta
+            {% trans "Desactivar cuenta" %}
           </a>
         </div>
       </div>
