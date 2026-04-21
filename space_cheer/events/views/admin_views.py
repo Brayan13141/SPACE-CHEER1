@@ -10,6 +10,7 @@ from accounts.decorators import role_required
 from events.forms import (
     EventCategoryForm,
     EventForm,
+    EventJudgeAssignmentForm,
     EventJudgingCriteriaForm,
     EventScoreForm,
     EventStaffAssignmentForm,
@@ -132,33 +133,64 @@ def registration_reject(request, pk, reg_pk):
 @role_required('ADMIN')
 def staff_manage(request, pk):
     event = get_object_or_404(Event, pk=pk)
-    form = EventStaffAssignmentForm(request.POST or None)
+    staff_form = EventStaffAssignmentForm(
+        request.POST or None, prefix='staff'
+    ) if request.POST.get('action') in (None, 'add_staff') else EventStaffAssignmentForm(prefix='staff')
+    judge_form = EventJudgeAssignmentForm(
+        request.POST or None, prefix='judge'
+    ) if request.POST.get('action') == 'add_judge' else EventJudgeAssignmentForm(prefix='judge')
 
     if request.method == 'POST':
-        action = request.POST.get('action', 'add')
+        action = request.POST.get('action', 'add_staff')
+
         if action == 'delete':
             assignment_pk = request.POST.get('assignment_pk')
             EventStaffAssignment.objects.filter(pk=assignment_pk, event=event).delete()
-            messages.success(request, 'Staff removido.')
+            messages.success(request, 'Asignación removida.')
             return redirect('events:staff_manage', pk=pk)
-        if form.is_valid():
-            try:
-                assignment = form.save(commit=False)
-                assignment.event = event
-                assignment.assigned_by = request.user
-                assignment.save()
-                messages.success(request, 'Staff asignado correctamente.')
-                return redirect('events:staff_manage', pk=pk)
-            except ValidationError as e:
-                messages.error(request, str(e))
+
+        if action == 'add_staff':
+            staff_form = EventStaffAssignmentForm(request.POST, prefix='staff')
+            if staff_form.is_valid():
+                try:
+                    assignment = staff_form.save(commit=False)
+                    assignment.event = event
+                    assignment.assigned_by = request.user
+                    assignment.save()
+                    messages.success(request, 'Staff asignado correctamente.')
+                except ValidationError as e:
+                    messages.error(request, str(e))
+            return redirect('events:staff_manage', pk=pk)
+
+        if action == 'add_judge':
+            judge_form = EventJudgeAssignmentForm(request.POST, prefix='judge')
+            if judge_form.is_valid():
+                try:
+                    assignment = judge_form.save(commit=False)
+                    assignment.event = event
+                    assignment.assigned_by = request.user
+                    assignment.save()
+                    messages.success(request, 'Juez asignado correctamente.')
+                except ValidationError as e:
+                    messages.error(request, str(e))
+            return redirect('events:staff_manage', pk=pk)
 
     staff = (
-        EventStaffAssignment.objects.filter(event=event)
+        EventStaffAssignment.objects.filter(event=event, role__is_judge=False)
         .select_related('user', 'role')
         .order_by('role__name', 'user__first_name')
     )
+    judges = (
+        EventStaffAssignment.objects.filter(event=event, role__is_judge=True)
+        .select_related('user', 'role')
+        .order_by('user__first_name')
+    )
     return render(request, 'events/admin/staff_manage.html', {
-        'event': event, 'form': form, 'staff': staff,
+        'event': event,
+        'staff_form': staff_form,
+        'judge_form': judge_form,
+        'staff': staff,
+        'judges': judges,
     })
 
 

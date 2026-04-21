@@ -9,6 +9,7 @@ from .models import (
     EventJudgingCriteria,
     EventScore,
     EventStaffAssignment,
+    EventStaffRole,
     EventTeamRegistration,
 )
 
@@ -63,6 +64,7 @@ class EventCategoryForm(forms.ModelForm):
 
 
 class EventStaffAssignmentForm(forms.ModelForm):
+    """Asigna staff general (roles con is_judge=False)."""
     class Meta:
         model = EventStaffAssignment
         fields = ['user', 'role', 'notes']
@@ -73,8 +75,39 @@ class EventStaffAssignmentForm(forms.ModelForm):
         from django.apps import apps
         from django.conf import settings
         User = apps.get_model(settings.AUTH_USER_MODEL)
+        # Solo usuarios con rol global de tipo staff
         self.fields['user'].queryset = (
-            User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+            User.objects.filter(is_active=True, roles__is_staff_type=True)
+            .distinct().order_by('first_name', 'last_name')
+        )
+        # Solo roles de staff (no jueces)
+        self.fields['role'].queryset = EventStaffRole.objects.filter(
+            is_active=True, is_judge=False
+        )
+        for f in self.fields.values():
+            _bs(f)
+
+
+class EventJudgeAssignmentForm(forms.ModelForm):
+    """Asigna jueces (roles con is_judge=True). Usuario debe tener rol global JUEZ."""
+    class Meta:
+        model = EventStaffAssignment
+        fields = ['user', 'role', 'notes']
+        widgets = {'notes': forms.Textarea(attrs={'rows': 2})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from django.apps import apps
+        from django.conf import settings
+        User = apps.get_model(settings.AUTH_USER_MODEL)
+        # Solo usuarios con rol global de tipo juez
+        self.fields['user'].queryset = (
+            User.objects.filter(is_active=True, roles__is_judge_type=True)
+            .distinct().order_by('first_name', 'last_name')
+        )
+        # Solo roles de juez
+        self.fields['role'].queryset = EventStaffRole.objects.filter(
+            is_active=True, is_judge=True
         )
         for f in self.fields.values():
             _bs(f)
@@ -98,11 +131,17 @@ class EventTeamRegistrationForm(forms.ModelForm):
         fields = ['category', 'notes']
         widgets = {'notes': forms.Textarea(attrs={'rows': 3})}
 
-    def __init__(self, event, *args, **kwargs):
+    def __init__(self, event, team=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].queryset = (
-            EventCategory.objects.filter(event=event).order_by('order', 'name')
-        )
+        from django.db.models import Q
+        # Filtrar categorías según la TeamCategory del equipo
+        if team is not None and team.category is not None:
+            qs = EventCategory.objects.filter(event=event).filter(
+                Q(team_category=team.category) | Q(team_category__isnull=True)
+            ).order_by('order', 'name')
+        else:
+            qs = EventCategory.objects.filter(event=event).order_by('order', 'name')
+        self.fields['category'].queryset = qs
         for f in self.fields.values():
             _bs(f)
 

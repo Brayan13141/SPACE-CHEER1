@@ -292,6 +292,7 @@ class EventStaffRole(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name=_('Nombre'))
     description = models.TextField(blank=True, verbose_name=_('Descripción'))
     is_active = models.BooleanField(default=True, verbose_name=_('Activo'))
+    is_judge = models.BooleanField(default=False, verbose_name=_('Es rol de juez'))
 
     class Meta:
         ordering = ['name']
