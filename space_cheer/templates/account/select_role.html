@@ -1,7 +1,8 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 <div class="container py-5">
-  <h2>Selecciona tu rol</h2>
+  <h2>{% trans "Selecciona tu rol" %}</h2>
   <form method="post" action="{% url 'accounts:select_role_submit' %}">
     {% csrf_token %}
     <div class="d-flex gap-3 mt-4">
@@ -12,7 +13,7 @@
       {% endfor %}
     </div>
     <div class="mt-4">
-      <button class="btn btn-primary" type="submit">Continuar</button>
+      <button class="btn btn-primary" type="submit">{% trans "Continuar" %}</button>
     </div>
   </form>
 </div>

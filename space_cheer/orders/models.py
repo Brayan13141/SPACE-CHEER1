@@ -11,7 +11,7 @@ from teams.models import Team
 from django.core.exceptions import ValidationError
 from products.models import Product
 from django.db.models import Sum, Q
-from core.file_utils import design_upload_path, validate_image_magic
+from core.file_utils import design_upload_path, validate_image_magic, validate_min_size_35mb
 from teams.models import UserTeamMembership
 
 
@@ -206,7 +206,7 @@ class Order(models.Model):
         # Restricción a nivel BD: garantiza que owner_user y owner_team sean consistentes con order_type
         constraints = [
             models.CheckConstraint(
-                condition=(
+                check=(
                     (
                         Q(order_type="PERSONAL")
                         & Q(owner_user__isnull=False)
@@ -248,7 +248,7 @@ class Order(models.Model):
                     team=order.owner_team,
                     status="accepted",
                     is_active=True,
-                    role_in_team="ATLETA",
+                    role_in_team="ATHLETE",
                 ).values_list("user_id", flat=True)
             )
         if not order.items.exists():
@@ -700,7 +700,7 @@ class OrderItemAthlete(models.Model):
                 team=order.owner_team,
                 status="accepted",
                 is_active=True,
-                role_in_team="ATLETA",
+                role_in_team="ATHLETE",
             ).exists():
                 raise ValidationError("El usuario no es atleta activo del equipo")
         else:
@@ -850,7 +850,7 @@ class OrderDesignImage(models.Model):
     )
     image = models.ImageField(
         upload_to=design_upload_path,
-        validators=[validate_image_magic]
+        validators=[validate_image_magic, validate_min_size_35mb]
     )
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

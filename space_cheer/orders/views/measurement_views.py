@@ -1,13 +1,18 @@
+import logging
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
 from orders.models import Order, OrderItemAthlete
 from django.db import transaction
 from django.contrib.admin.views.decorators import staff_member_required
 from orders.services.measurements.MeasurementLifecycleService import (
     MeasurementLifecycleService,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -142,8 +147,11 @@ def close_measurements(request, order_id):
     try:
         MeasurementLifecycleService.close(order, user=request.user)
         messages.success(request, "Medidas cerradas correctamente")
+    except ValidationError as e:
+        messages.error(request, e.message if hasattr(e, 'message') else str(e))
     except Exception as e:
-        messages.error(request, str(e))
+        logger.exception("Error inesperado al cerrar medidas order=%s: %s", order_id, e)
+        messages.error(request, "Error interno al cerrar medidas. Contacta al soporte.")
 
     return redirect("orders:admin_order_detail", order_id=order.id)
 
@@ -155,8 +163,11 @@ def reopen_measurements(request, order_id):
     try:
         MeasurementLifecycleService.reopen(order, user=request.user)
         messages.success(request, "Medidas reabiertas correctamente")
+    except ValidationError as e:
+        messages.error(request, e.message if hasattr(e, 'message') else str(e))
     except Exception as e:
-        messages.error(request, str(e))
+        logger.exception("Error inesperado al reabrir medidas order=%s: %s", order_id, e)
+        messages.error(request, "Error interno al reabrir medidas. Contacta al soporte.")
 
     return redirect("orders:admin_order_detail", order_id=order.id)
 
@@ -168,7 +179,10 @@ def lock_measurements(request, order_id):
     try:
         MeasurementLifecycleService.lock(order, user=request.user)
         messages.success(request, "Medidas bloqueadas definitivamente")
+    except ValidationError as e:
+        messages.error(request, e.message if hasattr(e, 'message') else str(e))
     except Exception as e:
-        messages.error(request, str(e))
+        logger.exception("Error inesperado al bloquear medidas order=%s: %s", order_id, e)
+        messages.error(request, "Error interno al bloquear medidas. Contacta al soporte.")
 
     return redirect("orders:admin_order_detail", order_id=order.id)

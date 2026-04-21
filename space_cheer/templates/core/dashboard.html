@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Dashboard - SPACE CHEER{% endblock %}
 
@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <div class="mb-4">
-    <h2 class="fw-bold">Bienvenido, {{ user.get_full_name|default:user.username }} 👋</h2>
+    <h2 class="fw-bold">{% blocktrans with name=user.get_full_name|default:user.username %}Bienvenido, {{ name }} 👋{% endblocktrans %}</h2>
     <p class="text-muted small">
       {% with role=user.roles.first %}{% if role %}{{ role.name }}{% endif %}{% endwith %}
     </p>
@@ -21,7 +21,7 @@
       <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Equipos</div>
+          <div class="fw-semibold text-white">{% trans "Mis Equipos" %}</div>
         </div>
       </a>
     </div>
@@ -29,7 +29,7 @@
       <a href="{% url 'teams:manage_athletes' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-person-video fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Alumnos</div>
+          <div class="fw-semibold text-white">{% trans "Mis Alumnos" %}</div>
         </div>
       </a>
     </div>
@@ -37,7 +37,7 @@
       <a href="{% url 'accounts:bulk_import_athletes' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-upload fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Bulk Import</div>
+          <div class="fw-semibold text-white">{% trans "Bulk Import" %}</div>
         </div>
       </a>
     </div>
@@ -49,7 +49,7 @@
       {% endif %}
         <div class="card-body text-center py-4">
           <i class="bi bi-list-ul fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Pedidos</div>
+          <div class="fw-semibold text-white">{% trans "Pedidos" %}</div>
         </div>
       </a>
     </div>
@@ -57,7 +57,7 @@
 
   {% if user_teams %}
   <div class="mb-4">
-    <h5 class="fw-semibold mb-3">Mis Equipos Activos</h5>
+    <h5 class="fw-semibold mb-3">{% trans "Mis Equipos Activos" %}</h5>
     <div class="row g-3">
       {% for team in user_teams %}
       <div class="col-12 col-md-4 col-lg-3">
@@ -82,7 +82,7 @@
   {% if is_headcoach or is_admin %}
   <div class="mt-3">
     <a href="{% url 'guardian:headcoach_dashboard' %}" class="btn btn-outline-light btn-sm">
-      <i class="bi bi-shield-check me-1"></i>Panel de Custodia
+      <i class="bi bi-shield-check me-1"></i>{% trans "Panel de Custodia" %}
     </a>
   </div>
   {% endif %}
@@ -94,7 +94,7 @@
       <a href="{% url 'coach:manage_owned_users' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-people fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mi Crew</div>
+          <div class="fw-semibold text-white">{% trans "Mi Crew" %}</div>
         </div>
       </a>
     </div>
@@ -102,7 +102,7 @@
       <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Equipos</div>
+          <div class="fw-semibold text-white">{% trans "Mis Equipos" %}</div>
         </div>
       </a>
     </div>
@@ -110,7 +110,7 @@
       <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-bag fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Pedidos</div>
+          <div class="fw-semibold text-white">{% trans "Mis Pedidos" %}</div>
         </div>
       </a>
     </div>
@@ -123,7 +123,7 @@
       <a href="{% url 'orders:admin_order_list' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-list-ul fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Administrar Pedidos</div>
+          <div class="fw-semibold text-white">{% trans "Administrar Pedidos" %}</div>
         </div>
       </a>
     </div>
@@ -131,7 +131,7 @@
       <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mi Perfil</div>
+          <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>
     </div>
@@ -144,7 +144,7 @@
       <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mi Equipo</div>
+          <div class="fw-semibold text-white">{% trans "Mi Equipo" %}</div>
         </div>
       </a>
     </div>
@@ -152,7 +152,7 @@
       <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-bag fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Pedidos</div>
+          <div class="fw-semibold text-white">{% trans "Mis Pedidos" %}</div>
         </div>
       </a>
     </div>
@@ -160,7 +160,7 @@
       <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mi Perfil</div>
+          <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>
     </div>
@@ -168,7 +168,7 @@
 
   {% if user_teams %}
   <div class="mb-4">
-    <h5 class="fw-semibold mb-3">Mis Equipos</h5>
+    <h5 class="fw-semibold mb-3">{% trans "Mis Equipos" %}</h5>
     <div class="row g-3">
       {% for team in user_teams %}
       <div class="col-12 col-md-4 col-lg-3">
@@ -197,7 +197,7 @@
       <a href="{% url 'guardian:dashboard' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-heart fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mis Atletas</div>
+          <div class="fw-semibold text-white">{% trans "Mis Atletas" %}</div>
         </div>
       </a>
     </div>
@@ -205,7 +205,7 @@
       <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
         <div class="card-body text-center py-4">
           <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
-          <div class="fw-semibold text-white">Mi Perfil</div>
+          <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>
     </div>
@@ -214,7 +214,7 @@
   <!-- Sin rol asignado -->
   {% else %}
   <div class="alert alert-info">
-    Tu cuenta está siendo configurada. Contacta a tu entrenador.
+    {% trans "Tu cuenta está siendo configurada. Contacta a tu entrenador." %}
   </div>
   {% endif %}
 

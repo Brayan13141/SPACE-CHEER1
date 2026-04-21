@@ -14,6 +14,12 @@ pip install flower==2.0.1
 # Actualizar requirements.txt
 pip freeze > requirements.txt
 
+# Ejecutar: python manage.py seed_roles  (management command incluido abajo)
+python manage.py seed_roles --dry-run   # Preview primero
+
+python manage.py seed_roles --verbose   # Ejecutar
+
+
 MIGRAR TABLAS DE CELERY BEAT
 bash# Aplicar migraciones de django-celery-beat
 python manage.py migrate django_celery_beat

@@ -1,21 +1,21 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <div class="container mt-4">
-  <h2>Eliminar dirección</h2>
+  <h2>{% trans "Eliminar dirección" %}</h2>
 
   <div class="alert alert-warning">
-    ¿Seguro que deseas eliminar la dirección
-    <strong>{{ address.label }}</strong>?
+    {% blocktrans with label=address.label %}¿Seguro que deseas eliminar la dirección <strong>{{ label }}</strong>?{% endblocktrans %}
   </div>
 
   <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">
-      Sí, eliminar
+      {% trans "Sí, eliminar" %}
     </button>
     <a href="{% url 'addresses:list' %}" class="btn btn-secondary">
-      Cancelar
+      {% trans "Cancelar" %}
     </a>
   </form>
 </div>

@@ -12,12 +12,16 @@ Incluye:
 - account_deactivate: desactivar cuenta propia
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import HttpResponse, JsonResponse
+
+logger = logging.getLogger(__name__)
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_GET
 
@@ -224,7 +228,7 @@ def user_search_api(request):
 
     Query params:
         q: texto de búsqueda (mínimo 2 caracteres)
-        role: filtro de rol (opcional, ej: "ATLETA")
+        role: filtro de rol (opcional, ej: "ATHLETE")
         exclude: IDs a excluir separados por coma (opcional)
 
     Ejemplo:
@@ -386,6 +390,7 @@ def account_deactivate(request):
             return redirect("account_login")
 
         except Exception as e:
-            messages.error(request, f"Error al desactivar cuenta: {e}")
+            logger.exception("Error al desactivar cuenta para user=%s: %s", request.user.id, e)
+            messages.error(request, "Ocurrió un error al desactivar tu cuenta. Contacta al administrador.")
 
     return render(request, "account/profile/deactivate_confirm.html")

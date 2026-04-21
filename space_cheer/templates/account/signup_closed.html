@@ -10,18 +10,17 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-warning text-dark">
                     <h4 class="mb-0">
-                        <i class="bi bi-exclamation-triangle me-2"></i> Registro temporalmente cerrado
+                        <i class="bi bi-exclamation-triangle me-2"></i> {% trans "Registro temporalmente cerrado" %}
                     </h4>
                 </div>
                 <div class="card-body text-center p-4">
                     <i class="bi bi-door-closed fs-1 text-warning mb-3"></i>
-                    <h5 class="card-title">No se aceptan nuevos registros en este momento</h5>
+                    <h5 class="card-title">{% trans "No se aceptan nuevos registros en este momento" %}</h5>
                     <p class="card-text text-muted">
-                        Estamos realizando mejoras en la plataforma. Pronto volveremos a abrir el registro.
-                        Si ya tienes una cuenta, puedes iniciar sesión.
+                        {% trans "Estamos realizando mejoras en la plataforma. Pronto volveremos a abrir el registro. Si ya tienes una cuenta, puedes iniciar sesión." %}
                     </p>
                     <a href="{% url 'account_login' %}" class="btn btn-primary mt-2">
-                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                        <i class="bi bi-box-arrow-in-right"></i> {% trans "Iniciar sesión" %}
                     </a>
                 </div>
             </div>

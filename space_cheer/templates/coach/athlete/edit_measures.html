@@ -1,8 +1,9 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div class="container py-4">
-    
+
     <!-- HEADER MOBILE-FIRST -->
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4 pb-3 border-bottom">
         <div class="d-flex align-items-center mb-3 mb-md-0">
@@ -10,7 +11,7 @@
                 <i class="bi bi-rulers fs-4"></i>
             </div>
             <div>
-                <h1 class="h4 fw-bold mb-0 text-dark">Medidas Corporales</h1>
+                <h1 class="h4 fw-bold mb-0 text-dark">{% trans "Medidas Corporales" %}</h1>
                 <p class="text-muted mb-0 small">
                     <i class="bi bi-person me-1"></i>{{ athlete.get_full_name|default:athlete.username }}
                 </p>
@@ -18,10 +19,10 @@
         </div>
         <div class="d-flex flex-column flex-md-row gap-2">
             <a href="{% url 'manage_athletes' %}" class="btn btn-outline-secondary btn-sm order-2 order-md-1">
-                <i class="bi bi-arrow-left me-1"></i> Volver
+                <i class="bi bi-arrow-left me-1"></i> {% trans "Volver" %}
             </a>
             <button type="submit" form="measuresForm" class="btn btn-success btn-sm order-1 order-md-2">
-                <i class="bi bi-check-circle me-1"></i> Guardar
+                <i class="bi bi-check-circle me-1"></i> {% trans "Guardar" %}
             </button>
         </div>
     </div>
@@ -42,7 +43,7 @@
                                     <i class="bi bi-ruler me-2"></i>
                                     {{ field.label }}
                                 </label>
-                                
+
                                 <!-- CAMPO DE ENTRADA -->
                                 <div class="input-group input-group-sm flex-nowrap">
                                     {{ field }}
@@ -53,7 +54,7 @@
                                 <!-- VALOR ACTUAL SI EXISTE -->
                                 {% if field.value %}
                                 <div class="mt-2">
-                                    <small class="text-muted">Actual:</small>
+                                    <small class="text-muted">{% trans "Actual:" %}</small>
                                     <span class="badge bg-success bg-opacity-10 text-success ms-1">
                                         {{ field.value }}
                                     </span>
@@ -67,7 +68,7 @@
                                     <div class="alert alert-danger alert-dismissible fade show py-1 px-2 small mb-2" role="alert">
                                         <i class="bi bi-exclamation-triangle me-1"></i>
                                         {{ error }}
-                                        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="{% trans 'Cerrar' %}"></button>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -92,10 +93,10 @@
                 <div class="d-none d-md-flex justify-content-end mt-4 pt-3 border-top">
                     <div class="d-flex gap-3">
                         <a href="{% url 'manage_athletes' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                            <i class="bi bi-x-circle me-1"></i> {% trans "Cancelar" %}
                         </a>
                         <button type="submit" class="btn btn-success px-4">
-                            <i class="bi bi-check-circle me-1"></i> Guardar todas las medidas
+                            <i class="bi bi-check-circle me-1"></i> {% trans "Guardar todas las medidas" %}
                         </button>
                     </div>
                 </div>
@@ -111,11 +112,11 @@
                     <i class="bi bi-info-circle fs-5 text-info"></i>
                 </div>
                 <div class="ms-3">
-                    <h6 class="alert-heading mb-2">Cómo completar las medidas</h6>
+                    <h6 class="alert-heading mb-2">{% trans "Cómo completar las medidas" %}</h6>
                     <ul class="mb-0 small ps-3">
-                        <li>Usa números decimales con punto (ej: 1.75)</li>
-                        <li>Todas las medidas están en centímetros</li>
-                        <li>Deja vacío si no conoces la medida</li>
+                        <li>{% trans "Usa números decimales con punto (ej: 1.75)" %}</li>
+                        <li>{% trans "Todas las medidas están en centímetros" %}</li>
+                        <li>{% trans "Deja vacío si no conoces la medida" %}</li>
                     </ul>
                 </div>
             </div>
@@ -133,7 +134,7 @@
             input.classList.add('form-control', 'form-control-sm', 'border-end-0');
             input.placeholder = 'Ej: 1.75';
             // Hacer que el input sea de tipo number si parece una medida numérica
-            if (input.name.includes('height') || input.name.includes('weight') || 
+            if (input.name.includes('height') || input.name.includes('weight') ||
                 input.name.includes('measure') || input.name.includes('size')) {
                 input.type = 'number';
                 input.step = '0.01';
@@ -144,7 +145,7 @@
         // Guardar estado del formulario en localStorage
         const form = document.getElementById('measuresForm');
         const inputsToSave = form.querySelectorAll('input');
-        
+
         function saveFormState() {
             const formData = {};
             inputsToSave.forEach(input => {

@@ -96,7 +96,7 @@ class OrderPermissionsManageTests(TestCase):
         UserTeamMembershipFactory(
             team=team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )
@@ -254,7 +254,7 @@ class OrderPermissionsViewTests(TestCase):
         UserTeamMembershipFactory(
             team=team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )

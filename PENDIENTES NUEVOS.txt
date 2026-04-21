@@ -1,8 +1,31 @@
+Validar con js las templates que necesiten form
+
+Terminar de configurar el Celery y configurar el SMTP para mandar la notificación de cuando se cierran las medidas
+
 COMENTAR ACCOUNTS
+COMENTAR ORDERS
 
-HACER EL RESET DE LA CONTRASEÑA PARA LOS USUARIOS
+=================================================
 
-MANDAR LOS CORREOS A LOS USUARIOS
+HACER LAS VALIDACIONES EN TODO CON JS Y FORMULARIOS INCLUIDO EL LOGIN
+
+===================================================
+CONFIGURAR POR QUE NO APARECE EL SITIO EN LOS CORREOS
+
+HACER LA URL O ENDPOINT PARA EL CONTACTO Y LA POLITICA DE PRIVACIDAD, EN EL INICIO Y EN EL CORREO
+
+HACER EL CIFRADO DE LA CURP CON pip install django-fernet-fields
+
+AGREGAR LA PARTE PARA LOS COACHS, ALUMNOS, Y CREW DEL EQUIPO, ALGO ASI COMO COMPAÑEROS, COACH, ESTRELLAS O ALGO ASI
+
+CAMBIAR EL MENSAJE DE CONTRASEÑA EN TEAMS/VIEWS PARA MOSTRAR LA CONTRASEÑA AL COACH Y MANDAR AL CORREO DEL ATLETA
+
+VALIDAR LAS DIRECCIONES
+
+PODER ESCOGER LA DIRECCION EN LUGAR DE LLENAR CAMPOS 
 
 
-REASIGNACION DE LOS USUARIOS A OTRO COACH
+Actualiza el seed de las categorias con estas
+CATEGORIAS:La USASF (U.S. All Star Federation, Inc.) 
+School (Escolar): Dividido por cursos (Mini, Youth, Junior, Senior, College). 
+All-Star: Dividido por edad (Tiny, Mini, Youth, Junior, Senior, Open) y niveles de dificultad (del 1 al 7), que pueden ser femeninos o mixtos (Coed).

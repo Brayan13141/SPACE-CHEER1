@@ -11,7 +11,7 @@ Uso:
     results = UserSearchService.search(
         query="ana garcia",
         searching_user=request.user,
-        role_filter="ATLETA",
+        role_filter="ATHLETE",
         exclude_ids=[1, 2, 3],
     )
 """
@@ -55,7 +55,7 @@ class UserSearchService:
         Parámetros:
             query: texto a buscar (mínimo 2 caracteres)
             searching_user: usuario que hace la búsqueda (determina scope)
-            role_filter: nombre de rol para filtrar (ej: "ATLETA")
+            role_filter: nombre de rol para filtrar (ej: "ATHLETE")
             exclude_ids: IDs a excluir del resultado (ej: ya agregados)
             limit: máximo de resultados (default 20)
 

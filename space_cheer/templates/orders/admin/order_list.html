@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
@@ -8,11 +8,13 @@
   <div class="row g-3 align-items-center mb-4">
     <div class="col-md-6">
       <h1 class="h2 mb-0">
-        <i class="bi bi-kanban me-2 text-primary"></i>Panel de órdenes
+        <i class="bi bi-kanban me-2 text-primary"></i>{% trans "Panel de órdenes" %}
       </h1>
       <p class="text-muted mb-0">
-        Mostrando {{ pagination.start_index }}–{{ pagination.end_index }}
-        de {{ pagination.total_items }} órdenes
+        {% blocktrans with start=pagination.start_index end=pagination.end_index total=pagination.total_items %}
+        Mostrando {{ start }}–{{ end }}
+        de {{ total }} órdenes
+        {% endblocktrans %}
       </p>
     </div>
   </div>
@@ -22,7 +24,7 @@
     {% for card in stats_cards %}
     <div class="col-6 col-md-4 col-lg-2">
       <a href="?status={% if card.key != 'total' %}{{ card.key }}{% endif %}" class="text-decoration-none">
-        <div class="card shadow-sm h-100 
+        <div class="card shadow-sm h-100
           {% if status_filter == card.key %}
             border-{{ card.color }}
           {% elif card.key == 'total' and not status_filter %}
@@ -45,14 +47,14 @@
         <div class="row g-3 align-items-end">
 
           <div class="col-md-3">
-            <label class="form-label small">Buscar</label>
-            <input type="text" name="q" class="form-control form-control-sm" value="{{ search }}">
+            <label class="form-label small">{% trans "Buscar" %}</label>
+            <input type="text" name="q" class="form-control form-control-sm" value="{{ search }}" placeholder="{% trans 'Buscar' %}">
           </div>
 
           <div class="col-md-2">
-            <label class="form-label small">Estado</label>
+            <label class="form-label small">{% trans "Estado" %}</label>
             <select name="status" class="form-select form-select-sm">
-              <option value="">Todos</option>
+              <option value="">{% trans "Todos" %}</option>
               {% for val, label in status_choices %}
               <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
@@ -60,26 +62,26 @@
           </div>
 
           <div class="col-md-2">
-            <label class="form-label small">Tipo</label>
+            <label class="form-label small">{% trans "Tipo" %}</label>
             <select name="type" class="form-select form-select-sm">
-              <option value="">Todos</option>
-              <option value="PERSONAL" {% if type_filter == "PERSONAL" %}selected{% endif %}>Personal</option>
-              <option value="TEAM" {% if type_filter == "TEAM" %}selected{% endif %}>Equipo</option>
+              <option value="">{% trans "Todos" %}</option>
+              <option value="PERSONAL" {% if type_filter == "PERSONAL" %}selected{% endif %}>{% trans "Personal" %}</option>
+              <option value="TEAM" {% if type_filter == "TEAM" %}selected{% endif %}>{% trans "Equipo" %}</option>
             </select>
           </div>
 
           <div class="col-md-2">
-            <label class="form-label small">Desde</label>
+            <label class="form-label small">{% trans "Desde" %}</label>
             <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
           </div>
 
           <div class="col-md-2">
-            <label class="form-label small">Hasta</label>
+            <label class="form-label small">{% trans "Hasta" %}</label>
             <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
           </div>
 
           <div class="col-md-1">
-            <button class="btn btn-primary btn-sm w-100">
+            <button class="btn btn-primary btn-sm w-100" title="{% trans 'Buscar' %}">
               <i class="bi bi-search"></i>
             </button>
           </div>
@@ -92,17 +94,17 @@
   <!-- TABLA -->
   <div class="card shadow-sm">
     <div class="card-body p-0">
-      <table class="table table-black table-hover align-middle mb-0">
+      <table class="table table-hover align-middle mb-0">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Dueño</th>
-            <th class="d-none d-lg-table-cell">Creado por</th>
-            <th class="text-center">Items</th>
-            <th class="text-end">Total</th>
-            <th class="text-end pe-4">Acciones</th>
+            <th>{% trans "ID" %}</th>
+            <th>{% trans "Tipo" %}</th>
+            <th>{% trans "Estado" %}</th>
+            <th>{% trans "Dueño" %}</th>
+            <th class="d-none d-lg-table-cell">{% trans "Creado por" %}</th>
+            <th class="text-center">{% trans "Items" %}</th>
+            <th class="text-end">{% trans "Total" %}</th>
+            <th class="text-end pe-4">{% trans "Acciones" %}</th>
           </tr>
         </thead>
 
@@ -113,9 +115,9 @@
 
             <td>
               {% if order.order_type == "PERSONAL" %}
-                <i class="bi bi-person text-primary"></i> Personal
+                <i class="bi bi-person text-primary"></i> {% trans "Personal" %}
               {% else %}
-                <i class="bi bi-people text-primary"></i> Equipo
+                <i class="bi bi-people text-primary"></i> {% trans "Equipo" %}
               {% endif %}
             </td>
 
@@ -142,7 +144,7 @@
             </td>
 
             <td class="text-end">
-              <a href="{% url 'orders:admin_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+              <a href="{% url 'orders:admin_order_detail' order.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Ver detalle' %}">
                 <i class="bi bi-eye"></i>
               </a>
             </td>
@@ -150,7 +152,7 @@
           {% empty %}
           <tr>
             <td colspan="8" class="text-center py-5">
-              No hay órdenes
+              {% trans "No hay órdenes" %}
             </td>
           </tr>
           {% endfor %}

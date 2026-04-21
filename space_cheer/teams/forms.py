@@ -21,6 +21,24 @@ class TeamCategoryForm(
 
 
 class TeamForm(forms.ModelForm):  # FORMULARIO PARA CREAR/EDITAR EQUIPOS
+    def clean_category(self):
+        category = self.cleaned_data.get('category')
+        # Solo validar al editar un equipo existente que cambia de categoría
+        if self.instance.pk and category != self.instance.category:
+            from events.models import EventTeamRegistration
+            has_active = EventTeamRegistration.objects.filter(
+                team=self.instance,
+                status__in=[
+                    EventTeamRegistration.STATUS_PENDING,
+                    EventTeamRegistration.STATUS_ACCEPTED,
+                ],
+            ).exists()
+            if has_active:
+                raise forms.ValidationError(
+                    'No puedes cambiar la categoría del equipo mientras esté '
+                    'inscrito en un evento activo (inscripción pendiente o aceptada).'
+                )
+        return category
     class Meta:
         model = Team
         fields = ["name", "coach", "address", "city", "phone", "logo", "category"]

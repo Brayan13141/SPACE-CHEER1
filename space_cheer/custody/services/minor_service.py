@@ -262,6 +262,43 @@ class MinorAthleteService:
             raise PermissionDenied("No tienes permisos para ver esta información.")
 
     @staticmethod
+    def get_all_minors(coach: User):
+        """Retorna TODOS los atletas menores, tengan o no guardian."""
+        owned_ids = UserOwnership.objects.filter(
+            owner=coach,
+            is_active=True,
+        ).values_list("user_id", flat=True)
+
+        today = timezone.now().date()
+        cutoff_date = today.replace(year=today.year - 18)
+
+        if coach.is_superuser or coach.roles.filter(name="ADMIN").exists():
+            return (
+                User.objects.filter(
+                    roles__name="ATHLETE",
+                    birth_date__isnull=False,
+                    birth_date__lte=today,
+                    birth_date__gt=cutoff_date,
+                )
+                .select_related("athleteprofile", "athleteprofile__guardian")
+                .distinct()
+            )
+        elif coach.roles.filter(name="HEADCOACH").exists():
+            return (
+                User.objects.filter(
+                    id__in=owned_ids,
+                    roles__name="ATHLETE",
+                    birth_date__isnull=False,
+                    birth_date__lte=today,
+                    birth_date__gt=cutoff_date,
+                )
+                .select_related("athleteprofile", "athleteprofile__guardian")
+                .distinct()
+            )
+        else:
+            raise PermissionDenied("No tienes permisos para ver esta información.")
+
+    @staticmethod
     def get_athletes_for_guardian(guardian: User):
         """Retorna todos los atletas que tienen a este usuario como guardian."""
         return User.objects.filter(athleteprofile__guardian=guardian).select_related(

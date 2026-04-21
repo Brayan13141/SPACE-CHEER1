@@ -114,7 +114,7 @@ class OrderAthleteValidatorTests(TestCase):
         UserTeamMembershipFactory(
             team=team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=True,
         )
@@ -141,7 +141,7 @@ class OrderAthleteValidatorTests(TestCase):
         UserTeamMembershipFactory(
             team=team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
             is_active=False,  # INACTIVO
         )
@@ -169,7 +169,7 @@ class OrderAthleteValidatorTests(TestCase):
         item = OrderItemFactory(order=order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         # primera asignación válida
         OrderItemAthleteFactory(order_item=item, athlete=athlete)
@@ -239,7 +239,7 @@ class OrderMeasurementsValidatorTests(TestCase):
         item = OrderItemFactory(order=order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
 
@@ -261,7 +261,7 @@ class OrderMeasurementsValidatorTests(TestCase):
         item = OrderItemFactory(order=order, product=product)
 
         athlete = AthleteFactory()
-        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATLETA")
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)
         # NO crear medidas

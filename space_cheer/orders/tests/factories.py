@@ -30,10 +30,10 @@ class RoleFactory(DjangoModelFactory):
         model = Role
         django_get_or_create = ("name",)
 
-    name = factory.Iterator(["ADMIN", "HEADCOACH", "COACH", "ATLETA", "STAFF"])
+    name = factory.Iterator(["ADMIN", "HEADCOACH", "COACH", "ATHLETE", "STAFF"])
     requires_curp = False
     is_staff_type = False
-    is_athlete_type = factory.LazyAttribute(lambda o: o.name == "ATLETA")
+    is_athlete_type = factory.LazyAttribute(lambda o: o.name == "ATHLETE")
     is_coach_type = factory.LazyAttribute(lambda o: o.name in ["HEADCOACH", "COACH"])
 
 
@@ -81,7 +81,7 @@ class AthleteFactory(UserFactory):
     @factory.post_generation
     def roles(self, create, extracted, **kwargs):
         if create:
-            role = RoleFactory(name="ATLETA")
+            role = RoleFactory(name="ATHLETE")
             self.roles.add(role)
 
 
@@ -110,7 +110,7 @@ class UserTeamMembershipFactory(DjangoModelFactory):
 
     user = factory.SubFactory(AthleteFactory)
     team = factory.SubFactory(TeamFactory)
-    role_in_team = "ATLETA"
+    role_in_team = "ATHLETE"
     status = "accepted"
     is_active = True
 

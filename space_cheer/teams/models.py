@@ -25,11 +25,11 @@ class TeamCategory(models.Model):
 
 
 GLOBAL_ROLE_HIERARCHY = {
-    "ADMIN": ["ADMIN", "HEADCOACH", "COACH", "STAFF", "ATLETA", "ACOMPANANTE"],
-    "HEADCOACH": ["HEADCOACH", "COACH", "STAFF", "ATLETA", "ACOMPANANTE"],
-    "COACH": ["COACH", "STAFF", "ATLETA", "ACOMPANANTE"],
+    "ADMIN": ["ADMIN", "HEADCOACH", "COACH", "STAFF", "ATHLETE", "ACOMPANANTE"],
+    "HEADCOACH": ["HEADCOACH", "COACH", "STAFF", "ATHLETE", "ACOMPANANTE"],
+    "COACH": ["COACH", "STAFF", "ATHLETE", "ACOMPANANTE"],
     "STAFF": ["STAFF", "ACOMPANANTE"],
-    "ATLETA": ["ATLETA", "ACOMPANANTE"],
+    "ATHLETE": ["ATHLETE", "ACOMPANANTE"],
     "ACOMPANANTE": ["ACOMPANANTE"],
 }
 
@@ -90,13 +90,13 @@ class Team(models.Model):
 # -------------------------
 class UserTeamMembership(models.Model):
     ROLE_CHOICES = [
-        ("ATLETA", "Atleta"),
+        ("ATHLETE", "ATHLETE"),
         ("COACH", "Coach"),
         ("STAFF", "Staff"),
     ]
 
     ROLE_COMPATIBILITY = {
-        "ATLETA": "is_athlete_type",
+        "ATHLETE": "is_athlete_type",
         "HEADCOACH": "is_coach_type",
         "COACH": "is_coach_type",
         "STAFF": "is_staff_type",
@@ -118,7 +118,7 @@ class UserTeamMembership(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="memberships")
 
     role_in_team = models.CharField(
-        max_length=20, choices=ROLE_CHOICES, default="ATLETA"
+        max_length=20, choices=ROLE_CHOICES, default="ATHLETE"
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
 

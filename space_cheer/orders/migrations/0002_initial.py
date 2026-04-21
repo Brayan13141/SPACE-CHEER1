@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='order',
-            constraint=models.CheckConstraint(condition=models.Q(models.Q(('order_type', 'PERSONAL'), ('owner_user__isnull', False), ('owner_team__isnull', True)), models.Q(('order_type', 'TEAM'), ('owner_team__isnull', False), ('owner_user__isnull', True)), _connector='OR'), name='valid_owner_by_type'),
+            constraint=models.CheckConstraint(check=models.Q(models.Q(('order_type', 'PERSONAL'), ('owner_user__isnull', False), ('owner_team__isnull', True)), models.Q(('order_type', 'TEAM'), ('owner_team__isnull', False), ('owner_user__isnull', True)), _connector='OR'), name='valid_owner_by_type'),
         ),
         migrations.AddConstraint(
             model_name='orderdesignimage',
