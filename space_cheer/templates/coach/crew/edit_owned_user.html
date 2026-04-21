@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Reasignar coach — {{ ownership.user.get_full_name }}{% endblock %}
+{% block title %}{% blocktrans with name=ownership.user.get_full_name %}Reasignar coach — {{ name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -10,14 +10,14 @@
   <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div>
       <h1 class="h3 fw-bold mb-1">
-        <i class="bi bi-arrow-left-right text-warning me-2"></i>Reasignar coach
+        <i class="bi bi-arrow-left-right text-warning me-2"></i>{% trans "Reasignar coach" %}
       </h1>
       <p class="text-muted mb-0 small">
-        Cambiar el HeadCoach responsable de este usuario
+        {% trans "Cambiar el HeadCoach responsable de este usuario" %}
       </p>
     </div>
     <a href="{% url 'manage_owned_users' %}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-arrow-left me-1"></i>Volver
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
     </a>
   </div>
 
@@ -36,7 +36,7 @@
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
           <h5 class="card-title mb-0">
-            <i class="bi bi-person me-2"></i>Usuario
+            <i class="bi bi-person me-2"></i>{% trans "Usuario" %}
           </h5>
         </div>
         <div class="card-body">
@@ -65,7 +65,7 @@
 
           <div class="d-flex align-items-center gap-2 small text-muted">
             <i class="bi bi-person-check"></i>
-            <span>Coach actual:
+            <span>{% trans "Coach actual:" %}
               <strong class="text-dark">
                 {{ ownership.owner.get_full_name|default:ownership.owner.username }}
               </strong>
@@ -79,7 +79,7 @@
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <h5 class="card-title mb-0">
-            <i class="bi bi-arrow-left-right me-2"></i>Nuevo coach
+            <i class="bi bi-arrow-left-right me-2"></i>{% trans "Nuevo coach" %}
           </h5>
         </div>
         <div class="card-body">
@@ -89,29 +89,29 @@
 
             <div class="mb-4">
               <label class="form-label fw-semibold small">
-                Selecciona el nuevo HeadCoach <span class="text-danger">*</span>
+                {% trans "Selecciona el nuevo HeadCoach" %} <span class="text-danger">*</span>
               </label>
               <select name="new_owner" class="form-select" required>
-                <option value="" disabled selected>Seleccionar HeadCoach…</option>
+                <option value="" disabled selected>{% trans "Seleccionar HeadCoach…" %}</option>
                 {% for coach in available_coaches %}
                   <option value="{{ coach.id }}"
                     {% if coach == ownership.owner %}disabled{% endif %}>
                     {{ coach.get_full_name|default:coach.username }}
-                    {% if coach == ownership.owner %}(actual){% endif %}
+                    {% if coach == ownership.owner %}({% trans "actual" %}){% endif %}
                   </option>
                 {% endfor %}
               </select>
               <div class="form-text">
-                El usuario pasará a ser responsabilidad del nuevo HeadCoach.
+                {% trans "El usuario pasará a ser responsabilidad del nuevo HeadCoach." %}
               </div>
             </div>
 
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-warning flex-fill">
-                <i class="bi bi-arrow-left-right me-2"></i>Reasignar coach
+                <i class="bi bi-arrow-left-right me-2"></i>{% trans "Reasignar coach" %}
               </button>
               <a href="{% url 'manage_owned_users' %}" class="btn btn-outline-secondary">
-                Cancelar
+                {% trans "Cancelar" %}
               </a>
             </div>
           </form>
@@ -122,8 +122,7 @@
         <div class="card-body text-center py-4">
           <i class="bi bi-lock text-muted display-5 d-block mb-3"></i>
           <p class="text-muted mb-0">
-            No tienes permisos para reasignar este usuario,
-            o no hay otros HeadCoach disponibles.
+            {% trans "No tienes permisos para reasignar este usuario, o no hay otros HeadCoach disponibles." %}
           </p>
         </div>
       </div>

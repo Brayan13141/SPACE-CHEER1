@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
 
 <div class="container py-3 py-md-4">
@@ -31,7 +31,7 @@
 
     <div class="mt-3 mt-md-0">
       <a href="{% url 'orders:detail_order' order.id %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver a la orden
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver a la orden" %}
       </a>
     </div>
   </div>
@@ -39,7 +39,7 @@
 
   {% if configuration_state != "READY" %}
   <div class="alert alert-warning mb-4">
-    <strong>Configuración incompleta</strong>
+    <strong>{% trans "Configuración incompleta" %}</strong>
 
     <ul class="mb-0 mt-2">
       {% for missing in missing_configuration %}
@@ -69,31 +69,31 @@
 
             <div class="flex-grow-1">
 
-              <h5 class="card-title mb-2">Detalles del producto</h5>
+              <h5 class="card-title mb-2">{% trans "Detalles del producto" %}</h5>
 
               <p class="text-muted">
-                {{ product.description|default:"Sin descripción"|truncatechars:200 }}
+                {{ product.description|default:_("Sin descripción")|truncatechars:200 }}
               </p>
 
               <div class="row g-2">
 
                 <div class="col-6 col-md-3">
-                  <span class="text-muted small d-block">Cantidad</span>
+                  <span class="text-muted small d-block">{% trans "Cantidad" %}</span>
                   <span class="fw-bold fs-5">{{ item.quantity }}</span>
                 </div>
 
                 <div class="col-6 col-md-3">
-                  <span class="text-muted small d-block">Precio unitario</span>
+                  <span class="text-muted small d-block">{% trans "Precio unitario" %}</span>
                   <span class="fw-bold fs-5">${{ item.unit_price|floatformat:2 }}</span>
                 </div>
 
                 <div class="col-6 col-md-3">
-                  <span class="text-muted small d-block">Subtotal</span>
+                  <span class="text-muted small d-block">{% trans "Subtotal" %}</span>
                   <span class="fw-bold fs-5 text-primary">${{ item.subtotal|floatformat:2 }}</span>
                 </div>
 
                 <div class="col-6 col-md-3">
-                  <span class="text-muted small d-block">Temporada</span>
+                  <span class="text-muted small d-block">{% trans "Temporada" %}</span>
                   <span>{{ product.season.name }}</span>
                 </div>
 
@@ -110,7 +110,7 @@
         <div class="card-body">
 
           <h5 class="card-title mb-3">
-            <i class="bi bi-lightning-charge me-2"></i>Acciones
+            <i class="bi bi-lightning-charge me-2"></i>{% trans "Acciones" %}
           </h5>
 
           <div class="d-flex flex-column gap-2">
@@ -120,7 +120,7 @@
               {% csrf_token %}
               <button type="submit" class="btn btn-outline-success w-100">
                 <i class="bi bi-person-plus me-2"></i>
-                Importar atletas
+                {% trans "Importar atletas" %}
               </button>
             </form>
             {% endif %}
@@ -131,7 +131,7 @@
                     data-bs-target="#deleteItemModal">
 
               <i class="bi bi-trash me-2"></i>
-              Eliminar producto
+              {% trans "Eliminar producto" %}
 
             </button>
             {% endif %}
@@ -149,12 +149,12 @@
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">
-      <i class="bi bi-person-arms-up me-2"></i>Atletas asignados
+      <i class="bi bi-person-arms-up me-2"></i>{% trans "Atletas asignados" %}
     </h4>
 
     {% if athlete_items %}
     <span class="badge bg-primary rounded-pill fs-6">
-      {{ athlete_items|length }} atleta{{ athlete_items|pluralize:"s" }}
+      {% blocktrans with count=athlete_items|length %}{{ count }} atleta{% endblocktrans %}{{ athlete_items|pluralize:"s" }}
     </span>
     {% endif %}
   </div>
@@ -180,11 +180,11 @@
 
             {% if athlete_item.has_complete_measurements %}
             <span class="badge bg-success">
-              Completo
+              {% trans "Completo" %}
             </span>
             {% else %}
             <span class="badge bg-warning text-dark">
-              Incompleto
+              {% trans "Incompleto" %}
             </span>
             {% endif %}
 
@@ -207,7 +207,7 @@
           <div class="mb-3">
 
             <span class="small text-muted d-block mb-1">
-              Medidas registradas
+              {% trans "Medidas registradas" %}
             </span>
 
             <div class="d-flex flex-wrap gap-1">
@@ -235,7 +235,7 @@
           {% if athlete_item.customization %}
 
           <div class="p-2 rounded mb-3" style="background: var(--sc-dark, #0d0d1a)">
-            <span class="small text-muted d-block">Personalización</span>
+            <span class="small text-muted d-block">{% trans "Personalización" %}</span>
             <span class="fw-semibold">{{ athlete_item.customization.custom_text }}</span>
           </div>
 
@@ -248,7 +248,7 @@
                class="btn btn-sm btn-outline-primary flex-grow-1">
 
               <i class="bi bi-rulers me-1"></i>
-              Medidas
+              {% trans "Medidas" %}
 
             </a>
 
@@ -271,11 +271,11 @@
     <i class="bi bi-person-slash display-4 text-muted mb-3"></i>
 
     <h5 class="text-muted">
-      No hay atletas asignados
+      {% trans "No hay atletas asignados" %}
     </h5>
 
     <p class="text-muted">
-      Debes asignar atletas para configurar este producto
+      {% trans "Debes asignar atletas para configurar este producto" %}
     </p>
 
   </div>
@@ -294,9 +294,7 @@
     <div class="card-body">
 
       <h5 class="card-title mb-3">
-
-        Medidas requeridas para este producto
-
+        {% trans "Medidas requeridas para este producto" %}
       </h5>
 
       <div class="d-flex flex-wrap gap-2">
@@ -335,24 +333,24 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title">Eliminar producto</h5>
+        <h5 class="modal-title">{% trans "Eliminar producto" %}</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
-        ¿Eliminar <strong>{{ product.name }}</strong> de la orden?
+        {% blocktrans with name=product.name %}¿Eliminar <strong>{{ name }}</strong> de la orden?{% endblocktrans %}
         <p class="text-danger small mt-2 mb-0">
           <i class="bi bi-exclamation-circle me-1"></i>
-          Esta acción eliminará atletas y medidas asociadas. No se puede deshacer.
+          {% trans "Esta acción eliminará atletas y medidas asociadas. No se puede deshacer." %}
         </p>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
         <form method="post" action="{% url 'orders:order_item_delete' item.id %}" class="d-inline mb-0">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger">
-            <i class="bi bi-trash me-1"></i>Sí, eliminar
+            <i class="bi bi-trash me-1"></i>{% trans "Sí, eliminar" %}
           </button>
         </form>
       </div>

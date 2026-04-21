@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -284,7 +284,7 @@
                             <i class="bi bi-stars me-2"></i>SPACE CHEER
                         </div>
                         <p class="account-subtitle">
-                            {% block page_title %}Portal de Cuenta{% endblock %}
+                            {% block page_title %}{% trans "Portal de Cuenta" %}{% endblock %}
                         </p>
                     </div>
 

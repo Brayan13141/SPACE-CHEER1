@@ -9,16 +9,16 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h4><i class="bi bi-envelope-paper"></i> Invitar a un amigo</h4>
+                    <h4><i class="bi bi-envelope-paper"></i> {% trans "Invitar a un amigo" %}</h4>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo electrónico</label>
+                            <label for="email" class="form-label">{% trans "Correo electrónico" %}</label>
                             <input type="email" name="email" id="email" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Enviar invitación</button>
+                        <button type="submit" class="btn btn-primary">{% trans "Enviar invitación" %}</button>
                     </form>
                 </div>
             </div>

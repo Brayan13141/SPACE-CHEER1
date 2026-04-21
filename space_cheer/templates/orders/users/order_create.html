@@ -1,16 +1,17 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <div class="container py-3 py-md-4">
 
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
     <div>
-      <h1 class="h2 mb-1">Crear orden</h1>
-      <p class="text-muted mb-0">Nueva orden de uniformes</p>
+      <h1 class="h2 mb-1">{% trans "Crear orden" %}</h1>
+      <p class="text-muted mb-0">{% trans "Nueva orden de uniformes" %}</p>
     </div>
     <div class="mt-3 mt-md-0">
       <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
       </a>
     </div>
   </div>
@@ -27,22 +28,22 @@
         {% csrf_token %}
 
         <div class="mb-4">
-          <label class="form-label fw-semibold">Tipo de orden</label>
+          <label class="form-label fw-semibold">{% trans "Tipo de orden" %}</label>
           <select name="order_type" id="order_type" class="form-select" required>
             <option value="PERSONAL">
-              <i class="bi bi-person me-1"></i>Personal
+              <i class="bi bi-person me-1"></i>{% trans "Personal" %}
             </option>
             {% if teams.exists and not is_guardian %}
-              <option value="TEAM">Equipo</option>
+              <option value="TEAM">{% trans "Equipo" %}</option>
             {% endif %}
           </select>
         </div>
 
         {% if teams.exists and not is_guardian %}
         <div class="mb-4 d-none" id="team-selector">
-          <label class="form-label fw-semibold">Equipo</label>
+          <label class="form-label fw-semibold">{% trans "Equipo" %}</label>
           <select name="team_id" class="form-select">
-            <option value="">Selecciona un equipo</option>
+            <option value="">{% trans "Selecciona un equipo" %}</option>
             {% for team in teams %}
               <option value="{{ team.id }}">{{ team.name }}</option>
             {% endfor %}
@@ -51,13 +52,13 @@
         {% elif not is_guardian %}
           <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo.
+            {% trans "No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo." %}
           </div>
         {% endif %}
 
         <div class="d-grid">
           <button type="submit" class="btn btn-primary btn-lg">
-            <i class="bi bi-plus-circle me-2"></i>Crear orden
+            <i class="bi bi-plus-circle me-2"></i>{% trans "Crear orden" %}
           </button>
         </div>
 

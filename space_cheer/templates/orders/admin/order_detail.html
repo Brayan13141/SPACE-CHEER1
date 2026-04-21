@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
@@ -8,8 +8,8 @@
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
     <div>
       <h1 class="h2 mb-1 d-flex align-items-center flex-wrap gap-2">
-        <span>Orden #{{ order.id }}</span>
-        <span class="badge fs-6 
+        <span>{% blocktrans with id=order.id %}Orden #{{ id }}{% endblocktrans %}</span>
+        <span class="badge fs-6
           {% if order.status == 'DELIVERED' %}bg-success
           {% elif order.status == 'DRAFT' %}bg-secondary
           {% elif order.status == 'PENDING' %}bg-warning text-dark
@@ -19,14 +19,14 @@
         </span>
       </h1>
       <p class="text-muted mb-0">
-        <i class="bi bi-calendar3 me-1"></i> Creada: {{ order.created_at|date:"d/m/Y H:i" }}
+        <i class="bi bi-calendar3 me-1"></i> {% trans "Creada:" %} {{ order.created_at|date:"d/m/Y H:i" }}
         <br class="d-md-none">
-        <span class="text-muted">por {{ order.created_by.get_full_name|default:order.created_by.email }}</span>
+        <span class="text-muted">{% blocktrans with name=order.created_by.get_full_name|default:order.created_by.email %}por {{ name }}{% endblocktrans %}</span>
       </p>
     </div>
     <div class="mt-3 mt-md-0">
       <a href="{% url 'orders:admin_order_list' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
       </a>
     </div>
   </div>
@@ -39,7 +39,7 @@
           <div class="d-flex align-items-center">
             <i class="bi bi-tag text-primary me-3 fs-5"></i>
             <div>
-              <span class="text-muted small d-block">Tipo</span>
+              <span class="text-muted small d-block">{% trans "Tipo" %}</span>
               <span class="fw-semibold">{{ order.get_order_type_display }}</span>
             </div>
           </div>
@@ -48,7 +48,7 @@
           <div class="d-flex align-items-center">
             <i class="bi bi-person-circle text-primary me-3 fs-5"></i>
             <div>
-              <span class="text-muted small d-block">Propietario</span>
+              <span class="text-muted small d-block">{% trans "Propietario" %}</span>
               <span class="fw-semibold">
                 {% if order.owner_user %}
                   {{ order.owner_user.get_full_name|default:order.owner_user.email }}
@@ -63,7 +63,7 @@
           <div class="d-flex align-items-center">
             <i class="bi bi-person-workspace text-primary me-3 fs-5"></i>
             <div>
-              <span class="text-muted small d-block">Creada por</span>
+              <span class="text-muted small d-block">{% trans "Creada por" %}</span>
               <span class="fw-semibold">{{ order.created_by.get_full_name|default:order.created_by.email }}</span>
             </div>
           </div>
@@ -72,7 +72,7 @@
           <div class="d-flex align-items-center">
             <i class="bi bi-cash-stack text-primary me-3 fs-5"></i>
             <div>
-              <span class="text-muted small d-block">Total</span>
+              <span class="text-muted small d-block">{% trans "Total" %}</span>
               <span class="fw-bold text-primary">${{ order.total|floatformat:2 }}</span>
             </div>
           </div>
@@ -86,7 +86,7 @@
     <div class="card shadow-sm mb-4">
       <div class="card-header">
         <h5 class="card-title mb-0">
-          <i class="bi bi-truck me-2"></i>Información de envío
+          <i class="bi bi-truck me-2"></i>{% trans "Información de envío" %}
         </h5>
       </div>
       <div class="card-body">
@@ -95,7 +95,7 @@
             <div class="d-flex align-items-start">
               <i class="bi bi-person-badge text-primary me-3 mt-1"></i>
               <div>
-                <span class="text-muted small d-block">Contacto</span>
+                <span class="text-muted small d-block">{% trans "Contacto" %}</span>
                 <span class="fw-semibold">{{ order.contact_info.contact_name }}</span>
                 <div class="small">{{ order.contact_info.contact_phone }} • {{ order.contact_info.contact_email }}</div>
               </div>
@@ -105,11 +105,11 @@
             <div class="d-flex align-items-start">
               <i class="bi bi-geo-alt text-primary me-3 mt-1"></i>
               <div>
-                <span class="text-muted small d-block">Dirección</span>
+                <span class="text-muted small d-block">{% trans "Dirección" %}</span>
                 <span>{{ order.contact_info.shipping_address_line }}</span>
-                <div class="small">{{ order.contact_info.shipping_city }}, CP: {{ order.contact_info.shipping_postal_code }}</div>
+                <div class="small">{{ order.contact_info.shipping_city }}, {% trans "CP:" %} {{ order.contact_info.shipping_postal_code }}</div>
                 {% if order.contact_info.shipping_notes %}
-                  <div class="small text-muted mt-1">Nota: {{ order.contact_info.shipping_notes }}</div>
+                  <div class="small text-muted mt-1">{% trans "Nota:" %} {{ order.contact_info.shipping_notes }}</div>
                 {% endif %}
               </div>
             </div>
@@ -124,7 +124,7 @@
 <div class="card shadow-sm mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="card-title mb-0">
-      <i class="bi bi-calendar-event me-2"></i>Fechas operativas
+      <i class="bi bi-calendar-event me-2"></i>{% trans "Fechas operativas" %}
     </h5>
   </div>
   <div class="card-body">
@@ -202,7 +202,7 @@
       {% if not order_flags.requires_design and not order_flags.requires_measurements and not order_flags.has_uniforms %}
         <p class="text-muted small mt-3 mb-0">
           <i class="bi bi-info-circle me-1"></i>
-          Esta orden solo contiene productos simples. No requiere fechas adicionales.
+          {% trans "Esta orden solo contiene productos simples. No requiere fechas adicionales." %}
         </p>
       {% endif %}
 
@@ -211,9 +211,9 @@
       {% endif %}
 
       <button class="btn btn-primary mt-3">
-        <i class="bi bi-save me-1"></i>Guardar fechas
+        <i class="bi bi-save me-1"></i>{% trans "Guardar fechas" %}
       </button>
-      
+
     </form>
   </div>
 </div>
@@ -223,7 +223,7 @@
   <div class="card shadow-sm mb-4">
     <div class="card-header">
       <h5 class="card-title mb-0">
-        <i class="bi bi-box-seam me-2"></i>Productos
+        <i class="bi bi-box-seam me-2"></i>{% trans "Productos" %}
       </h5>
     </div>
     <div class="card-body p-0">
@@ -231,11 +231,11 @@
         <table class="table table-hover align-middle mb-0">
           <thead>
             <tr>
-              <th>Producto</th>
-              <th>Talla</th>
-              <th>Cantidad</th>
-              <th>Subtotal</th>
-              <th>Configuración</th>
+              <th>{% trans "Producto" %}</th>
+              <th>{% trans "Talla" %}</th>
+              <th>{% trans "Cantidad" %}</th>
+              <th>{% trans "Subtotal" %}</th>
+              <th>{% trans "Configuración" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -244,7 +244,7 @@
                 <td>
                   <strong>{{ item.product.name }}</strong>
                   {% if not item.product.is_active %}
-                    <span class="badge bg-secondary">Inactivo</span>
+                    <span class="badge bg-secondary">{% trans "Inactivo" %}</span>
                   {% endif %}
                 </td>
                 <td>
@@ -258,9 +258,9 @@
                 <td>${{ item.subtotal|floatformat:2 }}</td>
                 <td>
                   {% if item.configuration_state == "READY" %}
-                    <span class="badge bg-success">Completo</span>
+                    <span class="badge bg-success">{% trans "Completo" %}</span>
                   {% else %}
-                    <span class="badge bg-warning text-dark">Pendiente</span>
+                    <span class="badge bg-warning text-dark">{% trans "Pendiente" %}</span>
                   {% endif %}
                 </td>
               </tr>
@@ -268,15 +268,15 @@
                 <tr class="table-secondary bg-opacity-10">
                   <td colspan="5">
                     <div class="p-2">
-                      <strong><i class="bi bi-person-arms-up me-1"></i>Atletas:</strong>
+                      <strong><i class="bi bi-person-arms-up me-1"></i>{% trans "Atletas:" %}</strong>
                       <ul class="list-unstyled mt-1 mb-0">
                         {% for athlete_item in item.athletes.all %}
                           <li class="d-flex align-items-center gap-2">
                             <span>{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}</span>
                             {% if athlete_item.has_complete_measurements %}
-                              <span class="badge bg-success">Medidas completas</span>
+                              <span class="badge bg-success">{% trans "Medidas completas" %}</span>
                             {% else %}
-                              <span class="badge bg-warning">Medidas pendientes</span>
+                              <span class="badge bg-warning">{% trans "Medidas pendientes" %}</span>
                             {% endif %}
                           </li>
                         {% endfor %}
@@ -289,7 +289,7 @@
               <tr>
                 <td colspan="5" class="text-center text-muted py-4">
                   <i class="bi bi-box display-6"></i>
-                  <p class="mt-2">No hay productos en esta orden</p>
+                  <p class="mt-2">{% trans "No hay productos en esta orden" %}</p>
                 </td>
               </tr>
             {% endfor %}
@@ -304,13 +304,15 @@
 <div class="card shadow-sm mb-4">
   <div class="card-header">
     <h5 class="card-title mb-0">
-      <i class="bi bi-rulers me-2"></i>Progreso de medidas
+      <i class="bi bi-rulers me-2"></i>{% trans "Progreso de medidas" %}
     </h5>
   </div>
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <span class="text-muted small">
-        {{ measurements_summary.complete }} de {{ measurements_summary.total }} atletas completos
+        {% blocktrans with complete=measurements_summary.complete total=measurements_summary.total %}
+        {{ complete }} de {{ total }} atletas completos
+        {% endblocktrans %}
       </span>
       <span class="fw-bold
         {% if measurements_summary.percent == 100 %}text-success
@@ -331,11 +333,13 @@
     {% if measurements_summary.pending > 0 %}
     <p class="text-muted small mt-2 mb-0">
       <i class="bi bi-exclamation-triangle text-warning me-1"></i>
-      {{ measurements_summary.pending }} atleta{{ measurements_summary.pending|pluralize }} sin medidas completas
+      {% blocktrans with pending=measurements_summary.pending %}
+      {{ pending }} atleta sin medidas completas
+      {% endblocktrans %}
     </p>
     {% else %}
     <p class="text-success small mt-2 mb-0">
-      <i class="bi bi-check-circle me-1"></i>Todas las medidas están completas
+      <i class="bi bi-check-circle me-1"></i>{% trans "Todas las medidas están completas" %}
     </p>
     {% endif %}
   </div>
@@ -346,7 +350,7 @@
 <div class="card shadow-sm mb-4">
   <div class="card-header">
     <h5 class="card-title mb-0">
-      <i class="bi bi-gear me-2"></i>Gestión de medidas
+      <i class="bi bi-gear me-2"></i>{% trans "Gestión de medidas" %}
     </h5>
   </div>
   <div class="card-body">
@@ -354,11 +358,11 @@
     <!-- Estado actual -->
     <div class="mb-3">
       {% if order.measurements_locked %}
-        <span class="badge bg-danger">Bloqueadas definitivamente</span>
+        <span class="badge bg-danger">{% trans "Bloqueadas definitivamente" %}</span>
       {% elif order.measurements_open %}
-        <span class="badge bg-success">Abiertas</span>
+        <span class="badge bg-success">{% trans "Abiertas" %}</span>
       {% else %}
-        <span class="badge bg-secondary">Cerradas</span>
+        <span class="badge bg-secondary">{% trans "Cerradas" %}</span>
       {% endif %}
     </div>
 
@@ -367,19 +371,19 @@
 
       {% if measurement_actions.can_close %}
         <a href="{% url 'orders:close_measurements' order.id %}" class="btn btn-warning">
-          <i class="bi bi-lock me-1"></i>Cerrar medidas
+          <i class="bi bi-lock me-1"></i>{% trans "Cerrar medidas" %}
         </a>
       {% endif %}
 
       {% if measurement_actions.can_reopen and not measurement_actions.can_close %}
         <a href="{% url 'orders:reopen_measurements' order.id %}" class="btn btn-success">
-          <i class="bi bi-arrow-clockwise me-1"></i>Reabrir
+          <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Reabrir" %}
         </a>
       {% endif %}
 
       {% if measurement_actions.can_lock %}
         <a href="{% url 'orders:lock_measurements' order.id %}" class="btn btn-danger">
-          <i class="bi bi-shield-lock me-1"></i>Bloquear definitivo
+          <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear definitivo" %}
         </a>
       {% endif %}
 
@@ -393,11 +397,11 @@
   <div class="card shadow-sm mb-4">
     <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
       <h5 class="card-title mb-0">
-        <i class="bi bi-images me-2"></i>Diseños
+        <i class="bi bi-images me-2"></i>{% trans "Diseños" %}
       </h5>
       <!-- Botón para abrir el formulario de subida (puede estar en un modal o colapsable) -->
       <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#uploadDesignCollapse" aria-expanded="false">
-        <i class="bi bi-upload me-1"></i>Subir nuevo diseño
+        <i class="bi bi-upload me-1"></i>{% trans "Subir nuevo diseño" %}
       </button>
     </div>
 
@@ -409,18 +413,18 @@
             {% csrf_token %}
             <div class="row g-3 align-items-end">
               <div class="col-md-6">
-                <label class="form-label">Seleccionar imagen</label>
+                <label class="form-label">{% trans "Seleccionar imagen" %}</label>
                 <input type="file" class="form-control" name="image" accept="image/*" required>
               </div>
               <div class="col-md-3">
                 <div class="form-check">
                   <input type="checkbox" class="form-check-input" name="is_final" id="isFinalCheck">
-                  <label class="form-check-label" for="isFinalCheck">Marcar como diseño final</label>
+                  <label class="form-check-label" for="isFinalCheck">{% trans "Marcar como diseño final" %}</label>
                 </div>
               </div>
               <div class="col-md-3">
                 <button type="submit" class="btn btn-primary w-100">
-                  <i class="bi bi-cloud-upload me-1"></i>Subir
+                  <i class="bi bi-cloud-upload me-1"></i>{% trans "Subir" %}
                 </button>
               </div>
             </div>
@@ -436,13 +440,13 @@
               <div class="card h-100 shadow-sm design-card">
                 <img src="{{ design.image.url }}"
                      class="card-img-top"
-                     alt="Diseño"
+                     alt="{% trans 'Diseño' %}"
                      style="height: 160px; object-fit: cover; cursor: pointer;"
                      data-bs-toggle="modal"
                      data-bs-target="#designModal{{ design.id }}">
                 <div class="card-body p-2 text-center">
                   {% if design.is_final %}
-                    <span class="badge bg-success mb-1"><i class="bi bi-check-circle-fill"></i> Final</span>
+                    <span class="badge bg-success mb-1"><i class="bi bi-check-circle-fill"></i> {% trans "Final" %}</span>
                   {% endif %}
                   <small class="text-muted d-block">
                     <i class="bi bi-person"></i> {{ design.uploaded_by.get_full_name|default:design.uploaded_by.email|default:"Sistema" }}
@@ -459,27 +463,27 @@
               <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Diseño #{{ forloop.counter }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <h5 class="modal-title">{% blocktrans with num=forloop.counter %}Diseño #{{ num }}{% endblocktrans %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
                   </div>
                   <div class="modal-body">
                     <div class="row">
                       <div class="col-md-8">
-                        <img src="{{ design.image.url }}" class="img-fluid rounded" alt="Diseño">
+                        <img src="{{ design.image.url }}" class="img-fluid rounded" alt="{% trans 'Diseño' %}">
                       </div>
                       <div class="col-md-4">
-                        <p><strong>Subido por:</strong> {{ design.uploaded_by.get_full_name|default:design.uploaded_by.email|default:"Sistema" }}</p>
-                        <p><strong>Fecha:</strong> {{ design.created_at|date:"d/m/Y H:i" }}</p>
+                        <p><strong>{% trans "Subido por:" %}</strong> {{ design.uploaded_by.get_full_name|default:design.uploaded_by.email|default:"Sistema" }}</p>
+                        <p><strong>{% trans "Fecha:" %}</strong> {{ design.created_at|date:"d/m/Y H:i" }}</p>
                         <p>
-                          <strong>Estado:</strong>
+                          <strong>{% trans "Estado:" %}</strong>
                           {% if design.is_final %}
-                            <span class="badge bg-success">Final</span>
+                            <span class="badge bg-success">{% trans "Final" %}</span>
                           {% else %}
-                            <span class="badge bg-secondary">Borrador</span>
+                            <span class="badge bg-secondary">{% trans "Borrador" %}</span>
                           {% endif %}
                         </p>
                         <hr>
-                       
+
                       </div>
                     </div>
                   </div>
@@ -491,7 +495,7 @@
       {% else %}
         <div class="text-center py-4">
           <i class="bi bi-image display-4 text-muted mb-3"></i>
-          <p class="text-muted">No hay diseños subidos aún.</p>
+          <p class="text-muted">{% trans "No hay diseños subidos aún." %}</p>
         </div>
       {% endif %}
     </div>
@@ -501,7 +505,7 @@
   <div class="card shadow-sm mb-4">
     <div class="card-header">
       <h5 class="card-title mb-0">
-        <i class="bi bi-lightning-charge me-2"></i>Acciones disponibles
+        <i class="bi bi-lightning-charge me-2"></i>{% trans "Acciones disponibles" %}
       </h5>
     </div>
     <div class="card-body">
@@ -512,7 +516,7 @@
               <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-primary w-100 py-3">
-                  <i class="bi bi-arrow-right-circle me-2"></i>Pasar a {{ status|title }}
+                  <i class="bi bi-arrow-right-circle me-2"></i>{% blocktrans with s=status|title %}Pasar a {{ s }}{% endblocktrans %}
                 </button>
               </form>
             </div>
@@ -521,7 +525,7 @@
       {% else %}
         <div class="text-center py-3">
           <i class="bi bi-check2-circle text-muted display-6"></i>
-          <p class="text-muted mt-2">No hay transiciones disponibles en este estado.</p>
+          <p class="text-muted mt-2">{% trans "No hay transiciones disponibles en este estado." %}</p>
         </div>
       {% endif %}
     </div>
@@ -531,7 +535,7 @@
   <div class="card shadow-sm">
     <div class="card-header">
       <h5 class="card-title mb-0">
-        <i class="bi bi-clock-history me-2"></i>Historial
+        <i class="bi bi-clock-history me-2"></i>{% trans "Historial" %}
       </h5>
     </div>
     <div class="card-body p-0">
@@ -539,10 +543,10 @@
         <table class="table table-sm mb-0">
           <thead>
             <tr>
-              <th>Fecha</th>
-              <th>Usuario</th>
-              <th>Acción</th>
-              <th>Notas</th>
+              <th>{% trans "Fecha" %}</th>
+              <th>{% trans "Usuario" %}</th>
+              <th>{% trans "Acción" %}</th>
+              <th>{% trans "Notas" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -556,7 +560,7 @@
             {% empty %}
               <tr>
                 <td colspan="4" class="text-center text-muted py-3">
-                  No hay eventos registrados.
+                  {% trans "No hay eventos registrados." %}
                 </td>
               </tr>
             {% endfor %}

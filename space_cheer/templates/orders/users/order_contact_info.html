@@ -1,16 +1,17 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <div class="container py-3 py-md-4">
 
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
     <div>
-      <h1 class="h2 mb-1">Información de contacto</h1>
-      <p class="text-muted mb-0">Orden #{{ order.id }} — Datos de envío</p>
+      <h1 class="h2 mb-1">{% trans "Información de contacto" %}</h1>
+      <p class="text-muted mb-0">{% blocktrans with id=order.id %}Orden #{{ id }} — Datos de envío{% endblocktrans %}</p>
     </div>
     <div class="mt-3 mt-md-0">
       <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
       </a>
     </div>
   </div>
@@ -30,7 +31,7 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold">
-              <i class="bi bi-person me-1"></i>Nombre de contacto <span class="text-danger">*</span>
+              <i class="bi bi-person me-1"></i>{% trans "Nombre de contacto" %} <span class="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -43,7 +44,7 @@
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">
-              <i class="bi bi-telephone me-1"></i>Teléfono
+              <i class="bi bi-telephone me-1"></i>{% trans "Teléfono" %}
             </label>
             <input
               type="text"
@@ -55,7 +56,7 @@
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">
-              <i class="bi bi-envelope me-1"></i>Email <span class="text-danger">*</span>
+              <i class="bi bi-envelope me-1"></i>{% trans "Email" %} <span class="text-danger">*</span>
             </label>
             <input
               type="email"
@@ -68,19 +69,19 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold">
-              <i class="bi bi-geo-alt me-1"></i>Dirección
+              <i class="bi bi-geo-alt me-1"></i>{% trans "Dirección" %}
             </label>
             <input
               type="text"
               name="shipping_address_line"
               class="form-control"
               value="{{ contact_info.shipping_address_line }}"
-              placeholder="Calle, número, colonia"
+              placeholder="{% trans 'Calle, número, colonia' %}"
             >
           </div>
 
           <div class="col-md-8">
-            <label class="form-label fw-semibold">Ciudad</label>
+            <label class="form-label fw-semibold">{% trans "Ciudad" %}</label>
             <input
               type="text"
               name="shipping_city"
@@ -90,7 +91,7 @@
           </div>
 
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Código postal</label>
+            <label class="form-label fw-semibold">{% trans "Código postal" %}</label>
             <input
               type="text"
               name="shipping_postal_code"
@@ -104,10 +105,10 @@
 
         <div class="d-flex gap-2 mt-4">
           <button type="submit" class="btn btn-primary">
-            <i class="bi bi-save me-1"></i>Guardar contacto
+            <i class="bi bi-save me-1"></i>{% trans "Guardar contacto" %}
           </button>
           <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary">
-            Cancelar
+            {% trans "Cancelar" %}
           </a>
         </div>
 

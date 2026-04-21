@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 
@@ -7,11 +7,11 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Gestión de Categorías de Equipo</h5>
+            <h5 class="mb-0">{% trans "Gestión de Categorías de Equipo" %}</h5>
 
             {% if puede_crear %}
             <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrear">
-                + Crear Categoría
+                + {% trans "Crear Categoría" %}
             </button>
             {% endif %}
         </div>
@@ -23,10 +23,10 @@
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Nombre</th>
-                            <th>Nivel</th>
-                            <th>Descripcion</th>
-                            <th>Acciones</th>
+                            <th>{% trans "Nombre" %}</th>
+                            <th>{% trans "Nivel" %}</th>
+                            <th>{% trans "Descripcion" %}</th>
+                            <th>{% trans "Acciones" %}</th>
                         </tr>
                     </thead>
 
@@ -40,7 +40,7 @@
                             <td>
 
                                 {% if puede_editar %}
-                                <button 
+                                <button
                                     class="btn btn-sm btn-warning btn-editar"
                                     data-id="{{ categoria.id }}"
                                     data-name="{{ categoria.name }}"
@@ -49,7 +49,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#modalEditar"
                                 >
-                                    Editar
+                                    {% trans "Editar" %}
                                 </button>
                                 {% endif %}
 
@@ -59,7 +59,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#modalEliminar{{ categoria.id }}"
                                 >
-                                    Eliminar
+                                    {% trans "Eliminar" %}
                                 </button>
                                 {% endif %}
                             </td>
@@ -77,19 +77,20 @@
                                         <input type="hidden" name="eliminar_categoria" value="1">
 
                                         <div class="modal-header">
-                                            <h5 class="modal-title">Eliminar Categoría</h5>
+                                            <h5 class="modal-title">{% trans "Eliminar Categoría" %}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
 
                                         <div class="modal-body">
-                                            ¿Seguro que deseas eliminar la categoría 
-                                            <strong>{{ categoria.name }}</strong>?
+                                            {% blocktrans with nombre=categoria.name %}
+                                                ¿Seguro que deseas eliminar la categoría <strong>{{ nombre }}</strong>?
+                                            {% endblocktrans %}
                                         </div>
 
                                         <div class="modal-footer">
-                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            <button type="submit" class="btn btn-danger">{% trans "Eliminar" %}</button>
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                Cancelar
+                                                {% trans "Cancelar" %}
                                             </button>
                                         </div>
 
@@ -103,7 +104,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="3" class="text-center text-muted py-4">
-                                No hay categorías registradas.
+                                {% trans "No hay categorías registradas." %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -127,7 +128,7 @@
         <input type="hidden" name="crear_categoria" value="1">
 
         <div class="modal-header">
-          <h5 class="modal-title">Crear Categoría</h5>
+          <h5 class="modal-title">{% trans "Crear Categoría" %}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
@@ -136,8 +137,8 @@
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">{% trans "Guardar" %}</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
         </div>
       </form>
 
@@ -158,7 +159,7 @@
         <input type="hidden" name="categoria_id" id="editar_categoria_id">
 
         <div class="modal-header">
-          <h5 class="modal-title">Editar Categoría</h5>
+          <h5 class="modal-title">{% trans "Editar Categoría" %}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
@@ -167,8 +168,8 @@
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar Cambios</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">{% trans "Guardar Cambios" %}</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
         </div>
 
       </form>
