@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
-from events.models import Event, EventCategory, EventResult
+from events.models import Event, EventCategory, EventResult, EventStaffAssignment
 from events.services import EventService
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,9 @@ def event_detail(request, pk):
         request.user.is_superuser
         or request.user.roles.filter(name='ADMIN').exists()
     )
+    is_judge = EventStaffAssignment.objects.filter(
+        event=event, user=request.user, role__is_judge=True
+    ).exists()
 
     results_qs = (
         EventResult.objects
@@ -83,6 +86,7 @@ def event_detail(request, pk):
         'categories': categories,
         'results': results_qs.order_by('category__order', 'placement'),
         'is_admin': is_admin,
+        'is_judge': is_judge,
         'transitions': transitions,
         'workflow_steps': workflow_steps,
         'is_cancelled': is_cancelled,

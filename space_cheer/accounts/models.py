@@ -17,6 +17,7 @@ class Role(models.Model):
     is_staff_type = models.BooleanField(default=False)
     is_athlete_type = models.BooleanField(default=False)
     is_coach_type = models.BooleanField(default=False)
+    is_judge_type = models.BooleanField(default=False)
     allow_dashboard_access = models.BooleanField(default=True)
 
     def __str__(self):

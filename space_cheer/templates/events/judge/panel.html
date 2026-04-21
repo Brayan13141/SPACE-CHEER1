@@ -1,0 +1,276 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Panel de Juez" %} — {{ event.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .score-input {
+    width: 78px; text-align: center;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; border-radius: 6px; padding: 4px 6px;
+    transition: border-color 0.2s;
+  }
+  .score-input:focus { outline: none; border-color: #0dcaf0; box-shadow: 0 0 0 2px rgba(13,202,240,.2); }
+  .score-input.saved  { border-color: #198754; }
+  .score-input.error  { border-color: #dc3545; }
+  .score-status { font-size: 0.68rem; margin-top: 3px; min-height: 14px; text-align: center; color: #6c757d; }
+  .leaderboard-entry { transition: background 0.3s ease; }
+  .criteria-th { font-size: 0.75rem; max-width: 90px; }
+  #round-bar .btn-check:checked + .btn { box-shadow: 0 0 0 2px #0dcaf0; background: rgba(13,202,240,.15); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  {# Header #}
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="h4 mb-0 text-light">
+        <i class="bi bi-clipboard-check me-2 text-info"></i>{% trans "Panel de Juez" %}
+      </h1>
+      <p class="text-secondary small mb-0">{{ event.name }}{% if assignment %} · {{ assignment.role.name }}{% endif %}</p>
+    </div>
+
+    {# Selector de ronda #}
+    <div class="ms-auto" id="round-bar">
+      <div class="btn-group" role="group" aria-label="{% trans 'Ronda' %}">
+        <input type="radio" class="btn-check" name="round" id="r-prelim" value="PRELIMINARY" autocomplete="off">
+        <label class="btn btn-outline-info btn-sm" for="r-prelim">{% trans "Preliminar" %}</label>
+        <input type="radio" class="btn-check" name="round" id="r-final" value="FINAL" autocomplete="off" checked>
+        <label class="btn btn-outline-info btn-sm" for="r-final">{% trans "Final" %}</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    {# Scoring table #}
+    <div class="col-xl-8">
+      <div class="card border-secondary" style="background:rgba(255,255,255,0.03);">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+          <span class="text-light small fw-semibold">{% trans "Evaluación" %}</span>
+          <span id="global-status" class="text-muted" style="font-size:0.75rem;"></span>
+        </div>
+        <div class="card-body p-0">
+          {% if registrations %}
+          <div class="table-responsive">
+            <table class="table table-dark table-bordered table-hover mb-0" id="scoring-table">
+              <thead>
+                <tr class="align-middle">
+                  <th class="text-secondary fw-normal" style="min-width:140px;">{% trans "Equipo" %}</th>
+                  <th class="text-secondary fw-normal text-center" style="width:80px;">{% trans "Cat." %}</th>
+                  {% for c in criteria %}
+                  <th class="text-secondary fw-normal text-center criteria-th" style="min-width:95px;">
+                    {{ c.name }}<br>
+                    <span class="text-muted" style="font-size:0.65rem;">máx {{ c.max_score }}</span>
+                  </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for reg in registrations %}
+                <tr class="align-middle">
+                  <td class="text-light fw-semibold small">{{ reg.team.name }}</td>
+                  <td class="text-center">
+                    <span class="badge" style="background:rgba(108,117,125,.4);font-size:.65rem;">
+                      {{ reg.category.name }}
+                    </span>
+                  </td>
+                  {% for c in criteria %}
+                  <td class="text-center p-1">
+                    <input
+                      type="number"
+                      class="score-input"
+                      min="0"
+                      max="{{ c.max_score }}"
+                      step="0.01"
+                      placeholder="—"
+                      data-reg="{{ reg.pk }}"
+                      data-criteria="{{ c.pk }}"
+                      data-max="{{ c.max_score }}"
+                      id="inp_{{ reg.pk }}_{{ c.pk }}"
+                    >
+                    <div class="score-status" id="st_{{ reg.pk }}_{{ c.pk }}"></div>
+                  </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center text-secondary py-5">
+            <i class="bi bi-people display-4 opacity-50"></i>
+            <p class="mt-3 small">{% trans "No hay equipos aceptados para evaluar." %}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# Live leaderboard #}
+    <div class="col-xl-4">
+      <div class="card border-secondary h-100" style="background:rgba(255,255,255,0.03);">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+          <span class="text-light small fw-semibold">
+            <i class="bi bi-trophy me-1 text-warning"></i>{% trans "Leaderboard en vivo" %}
+          </span>
+          <span id="lb-ts" class="text-muted" style="font-size:0.65rem;"></span>
+        </div>
+        <div id="lb-body" class="card-body p-0">
+          <div class="text-center text-secondary py-5">
+            <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+            <div class="small">{% trans "Cargando..." %}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCORE_URL   = "{% url 'events:judge_score_submit' event.pk %}";
+const LB_URL      = "{% url 'events:judge_leaderboard_api' event.pk %}";
+const CSRF_TOKEN  = "{{ csrf_token }}";
+const existingScores = {{ my_scores_json|safe }};
+
+let currentRound = 'FINAL';
+const debounceTimers = {};
+
+function scoreKey(regId, critId) {
+  return `${regId}_${critId}_${currentRound}`;
+}
+
+// Llenar inputs con scores previos del juez
+function populateScores() {
+  document.querySelectorAll('.score-input').forEach(inp => {
+    const key = scoreKey(inp.dataset.reg, inp.dataset.criteria);
+    if (existingScores[key] !== undefined) {
+      inp.value = existingScores[key];
+      inp.classList.add('saved');
+      inp.classList.remove('error');
+    } else {
+      inp.value = '';
+      inp.classList.remove('saved', 'error');
+    }
+    document.getElementById(`st_${inp.dataset.reg}_${inp.dataset.criteria}`).textContent = '';
+  });
+}
+
+// Guardar score vía AJAX
+async function saveScore(regId, critId, maxScore) {
+  const inp = document.getElementById(`inp_${regId}_${critId}`);
+  const st  = document.getElementById(`st_${regId}_${critId}`);
+  const val = parseFloat(inp.value);
+
+  if (inp.value === '' || isNaN(val)) {
+    st.textContent = '';
+    return;
+  }
+
+  if (val < 0 || val > parseFloat(maxScore)) {
+    st.textContent = '⚠ Fuera de rango';
+    st.style.color = '#dc3545';
+    inp.classList.add('error');
+    inp.classList.remove('saved');
+    return;
+  }
+
+  st.textContent = '⏳';
+  st.style.color = '#6c757d';
+  document.getElementById('global-status').textContent = 'Guardando...';
+
+  try {
+    const res = await fetch(SCORE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+      body: JSON.stringify({ registration_id: regId, criteria_id: critId, score: val, round: currentRound }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      st.textContent = '✓';
+      st.style.color = '#198754';
+      inp.classList.add('saved');
+      inp.classList.remove('error');
+      existingScores[scoreKey(regId, critId)] = data.score;
+      document.getElementById('global-status').textContent = 'Guardado';
+      setTimeout(() => { document.getElementById('global-status').textContent = ''; }, 2000);
+    } else {
+      st.textContent = '✗';
+      st.style.color = '#dc3545';
+      inp.classList.add('error');
+      inp.classList.remove('saved');
+      document.getElementById('global-status').textContent = 'Error al guardar';
+    }
+  } catch {
+    st.textContent = '✗';
+    st.style.color = '#dc3545';
+    document.getElementById('global-status').textContent = 'Sin conexión';
+  }
+}
+
+// Registrar cambios con debounce
+document.querySelectorAll('.score-input').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const key = `${inp.dataset.reg}_${inp.dataset.criteria}`;
+    clearTimeout(debounceTimers[key]);
+    debounceTimers[key] = setTimeout(
+      () => saveScore(inp.dataset.reg, inp.dataset.criteria, inp.dataset.max),
+      800
+    );
+  });
+});
+
+// Cambio de ronda
+document.querySelectorAll('input[name="round"]').forEach(r => {
+  r.addEventListener('change', () => {
+    currentRound = r.value;
+    populateScores();
+    fetchLeaderboard();
+  });
+});
+
+// Leaderboard
+const medals = ['🥇','🥈','🥉'];
+
+async function fetchLeaderboard() {
+  try {
+    const res = await fetch(`${LB_URL}?round=${currentRound}`);
+    const data = await res.json();
+    renderLeaderboard(data.leaderboard || []);
+    const now = new Date();
+    document.getElementById('lb-ts').textContent = now.toLocaleTimeString();
+  } catch { /* sin conexión — ignorar silenciosamente */ }
+}
+
+function renderLeaderboard(entries) {
+  const body = document.getElementById('lb-body');
+  if (!entries.length) {
+    body.innerHTML = '<div class="text-center text-secondary py-5 small">Sin puntajes aún</div>';
+    return;
+  }
+  body.innerHTML = entries.map(e => `
+    <div class="leaderboard-entry d-flex align-items-center gap-2 px-3 py-2 border-bottom border-secondary">
+      <div class="fs-5 flex-shrink-0">${medals[e.rank - 1] || `#${e.rank}`}</div>
+      <div class="flex-grow-1 overflow-hidden">
+        <div class="text-light fw-semibold text-truncate small">${e.team}</div>
+        <div class="text-muted" style="font-size:.65rem;">${e.category}</div>
+      </div>
+      <div class="text-info fw-bold flex-shrink-0">${e.total_score.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
+// Init
+populateScores();
+fetchLeaderboard();
+setInterval(fetchLeaderboard, 10000);
+</script>
+{% endblock %}

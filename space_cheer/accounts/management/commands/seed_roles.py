@@ -113,7 +113,8 @@ class Command(BaseCommand):
                 "is_staff_type": False,
                 "is_athlete_type": False,
                 "is_coach_type": False,
-                "allow_dashboard_access": False,  # Sin dashboard hasta Events
+                "is_judge_type": True,
+                "allow_dashboard_access": True,
             },
         ]
 

@@ -1,3 +1,4 @@
+import datetime
 import logging
 from decimal import Decimal
 
@@ -30,30 +31,35 @@ _ALLOWED_TRANSITIONS = {
 _TRANSITION_META = {
     Event.STATUS_REGISTRATION_OPEN: {
         'label': 'Abrir Inscripciones',
+        'description': 'Permite a los coaches registrar sus equipos al evento.',
         'icon': 'bi-unlock',
         'btn_class': 'success',
         'confirm': False,
     },
     Event.STATUS_REGISTRATION_CLOSED: {
         'label': 'Cerrar Inscripciones',
+        'description': 'Congela el registro de equipos. Requiere al menos 2 equipos.',
         'icon': 'bi-lock',
         'btn_class': 'warning',
-        'confirm': False,
+        'confirm': True,
     },
     Event.STATUS_IN_PROGRESS: {
         'label': 'Iniciar Evento',
+        'description': 'Marca el evento como en curso. Los jueces pueden evaluar.',
         'icon': 'bi-play-circle',
         'btn_class': 'primary',
-        'confirm': False,
+        'confirm': True,
     },
     Event.STATUS_COMPLETED: {
         'label': 'Completar Evento',
+        'description': 'Cierra el evento. Requiere resultados calculados.',
         'icon': 'bi-check-circle',
         'btn_class': 'info',
         'confirm': True,
     },
     Event.STATUS_CANCELLED: {
         'label': 'Cancelar Evento',
+        'description': 'Cancela el evento permanentemente. Acción irreversible.',
         'icon': 'bi-x-circle',
         'btn_class': 'danger',
         'confirm': True,
@@ -106,6 +112,13 @@ class EventService:
                 f"Allowed targets: {sorted(allowed) or 'none (terminal state)'}."
             )
 
+        # Enforce preconditions — same checks shown in the UI
+        blocking = cls._check_transition_preconditions(event, new_status)
+        if blocking:
+            raise ValidationError(
+                'No se puede cambiar el estado: ' + '; '.join(blocking)
+            )
+
         old_status = event.status
         event.status = new_status
         event.save()
@@ -148,6 +161,7 @@ class EventService:
             result.append({
                 'status': target,
                 'label': meta.get('label', target),
+                'description': meta.get('description', ''),
                 'icon': meta.get('icon', 'bi-arrow-right'),
                 'btn_class': meta.get('btn_class', 'secondary'),
                 'confirm': meta.get('confirm', False),
@@ -170,14 +184,43 @@ class EventService:
                 blocking.append('Define la fecha de apertura de inscripciones')
             if not event.registration_close:
                 blocking.append('Define la fecha de cierre de inscripciones')
+            if event.start_date and event.start_date < datetime.date.today():
+                blocking.append('La fecha de inicio del evento ya pasó')
+
+        elif target_status == Event.STATUS_REGISTRATION_CLOSED:
+            # Cada categoría debe tener ≥2 equipos activos (PENDING o ACCEPTED)
+            short_categories = []
+            for cat in event.categories.all():
+                count = EventTeamRegistration.objects.filter(
+                    category=cat,
+                    status__in=[
+                        EventTeamRegistration.STATUS_PENDING,
+                        EventTeamRegistration.STATUS_ACCEPTED,
+                    ],
+                ).count()
+                if count < 2:
+                    short_categories.append(f'"{cat.name}" ({count}/2)')
+            if short_categories:
+                blocking.append(
+                    'Las siguientes categorías necesitan al menos 2 equipos registrados: '
+                    + ', '.join(short_categories)
+                )
 
         elif target_status == Event.STATUS_IN_PROGRESS:
-            accepted_count = EventTeamRegistration.objects.filter(
-                event=event,
-                status=EventTeamRegistration.STATUS_ACCEPTED,
-            ).count()
-            if accepted_count == 0:
-                blocking.append('Acepta al menos un registro de equipo')
+            # Cada categoría debe tener ≥2 equipos ACEPTADOS
+            short_categories = []
+            for cat in event.categories.all():
+                count = EventTeamRegistration.objects.filter(
+                    category=cat,
+                    status=EventTeamRegistration.STATUS_ACCEPTED,
+                ).count()
+                if count < 2:
+                    short_categories.append(f'"{cat.name}" ({count}/2)')
+            if short_categories:
+                blocking.append(
+                    'Las siguientes categorías necesitan al menos 2 equipos aceptados: '
+                    + ', '.join(short_categories)
+                )
 
         elif target_status == Event.STATUS_COMPLETED:
             has_results = EventResult.objects.filter(
@@ -212,11 +255,33 @@ class EventRegistrationService:
         if category.event_id != event.pk:
             raise ValidationError('The selected category does not belong to this event.')
 
-        # Enforce max_teams cap (based on ACCEPTED count)
+        # Un coach solo puede tener un equipo por categoría en el mismo evento
+        if EventTeamRegistration.objects.filter(
+            event=event,
+            category=category,
+            team__coach=registered_by,
+        ).exclude(status=EventTeamRegistration.STATUS_WITHDRAWN).exists():
+            raise ValidationError(
+                f'Ya tienes un equipo registrado en la categoría "{category.name}" para este evento.'
+            )
+
+        # Enforce global max_teams cap (ACCEPTED count)
         if event.max_teams is not None:
             accepted_count = EventService.get_registered_teams_count(event)
             if accepted_count >= event.max_teams:
-                raise ValidationError('This event has reached its maximum number of accepted teams.')
+                raise ValidationError('Este evento ya alcanzó el límite máximo de equipos aceptados.')
+
+        # Enforce per-category max_teams cap (ACCEPTED count in this category)
+        if category.max_teams is not None:
+            category_accepted = EventTeamRegistration.objects.filter(
+                category=category,
+                status=EventTeamRegistration.STATUS_ACCEPTED,
+            ).count()
+            if category_accepted >= category.max_teams:
+                raise ValidationError(
+                    f'La categoría "{category.name}" ya alcanzó su límite de '
+                    f'{category.max_teams} equipos aceptados.'
+                )
 
         registration = EventTeamRegistration(
             event=event,
@@ -284,6 +349,15 @@ class EventRegistrationService:
     @classmethod
     @transaction.atomic
     def withdraw_registration(cls, *, registration, user) -> EventTeamRegistration:
+        # Solo se puede retirar si está PENDING o ACCEPTED
+        if registration.status not in (
+            EventTeamRegistration.STATUS_PENDING,
+            EventTeamRegistration.STATUS_ACCEPTED,
+        ):
+            raise ValidationError(
+                f'No se puede cancelar un registro en estado "{registration.get_status_display()}".'
+            )
+
         # Allowed for: the original submitter, the team coach, or a superuser
         team = registration.team
         team_coach = getattr(team, 'coach', None)
@@ -339,14 +413,12 @@ class EventScoringService:
         if event.staff_assignments.exists():
             is_judge = event.staff_assignments.filter(
                 user=judge,
-                role__name__icontains='juez',
-            ).exists() or event.staff_assignments.filter(
-                user=judge,
-                role__name__icontains='judge',
+                role__is_judge=True,
             ).exists()
-            if not is_judge:
+            is_admin = judge.is_superuser or judge.roles.filter(name='ADMIN').exists()
+            if not is_judge and not is_admin:
                 raise PermissionDenied(
-                    'The specified user does not have an active judge staff assignment for this event.'
+                    'El usuario no tiene una asignación activa de juez para este evento.'
                 )
 
         # Upsert: update existing score or create a new one
