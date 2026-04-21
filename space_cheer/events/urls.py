@@ -2,6 +2,7 @@ from django.urls import path
 
 import events.views.admin_views as admin_views
 import events.views.coach_views as coach_views
+import events.views.judge_views as judge_views
 import events.views.public_views as public_views
 
 app_name = 'events'
@@ -25,4 +26,9 @@ urlpatterns = [
     path('<int:pk>/results/', admin_views.results_manage, name='results_manage'),
     # Coach
     path('<int:pk>/register/', coach_views.team_register, name='team_register'),
+    path('registrations/<int:reg_pk>/withdraw/', coach_views.registration_withdraw, name='registration_withdraw'),
+    # Juez — panel de evaluación en tiempo real
+    path('<int:pk>/judge/', judge_views.judge_panel, name='judge_panel'),
+    path('<int:pk>/judge/score/', judge_views.judge_score_submit, name='judge_score_submit'),
+    path('<int:pk>/judge/leaderboard/', judge_views.judge_leaderboard_api, name='judge_leaderboard_api'),
 ]
