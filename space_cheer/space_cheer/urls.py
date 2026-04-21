@@ -5,6 +5,7 @@ from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("i18n/", include("django.conf.urls.i18n")),
     # Core app URLs
     path("", include("core.urls")),
     # Include allauth and accounts URLs for authentication
