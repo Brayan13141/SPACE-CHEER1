@@ -1,0 +1,78 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Ingresar Scores" %} — {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="h3 mb-0">{% trans "Ingresar Scores" %}</h1>
+      <p class="text-secondary small mb-0">{{ event.name }}</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header"><h6 class="mb-0"><i class="bi bi-pencil-square me-2"></i>{% trans "Nuevo Score" %}</h6></div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-check-lg me-1"></i>{% trans "Registrar Score" %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">{% blocktrans with count=scores.count %}Scores registrados ({{ count }}){% endblocktrans %}</h6>
+        </div>
+        {% if scores %}
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+              <thead>
+                <tr>
+                  <th>{% trans "Equipo" %}</th><th>{% trans "Criterio" %}</th>
+                  <th>{% trans "Juez" %}</th><th>{% trans "Score" %}</th><th>{% trans "Ronda" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for score in scores %}
+                <tr>
+                  <td>{{ score.team_registration.team.name }}</td>
+                  <td>{{ score.criteria.name }}</td>
+                  <td>{{ score.judge.get_full_name|default:score.judge.username }}</td>
+                  <td><strong>{{ score.score }}</strong> / {{ score.criteria.max_score }}</td>
+                  <td><span class="badge bg-secondary">{{ score.get_round_display }}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% else %}
+        <div class="card-body text-center text-secondary py-4">
+          <i class="bi bi-bar-chart display-4"></i>
+          <p class="mt-3 mb-0">{% trans "No hay scores registrados aún." %}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

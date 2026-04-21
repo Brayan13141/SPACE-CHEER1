@@ -1,0 +1,10 @@
+{# Usar como: {% include "events/partials/status_badge.html" with status=event.status display=event.get_status_display %} #}
+{% load i18n %}
+{% if status == 'DRAFT' %}<span class="badge bg-secondary">{{ display }}</span>
+{% elif status == 'REGISTRATION_OPEN' %}<span class="badge bg-success">{{ display }}</span>
+{% elif status == 'REGISTRATION_CLOSED' %}<span class="badge bg-warning text-dark">{{ display }}</span>
+{% elif status == 'IN_PROGRESS' %}<span class="badge bg-primary">{{ display }}</span>
+{% elif status == 'COMPLETED' %}<span class="badge bg-info text-dark">{{ display }}</span>
+{% elif status == 'CANCELLED' %}<span class="badge bg-danger">{{ display }}</span>
+{% else %}<span class="badge bg-secondary">{{ display }}</span>
+{% endif %}

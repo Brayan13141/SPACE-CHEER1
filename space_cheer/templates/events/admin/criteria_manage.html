@@ -1,0 +1,136 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Categorías y Criterios" %} — {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="h3 mb-0">{% trans "Categorías y Criterios" %}</h1>
+      <p class="text-secondary small mb-0">{{ event.name }}</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-list-stars me-2"></i>{% trans "Categorías" %}</h6>
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#catForm">
+            <i class="bi bi-plus"></i>
+          </button>
+        </div>
+        <div class="collapse" id="catForm">
+          <div class="card-body border-bottom">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_category">
+              {% for field in cat_form %}
+              <div class="mb-2">
+                <label class="form-label small">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              {% endfor %}
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar" %}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% if categories %}
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead><tr>
+              <th>{% trans "Nombre" %}</th><th>{% trans "Máx. equipos" %}</th><th></th>
+            </tr></thead>
+            <tbody>
+              {% for cat in categories %}
+              <tr>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.max_teams|default:"—" }}</td>
+                <td>
+                  <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_category">
+                    <input type="hidden" name="category_pk" value="{{ cat.pk }}">
+                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="card-body text-center text-secondary py-3">
+          <p class="mb-0 small">{% trans "Sin categorías. Agrega la primera." %}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>{% trans "Criterios de evaluación" %}</h6>
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#critForm">
+            <i class="bi bi-plus"></i>
+          </button>
+        </div>
+        <div class="collapse" id="critForm">
+          <div class="card-body border-bottom">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_criteria">
+              {% for field in crit_form %}
+              <div class="mb-2">
+                <label class="form-label small">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+              {% endfor %}
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar" %}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% if criteria %}
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead><tr>
+              <th>{% trans "Nombre" %}</th><th>{% trans "Peso" %}</th><th>{% trans "Máx." %}</th><th></th>
+            </tr></thead>
+            <tbody>
+              {% for crit in criteria %}
+              <tr>
+                <td>{{ crit.name }}</td>
+                <td>{{ crit.weight }}</td>
+                <td>{{ crit.max_score }}</td>
+                <td>
+                  <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_criteria">
+                    <input type="hidden" name="criteria_pk" value="{{ crit.pk }}">
+                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="card-body text-center text-secondary py-3">
+          <p class="mb-0 small">{% trans "Sin criterios. Define cómo se evalúa este evento." %}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
