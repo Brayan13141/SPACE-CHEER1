@@ -22,11 +22,6 @@ urlpatterns = [
         name="remove_guardian",
     ),
     path(
-        "guardians/minors-without/",
-        views.minors_without_guardian_list,
-        name="minors_without_guardian",
-    ),
-    path(
         "ownership/add/<int:user_id>/",
         views.ownership_add_user,
         name="ownership_add_user",

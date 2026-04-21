@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Asignar Guardián - {{ athlete.get_full_name }}{% endblock %}
+{% block title %}{% blocktrans with name=athlete.get_full_name %}Asignar Guardián - {{ name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -38,28 +38,37 @@
                 <div>
                     <h1 class="h2 mb-1">
                         <i class="bi bi-person-plus-fill text-primary me-2"></i>
-                        Asignar Guardián
+                        {% trans "Asignar Guardián" %}
                     </h1>
                     <p class="text-muted">
-                        Para: <strong>{{ athlete.get_full_name }}</strong> 
+                        {% trans "Para:" %} <strong>{{ athlete.get_full_name }}</strong> 
                         {% if athlete.birth_date %}
                             ({{ athlete.birth_date }} - 
-                            {% if athlete.is_minor %}Menor de edad{% else %}Mayor de edad{% endif %})
+                            {% if athlete.is_minor %}{% trans "Menor de edad" %}{% else %}{% trans "Mayor de edad" %}{% endif %})
                         {% endif %}
                     </p>
                 </div>
                 <a href="{% url 'guardian:headcoach_dashboard' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Volver a Mis Alumnos
+                    <i class="bi bi-arrow-left me-1"></i> {% trans "Volver a Mis Alumnos" %}
                 </a>
             </div>
 
-            <!-- Alerta si ya tiene guardian -->
+            <!-- Alerta si ya tiene guardian (Transferir o Remover) -->
             {% if current_guardian %}
-            <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Atención:</strong> {{ athlete.get_full_name }} ya tiene un guardián asignado 
-                ({{ current_guardian.get_full_name }}). Si asignas uno nuevo, reemplazará al actual.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="alert alert-warning d-flex flex-column flex-md-row justify-content-between align-items-md-center px-4 py-3 border-warning shadow-sm rounded-4 mb-4 bg-warning bg-opacity-10 text-dark">
+                <div class="mb-3 mb-md-0">
+                    <h5 class="alert-heading text-white fw-bold mb-1">
+                        <i class="bi bi-shield-check me-2"></i> {% blocktrans with name=current_guardian.get_full_name %}Guardián Actual: {{ name }}{% endblocktrans %}
+                    </h5>
+                    <p class="mb-0 text-white small" style="opacity: 0.85;">
+                        {% trans "Si seleccionas otro guardián de la lista y guardas, el actual será" %} <strong class="text-danger">{% trans "reemplazado (Transferencia)" %}</strong>.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-danger btn-sm rounded-pill fw-semibold shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#removeGuardianModal">
+                        <i class="bi bi-person-x-fill me-1"></i> {% trans "Remover Guardián" %}
+                    </button>
+                </div>
             </div>
             {% endif %}
 
@@ -68,15 +77,15 @@
                 <div class="card-header bg-dark border-0 pt-4">
                     <ul class="nav nav-tabs card-header-tabs" id="guardianTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="assign-tab" data-bs-toggle="tab" 
+                            <button class="nav-link active" id="assign-tab" data-bs-toggle="tab"
                                     data-bs-target="#assign-pane" type="button" role="tab">
-                                <i class="bi bi-person-check me-1"></i> Guardián registrado
+                                <i class="bi bi-person-check me-1"></i> {% trans "Guardián registrado" %}
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="invite-tab" data-bs-toggle="tab" 
+                            <button class="nav-link" id="invite-tab" data-bs-toggle="tab"
                                     data-bs-target="#invite-pane" type="button" role="tab">
-                                <i class="bi bi-envelope-plus me-1"></i> Invitar por email
+                                <i class="bi bi-envelope-plus me-1"></i> {% trans "Invitar por email" %}
                             </button>
                         </li>
                     </ul>
@@ -86,15 +95,15 @@
                         <!-- TAB A: Asignar guardián existente (radio buttons) -->
                         <div class="tab-pane fade show active" id="assign-pane" role="tabpanel">
                             {% if potential_guardians %}
-                                <form method="post" id="assignForm">
+                                <form method="post" id="assignForm" class="needs-validation" novalidate>
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="assign">
                                     
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">
-                                            <i class="bi bi-people me-1"></i> Selecciona un guardián
+                                            <i class="bi bi-people me-1"></i> {% trans "Selecciona un guardián" %}
                                         </label>
-                                        <div class="list-group">
+                                        <div class="list-group" id="guardianListGroup">
                                             {% for guardian in potential_guardians %}
                                             <div class="list-group-item list-group-item-action p-3 guardian-card list-group-item-radio">
                                                 <div class="form-check">
@@ -106,7 +115,7 @@
                                                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start">
                                                             <div>
                                                                 <strong>{{ guardian.get_full_name }}</strong>
-                                                                <span class="badge bg-secondary relation-badge ms-2">Adulto</span>
+                                                                <span class="badge bg-secondary relation-badge ms-2">{% trans "Adulto" %}</span>
                                                                 <div class="small text-muted">
                                                                     <i class="bi bi-envelope me-1"></i> {{ guardian.email }}
                                                                     {% if guardian.phone %}
@@ -116,7 +125,7 @@
                                                             </div>
                                                             <div class="mt-2 mt-sm-0">
                                                                 <span class="badge bg-light text-dark">
-                                                                    <i class="bi bi-person-check"></i> Disponible
+                                                                    <i class="bi bi-person-check"></i> {% trans "Disponible" %}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -125,12 +134,15 @@
                                             </div>
                                             {% endfor %}
                                         </div>
+                                        <div id="guardianSelectionFeedback" class="invalid-feedback mt-2" style="display: none;">
+                                            {% trans "Por favor, selecciona un guardián de la lista." %}
+                                        </div>
                                     </div>
 
                                     <!-- Tipo de relación -->
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">
-                                            <i class="bi bi-link me-1"></i> Tipo de relación
+                                            <i class="bi bi-link me-1"></i> {% trans "Tipo de relación" %}
                                         </label>
                                         <select name="relation" class="form-select">
                                             {% for value, label in relation_choices %}
@@ -139,21 +151,24 @@
                                                 </option>
                                             {% endfor %}
                                         </select>
-                                        <div class="form-text">Opcional: define el vínculo del guardián con el atleta.</div>
+                                        <div class="form-text">{% trans "Opcional: define el vínculo del guardián con el atleta." %}</div>
                                     </div>
 
                                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
-                                        <button type="submit" class="btn btn-primary px-4">
-                                            <i class="bi bi-save me-2"></i> Asignar Guardián
+                                        <button type="submit" class="btn btn-primary px-4 rounded-pill">
+                                            {% if current_guardian %}
+                                            <i class="bi bi-arrow-left-right me-2"></i> {% trans "Transferir a este Guardián" %}
+                                            {% else %}
+                                            <i class="bi bi-save me-2"></i> {% trans "Asignar Guardián" %}
+                                            {% endif %}
                                         </button>
                                     </div>
                                 </form>
                             {% else %}
                                 <div class="alert alert-info">
                                     <i class="bi bi-info-circle me-2"></i>
-                                    No hay usuarios adultos disponibles para ser guardians.
-                                    <a href="{% url 'account_signup' %}" class="alert-link">Registra un nuevo usuario</a> o 
-                                    usa la pestaña <strong>"Invitar por email"</strong>.
+                                    {% trans "No hay usuarios adultos disponibles para ser guardians." %}
+                                    <a href="{% url 'account_signup' %}" class="alert-link">{% trans "Registra un nuevo usuario" %}</a> {% trans "o usa la pestaña" %} <strong>"{% trans "Invitar por email" %}"</strong>.
                                 </div>
                             {% endif %}
                         </div>
@@ -161,24 +176,24 @@
                         <!-- TAB B: Invitar por email -->
                         <div class="tab-pane fade" id="invite-pane" role="tabpanel">
                             <p class="text-muted">
-                                Si el padre o tutor <strong>no tiene cuenta</strong> en el sistema,
-                                puedes enviarle una invitación por email. Cuando se registre y
-                                seleccione el rol <strong>GUARDIAN</strong>, aparecerá en la lista
-                                de guardians disponibles.
+                                {% trans "Si el padre o tutor" %} <strong>{% trans "no tiene cuenta" %}</strong> {% trans "en el sistema, puedes enviarle una invitación por email. Cuando se registre y seleccione el rol" %} <strong>GUARDIAN</strong>, {% trans "aparecerá en la lista de guardians disponibles." %}
                             </p>
-                            <form method="post" id="inviteForm">
+                            <form method="post" id="inviteForm" class="needs-validation" novalidate>
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="invite">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">
-                                        <i class="bi bi-envelope me-1"></i> Email del padre / tutor
+                                        <i class="bi bi-envelope me-1"></i> {% trans "Email del padre / tutor" %}
                                     </label>
                                     <input type="email" name="invite_email" class="form-control"
                                            placeholder="padre@ejemplo.com" required>
+                                    <div class="invalid-feedback">
+                                        {% trans "Por favor, ingresa un correo electrónico válido." %}
+                                    </div>
                                 </div>
                                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
                                     <button type="submit" class="btn btn-outline-primary">
-                                        <i class="bi bi-send me-2"></i> Enviar Invitación
+                                        <i class="bi bi-send me-2"></i> {% trans "Enviar Invitación" %}
                                     </button>
                                 </div>
                             </form>
@@ -190,10 +205,8 @@
             <!-- Información adicional (opcional) -->
             <div class="alert alert-light border rounded-3 small mt-4">
                 <i class="bi bi-question-circle-fill me-2 text-info"></i>
-                <strong>¿Por qué asignar un guardián?</strong><br>
-                Los atletas menores de edad necesitan un adulto responsable para autorizaciones, 
-                recogida de pedidos y comunicación oficial. El guardián puede ser padre, tutor o 
-                acompañante designado por el coach.
+                <strong>{% trans "¿Por qué asignar un guardián?" %}</strong><br>
+                {% trans "Los atletas menores de edad necesitan un adulto responsable para autorizaciones, recogida de pedidos y comunicación oficial. El guardián puede ser padre, tutor o acompañante designado por el coach." %}
             </div>
         </div>
 
@@ -203,7 +216,7 @@
                 <div class="card-header">
                     <h6 class="mb-0">
                         <i class="bi bi-exclamation-triangle me-1"></i>
-                        Otros menores pendientes
+                        {% trans "Otros menores pendientes" %}
                         {% if minors_pending_count %}
                         <span class="badge bg-warning text-dark ms-1">
                             {{ minors_pending_count }}
@@ -219,14 +232,14 @@
                             <span>{{ minor.get_full_name }}</span>
                             <a href="{% url 'guardian:assign_guardian' minor.id %}"
                                class="btn btn-sm btn-outline-warning">
-                                Asignar
+                                {% trans "Asignar" %}
                             </a>
                         </li>
                         {% endfor %}
                     </ul>
                     {% else %}
                     <div class="p-3 text-muted text-center">
-                        ✅ Todos los menores tienen guardian
+                        ✅ {% trans "Todos los menores tienen guardian" %}
                     </div>
                     {% endif %}
                 </div>
@@ -234,28 +247,84 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Remover Guardian -->
+{% if current_guardian %}
+<div class="modal fade" id="removeGuardianModal" tabindex="-1" aria-labelledby="removeGuardianModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="background: #1a1a2e;">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title text-danger fw-bold" id="removeGuardianModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {% trans "Remover Guardián" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-light">
+                <p>{% blocktrans with guardian_name=current_guardian.get_full_name athlete_name=athlete.get_full_name %}¿Estás completamente seguro de que deseas <strong>remover a {{ guardian_name }}</strong> como guardián de {{ athlete_name }}?{% endblocktrans %}</p>
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger small mb-0">
+                    <i class="bi bi-info-circle-fill me-1"></i> {% trans "Esto dejará al atleta sin tutor legal registrado en el sistema. Debe realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se reasignará un tutor después." %}
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+                <form method="post" action="{% url 'guardian:remove_guardian' athlete.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger fw-semibold shadow-sm">
+                        <i class="bi bi-trash me-1"></i> {% trans "Sí, Remover" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Validación para el formulario de asignación: asegurar que se seleccione un guardián
-        const assignForm = document.getElementById('assignForm');
-        if (assignForm) {
-            assignForm.addEventListener('submit', function(e) {
-                const selected = document.querySelector('input[name="guardian_id"]:checked');
-                if (!selected) {
-                    e.preventDefault();
-                    alert('Por favor, selecciona un guardián de la lista.');
+        // Bootstrap 5 form validation logic
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                let isValid = form.checkValidity();
+                
+                // Validación custom para los radios de guardian_id
+                if (form.id === 'assignForm') {
+                    const selected = form.querySelector('input[name="guardian_id"]:checked');
+                    if (!selected) {
+                        isValid = false;
+                        const listGroup = document.getElementById('guardianListGroup');
+                        const feedback = document.getElementById('guardianSelectionFeedback');
+                        if (listGroup) listGroup.style.border = '1px solid var(--bs-danger)';
+                        if (feedback) feedback.style.display = 'block';
+                    }
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Limpiar el error de validación cuando se selecciona un radio
+        const radios = document.querySelectorAll('input[name="guardian_id"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const listGroup = document.getElementById('guardianListGroup');
+                const feedback = document.getElementById('guardianSelectionFeedback');
+                if (listGroup) {
+                    listGroup.style.border = '';
+                }
+                if (feedback) {
+                    feedback.style.display = 'none';
                 }
             });
-        }
-
-        // Opcional: auto-seleccionar el primer radio si la lista tiene al menos uno y ninguno está marcado
-        const radios = document.querySelectorAll('input[name="guardian_id"]');
-        if (radios.length > 0 && !Array.from(radios).some(r => r.checked)) {
-            radios[0].checked = true;
-        }
+        });
     });
 </script>
 {% endblock %}

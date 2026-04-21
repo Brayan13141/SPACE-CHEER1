@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
             name='UserTeamMembership',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role_in_team', models.CharField(choices=[('ATLETA', 'Atleta'), ('COACH', 'Coach'), ('STAFF', 'Staff')], default='ATLETA', max_length=20)),
+                ('role_in_team', models.CharField(choices=[('ATHLETE', 'ATHLETE'), ('COACH', 'Coach'), ('STAFF', 'Staff')], default='ATHLETE', max_length=20)),
                 ('status', models.CharField(choices=[('pending', 'Pendiente'), ('accepted', 'Aceptado'), ('rejected', 'Rechazado'), ('inactive', 'Inactivo')], default='pending', max_length=10)),
                 ('date_joined', models.DateTimeField(auto_now_add=True)),
                 ('start_date', models.DateField(default=django.utils.timezone.now)),

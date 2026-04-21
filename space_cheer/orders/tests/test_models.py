@@ -169,7 +169,7 @@ class OrderItemAthleteModelTests(TestCase):
         team = TeamFactory()
         athlete = AthleteFactory()
         UserTeamMembershipFactory(
-            team=team, user=athlete, role_in_team="ATLETA", status="accepted"
+            team=team, user=athlete, role_in_team="ATHLETE", status="accepted"
         )
 
         order = TeamOrderFactory(owner_team=team)
@@ -204,7 +204,7 @@ class OrderItemAthleteModelTests(TestCase):
         UserTeamMembershipFactory(
             team=order.owner_team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
         )
 
@@ -233,7 +233,7 @@ class OrderItemAthleteModelTests(TestCase):
         UserTeamMembershipFactory(
             team=order.owner_team,
             user=athlete,
-            role_in_team="ATLETA",
+            role_in_team="ATHLETE",
             status="accepted",
         )
 
@@ -315,7 +315,7 @@ class OrderValidationTests(TestCase):
 
         athlete = AthleteFactory()
         UserTeamMembershipFactory(
-            team=order.owner_team, user=athlete, role_in_team="ATLETA"
+            team=order.owner_team, user=athlete, role_in_team="ATHLETE"
         )
 
         athlete_item = OrderItemAthleteFactory(order_item=item, athlete=athlete)

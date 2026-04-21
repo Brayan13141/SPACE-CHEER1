@@ -32,6 +32,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
 
+from decouple import config
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -238,7 +239,7 @@ class BulkImportService:
                     phone=phone,
                     birth_date=birth_date,
                     gender=gender or None,
-                    password="$Temporal123!",  # Cambiar en primer login
+                    password=config("ATLETA_TEMP_PASSWORD"),  # Definir en .env — nunca en código
                     profile_completed=False,
                     is_active=True,
                 )
@@ -275,7 +276,7 @@ class BulkImportService:
         # Remover caracteres especiales
         base = "".join(c for c in base if c.isalnum())
         if not base:
-            base = "atleta"
+            base = "ATHLETE"
 
         username = base
         counter = 1

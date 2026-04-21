@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div class="container mt-4">
@@ -8,7 +9,7 @@
     <div>
       <h2 class="mb-1">
         <i class="bi bi-shield-heart me-2" style="color: var(--sc-purple);"></i>
-        Panel de Guardian
+        {% trans "Panel de Guardian" %}
       </h2>
       <p class="text-muted mb-0">
         {{ request.user.get_full_name }}
@@ -25,7 +26,7 @@
   {% if alerts %}
   <div class="mb-4">
     <h5 class="text-warning mb-3">
-      <i class="bi bi-exclamation-triangle-fill me-1"></i> Alertas activas
+      <i class="bi bi-exclamation-triangle-fill me-1"></i> {% trans "Alertas activas" %}
     </h5>
     {% for alert in alerts %}
       <div class="alert alert-{{ alert.level }} d-flex align-items-center gap-2 mb-2" role="alert">
@@ -46,7 +47,7 @@
   <div class="card border-0 shadow-sm">
     <div class="card-header d-flex align-items-center gap-2" style="border-bottom: 1px solid rgba(255,255,255,.1);">
       <i class="bi bi-people-fill" style="color: var(--sc-cyan);"></i>
-      <span class="fw-semibold">Mis Atletas</span>
+      <span class="fw-semibold">{% trans "Mis Atletas" %}</span>
       {% if athletes %}
         <span class="badge rounded-pill ms-auto" style="background-color: var(--sc-cyan); color: #000;">
           {{ athletes|length }}
@@ -71,12 +72,12 @@
                 {% if athlete.birth_date %}
                   <p class="text-muted small mb-2">
                     <i class="bi bi-calendar3 me-1"></i>
-                    Nacimiento: {{ athlete.birth_date|date:"d/m/Y" }}
+                    {% trans "Nacimiento:" %} {{ athlete.birth_date|date:"d/m/Y" }}
                   </p>
                 {% else %}
                   <p class="text-muted small mb-2">
                     <i class="bi bi-calendar-x me-1"></i>
-                    Sin fecha de nacimiento
+                    {% trans "Sin fecha de nacimiento" %}
                   </p>
                 {% endif %}
 
@@ -92,7 +93,7 @@
                     </div>
                   {% else %}
                     <p class="text-muted small mb-2">
-                      <i class="bi bi-dash-circle me-1"></i> Sin equipo asignado
+                      <i class="bi bi-dash-circle me-1"></i> {% trans "Sin equipo asignado" %}
                     </p>
                   {% endif %}
                 {% endwith %}
@@ -111,7 +112,7 @@
                 {% endwith %}
 
                 <a href="#" class="btn btn-sm w-100" style="background-color: var(--sc-purple); color: #fff;">
-                  <i class="bi bi-eye me-1"></i> Ver perfil
+                  <i class="bi bi-eye me-1"></i> {% trans "Ver perfil" %}
                 </a>
               </div>
             </div>
@@ -121,7 +122,7 @@
       {% else %}
         <div class="text-center py-5">
           <i class="bi bi-person-x display-4 text-muted"></i>
-          <p class="mt-3 text-muted">No tienes atletas asignados bajo tu custodia.</p>
+          <p class="mt-3 text-muted">{% trans "No tienes atletas asignados bajo tu custodia." %}</p>
         </div>
       {% endif %}
     </div>

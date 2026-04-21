@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Competencias" %} — SPACE CHEER{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1"><i class="bi bi-trophy me-2" style="color:var(--sc-cyan);"></i>{% trans "Competencias" %}</h1>
+      <p class="text-secondary mb-0">{% trans "Explora eventos y competencias disponibles" %}</p>
+    </div>
+    {% if is_admin %}
+    <a href="{% url 'events:event_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>{% trans "Crear Evento" %}
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'events:event_list' %}"
+       class="btn btn-sm {% if not filter_status %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {% trans "Todos" %}
+    </a>
+    {% for value, label in status_choices %}
+    <a href="?filter={{ value }}"
+       class="btn btn-sm {% if filter_status == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+    <a href="?filter=upcoming"
+       class="btn btn-sm {% if filter_status == 'upcoming' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-calendar-event me-1"></i>{% trans "Próximos" %}
+    </a>
+  </div>
+
+  {% if events %}
+  <div class="row g-4">
+    {% for event in events %}
+    <div class="col-sm-6 col-lg-4">
+      {% include "events/partials/event_card.html" %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-calendar-x display-4 text-secondary"></i>
+    <p class="text-secondary mt-3 mb-0">{% trans "No hay eventos con este filtro." %}</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

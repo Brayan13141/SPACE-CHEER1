@@ -87,10 +87,10 @@
         <div class="mb-4">
             <label class="form-label-neon" style="color: #e2e8f0 !important;">
                 <i class="bi bi-person-badge me-1"></i>
-                ¿Cuál es tu rol?
+                {% trans "¿Cuál es tu rol?" %}
                 <span class="text-danger">*</span>
             </label>
-            <p class="text-muted small mb-3" style="color: #a0a7d0 !important;">Selecciona tu perfil – define qué acciones podrás realizar en la plataforma.</p>
+            <p class="text-muted small mb-3" style="color: #a0a7d0 !important;">{% trans "Selecciona tu perfil – define qué acciones podrás realizar en la plataforma." %}</p>
 
             <!-- Select original de Django (oculto) -->
             {% for field in form %}
@@ -132,8 +132,8 @@
                 <div class="d-flex gap-3">
                     <i class="bi bi-clock-history fs-4"></i>
                     <div>
-                        <strong>Perfil en revisión</strong>
-                        <p class="mb-0 small">El rol <strong>HEADCOACH</strong> requiere validación manual. Tu cuenta quedará inactiva hasta que sea aprobada.</p>
+                        <strong>{% trans "Perfil en revisión" %}</strong>
+                        <p class="mb-0 small">{% trans "El rol HEADCOACH requiere validación manual. Tu cuenta quedará inactiva hasta que sea aprobada." %}</p>
                     </div>
                 </div>
             </div>

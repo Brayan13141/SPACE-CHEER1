@@ -1,18 +1,21 @@
 <!-- orders/templates/orders/partials/pagination.html -->
+{% load i18n %}
 {% if pagination.total_pages > 1 %}
-<nav aria-label="Paginación">
+<nav aria-label="{% trans 'Paginación' %}">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="text-muted">
-            Mostrando <strong>{{ pagination.start_index }}</strong> 
-            a <strong>{{ pagination.end_index }}</strong> 
-            de <strong>{{ pagination.total_items }}</strong> resultados
+            {% blocktrans with start=pagination.start_index end=pagination.end_index total=pagination.total_items %}
+            Mostrando <strong>{{ start }}</strong>
+            a <strong>{{ end }}</strong>
+            de <strong>{{ total }}</strong> resultados
+            {% endblocktrans %}
         </div>
-        
+
         <ul class="pagination mb-0">
             <!-- Primera página -->
             {% if pagination.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Primera">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="{% trans 'Primera' %}">
                     <span aria-hidden="true">&laquo;&laquo;</span>
                 </a>
             </li>
@@ -25,7 +28,7 @@
             <!-- Anterior -->
             {% if pagination.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ pagination.previous_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Anterior">
+                <a class="page-link" href="?page={{ pagination.previous_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="{% trans 'Anterior' %}">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
@@ -53,7 +56,7 @@
             <!-- Siguiente -->
             {% if pagination.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ pagination.next_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Siguiente">
+                <a class="page-link" href="?page={{ pagination.next_page }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="{% trans 'Siguiente' %}">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -66,7 +69,7 @@
             <!-- Última página -->
             {% if pagination.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ pagination.total_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Última">
+                <a class="page-link" href="?page={{ pagination.total_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="{% trans 'Última' %}">
                     <span aria-hidden="true">&raquo;&raquo;</span>
                 </a>
             </li>

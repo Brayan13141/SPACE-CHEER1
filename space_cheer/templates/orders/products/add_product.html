@@ -1,19 +1,19 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
 
 <div class="container py-3 py-md-4">
   <!-- Header -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
     <div>
-      <h1 class="h2 mb-1">Agregar producto a la orden</h1>
+      <h1 class="h2 mb-1">{% trans "Agregar producto a la orden" %}</h1>
       <p class="text-muted mb-0">
-        Orden #{{ order.id }} | Selecciona productos del catálogo
+        {% blocktrans with id=order.id %}Orden #{{ id }} | Selecciona productos del catálogo{% endblocktrans %}
       </p>
     </div>
     <div class="mt-3 mt-md-0">
       <a href="{% url 'orders:detail_order' order.id %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Volver a la orden
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver a la orden" %}
       </a>
     </div>
   </div>
@@ -23,9 +23,9 @@
     <!-- Filters Sidebar -->
     <div class="col-lg-3 mb-4">
       <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
+        <div class="card-header">
           <h5 class="card-title mb-0">
-            <i class="bi bi-funnel me-2"></i>Filtros
+            <i class="bi bi-funnel me-2"></i>{% trans "Filtros" %}
           </h5>
         </div>
         <div class="card-body">
@@ -33,12 +33,12 @@
             <!-- Product Type Filter -->
             <div class="mb-4">
               <label class="form-label fw-semibold mb-2">
-                <i class="bi bi-tag me-1"></i>Tipo de producto
+                <i class="bi bi-tag me-1"></i>{% trans "Tipo de producto" %}
               </label>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="product_type" value="" id="type-all" checked>
                 <label class="form-check-label" for="type-all">
-                  Todos los tipos
+                  {% trans "Todos los tipos" %}
                 </label>
               </div>
               {% for value, label in product_type_choices %}
@@ -54,12 +54,12 @@
             <!-- Usage Type Filter -->
             <div class="mb-4">
               <label class="form-label fw-semibold mb-2">
-                <i class="bi bi-gear me-1"></i>Tipo de uso
+                <i class="bi bi-gear me-1"></i>{% trans "Tipo de uso" %}
               </label>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="usage_type" value="" id="usage-all" checked>
                 <label class="form-check-label" for="usage-all">
-                  Todos los usos
+                  {% trans "Todos los usos" %}
                 </label>
               </div>
               {% for value, label in usage_type_choices %}
@@ -75,10 +75,10 @@
             <!-- Season Filter -->
             <div class="mb-4">
               <label class="form-label fw-semibold mb-2">
-                <i class="bi bi-calendar me-1"></i>Temporada
+                <i class="bi bi-calendar me-1"></i>{% trans "Temporada" %}
               </label>
               <select class="form-select" name="season">
-                <option value="">Todas las temporadas</option>
+                <option value="">{% trans "Todas las temporadas" %}</option>
                 {% for season in seasons %}
                 <option value="{{ season.id }}">{{ season.name }}</option>
                 {% endfor %}
@@ -88,14 +88,14 @@
             <!-- Price Range -->
             <div class="mb-4">
               <label class="form-label fw-semibold mb-2">
-                <i class="bi bi-currency-dollar me-1"></i>Rango de precio
+                <i class="bi bi-currency-dollar me-1"></i>{% trans "Rango de precio" %}
               </label>
               <div class="row g-2">
                 <div class="col-6">
-                  <input type="number" class="form-control" name="min_price" placeholder="Mín" min="0" step="0.01">
+                  <input type="number" class="form-control" name="min_price" placeholder="{% trans 'Mín' %}" min="0" step="0.01">
                 </div>
                 <div class="col-6">
-                  <input type="number" class="form-control" name="max_price" placeholder="Máx" min="0" step="0.01">
+                  <input type="number" class="form-control" name="max_price" placeholder="{% trans 'Máx' %}" min="0" step="0.01">
                 </div>
               </div>
             </div>
@@ -103,10 +103,10 @@
             <!-- Action Buttons -->
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-primary">
-                <i class="bi bi-funnel me-1"></i>Aplicar filtros
+                <i class="bi bi-funnel me-1"></i>{% trans "Aplicar filtros" %}
               </button>
               <button type="reset" class="btn btn-outline-secondary" id="reset-filters">
-                <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+                <i class="bi bi-x-circle me-1"></i>{% trans "Limpiar filtros" %}
               </button>
             </div>
           </form>
@@ -125,13 +125,13 @@
                 <span class="input-group-text">
                   <i class="bi bi-search"></i>
                 </span>
-                <input type="text" class="form-control" id="product-search" placeholder="Buscar productos...">
+                <input type="text" class="form-control" id="product-search" placeholder="{% trans 'Buscar productos...' %}">
               </div>
             </div>
             <div class="col-md-6">
               <div class="text-md-end">
                 <span class="badge bg-info rounded-pill fs-6">
-                  {{ products|length }} producto{{ products|pluralize:"s" }} encontrado{{ products|pluralize:"s" }}
+                  {% blocktrans with count=products|length %}{{ count }} producto encontrado{% endblocktrans %}{{ products|pluralize:"s" }}
                 </span>
               </div>
             </div>
@@ -150,7 +150,7 @@
                 {% if product.image %}
                   <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
                 {% else %}
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                  <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: var(--sc-panel, #1a1a2e);">
                     <i class="bi bi-image text-muted display-4"></i>
                   </div>
                 {% endif %}
@@ -158,12 +158,12 @@
                 <div class="position-absolute top-0 end-0 m-2">
                   {% if product.scope == "TEAM_ONLY" %}
                     <span class="badge bg-warning">
-                      <i class="bi bi-shield-lock me-1"></i>Exclusivo
+                      <i class="bi bi-shield-lock me-1"></i>{% trans "Exclusivo" %}
                     </span>
                   {% endif %}
                   {% if not product.is_active %}
                     <span class="badge bg-secondary">
-                      <i class="bi bi-pause-circle me-1"></i>Inactivo
+                      <i class="bi bi-pause-circle me-1"></i>{% trans "Inactivo" %}
                     </span>
                   {% endif %}
                 </div>
@@ -177,7 +177,7 @@
                   <p class="card-text text-muted small mb-3">
                     {{ product.description|truncatechars:100 }}
                   </p>
-                  
+
                   <!-- Product Metadata -->
                   <div class="row g-2 mb-3">
                     <div class="col-6">
@@ -195,7 +195,7 @@
                     <div class="col-12">
                       <div class="d-flex align-items-center">
                         <i class="bi bi-calendar text-primary me-2"></i>
-                        <small>Temporada: {{ product.season.name }}</small>
+                        <small>{% trans "Temporada:" %} {{ product.season.name }}</small>
                       </div>
                     </div>
                   </div>
@@ -204,11 +204,11 @@
                   {% if product.measurement_fields.all %}
                   <div class="mb-3">
                     <small class="text-muted d-block mb-1">
-                      <i class="bi bi-rulers me-1"></i>Medidas requeridas:
+                      <i class="bi bi-rulers me-1"></i>{% trans "Medidas requeridas:" %}
                     </small>
                     <div class="d-flex flex-wrap gap-1">
                       {% for field in product.measurement_fields.all %}
-                      <span class="badge bg-light text-dark border">
+                      <span class="badge bg-secondary border">
                         {{ field.field.name }}
                         {% if field.required %}
                           <i class="bi bi-asterisk text-danger ms-1" style="font-size: 0.6rem;"></i>
@@ -222,14 +222,14 @@
                   <div class="mb-3">
 
                     <small class="text-muted d-block mb-1">
-                      <i class="bi bi-tag me-1"></i>Tallas disponibles:
+                      <i class="bi bi-tag me-1"></i>{% trans "Tallas disponibles:" %}
                     </small>
 
                     <div class="d-flex flex-wrap gap-1">
 
                       {% for size in product.size_variants.all %}
 
-                      <span class="badge bg-light text-dark border">
+                      <span class="badge bg-secondary border">
 
                         {{ size.size }}
 
@@ -267,33 +267,33 @@
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                       <span class="h4 mb-0">${{ product.base_price }}</span>
-                      <small class="text-muted d-block">Precio base</small>
+                      <small class="text-muted d-block">{% trans "Precio base" %}</small>
                     </div>
                     {% if product.owner_team %}
                     <div class="text-end">
-                      <small class="text-muted d-block">Equipo:</small>
+                      <small class="text-muted d-block">{% trans "Equipo:" %}</small>
                       <span class="badge bg-info">{{ product.owner_team.name|truncatechars:15 }}</span>
                     </div>
                     {% endif %}
-                    
+
                   </div>
 
                   <!-- Add to Order Form -->
-                  
+
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.id }}">
                     <div class="row g-2 align-items-center">
                       <div class="col-6">
-                        <input type="number" 
-                               name="quantity" 
-                               min="1" 
-                               value="1" 
-                               class="form-control form-control-sm" 
+                        <input type="number"
+                               name="quantity"
+                               min="1"
+                               value="1"
+                               class="form-control form-control-sm"
                                required>
                       </div>
                       <div class="col-6">
                         <button type="submit" class="btn btn-primary btn-sm w-100">
-                          <i class="bi bi-cart-plus me-1"></i>Agregar
+                          <i class="bi bi-cart-plus me-1"></i>{% trans "Agregar" %}
                         </button>
                       </div>
                     </div>
@@ -308,20 +308,20 @@
         <!-- No Results Message (hidden by default) -->
         <div id="no-results" class="text-center py-5 d-none">
           <i class="bi bi-search display-4 text-muted mb-3"></i>
-          <h5 class="text-muted">No se encontraron productos</h5>
-          <p class="text-muted">Intenta con otros filtros o términos de búsqueda</p>
+          <h5 class="text-muted">{% trans "No se encontraron productos" %}</h5>
+          <p class="text-muted">{% trans "Intenta con otros filtros o términos de búsqueda" %}</p>
         </div>
 
       {% else %}
         <!-- Empty State -->
         <div class="text-center py-5">
           <i class="bi bi-box display-4 text-muted mb-3"></i>
-          <h5 class="text-muted">No hay productos disponibles</h5>
+          <h5 class="text-muted">{% trans "No hay productos disponibles" %}</h5>
           <p class="text-muted mb-4">
-            No hay productos activos que coincidan con los criterios de esta orden.
+            {% trans "No hay productos activos que coincidan con los criterios de esta orden." %}
           </p>
           <a href="{% url 'orders:detail_order' order.id %}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left me-1"></i>Volver a la orden
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Volver a la orden" %}
           </a>
         </div>
       {% endif %}
@@ -337,21 +337,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const productCards = document.querySelectorAll('.product-card');
   const productsContainer = document.getElementById('products-container');
   const noResults = document.getElementById('no-results');
-  
+
   if (searchInput) {
     searchInput.addEventListener('input', function() {
       const searchTerm = this.value.toLowerCase();
       let visibleCount = 0;
-      
+
       productCards.forEach(card => {
         const productName = card.closest('.col').dataset.productName;
         const productType = card.closest('.col').dataset.productType;
         const usageType = card.closest('.col').dataset.usageType;
-        
-        const matchesSearch = productName.includes(searchTerm) || 
+
+        const matchesSearch = productName.includes(searchTerm) ||
                              productType.includes(searchTerm) ||
                              usageType.includes(searchTerm);
-        
+
         if (matchesSearch) {
           card.closest('.col').style.display = '';
           visibleCount++;
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
           card.closest('.col').style.display = 'none';
         }
       });
-      
+
       // Show/hide no results message
       if (productsContainer && noResults) {
         if (visibleCount === 0) {
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   // Reset filters button
   const resetButton = document.getElementById('reset-filters');
   if (resetButton) {
@@ -383,18 +383,18 @@ document.addEventListener('DOMContentLoaded', function() {
       form.submit();
     });
   }
-  
+
   // Add to order form submission feedback
   const forms = document.querySelectorAll('.add-to-order-form');
   forms.forEach(form => {
     form.addEventListener('submit', function(e) {
       const submitButton = this.querySelector('button[type="submit"]');
       const originalText = submitButton.innerHTML;
-      submitButton.innerHTML = '<i class="bi bi-check-circle me-1"></i>Agregado';
+      submitButton.innerHTML = '<i class="bi bi-check-circle me-1"></i>{% trans "Agregado" %}';
       submitButton.disabled = true;
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-success');
-      
+
       // Reset button after 2 seconds
       setTimeout(() => {
         submitButton.innerHTML = originalText;
@@ -410,28 +410,23 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .product-card {
   transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255,255,255,.1);
 }
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 5px 20px rgba(127,90,240,.25) !important;
+  border-color: var(--sc-purple, #7f5af0);
 }
 
 .card-img-top {
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid rgba(255,255,255,.1);
 }
 
 .badge {
   font-size: 0.75rem;
 }
 
-.form-check-input:checked {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .product-card .row.g-2 .col-6 {
     margin-bottom: 0.5rem;

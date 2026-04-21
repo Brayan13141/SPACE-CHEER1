@@ -24,15 +24,6 @@ Correos para los usuarios Unique
 Decoradores personalizados 
 Mixins para CBV 
 
-5. Implementar Team Membership correctamente
-
-Tu relación M:N con soft delete es excelente, pero inútil sin:
-
-• Formulario para agregar miembros
-• Vista para expulsar a un miembro (set end_date)
-• Vista para reactivar miembros
-• Tablas Bootstrap para mostrar historial
-• Validación: un atleta no puede pertenecer a dos equipos activos simultáneamente
 
 Este módulo será clave para Events y competencias.
 

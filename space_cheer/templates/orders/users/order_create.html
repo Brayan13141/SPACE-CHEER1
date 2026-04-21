@@ -1,65 +1,82 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block content %}
 
-<div class="container mt-4">
-  <h2>Crear orden</h2>
+<div class="container py-3 py-md-4">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <h1 class="h2 mb-1">{% trans "Crear orden" %}</h1>
+      <p class="text-muted mb-0">{% trans "Nueva orden de uniformes" %}</p>
+    </div>
+    <div class="mt-3 mt-md-0">
+      <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
+      </a>
+    </div>
+  </div>
 
   {% if error %}
     <div class="alert alert-danger">
-      {{ error }}
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
     </div>
   {% endif %}
 
-  <form method="post">
-    {% csrf_token %}
+  <div class="card shadow-sm" style="max-width: 480px;">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
 
-    <div class="mb-3">
-      <label class="form-label">Tipo de orden</label>
-      <select name="order_type" id="order_type" class="form-select" required>
-        <option value="PERSONAL">Personal</option>
-        {% if teams.exists and not is_guardian%}
-          <option value="TEAM">Equipo</option>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">{% trans "Tipo de orden" %}</label>
+          <select name="order_type" id="order_type" class="form-select" required>
+            <option value="PERSONAL">
+              <i class="bi bi-person me-1"></i>{% trans "Personal" %}
+            </option>
+            {% if teams.exists and not is_guardian %}
+              <option value="TEAM">{% trans "Equipo" %}</option>
+            {% endif %}
+          </select>
+        </div>
+
+        {% if teams.exists and not is_guardian %}
+        <div class="mb-4 d-none" id="team-selector">
+          <label class="form-label fw-semibold">{% trans "Equipo" %}</label>
+          <select name="team_id" class="form-select">
+            <option value="">{% trans "Selecciona un equipo" %}</option>
+            {% for team in teams %}
+              <option value="{{ team.id }}">{{ team.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% elif not is_guardian %}
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            {% trans "No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo." %}
+          </div>
         {% endif %}
-      </select>
-    </div>
 
-    {% if teams.exists and not is_guardian %}
-    <div class="mb-3 d-none" id="team-selector">
-      <label class="form-label">Equipo</label>
-      <select name="team_id" class="form-select">
-        <option value="">Selecciona un equipo</option>
-        {% for team in teams %}
-          <option value="{{ team.id }}">{{ team.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    {% else %}
-    {% if not is_guardian %}
-      <div class="alert alert-info">
-        No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de equipo.
-      </div>
-      {% endif %}
-    {% endif %}
-   
-    
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>{% trans "Crear orden" %}
+          </button>
+        </div>
 
-    <button type="submit" class="btn btn-primary">
-      Crear
-    </button>
-  </form>
+      </form>
+    </div>
+  </div>
+
 </div>
 
 <script>
   const orderType = document.getElementById("order_type");
   const teamSelector = document.getElementById("team-selector");
 
-  orderType.addEventListener("change", function () {
-    if (this.value === "TEAM") {
-      teamSelector.classList.remove("d-none");
-    } else {
-      teamSelector.classList.add("d-none");
-    }
-  });
+  if (orderType && teamSelector) {
+    orderType.addEventListener("change", function () {
+      teamSelector.classList.toggle("d-none", this.value !== "TEAM");
+    });
+  }
 </script>
 
 {% endblock %}

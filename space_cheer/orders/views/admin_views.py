@@ -15,6 +15,7 @@ from orders.models import (
     OrderDesignImage,
 )
 from orders.services.state import OrderStateService
+from orders.services.file_validation import FileValidator
 from orders.forms import OrderDatesForm
 from django.core.exceptions import ValidationError
 
@@ -308,15 +309,12 @@ def admin_upload_design(request, order_id):
             messages.error(request, "Debes subir una imagen.")
             return redirect("orders:admin_order_detail", order_id=order.id)
 
-        ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
-        MAX_SIZE_MB = 10
-
-        if image.content_type not in ALLOWED_TYPES:
-            messages.error(request, "Solo se permiten imágenes JPG, PNG o WEBP.")
-            return redirect("orders:admin_order_detail", order_id=order.id)
-
-        if image.size > MAX_SIZE_MB * 1024 * 1024:
-            messages.error(request, f"El tamaño máximo permitido es {MAX_SIZE_MB} MB.")
+        # Validación robusta: magic bytes + Pillow + dimensiones (A03/A05)
+        # No confiar en image.content_type — es un header HTTP spoofeable
+        try:
+            FileValidator.validate_image(image)
+        except ValidationError as e:
+            messages.error(request, str(e))
             return redirect("orders:admin_order_detail", order_id=order.id)
 
         try:

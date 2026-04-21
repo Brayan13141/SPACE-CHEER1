@@ -35,16 +35,25 @@ User = get_user_model()
 
 @role_required("HEADCOACH", "ADMIN")
 def headcoach_dashboard(request):
-    minors_without_guardian = MinorAthleteService.get_minors_without_guardian(
-        request.user
-    )
+    all_minors = MinorAthleteService.get_all_minors(request.user)
+    
+    minors_with_guardian = []
+    minors_without_guardian = []
+    
+    for minor in all_minors:
+        if hasattr(minor, "athleteprofile") and minor.athleteprofile.guardian:
+            minors_with_guardian.append(minor)
+        else:
+            minors_without_guardian.append(minor)
 
     return render(
         request,
         "account/guardian/headcoach_dashboard.html",
         {
+            "minors_with_guardian": minors_with_guardian,
             "minors_without_guardian": minors_without_guardian,
-            "count_minors": minors_without_guardian.count(),
+            "count_without": len(minors_without_guardian),
+            "count_with": len(minors_with_guardian),
         },
     )
 
@@ -131,7 +140,7 @@ def assign_guardian(request, athlete_id):
             f"{athlete.get_full_name()} no es menor de edad. "
             "Los guardians solo aplican a menores.",
         )
-        return redirect("guardian:minors_without_guardian")
+        return redirect("guardian:headcoach_dashboard")
 
     # HEADCOACH: validar ownership
     if (
@@ -185,7 +194,7 @@ def assign_guardian(request, athlete_id):
                     f"{guardian.get_full_name()} asignado como guardian "
                     f"de {athlete.get_full_name()}.",
                 )
-                return redirect("guardian:minors_without_guardian")
+                return redirect("guardian:headcoach_dashboard")
 
             except (ValidationError, PermissionDenied) as e:
                 messages.error(request, str(e))
@@ -324,28 +333,7 @@ def remove_guardian(request, athlete_id):
     except (ValidationError, PermissionDenied) as e:
         messages.error(request, str(e))
 
-    return redirect("guardian:minors_without_guardian")
-
-
-# =============================================================================
-# LISTA DE MENORES SIN GUARDIAN
-# =============================================================================
-
-
-@role_required("HEADCOACH", "ADMIN")
-def minors_without_guardian_list(request):
-    """Lista de atletas menores SIN guardian asignado."""
-    minors = MinorAthleteService.get_minors_without_guardian(request.user)
-
-    return render(
-        request,
-        "account/guardian/minors_without_guardian.html",
-        {
-            "minors": minors,
-            "count": minors.count(),
-        },
-    )
-
+    return redirect("guardian:headcoach_dashboard")
 
 # =============================================================================
 # OWNERSHIP — complemento de coach/views.py
