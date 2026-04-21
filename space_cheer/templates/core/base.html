@@ -1,6 +1,6 @@
 {% load static i18n %}
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -430,6 +430,9 @@
                 <div class="d-flex align-items-center gap-2">
 
                     {% if user.is_authenticated %}
+
+                    {# Selector de idioma #}
+                    {% include "partials/language_switcher.html" %}
 
                     {# Campana de notificaciones #}
                     <div class="dropdown">
