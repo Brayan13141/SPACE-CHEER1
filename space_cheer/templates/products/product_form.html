@@ -57,7 +57,7 @@
       <!-- Columna izquierda: info básica -->
       <div class="col-lg-8">
         <div class="card shadow-sm mb-4">
-          <div class="card-header bg-light">
+          <div class="card-header">
             <h5 class="card-title mb-0">
               <i class="bi bi-info-circle me-2"></i>{% trans "Información básica" %}
             </h5>
@@ -113,7 +113,7 @@
 
               {% if template_key %}
               <div class="col-12 mt-3">
-                <div class="bg-light rounded p-3 small text-muted">
+                <div class="border border-secondary rounded p-3 small text-secondary">
                   <i class="bi bi-lock me-1"></i>
                   {% trans "Campos definidos por plantilla:" %}
                   <ul class="mb-0">
@@ -134,16 +134,16 @@
       <!-- Columna derecha: imagen -->
       <div class="col-lg-4">
         <div class="card shadow-sm">
-          <div class="card-header bg-light">
+          <div class="card-header">
             <h5 class="card-title mb-0">
               <i class="bi bi-image me-2"></i>{% trans "Imagen" %}
             </h5>
           </div>
           <div class="card-body text-center">
             <div id="preview-container" class="mb-3">
-              <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                   style="height:160px;" id="placeholder">
-                <i class="bi bi-image text-muted display-4"></i>
+              <div class="rounded d-flex align-items-center justify-content-center"
+                   style="height:160px;background:var(--sc-panel,#1a1a2e);" id="placeholder">
+                <i class="bi bi-image text-secondary display-4"></i>
               </div>
               <img id="img-preview" src="#" alt="Preview"
                    class="img-fluid rounded d-none" style="max-height:160px;">

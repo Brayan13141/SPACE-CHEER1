@@ -93,11 +93,11 @@ def team_song_path(instance, filename):
 
 def product_image_path(instance, filename):
     """
-    Genera: media/products/<sku>/<filename>
+    Genera: media/products/<nombre_sanitizado>/<filename>
     """
     safe_filename = os.path.basename(filename)
-    # Suponiendo que el producto tiene un SKU único
-    return f'products/{instance.sku}/{safe_filename}'
+    safe_name = _sanitize_path_component(instance.name.replace(" ", "_").lower())
+    return f'products/{safe_name}/{safe_filename}'
 
 def design_upload_path(instance, filename):
     """
