@@ -319,6 +319,18 @@ def product_detail(request, product_id):
             }
         )
 
+    protection_info = {
+        "is_protected": product.orders_count > 0,
+        "orders_count": product.orders_count,
+        "active_orders_count": product.active_orders_count,
+    }
+    requirements = {
+        "requires_design": requires_design,
+        "requires_athletes": product.requires_athletes,
+        "requires_measurements": requires_measurements,
+        "requires_sizes": requires_sizes,
+        "requires_team": product.requires_team,
+    }
     context = {
         "product": product,
         "form": form,
@@ -332,6 +344,8 @@ def product_detail(request, product_id):
         "requires_design": requires_design,
         "requires_team": product.requires_team,
         "is_configured": product.is_configured,
+        "protection_info": protection_info,
+        "requirements": requirements,
     }
 
     return render(request, "products/product_detail.html", context)
