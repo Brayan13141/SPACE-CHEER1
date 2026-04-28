@@ -29,3 +29,27 @@ Actualiza el seed de las categorias con estas
 CATEGORIAS:La USASF (U.S. All Star Federation, Inc.) 
 School (Escolar): Dividido por cursos (Mini, Youth, Junior, Senior, College). 
 All-Star: Dividido por edad (Tiny, Mini, Youth, Junior, Senior, Open) y niveles de dificultad (del 1 al 7), que pueden ser femeninos o mixtos (Coed).
+
+
+ADMIN
+aprobar/rechazar entrenadores
+
+Productos
+Previsualización 3D (Three.js).
+
+REVISAR
+Integración con Google Maps API para ubicación de concursos y hoteles
+
+
+Un equipo si puede competir en
+   dos categorías del mismo evento aunque quisiera.
+
+  Auto-creación: cuando se registra un equipo, el service crea automáticamente un EventParticipant con role=HEADCOACH para el
+  coach del equipo (best-effort, no aborta si falla).
+
+
+Hay dos capas de roles que se combinan:
+
+  accounts.Role (global del sistema)          EventStaffRole (funcional en el evento)
+    is_staff_type = True  ────────────────►  is_judge = False  →  Staff General
+    is_judge_type = True  ────────────────►  is_judge = True   →  Juez
