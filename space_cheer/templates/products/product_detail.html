@@ -1,3 +1,4 @@
+
 {% extends "core/base.html" %}
 {% load static i18n %}
 
@@ -236,9 +237,10 @@
         <div class="collapse" id="editFormCollapse">
           <div class="card-body">
             {% if protection_info.is_protected %}
-              <div class="alert alert-warning alert-sm py-2 mb-3 small">
-                <i class="bi bi-shield-exclamation me-1"></i>
-                <strong>{% trans "Producto protegido" %}</strong> – {% trans "Este producto está siendo usado en órdenes. Modificar ciertos campos puede afectar órdenes existentes." %}
+              <div class="alert alert-danger py-2 mb-3 small">
+                <i class="bi bi-lock-fill me-1"></i>
+                <strong>{% trans "Campos bloqueados" %}</strong> —
+                {% trans "Tipo de producto, Tipo de uso, Estrategia de tallas, Alcance y Equipo propietario no pueden modificarse porque este producto ya está en órdenes." %}
               </div>
             {% endif %}
 
@@ -266,60 +268,86 @@
                 {{ form.description }}
               </div>
 
-              <!-- Campos con advertencia de protección -->
               <div class="row g-2 mb-3">
                 <div class="col-6">
                   <label class="form-label small fw-semibold">{% trans "Tipo de producto" %}</label>
-                  {{ form.product_type }}
-
-                    <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
+                  {% if protection_info.is_protected %}
+                    <select class="form-select form-select-sm" disabled>
+                      <option selected>{{ product.get_product_type_display }}</option>
+                    </select>
+                    <input type="hidden" name="product_type" value="{{ product.product_type }}">
+                    <div class="small text-danger mt-1">
+                      <i class="bi bi-lock-fill me-1"></i>{% trans "No puede ser modificado o afectaría a órdenes actuales" %}
                     </div>
-
+                  {% else %}
+                    {{ form.product_type }}
+                  {% endif %}
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-semibold">{% trans "Tipo de uso" %}</label>
-                  {{ form.usage_type }}
-
-                    <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
+                  {% if protection_info.is_protected %}
+                    <select class="form-select form-select-sm" disabled>
+                      <option selected>{{ product.get_usage_type_display }}</option>
+                    </select>
+                    <input type="hidden" name="usage_type" value="{{ product.usage_type }}">
+                    <div class="small text-danger mt-1">
+                      <i class="bi bi-lock-fill me-1"></i>{% trans "No puede ser modificado o afectaría a órdenes actuales" %}
                     </div>
-
+                  {% else %}
+                    {{ form.usage_type }}
+                  {% endif %}
                 </div>
               </div>
 
               <div class="row g-2 mb-3">
                 <div class="col-6">
                   <label class="form-label small fw-semibold">{% trans "Estrategia de tallas" %}</label>
-                  {{ form.size_strategy }}
-
-                    <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
+                  {% if protection_info.is_protected %}
+                    <select class="form-select form-select-sm" disabled>
+                      <option selected>{{ product.get_size_strategy_display }}</option>
+                    </select>
+                    <input type="hidden" name="size_strategy" value="{{ product.size_strategy }}">
+                    <div class="small text-danger mt-1">
+                      <i class="bi bi-lock-fill me-1"></i>{% trans "No puede ser modificado o afectaría a órdenes actuales" %}
                     </div>
-
+                  {% else %}
+                    {{ form.size_strategy }}
+                  {% endif %}
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-semibold">{% trans "Alcance" %}</label>
-                  {{ form.scope }}
-
-                    <div class="small text-warning mt-1">
-                      <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar esto puede afectar órdenes existentes." %}
+                  {% if protection_info.is_protected %}
+                    <select class="form-select form-select-sm" disabled>
+                      <option selected>{{ product.get_scope_display }}</option>
+                    </select>
+                    <input type="hidden" name="scope" value="{{ product.scope }}">
+                    <div class="small text-danger mt-1">
+                      <i class="bi bi-lock-fill me-1"></i>{% trans "No puede ser modificado o afectaría a órdenes actuales" %}
                     </div>
-
+                  {% else %}
+                    {{ form.scope }}
+                  {% endif %}
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label small fw-semibold">{% trans "Equipo propietario" %}</label>
-                {{ form.owner_team }}
-                {% if form.owner_team.help_text %}
-                  <small class="text-muted d-block">{{ form.owner_team.help_text }}</small>
-                {% endif %}
-
-                  <div class="small text-warning mt-1">
-                    <i class="bi bi-exclamation-triangle"></i> {% trans "Cambiar el equipo puede afectar órdenes existentes." %}
+                {% if protection_info.is_protected %}
+                  <select class="form-select form-select-sm" disabled>
+                    <option selected>{{ product.owner_team.name|default:"Sin equipo" }}</option>
+                  </select>
+                  {% if product.owner_team %}
+                    <input type="hidden" name="owner_team" value="{{ product.owner_team.id }}">
+                  {% endif %}
+                  <div class="small text-danger mt-1">
+                    <i class="bi bi-lock-fill me-1"></i>{% trans "No puede ser modificado o afectaría a órdenes actuales" %}
                   </div>
-
+                {% else %}
+                  {{ form.owner_team }}
+                  {% if form.owner_team.help_text %}
+                    <small class="text-muted d-block">{{ form.owner_team.help_text }}</small>
+                  {% endif %}
+                {% endif %}
               </div>
 
               <div class="row g-2 mb-3">
@@ -486,7 +514,7 @@
             {% else %}
             <p class="text-muted small mb-0">
               {% trans "No quedan campos disponibles." %}
-              <a href="{% url 'manage_measurement_fields' %}">{% trans "Crear nuevos campos" %}</a>
+              <a href="{% url 'measures:manage_measurement_fields' %}">{% trans "Crear nuevos campos" %}</a>
             </p>
             {% endif %}
           </div>

@@ -80,7 +80,7 @@ def create_order(request):
     if request.method == "POST":
 
         order_type = request.POST.get("order_type")
-        order_team_id = request.POST.get("order_team") or ""
+        order_team_id = request.POST.get("team_id") or ""
 
         if order_type not in ["PERSONAL", "TEAM"]:
             return render(
@@ -249,28 +249,48 @@ def order_detail(request, order_id):
         pk=order_id,
     )
 
+    items = list(order.items.all())
+    order_flags = {
+        "requires_design": any(i.product.requires_design for i in items),
+        "requires_measurements": any(i.product.requires_measurements for i in items),
+        "requires_athletes": any(i.product.requires_athletes for i in items),
+        "has_uniforms": any(i.product.product_type == "UNIFORM" for i in items),
+        "has_items": bool(items),
+        "is_simple": bool(items) and all(i.product.is_simple for i in items),
+    }
+
+    # Blocking issues solo aplican cuando la orden está en DRAFT (el usuario va a enviarla)
     blocking_issues = []
-
-    try:
-        Order.validate_order_ready(order)
-    except ValidationError as e:
-        for msg in e.messages:
-            blocking_issues.append(
-                OrderBlockingIssue(code="ORDER_NOT_READY", message=msg)
-            )
-
-    blocking_issues += can_submit_order(order)
+    if order.status == "DRAFT":
+        try:
+            Order.validate_order_ready(order)
+        except ValidationError as e:
+            for msg in e.messages:
+                blocking_issues.append(
+                    OrderBlockingIssue(code="ORDER_NOT_READY", message=msg)
+                )
+        blocking_issues += can_submit_order(order)
 
     available_transitions = OrderStateService.get_available_transitions(
         order, request.user
     )
+
+    transition_labels = {
+        "PENDING": "Enviar pedido",
+        "CANCELLED": "Cancelar pedido",
+        "DESIGN_APPROVED": "Aprobar diseño",
+        "IN_PRODUCTION": "Iniciar producción",
+        "DELIVERED": "Marcar como entregada",
+    }
 
     return render(
         request,
         "orders/users/order_detail.html",
         {
             "order": order,
+            "order_flags": order_flags,
             "blocking_issues": blocking_issues,
             "available_transitions": available_transitions,
+            "transition_labels": transition_labels,
         },
     )
