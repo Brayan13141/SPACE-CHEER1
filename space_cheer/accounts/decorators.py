@@ -55,3 +55,43 @@ def role_required(*allowed_roles):
         return wrapper
 
     return decorator
+
+
+def minor_access_required(min_level="READ_ONLY"):
+    """
+    Bloquea a atletas menores que no cumplan el nivel mínimo de acceso.
+    Si el usuario no es menor, lo deja pasar sin revisar nada.
+
+    Uso:
+        @minor_access_required(min_level="ACTIVE")
+        def my_view(request): ...
+    """
+    _LEVEL_ORDER = {
+        "BLOCKED": 0,
+        "READ_ONLY": 1,
+        "ACTIVE": 2,
+    }
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            from custody.services.minor_access_service import MinorAccessService
+
+            user = request.user
+            if not user.is_authenticated:
+                return redirect("account_login")
+
+            level = MinorAccessService.get_access_level(user)
+
+            if level is None:
+                # No es menor — dejar pasar
+                return view_func(request, *args, **kwargs)
+
+            if _LEVEL_ORDER.get(level, 0) < _LEVEL_ORDER.get(min_level, 0):
+                return redirect("guardian:minor_blocked")
+
+            return view_func(request, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
