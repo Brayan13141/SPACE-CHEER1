@@ -236,13 +236,13 @@ class Product(models.Model):
 
         # GLOBAL no puede ser exclusivo de equipo
         if self.usage_type == "GLOBAL" and self.scope == "TEAM_ONLY":
-            errors["Alcance"] = (
+            errors["scope"] = (
                 "Un producto de uso global no puede ser exclusivo de un equipo."
             )
 
         # GLOBAL no puede usar medidas
         if self.usage_type == "GLOBAL" and self.size_strategy == "MEASUREMENTS":
-            errors["Estrategia de talla"] = (
+            errors["size_strategy"] = (
                 "Los productos de uso global no pueden usar medidas personalizadas."
             )
 
@@ -260,7 +260,7 @@ class Product(models.Model):
 
         # ATHLETE_CUSTOM requiere medidas
         if self.usage_type == "ATHLETE_CUSTOM" and self.size_strategy != "MEASUREMENTS":
-            errors["Estrategia de talla"] = (
+            errors["size_strategy"] = (
                 "Los productos personalizados por atleta requieren medidas personalizadas."
             )
 

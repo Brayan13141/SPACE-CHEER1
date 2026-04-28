@@ -152,7 +152,17 @@ def product_detail(request, product_id):
 
         # ── Editar producto ──────────────────────────────
         if action == "edit_info":
-            form = ProductForm(request.POST, request.FILES, instance=product)
+            post_data = request.POST.copy()
+            # Si el producto ya está en órdenes, forzar los campos inmutables
+            # a sus valores actuales independientemente de lo que venga en POST.
+            if product.orders_count > 0:
+                post_data["usage_type"] = product.usage_type
+                post_data["size_strategy"] = product.size_strategy
+                post_data["scope"] = product.scope
+                post_data["owner_team"] = (
+                    str(product.owner_team_id) if product.owner_team_id else ""
+                )
+            form = ProductForm(post_data, request.FILES, instance=product)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Producto actualizado.")
