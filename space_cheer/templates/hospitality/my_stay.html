@@ -1,0 +1,116 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Mi Estancia — {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:680px;">
+
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+      <h1 class="h2 mb-1"><i class="bi bi-house-heart me-2" style="color:var(--sc-cyan);"></i>Mi Estancia</h1>
+      <p class="text-secondary mb-0">{{ event.name }}</p>
+    </div>
+    <a href="{% url 'hospitality:preference_form' event_pk=event.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-sliders me-1"></i>{% if preference %}Editar preferencias{% else %}Mis preferencias{% endif %}
+    </a>
+  </div>
+
+  {% if stay %}
+  <!-- Stay card -->
+  <div class="card border-0 mb-4" style="background:var(--sc-surface);">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Detalles de la estancia</h2>
+        {% if stay.status == 'REQUESTED' %}
+        <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+        {% elif stay.status == 'CONFIRMED' %}
+        <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+        {% elif stay.status == 'CHECKED_IN' %}
+        <span class="badge" style="background:var(--sc-success,#198754);">Check-in realizado</span>
+        {% elif stay.status == 'CHECKED_OUT' %}
+        <span class="badge bg-secondary">Check-out realizado</span>
+        {% elif stay.status == 'CANCELLED' %}
+        <span class="badge bg-danger">Cancelado</span>
+        {% endif %}
+      </div>
+
+      {% if stay.hotel %}
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <p class="text-secondary small mb-1">Hotel</p>
+          <p class="fw-semibold mb-0">{{ stay.hotel.name }}</p>
+          {% if stay.hotel.address %}<p class="text-secondary small mb-0">{{ stay.hotel.address }}</p>{% endif %}
+          {% if stay.hotel.phone %}<p class="text-secondary small mb-0"><i class="bi bi-telephone me-1"></i>{{ stay.hotel.phone }}</p>{% endif %}
+        </div>
+        {% if stay.check_in_date %}
+        <div class="col-sm-3">
+          <p class="text-secondary small mb-1">Check-in</p>
+          <p class="fw-semibold mb-0">{{ stay.check_in_date }}</p>
+        </div>
+        <div class="col-sm-3">
+          <p class="text-secondary small mb-1">Check-out</p>
+          <p class="fw-semibold mb-0">{{ stay.check_out_date }}</p>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <p class="text-secondary mb-0">Tu estancia está registrada. El organizador confirmará el hotel y las fechas próximamente.</p>
+      {% endif %}
+
+      {% if stay.room_assignment %}
+      <hr style="border-color:var(--sc-border,rgba(255,255,255,.1));">
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <p class="text-secondary small mb-1">Habitación asignada</p>
+          <p class="fw-semibold mb-0">#{{ stay.room_assignment.room.room_number }} — {{ stay.room_assignment.room.room_type.name }}</p>
+          <p class="text-secondary small mb-0">Piso {{ stay.room_assignment.room.floor }}</p>
+        </div>
+        {% if stay.bed_assignments.all %}
+        <div class="col-sm-6">
+          <p class="text-secondary small mb-1">Cama(s)</p>
+          {% for ba in stay.bed_assignments.all %}
+          <p class="fw-semibold mb-0">{{ ba.bed.get_bed_type_display }}{% if ba.bed.label %} — {{ ba.bed.label }}{% endif %}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card border-0 mb-4" style="background:var(--sc-surface);">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-house display-4 text-secondary"></i>
+      <p class="text-secondary mt-3 mb-0">No tienes una estancia registrada para este evento.</p>
+      <p class="text-secondary small">Contacta al organizador si necesitas hospedaje.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Preferences summary -->
+  {% if preference %}
+  <div class="card border-0" style="background:var(--sc-surface);">
+    <div class="card-body">
+      <h2 class="h5 mb-3"><i class="bi bi-sliders me-2" style="color:var(--sc-cyan);"></i>Mis preferencias</h2>
+      <dl class="row small mb-0">
+        {% if preference.preferred_hotel %}
+        <dt class="col-5 text-secondary">Hotel preferido</dt>
+        <dd class="col-7">{{ preference.preferred_hotel.name }}</dd>
+        {% endif %}
+        {% if preference.preferred_room_type %}
+        <dt class="col-5 text-secondary">Tipo de habitación</dt>
+        <dd class="col-7">{{ preference.preferred_room_type.name }}</dd>
+        {% endif %}
+        {% if preference.special_needs %}
+        <dt class="col-5 text-secondary">Necesidades especiales</dt>
+        <dd class="col-7">{{ preference.special_needs }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

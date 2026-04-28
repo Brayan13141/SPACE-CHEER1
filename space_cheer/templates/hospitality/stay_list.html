@@ -1,0 +1,101 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Estancias — {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_detail' pk=event.pk %}">{{ event.name }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:hotel_list' event_pk=event.pk %}">Hospitalidad</a></li>
+      <li class="breadcrumb-item active">Estancias</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1"><i class="bi bi-people me-2" style="color:var(--sc-cyan);"></i>Estancias</h1>
+      <p class="text-secondary mb-0">{{ event.name }}</p>
+    </div>
+    <a href="{% url 'hospitality:stay_create' event_pk=event.pk %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nueva Estancia
+    </a>
+  </div>
+
+  <!-- Status filters -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'hospitality:stay_list' event_pk=event.pk %}"
+       class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">Todas</a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}"
+       class="btn btn-sm {% if status_filter == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if stays %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Participante</th>
+          <th>Estado</th>
+          <th>Hotel</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Habitación</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stay in stays %}
+        <tr>
+          <td>
+            <span class="fw-semibold">{{ stay.user.get_full_name|default:stay.user.username }}</span>
+          </td>
+          <td>
+            {% if stay.status == 'REQUESTED' %}
+            <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+            {% elif stay.status == 'CONFIRMED' %}
+            <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+            {% elif stay.status == 'CHECKED_IN' %}
+            <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+            {% elif stay.status == 'CHECKED_OUT' %}
+            <span class="badge bg-secondary">Check-out</span>
+            {% elif stay.status == 'CANCELLED' %}
+            <span class="badge bg-danger">Cancelado</span>
+            {% endif %}
+          </td>
+          <td>{{ stay.hotel.name|default:"—" }}</td>
+          <td>{{ stay.check_in_date|default:"—" }}</td>
+          <td>{{ stay.check_out_date|default:"—" }}</td>
+          <td>
+            {% if stay.room_assignment %}
+            #{{ stay.room_assignment.room.room_number }}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'hospitality:stay_detail' event_pk=event.pk pk=stay.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-people display-4 text-secondary"></i>
+    <p class="text-secondary mt-3 mb-3">No hay estancias{% if status_filter %} con este estado{% endif %}.</p>
+    {% if not status_filter %}
+    <a href="{% url 'hospitality:stay_create' event_pk=event.pk %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Crear la primera estancia
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

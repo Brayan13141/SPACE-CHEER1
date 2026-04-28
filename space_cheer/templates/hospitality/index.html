@@ -1,0 +1,128 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Hospitalidad — SPACE CHEER{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1"><i class="bi bi-building me-2" style="color:var(--sc-cyan);"></i>Hospitalidad</h1>
+      <p class="text-secondary mb-0">
+        {% if is_admin %}Gestión de hoteles y estancias por evento{% else %}Tus estancias en eventos{% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% if is_admin %}
+
+  {# ── Vista admin: eventos con hoteles ── #}
+  {% if events %}
+  <h2 class="h5 mb-3 text-secondary">Eventos con hospitalidad activa</h2>
+  <div class="row g-3 mb-4">
+    {% for event in events %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card border-0 h-100" style="background:var(--sc-surface);">
+        <div class="card-body">
+          <h3 class="h6 fw-semibold mb-1">{{ event.name }}</h3>
+          <p class="text-secondary small mb-3">
+            {{ event.start_date }} — {{ event.end_date }}
+          </p>
+          <div class="d-flex gap-3 mb-3">
+            <span class="text-secondary small"><i class="bi bi-building me-1"></i>{{ event.hotel_count }} hotel{{ event.hotel_count|pluralize:"es" }}</span>
+            <span class="text-secondary small"><i class="bi bi-people me-1"></i>{{ event.stay_count }} estancia{{ event.stay_count|pluralize:"s" }}</span>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'hospitality:hotel_list' event_pk=event.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+              <i class="bi bi-building me-1"></i>Hoteles
+            </a>
+            <a href="{% url 'hospitality:stay_list' event_pk=event.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+              <i class="bi bi-people me-1"></i>Estancias
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if events_no_hotels %}
+  <h2 class="h5 mb-3 text-secondary">Otros eventos (sin hoteles aún)</h2>
+  <div class="row g-3">
+    {% for event in events_no_hotels %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card border-0 h-100" style="background:var(--sc-surface);opacity:.75;">
+        <div class="card-body">
+          <h3 class="h6 fw-semibold mb-1">{{ event.name }}</h3>
+          <p class="text-secondary small mb-3">{{ event.start_date }} — {{ event.end_date }}</p>
+          <a href="{% url 'hospitality:hotel_create' event_pk=event.pk %}" class="btn btn-sm btn-outline-primary w-100">
+            <i class="bi bi-plus-circle me-1"></i>Agregar hotel
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not events and not events_no_hotels %}
+  <div class="text-center py-5">
+    <i class="bi bi-building display-4 text-secondary"></i>
+    <p class="text-secondary mt-3 mb-3">No hay eventos registrados aún.</p>
+    <a href="{% url 'events:event_list' %}" class="btn btn-primary">
+      <i class="bi bi-calendar-event me-1"></i>Ver eventos
+    </a>
+  </div>
+  {% endif %}
+
+  {% else %}
+
+  {# ── Vista participante: mis estancias ── #}
+  {% if stays %}
+  <div class="row g-3">
+    {% for stay in stays %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card border-0 h-100" style="background:var(--sc-surface);">
+        <div class="card-body">
+          <h3 class="h6 fw-semibold mb-1">{{ stay.event.name }}</h3>
+          <p class="text-secondary small mb-2">{{ stay.event.start_date }}</p>
+          <div class="mb-3">
+            {% if stay.status == 'REQUESTED' %}
+            <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+            {% elif stay.status == 'CONFIRMED' %}
+            <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+            {% elif stay.status == 'CHECKED_IN' %}
+            <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+            {% elif stay.status == 'CHECKED_OUT' %}
+            <span class="badge bg-secondary">Check-out</span>
+            {% elif stay.status == 'CANCELLED' %}
+            <span class="badge bg-danger">Cancelado</span>
+            {% endif %}
+            {% if stay.hotel %}
+            <p class="text-secondary small mt-2 mb-0"><i class="bi bi-building me-1"></i>{{ stay.hotel.name }}</p>
+            {% endif %}
+          </div>
+          <a href="{% url 'hospitality:my_stay' event_pk=stay.event.pk %}" class="btn btn-sm btn-outline-secondary w-100">
+            <i class="bi bi-eye me-1"></i>Ver estancia
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-house-heart display-4 text-secondary"></i>
+    <p class="text-secondary mt-3 mb-3">No tienes estancias registradas en ningún evento.</p>
+    <a href="{% url 'events:event_list' %}" class="btn btn-primary">
+      <i class="bi bi-calendar-event me-1"></i>Ver eventos
+    </a>
+  </div>
+  {% endif %}
+
+  {% endif %}
+
+</div>
+{% endblock %}
