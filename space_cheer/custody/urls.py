@@ -31,4 +31,5 @@ urlpatterns = [
         views.ownership_transfer,
         name="ownership_transfer",
     ),
+    path("minor/blocked/", views.minor_blocked, name="minor_blocked"),
 ]

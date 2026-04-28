@@ -400,3 +400,16 @@ def ownership_transfer(request, ownership_id):
         messages.error(request, str(e))
 
     return redirect("coach:manage_owned_users")
+
+
+# =============================================================================
+# PANTALLA DE BLOQUEO PARA MENORES SIN GUARDIAN
+# =============================================================================
+
+from django.contrib.auth.decorators import login_required as _login_required
+
+
+@_login_required
+def minor_blocked(request):
+    """Pantalla informativa para menores que aún no tienen guardian asignado."""
+    return render(request, "custody/minor_blocked.html")
