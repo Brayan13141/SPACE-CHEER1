@@ -304,6 +304,30 @@
                     </li>
                     {% endif %}
 
+                    {# ── HOSPITALIDAD — todos los roles autenticados ── #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-building me-1"></i>{% trans "Hospitalidad" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'hospitality:index' %}">
+                                <i class="bi bi-grid me-2"></i>{% trans "Inicio" %}
+                            </a></li>
+                            {% if is_admin %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{% trans "Administrar" %}</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'hospitality:room_feature_list' %}">
+                                <i class="bi bi-tags me-2"></i>{% trans "Características" %}
+                            </a></li>
+                            {% else %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'hospitality:index' %}">
+                                <i class="bi bi-house-heart me-2"></i>{% trans "Mis Estancias" %}
+                            </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+
                     {# ── EQUIPOS — coaches y admin ── #}
                     {% if can_manage %}
                     <li class="nav-item dropdown">
@@ -431,8 +455,6 @@
 
                     {% if user.is_authenticated %}
 
-                    {# Selector de idioma #}
-                    {% include "partials/language_switcher.html" %}
 
                     {# Campana de notificaciones #}
                     <div class="dropdown">
@@ -519,6 +541,27 @@
                             <li><a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">
                                 <i class="bi bi-person me-2"></i>{% trans "Mi Perfil" %}
                             </a></li>
+
+                            {# Selector de idioma — items directos, sin dropdown anidado #}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{% trans "Idioma" %}</h6></li>
+                            {% get_current_language as CURRENT_LANG %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% for lang_code, lang_name in LANGUAGES %}
+                            <li>
+                                <form method="post" action="{% url 'set_language' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="language" value="{{ lang_code }}">
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 {% if lang_code == CURRENT_LANG %}fw-bold{% endif %}">
+                                        {% if lang_code == 'es' %}<span>🇲🇽</span> Español
+                                        {% elif lang_code == 'en' %}<span>🇺🇸</span> English
+                                        {% else %}{{ lang_name }}{% endif %}
+                                        {% if lang_code == CURRENT_LANG %}<i class="bi bi-check2 ms-auto"></i>{% endif %}
+                                    </button>
+                                </form>
+                            </li>
+                            {% endfor %}
 
                             {# Todos: mis pedidos (enlace según rol) #}
                             {% if is_admin or is_staff_role %}
