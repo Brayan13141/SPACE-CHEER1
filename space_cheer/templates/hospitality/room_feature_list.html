@@ -1,0 +1,95 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Características de Habitación — Hospitalidad{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:760px;">
+
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:index' %}">Hospitalidad</a></li>
+      <li class="breadcrumb-item active">Características</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 mb-1"><i class="bi bi-tags me-2" style="color:var(--sc-cyan);"></i>Características</h1>
+      <p class="text-secondary mb-0">Catálogo global de características de habitación</p>
+    </div>
+    <a href="{% url 'hospitality:room_feature_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nueva
+    </a>
+  </div>
+
+  {% if features %}
+  <div class="card border-0" style="background:var(--sc-surface);">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width:48px;"></th>
+            <th>Nombre</th>
+            <th>Clase de ícono</th>
+            <th style="width:100px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for feature in features %}
+          <tr>
+            <td class="text-center">
+              {% if feature.icon %}
+              <i class="{{ feature.icon }} fs-5" style="color:var(--sc-cyan);"></i>
+              {% else %}
+              <span class="text-secondary">—</span>
+              {% endif %}
+            </td>
+            <td class="fw-semibold">{{ feature.name }}</td>
+            <td><code class="text-secondary small">{{ feature.icon|default:"—" }}</code></td>
+            <td>
+              <div class="d-flex gap-1 justify-content-end">
+                <a href="{% url 'hospitality:room_feature_edit' pk=feature.pk %}"
+                   class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <form method="post" action="{% url 'hospitality:room_feature_delete' pk=feature.pk %}"
+                      onsubmit="return confirm('¿Eliminar «{{ feature.name }}»?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="text-secondary small mt-3">
+    <i class="bi bi-info-circle me-1"></i>
+    Los íconos usan clases de
+    <a href="https://icons.getbootstrap.com" target="_blank" rel="noopener" class="text-secondary">Bootstrap Icons</a>
+    (ej. <code>bi-wifi</code>, <code>bi-thermometer-snow</code>).
+  </p>
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-tags display-4 text-secondary"></i>
+    <p class="text-secondary mt-3 mb-3">No hay características registradas.</p>
+    <div class="d-flex gap-2 justify-content-center">
+      <a href="{% url 'hospitality:room_feature_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Crear manualmente
+      </a>
+      <p class="text-secondary small mt-2 mb-0">
+        o corre <code>python manage.py seed_room_features</code>
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

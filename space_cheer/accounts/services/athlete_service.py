@@ -46,7 +46,7 @@ class AthleteService:
             last_name=last_name,
             email=email,
             phone=phone,
-            password=config("ATLETA_TEMP_PASSWORD"),
+            password=config("ATHLETE_TEMP_PASSWORD"),
             profile_completed=False,
         )
 
@@ -86,7 +86,7 @@ class AthleteService:
             User.objects.filter(username__startswith="ATLETA-")
             .annotate(
                 num=models.functions.Cast(
-                    models.functions.Substr("username", 9),
+                    models.functions.Substr("username", 8),
                     models.IntegerField(),
                 )
             )

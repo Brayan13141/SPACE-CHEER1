@@ -30,7 +30,7 @@ class UserProfilingForm(forms.ModelForm):
         label="¿Cuál es tu rol?",
         empty_label="Selecciona tu rol...",
         # Widget con ayuda visual — el template puede usar esto
-        widget=forms.RadioSelect,
+        widget=forms.Select,
     )
 
     class Meta:

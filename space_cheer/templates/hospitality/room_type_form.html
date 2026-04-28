@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Editar{% else %}Nuevo{% endif %} Tipo de Habitación{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:600px;">
+
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_detail' pk=event.pk %}">{{ event.name }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:hotel_list' event_pk=event.pk %}">Hoteles</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:hotel_detail' event_pk=event.pk pk=hotel.pk %}">{{ hotel.name }}</a></li>
+      <li class="breadcrumb-item active">{% if is_edit %}Editar tipo{% else %}Nuevo tipo{% endif %}</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0" style="background:var(--sc-surface);">
+    <div class="card-header border-0 pb-0" style="background:transparent;">
+      <h1 class="h4 mb-0">
+        <i class="bi bi-grid me-2" style="color:var(--sc-cyan);"></i>
+        {% if is_edit %}Editar Tipo{% else %}Nuevo Tipo de Habitación{% endif %}
+      </h1>
+      <p class="text-secondary small mt-1 mb-0">{{ hotel.name }}</p>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.capacity.label }} <span class="text-danger">*</span></label>
+            {{ form.capacity }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.base_price.label }}</label>
+            {{ form.base_price }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">{{ form.description.label }}</label>
+            {{ form.description }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">{{ form.features.label }}</label>
+            <div class="border rounded p-3" style="background:var(--sc-bg);">
+              {% for choice in form.features %}
+              <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+              </div>
+              {% empty %}
+              <p class="text-secondary small mb-0">No hay características registradas.</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>{% if is_edit %}Guardar{% else %}Crear{% endif %}
+          </button>
+          <a href="{% url 'hospitality:hotel_detail' event_pk=event.pk pk=hotel.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

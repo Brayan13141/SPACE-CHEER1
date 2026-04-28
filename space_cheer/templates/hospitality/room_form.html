@@ -1,0 +1,67 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Habitación — {{ hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:560px;">
+
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:hotel_list' event_pk=event.pk %}">Hoteles</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'hospitality:hotel_detail' event_pk=event.pk pk=hotel.pk %}">{{ hotel.name }}</a></li>
+      <li class="breadcrumb-item active">{% if is_edit %}Editar hab.{% else %}Nueva hab.{% endif %}</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0" style="background:var(--sc-surface);">
+    <div class="card-header border-0 pb-0" style="background:transparent;">
+      <h1 class="h4 mb-0">
+        <i class="bi bi-door-closed me-2" style="color:var(--sc-cyan);"></i>
+        {% if is_edit %}Editar Habitación #{{ room.room_number }}{% else %}Nueva Habitación{% endif %}
+      </h1>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.room_number.label }}</label>
+            {{ form.room_number }}
+            {% if form.room_number.errors %}<div class="text-danger small mt-1">{{ form.room_number.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.floor.label }}</label>
+            {{ form.floor }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">{{ form.room_type.label }}</label>
+            {{ form.room_type }}
+            {% if form.room_type.errors %}<div class="text-danger small mt-1">{{ form.room_type.errors }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">{{ form.notes.label }}</label>
+            {{ form.notes }}
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              {{ form.is_available }}
+              <label class="form-check-label" for="{{ form.is_available.id_for_label }}">Disponible</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>{% if is_edit %}Guardar{% else %}Crear{% endif %}
+          </button>
+          <a href="{% url 'hospitality:hotel_detail' event_pk=event.pk pk=hotel.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
