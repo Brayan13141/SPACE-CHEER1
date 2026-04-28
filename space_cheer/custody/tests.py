@@ -22,7 +22,7 @@ class TestMinorAccessService:
 
     def test_adulto_devuelve_none(self):
         adult = AthleteFactory(
-            birth_date=date(2000, 1, 1),
+            birth_date=date(date.today().year - 20, 1, 1),
             profile_completed=True,
         )
         assert MinorAccessService.get_access_level(adult) is None
