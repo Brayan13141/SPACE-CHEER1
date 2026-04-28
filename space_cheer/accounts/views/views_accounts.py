@@ -23,7 +23,7 @@ def profile_setup_view(request):
             if selected_role.requires_curp:
                 return redirect("accounts:curp_verification")
 
-            return redirect("dashboard")
+            return redirect("core:dashboard")
 
     else:
         form = UserProfilingForm(instance=user)

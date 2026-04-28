@@ -4,7 +4,7 @@ from decouple import config
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -235,8 +235,10 @@ def manage_athletes(request):
                         "La contraseña temporal fue enviada al correo",
                     )
                     return redirect("teams:manage_athletes")
+                except (ValueError, ValidationError) as e:
+                    logger.exception("Error al crear atleta rápido por user=%s: %s", request.user.id, e)
+                    messages.error(request, str(e))
                 except Exception as e:
-                    # No exponer detalles internos al usuario — solo loggear
                     logger.exception("Error al crear atleta rápido por user=%s: %s", request.user.id, e)
                     messages.error(request, "Error al crear el atleta. Contacta al administrador.")
 
