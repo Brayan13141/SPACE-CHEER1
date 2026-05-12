@@ -75,6 +75,10 @@ def create_order(request):
     Crear una orden TEAM o PERSONAL.
     """
 
+    if request.user.is_minor:
+        messages.error(request, "Los atletas menores no pueden crear pedidos. Tu tutor debe hacerlo.")
+        return redirect("guardian:minor_blocked")
+
     teams = Team.objects.filter(coach=request.user)
 
     if request.method == "POST":

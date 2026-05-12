@@ -266,6 +266,22 @@
             margin: 0;
         }
     }
+
+    /* ── Validation states ─────────────────────────────────── */
+    .form-control-neon.is-invalid {
+        border-color: #ff4f9a !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 79, 154, 0.2) !important;
+    }
+    .form-control-neon.is-valid {
+        border-color: rgba(40, 167, 69, 0.6) !important;
+        box-shadow: none !important;
+    }
+    .sc-feedback {
+        color: #ff9e9e;
+        font-size: 0.8rem;
+        margin-top: 0.35rem;
+        display: none;
+    }
     </style>
 
     {% block extra_head %}{% endblock %}
@@ -312,6 +328,7 @@
     </div>
 
     <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'JS/sc-validation.js' %}"></script>
     
     
     <script>

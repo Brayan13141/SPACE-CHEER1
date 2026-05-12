@@ -800,12 +800,19 @@
         }
 
         // Spinner en submit de forms
+        // Usa setTimeout(0) para que el spinner solo corra si ningún listener
+        // síncrono (ej. validación JS) llamó e.preventDefault() antes.
         document.querySelectorAll('form').forEach(function (form) {
-            form.addEventListener('submit', function () {
-                form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
-                });
+            form.addEventListener('submit', function (e) {
+                var btns = form.querySelectorAll('button[type="submit"]');
+                setTimeout(function () {
+                    if (!e.defaultPrevented) {
+                        btns.forEach(function (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+                        });
+                    }
+                }, 0);
             });
         });
     });

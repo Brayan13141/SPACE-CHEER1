@@ -18,6 +18,7 @@ from orders.services.state import OrderStateService
 from orders.services.file_validation import FileValidator
 from orders.forms import OrderDatesForm
 from django.core.exceptions import ValidationError
+from django_ratelimit.decorators import ratelimit
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -296,6 +297,7 @@ def admin_order_detail(request, order_id):
 
 
 @staff_member_required
+@ratelimit(key="user", rate="5/m", method="POST", block=True)
 def admin_upload_design(request, order_id):
 
     order = get_object_or_404(Order, pk=order_id)

@@ -5,6 +5,7 @@ from decouple import config
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ from accounts.services.permission_service import AccountPermissions
 from .models import Team, TeamCategory, UserTeamMembership
 from .forms import TeamForm, TeamCategoryForm, QuickAthleteRegisterForm
 from .services import TeamService, MembershipService
+from accounts.tasks import send_athlete_credentials
 
 
 @role_required("ADMIN", "HEADCOACH")
@@ -222,18 +224,27 @@ def manage_athletes(request):
             if form_crear.is_valid():
                 cd = form_crear.cleaned_data
                 try:
-                    user = AthleteService.create_quick(
+                    user, temp_password = AthleteService.create_quick(
                         first_name=cd["first_name"],
                         last_name=cd["last_name"],
                         email=cd.get("email", ""),
                         phone=cd.get("phone", ""),
                         created_by=request.user,
                     )
-                    messages.success(
-                        request,
-                        f"Alumno creado. Usuario: {user.username}. "
-                        "La contraseña temporal fue enviada al correo",
-                    )
+                    request.session["new_athlete"] = {
+                        "username": user.username,
+                        "password": temp_password,
+                        "name": user.get_full_name(),
+                        "email": user.email,
+                        "email_sent": bool(user.email),
+                    }
+                    if user.email:
+                        login_url = request.build_absolute_uri(
+                            reverse("account_login")
+                        )
+                        send_athlete_credentials.delay(
+                            user.id, temp_password, login_url
+                        )
                     return redirect("teams:manage_athletes")
                 except (ValueError, ValidationError) as e:
                     logger.exception("Error al crear atleta rápido por user=%s: %s", request.user.id, e)
@@ -244,6 +255,8 @@ def manage_athletes(request):
 
             abrir_modal_crear = True
 
+    new_athlete = request.session.pop("new_athlete", None)
+
     return render(
         request,
         "coach/athlete/manage_athletes.html",
@@ -252,5 +265,6 @@ def manage_athletes(request):
             "form_crear": form_crear,
             "abrir_modal_crear": abrir_modal_crear,
             "puede_crear": puede_crear,
+            "new_athlete": new_athlete,
         },
     )

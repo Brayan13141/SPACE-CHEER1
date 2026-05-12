@@ -57,8 +57,8 @@
             <i class="bi bi-key me-1"></i>
             {% trans "Contraseña" %}
         </label>
-        <input type="password" name="password1" id="id_password1" 
-               class="form-control form-control-neon" 
+        <input type="password" name="password1" id="id_password1"
+               class="form-control form-control-neon"
                placeholder="••••••••"
                autocomplete="new-password" required>
         {% if form.password1.errors %}
@@ -66,9 +66,7 @@
                 {{ form.password1.errors }}
             </div>
         {% endif %}
-        <div class="form-text" style="color: #a0a7d0; font-size: 0.8rem;">
-            {% trans "Mínimo 8 caracteres, con letras y números." %}
-        </div>
+        <div id="strength-meter-wrap"></div>
     </div>
 
     <!-- Password Confirmation -->
@@ -103,10 +101,10 @@
                {% if form.terms.value %}checked{% endif %}>
                
         <label class="form-check-label" for="id_terms" style="font-size: 0.85rem;">
-            {% trans "Acepto los" %} 
-            <a href="#" style="color: var(--secondary-color);">{% trans "Términos de servicio" %}</a> 
-            {% trans "y" %} 
-            <a href="#" style="color: var(--secondary-color);">{% trans "Política de privacidad" %}</a>
+            {% trans "Acepto los" %}
+            <a href="{% url 'core:contact' %}" target="_blank" rel="noopener" style="color: var(--secondary-color);">{% trans "Términos de servicio" %}</a>
+            {% trans "y" %}
+            <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener" style="color: var(--secondary-color);">{% trans "Política de privacidad" %}</a>
         </label>
         
         {% if form.terms.errors %}
@@ -137,9 +135,44 @@
 
 {% block footer_links %}
 <p>
-    {% trans "Al registrarte, aceptas nuestros" %} 
-    <a href="#" style="color: var(--secondary-color);">{% trans "Términos" %}</a> •
-    <a href="#" style="color: var(--secondary-color);">{% trans "Privacidad" %}</a> •
+    {% trans "Al registrarte, aceptas nuestros" %}
+    <a href="{% url 'core:contact' %}" target="_blank" rel="noopener" style="color: var(--secondary-color);">{% trans "Términos" %}</a> •
+    <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener" style="color: var(--secondary-color);">{% trans "Privacidad" %}</a> •
     <a href="{% url 'account_login' %}">{% trans "Iniciar Sesión" %}</a>
 </p>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.attachStrengthMeter('id_password1', 'strength-meter-wrap');
+
+    ScValidation.init(document.getElementById('signup_form'), {
+        email: [
+            ScValidation.rules.required('El correo es obligatorio'),
+            ScValidation.rules.email('Introduce un correo válido (ej: nombre@ejemplo.com)'),
+        ],
+        username: [
+            ScValidation.rules.required('Elige un nombre de usuario'),
+            ScValidation.rules.minLen(3, 'El usuario debe tener al menos 3 caracteres'),
+            ScValidation.rules.maxLen(50, 'El usuario no puede superar 50 caracteres'),
+            ScValidation.rules.pattern(
+                /^[\w.@+-]+$/,
+                'Solo letras, números y los caracteres: @ . + - _'
+            ),
+        ],
+        password1: [
+            ScValidation.rules.required('La contraseña es obligatoria'),
+            ScValidation.rules.minLen(8, 'La contraseña debe tener al menos 8 caracteres'),
+        ],
+        password2: [
+            ScValidation.rules.required('Confirma tu contraseña'),
+            ScValidation.rules.matchField('id_password1', 'Las contraseñas no coinciden'),
+        ],
+        terms: [
+            ScValidation.rules.checked('Debes aceptar los términos para continuar'),
+        ],
+    });
+});
+</script>
 {% endblock %}

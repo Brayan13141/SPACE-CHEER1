@@ -285,13 +285,35 @@ class AthleteMedicalInfo(models.Model):
 #  COACH PROFILE
 # -------------------------------------------------------------
 class CoachProfile(models.Model):
+
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    APPROVAL_CHOICES = [
+        (PENDING, "Pendiente"),
+        (APPROVED, "Aprobado"),
+        (REJECTED, "Rechazado"),
+    ]
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     experience_years = models.PositiveIntegerField(default=0)
     certifications = models.TextField(blank=True)
 
+    approval_status = models.CharField(
+        max_length=10,
+        choices=APPROVAL_CHOICES,
+        default=PENDING,
+    )
+    rejection_reason = models.TextField(blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"Coach: {self.user}"
+
+    @property
+    def is_approved(self):
+        return self.approval_status == self.APPROVED
 
 
 # -------------------------------------------------------------

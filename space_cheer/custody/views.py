@@ -16,11 +16,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponseNotAllowed
+from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
 
-from accounts.models import UserOwnership
+from accounts.models import UserOwnership, AthleteProfile
 from accounts.services.ownership_service import OwnershipService
 from accounts.decorators import role_required
 from custody.services.minor_service import MinorAthleteService
@@ -109,6 +110,58 @@ def guardian_dashboard(request):
             "guardian_profile": getattr(request.user, "guardianprofile", None),
         },
     )
+
+
+# =============================================================================
+# GUARDIAN CREA ORDEN PARA SU ATLETA MENOR
+# =============================================================================
+
+
+@role_required("GUARDIAN", "ADMIN")
+def guardian_create_order(request, athlete_id):
+    """
+    El guardian crea una orden PERSONAL en nombre de su atleta menor.
+    El guardian es created_by, el menor es owner_user.
+    """
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    athlete = get_object_or_404(User, id=athlete_id)
+
+    try:
+        if athlete.athleteprofile.guardian != request.user:
+            messages.error(request, "No tienes permiso sobre este atleta.")
+            return redirect("guardian:dashboard")
+    except AthleteProfile.DoesNotExist:
+        messages.error(request, "Este usuario no tiene perfil de atleta.")
+        return redirect("guardian:dashboard")
+
+    if not athlete.is_minor:
+        messages.error(request, "Solo puedes crear pedidos para atletas menores de edad.")
+        return redirect("guardian:dashboard")
+
+    from orders.services.state import OrderCreationService
+    from orders.services.factories import OrderContactInfoFactory
+
+    try:
+        with transaction.atomic():
+            order = OrderCreationService.create_order(
+                order_type="PERSONAL",
+                created_by=request.user,
+                owner_user=athlete,
+                owner_team=None,
+            )
+            contact_info = OrderContactInfoFactory.from_user(order=order, user=athlete)
+            contact_info.full_clean()
+            contact_info.save()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception("Error creating order for minor athlete_id=%s: %s", athlete_id, e)
+        messages.error(request, f"No se pudo crear el pedido: {e}")
+        return redirect("guardian:dashboard")
+
+    messages.success(request, f"Pedido creado para {athlete.get_full_name()}.")
+    return redirect("orders:contact_info_order", order_id=order.id)
 
 
 # =============================================================================
@@ -400,3 +453,16 @@ def ownership_transfer(request, ownership_id):
         messages.error(request, str(e))
 
     return redirect("coach:manage_owned_users")
+
+
+# =============================================================================
+# PANTALLA DE BLOQUEO PARA MENORES SIN GUARDIAN
+# =============================================================================
+
+from django.contrib.auth.decorators import login_required as _login_required
+
+
+@_login_required
+def minor_blocked(request):
+    """Pantalla informativa para menores que aún no tienen guardian asignado."""
+    return render(request, "custody/minor_blocked.html")

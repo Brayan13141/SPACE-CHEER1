@@ -2,8 +2,7 @@ import logging
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.db.models import Max
-
-from decouple import config
+from django.utils.crypto import get_random_string
 
 from accounts.models import AthleteProfile, AthleteMedicalInfo, Role, UserOwnership
 from accounts.services.ownership_service import OwnershipService
@@ -23,22 +22,27 @@ class AthleteService:
         email: str = "",
         phone: str = "",
         created_by,
-    ) -> User:
+    ) -> tuple:
         """
         Crea un atleta rápidamente desde la interfaz del coach.
 
         Pasos:
         1. Genera username incremental seguro (ATLETA-N)
-        2. Crea el User con contraseña temporal
-        3. Asigna el rol global ATLETA
-        4. Crea AthleteProfile con valores mínimos
-        5. Crea AthleteMedicalInfo vacío
-        6. Registra ownership: created_by → nuevo usuario
+        2. Genera contraseña temporal aleatoria (única por atleta)
+        3. Crea el User
+        4. Asigna el rol global ATLETA
+        5. Crea AthleteProfile con valores mínimos
+        6. Crea AthleteMedicalInfo vacío
+        7. Registra ownership: created_by → nuevo usuario
 
-        Retorna el User creado.
+        Retorna (user, temp_password).
         Lanza ValueError o Role.DoesNotExist si los datos de configuración faltan.
         """
         username = AthleteService._generate_username()
+        temp_password = get_random_string(
+            length=12,
+            allowed_chars="abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789",
+        )
 
         user = User.objects.create_user(
             username=username,
@@ -46,8 +50,8 @@ class AthleteService:
             last_name=last_name,
             email=email,
             phone=phone,
-            password=config("ATHLETE_TEMP_PASSWORD"),
-            profile_completed=False,
+            password=temp_password,
+            profile_completed=True,
         )
 
         user.roles.add(Role.objects.get(name="ATHLETE"))
@@ -73,7 +77,7 @@ class AthleteService:
             username,
             created_by,
         )
-        return user
+        return user, temp_password
 
     @staticmethod
     def _generate_username() -> str:

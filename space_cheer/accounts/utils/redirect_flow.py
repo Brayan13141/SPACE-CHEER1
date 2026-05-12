@@ -1,25 +1,10 @@
-# accounts/utils/redirect_flow.py
-# Este módulo centraliza la lógica de redirección de usuarios según su estado.
-# Así evitamos tener lógica de redirección dispersa por toda la app.
-
 from django.urls import reverse
 
 
 def get_user_redirect_flow(user):
-    """
-    Decide EXACTAMENTE a dónde debe ir el usuario
-    según su estado completo.
-
-    Prioridad:
-    1. Autenticación
-    2. Perfil / onboarding
-    3. CURP
-    4. Dashboard por rol
-    """
     if not user.is_authenticated:
         return reverse("account_login")
 
-    # 1. Sin rol → onboarding
     if not user.roles.exists():
         return reverse("accounts:profile_setup")
 
@@ -28,11 +13,26 @@ def get_user_redirect_flow(user):
     if not user.profile_completed:
         return reverse("accounts:profile_setup")
 
-    # 2. CURP requerido
     if role.requires_curp and not user.curp:
         return reverse("accounts:curp_verification")
 
-    # 3. Redirección por rol
+    # Coach/Headcoach pendiente de aprobación o rechazado
+    if user.roles.filter(name__in=["COACH", "HEADCOACH"]).exists():
+        try:
+            status = user.coachprofile.approval_status
+            if status == "PENDING":
+                return reverse("accounts:coach_pending_approval")
+            if status == "REJECTED":
+                return reverse("accounts:coach_rejected")
+        except Exception:
+            pass
+
+    # Menor sin guardian → pantalla de bloqueo
+    if user.roles.filter(name="ATHLETE").exists() and user.is_minor:
+        from custody.services.minor_access_service import MinorAccessService
+        if MinorAccessService.get_access_level(user) == MinorAccessService.BLOCKED:
+            return reverse("guardian:minor_blocked")
+
     if user.roles.filter(name="ADMIN").exists():
         return reverse("core:dashboard")
 

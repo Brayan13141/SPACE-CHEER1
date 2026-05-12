@@ -29,6 +29,7 @@ Reglas:
 
 import logging
 from django.contrib.auth import get_user_model
+from ipware import get_client_ip
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -124,23 +125,5 @@ class PiiAuditService:
 
     @staticmethod
     def _get_client_ip(request) -> str:
-        """
-        Extrae la IP real del cliente.
-
-        IMPORTANTE SOBRE X-Forwarded-For:
-        Este header puede ser falsificado por el cliente. Solo se usa cuando
-        SECURE_PROXY_SSL_HEADER está configurado, lo que indica que existe un
-        proxy inverso de confianza (Nginx, AWS ALB, etc.) que controla el header.
-        En caso contrario se usa REMOTE_ADDR, que es la IP directa y no spoofeable.
-        """
-        from django.conf import settings
-
-        # Solo confiar en X-Forwarded-For si hay un proxy inverso configurado
-        if getattr(settings, "SECURE_PROXY_SSL_HEADER", None):
-            x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-            if x_forwarded_for:
-                # X-Forwarded-For puede tener múltiples IPs: "client, proxy1, proxy2"
-                # La IP del cliente real es siempre la primera de la lista
-                return x_forwarded_for.split(",")[0].strip()
-
-        return request.META.get("REMOTE_ADDR", "")
+        ip, _ = get_client_ip(request)
+        return ip or "0.0.0.0"

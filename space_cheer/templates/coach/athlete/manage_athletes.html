@@ -4,6 +4,52 @@
 {% block content %}
 <div class="container py-4">
 
+    {% if new_athlete %}
+    <div class="alert border-0 shadow mb-4 d-flex align-items-start gap-3"
+         style="background: rgba(40,167,69,0.12); border-left: 4px solid #28a745 !important;">
+        <i class="bi bi-check-circle-fill text-success fs-3 flex-shrink-0 mt-1"></i>
+        <div class="flex-grow-1">
+            <h5 class="fw-bold mb-1 text-success">Alumno creado exitosamente</h5>
+            <p class="small text-muted mb-3">Guarda estas credenciales y entrégaselas al alumno. Solo se muestran una vez.</p>
+            <div class="row g-2">
+                <div class="col-sm-4">
+                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                        <div class="small text-muted mb-1"><i class="bi bi-person me-1"></i>Nombre</div>
+                        <div class="fw-semibold">{{ new_athlete.name }}</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                        <div class="small text-muted mb-1"><i class="bi bi-at me-1"></i>Usuario</div>
+                        <code class="text-light fw-bold">{{ new_athlete.username }}</code>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                        <div class="small text-muted mb-1"><i class="bi bi-key me-1"></i>Contraseña temporal</div>
+                        <code class="text-warning fw-bold">{{ new_athlete.password }}</code>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                {% if new_athlete.email_sent %}
+                <p class="small mb-0" style="color:#4ade80;">
+                    <i class="bi bi-envelope-check me-1"></i>
+                    Credenciales enviadas a <strong>{{ new_athlete.email }}</strong>.
+                    El alumno puede cambiar su contraseña desde su perfil.
+                </p>
+                {% else %}
+                <p class="small mb-0 text-warning">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Sin email registrado — entrega estas credenciales manualmente.
+                    El alumno debe cambiar su contraseña al iniciar sesión.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- HEADER MEJORADO (sin buscador manual) -->
     <div class="row g-3 mb-4 align-items-end">
         <div class="col-md-8">

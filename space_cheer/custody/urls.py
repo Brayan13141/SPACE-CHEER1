@@ -31,4 +31,6 @@ urlpatterns = [
         views.ownership_transfer,
         name="ownership_transfer",
     ),
+    path("minor/blocked/", views.minor_blocked, name="minor_blocked"),
+    path("order/create/<int:athlete_id>/", views.guardian_create_order, name="create_order_for_minor"),
 ]

@@ -403,8 +403,56 @@ input.form-control-neon:focus {
 
 {% block footer_links %}
 <p style="color: #a0a7d0;">
-    {% trans "¿Necesitas ayuda para completar tu perfil?" %} 
-    
+    {% trans "¿Necesitas ayuda para completar tu perfil?" %}
     <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">{% trans "Salir" %}</a>
 </p>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form.additional-info-form');
+    if (!form) return;
+
+    // Standard field validation
+    ScValidation.init(form, {
+        first_name: [
+            ScValidation.rules.required('El nombre es obligatorio'),
+            ScValidation.rules.maxLen(50, 'Máximo 50 caracteres'),
+        ],
+        last_name: [
+            ScValidation.rules.required('El apellido es obligatorio'),
+            ScValidation.rules.maxLen(50, 'Máximo 50 caracteres'),
+        ],
+        phone: [
+            ScValidation.rules.phoneMx('Introduce un teléfono válido (7-15 dígitos)'),
+        ],
+        birth_date: [
+            ScValidation.rules.required('La fecha de nacimiento es obligatoria'),
+            ScValidation.rules.notFuture('La fecha no puede ser futura'),
+        ],
+    });
+
+    // Role validation: the hidden <select name="role"> must have a value on submit
+    form.addEventListener('submit', function (e) {
+        const roleSelect = form.querySelector('select[name="role"]');
+        if (!roleSelect || !roleSelect.value) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            // Show error near the role grid
+            let roleErr = document.getElementById('role-validation-error');
+            if (!roleErr) {
+                roleErr = document.createElement('div');
+                roleErr.id = 'role-validation-error';
+                roleErr.className = 'sc-feedback';
+                roleErr.style.display = 'block';
+                document.getElementById('roleGrid')?.after(roleErr);
+            }
+            roleErr.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Selecciona un rol para continuar';
+            document.getElementById('roleGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, true); // capture phase so it runs before ScValidation.init's submit listener
+});
+</script>
 {% endblock %}

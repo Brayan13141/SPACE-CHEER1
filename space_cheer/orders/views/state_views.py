@@ -6,6 +6,7 @@ from orders.services.state import OrderStateService
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.admin.views.decorators import staff_member_required
+from django_ratelimit.decorators import ratelimit
 
 # ---------------------------------------------------------
 # Order State
@@ -16,6 +17,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 @login_required
 @require_POST
+@ratelimit(key="user", rate="20/m", method="POST", block=True)
 def transition_order(request, order_id, to_status):
     """Transición para usuarios normales."""
     _do_transition(request, order_id, to_status)

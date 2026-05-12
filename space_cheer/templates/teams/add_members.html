@@ -591,8 +591,8 @@
               Todos tus usuarios ya están en este equipo, o aún no tienes usuarios asignados.
             </p>
             <div class="d-flex gap-2 justify-content-center flex-wrap">
-              <a href="{% url 'coach:manage_athletes' %}" class="btn btn-primary btn-sm">
-                <i class="bi bi-person-plus me-1"></i>Crear atleta
+              <a href="{% url 'teams:manage_athletes' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus me-1"></i>Añadir atletas
               </a>
               <a href="{% url 'coach:create_team_crew_member' team.id %}" class="btn btn-outline-primary btn-sm">
                 <i class="bi bi-person-badge me-1"></i>Crear miembro nuevo

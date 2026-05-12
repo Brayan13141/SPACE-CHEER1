@@ -142,7 +142,10 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "accounts.middleware.AdminIPWhitelistMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "csp.middleware.CSPMiddleware",
+    "accounts.middleware.PermissionsPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -265,8 +268,51 @@ X_FRAME_OPTIONS = "DENY"
 # Evita que el navegador detecte el MIME type por sniffing
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Activa XSS filter del navegador (legacy, pero útil para IE/Edge antiguos)
-SECURE_BROWSER_XSS_FILTER = True
+# M1 — URL del admin configurable + whitelist de IPs
+# En producción: ADMIN_URL=my-secret-admin/ ADMIN_ALLOWED_IPS=1.2.3.4,5.6.7.8
+ADMIN_URL = config("ADMIN_URL", default="admin/")
+ADMIN_ALLOWED_IPS = config("ADMIN_ALLOWED_IPS", default="", cast=Csv())
+
+# A1 — Content Security Policy
+# 'unsafe-inline' en script-src/style-src es deuda técnica conocida:
+# base.html tiene <style> y <script> inline. Migrar a nonces cuando se refactorice base.html.
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "script-src": [
+            "'self'",
+            "https://code.jquery.com",
+            "https://cdn.datatables.net",
+            "https://cdn.jsdelivr.net",
+            "'unsafe-inline'",
+        ],
+        "style-src": [
+            "'self'",
+            "https://cdn.datatables.net",
+            "'unsafe-inline'",
+        ],
+        "font-src": ["'self'", "data:"],
+        "img-src": ["'self'", "data:", "blob:"],
+        "connect-src": ["'self'"],
+        "frame-ancestors": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+    }
+}
+
+# A4 — Referrer-Policy
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# A4 — Permissions-Policy (leído por PermissionsPolicyMiddleware en accounts/middleware.py)
+PERMISSIONS_POLICY = {
+    "camera": [],
+    "microphone": [],
+    "geolocation": [],
+}
+
+# A5 — Límite de tamaño para uploads (protege contra DoS por archivos grandes)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024    # 5MB
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
@@ -282,8 +328,8 @@ TEMPLATES[0]["DIRS"] = [TEMPLATE_DIR]
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 
-CELERY_ACCEPT_CONTENT = config("CELERY_ACCEPT_CONTENT", cast=Csv())
-CELERY_TASK_SERIALIZER = config("CELERY_TASK_SERIALIZER")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = config("CELERY_TIMEZONE")
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
