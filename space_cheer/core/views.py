@@ -18,6 +18,10 @@ def home(request):
     return render(request, "core/home.html")
 
 
+def landing(request):
+    return render(request, "core/home.html")
+
+
 @cache_page(60 * 60 * 24)
 def contact(request):
     return render(request, "core/contact.html")

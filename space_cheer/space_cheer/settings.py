@@ -168,6 +168,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
                 "accounts.context_processors.user_roles",
+                "orders.context_processors.cart_context",
                 "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",

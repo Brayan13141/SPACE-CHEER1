@@ -4,6 +4,8 @@ from products import views
 app_name = "products"
 
 urlpatterns = [
+    # Catálogo público
+    path("catalog/", views.catalog_view, name="catalog"),
     # Lista
     path("", views.product_list, name="list_products"),
     # Crear — paso 1: elegir plantilla
