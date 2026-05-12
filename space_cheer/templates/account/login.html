@@ -185,8 +185,23 @@
 
 {% block footer_links %}
 <p>
-    {% trans "¿Problemas para iniciar sesión?" %} 
+    {% trans "¿Problemas para iniciar sesión?" %}
     <a href="{% url 'account_reset_password' %}">{% trans "Recuperar contraseña" %}</a> •
     <a href="{% url 'account_signup' %}">{% trans "Registrarse" %}</a>
 </p>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.querySelector('form.login'), {
+        login: [
+            ScValidation.rules.required('Ingresa tu correo o nombre de usuario'),
+        ],
+        password: [
+            ScValidation.rules.required('La contraseña es obligatoria'),
+        ],
+    });
+});
+</script>
 {% endblock %}

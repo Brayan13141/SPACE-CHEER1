@@ -367,7 +367,7 @@ def edit_athlete_measures(request, id):
 
         if not (is_owner or is_in_team):
             messages.error(request, "No tienes acceso a este atleta.")
-            return redirect("coach:manage_athletes")
+            return redirect("teams:manage_athletes")
 
     if request.method == "POST":
         form = DynamicMeasurementsForm(request.POST, user=athlete)

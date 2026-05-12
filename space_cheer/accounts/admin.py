@@ -177,7 +177,8 @@ class AthleteProfileInline(admin.StackedInline):
 class CoachProfileInline(admin.StackedInline):
     model = CoachProfile
     can_delete = False
-    fields = ("experience_years", "certifications")
+    fields = ("experience_years", "certifications", "approval_status", "rejection_reason", "approved_at")
+    readonly_fields = ("approved_at",)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -630,6 +631,86 @@ class UserOwnershipAdmin(admin.ModelAdmin):
     def deactivate_ownerships(self, request, queryset):
         updated = queryset.update(is_active=False, deactivated_at=timezone.now())
         self.message_user(request, f"{updated} relaciones desactivadas.")
+
+
+# ============================================================
+# COACH PROFILE ADMIN
+# ============================================================
+@admin.register(CoachProfile)
+class CoachProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "user_link",
+        "approval_badge",
+        "experience_years",
+        "approved_at",
+    )
+    list_filter = ("approval_status",)
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__email",
+    )
+    readonly_fields = ("approved_at",)
+    raw_id_fields = ("user",)
+    ordering = ("-user__date_joined",)
+
+    fieldsets = (
+        ("Entrenador", {"fields": ("user",)}),
+        ("Perfil", {"fields": ("experience_years", "certifications")}),
+        (
+            "Aprobación",
+            {"fields": ("approval_status", "rejection_reason", "approved_at")},
+        ),
+    )
+
+    actions = ["approve_coaches", "reject_coaches"]
+
+    def user_link(self, obj):
+        url = reverse("admin:accounts_user_change", args=[obj.user.id])
+        return format_html(
+            '<a href="{}">{}</a>',
+            url,
+            obj.user.get_full_name() or obj.user.username,
+        )
+
+    user_link.short_description = "Entrenador"
+    user_link.admin_order_field = "user__last_name"
+
+    def approval_badge(self, obj):
+        styles = {
+            CoachProfile.PENDING: ("#ffc107", "#000", "⏳ Pendiente"),
+            CoachProfile.APPROVED: ("#28a745", "#fff", "✓ Aprobado"),
+            CoachProfile.REJECTED: ("#dc3545", "#fff", "✗ Rechazado"),
+        }
+        bg, fg, label = styles.get(obj.approval_status, ("#6c757d", "#fff", obj.approval_status))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 8px;border-radius:4px;font-size:11px;">{}</span>',
+            bg, fg, label,
+        )
+
+    approval_badge.short_description = "Estado"
+    approval_badge.admin_order_field = "approval_status"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user")
+
+    @admin.action(description="✓ Aprobar entrenadores seleccionados")
+    def approve_coaches(self, request, queryset):
+        updated = queryset.update(
+            approval_status=CoachProfile.APPROVED,
+            approved_at=timezone.now(),
+            rejection_reason="",
+        )
+        self.message_user(request, f"{updated} entrenadores aprobados.")
+
+    @admin.action(description="✗ Rechazar entrenadores seleccionados")
+    def reject_coaches(self, request, queryset):
+        updated = queryset.update(
+            approval_status=CoachProfile.REJECTED,
+            rejection_reason="Solicitud rechazada por administración.",
+        )
+        self.message_user(request, f"{updated} entrenadores rechazados.")
 
 
 # ============================================================

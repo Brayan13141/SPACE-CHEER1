@@ -7,6 +7,8 @@ app_name = "accounts"
 urlpatterns = [
     # 1. ONBOARDING
     path("complete-profile/", views_accounts.profile_setup_view, name="profile_setup"),
+    path("coach/pending/", views_accounts.coach_pending_approval, name="coach_pending_approval"),
+    path("coach/rejected/", views_accounts.coach_rejected, name="coach_rejected"),
     path(
         "complete-profile/curp/",
         views_accounts.curp_verification,

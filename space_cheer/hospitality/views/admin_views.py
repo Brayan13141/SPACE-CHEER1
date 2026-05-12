@@ -31,6 +31,12 @@ logger = logging.getLogger(__name__)
 def hospitality_index(request):
     is_admin = request.user.roles.filter(name='ADMIN').exists() or request.user.is_superuser
 
+    my_stays = (
+        Stay.objects.filter(user=request.user)
+        .select_related('event', 'hotel', 'room_assignment__room__room_type')
+        .order_by('-event__start_date')
+    )
+
     if is_admin:
         events = (
             Event.objects.annotate(
@@ -40,7 +46,6 @@ def hospitality_index(request):
             .filter(hotel_count__gt=0)
             .order_by('-start_date')
         )
-        # Also include events without hotels so admin can add them
         events_no_hotels = (
             Event.objects.annotate(hotel_count=Count('hotels', distinct=True))
             .filter(hotel_count=0)
@@ -49,17 +54,12 @@ def hospitality_index(request):
         return render(request, 'hospitality/index.html', {
             'events': events,
             'events_no_hotels': events_no_hotels,
+            'my_stays': my_stays,
             'is_admin': True,
         })
 
-    # Participant / coach — show own stays
-    stays = (
-        Stay.objects.filter(user=request.user)
-        .select_related('event', 'hotel', 'room_assignment__room__room_type')
-        .order_by('-event__start_date')
-    )
     return render(request, 'hospitality/index.html', {
-        'stays': stays,
+        'stays': my_stays,
         'is_admin': False,
     })
 

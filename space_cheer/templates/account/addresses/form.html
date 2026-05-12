@@ -1,55 +1,269 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n static %}
+
+{% block extra_css %}
+<style>
+.addr-card {
+    background: rgba(26, 26, 46, 0.9);
+    border: 1px solid rgba(127, 90, 240, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.addr-card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, #7f5af0, #2cb1ff, #ff4f9a);
+    border-radius: 16px 16px 0 0;
+}
+.input-neon {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(127, 90, 240, 0.3) !important;
+    color: #e4eaff !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.input-neon:focus {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: #7f5af0 !important;
+    box-shadow: 0 0 0 0.2rem rgba(127,90,240,0.25) !important;
+    color: #e4eaff !important;
+    outline: none !important;
+}
+.input-neon::placeholder { color: #6c7293; }
+.input-neon.is-invalid {
+    border-color: #ff4f9a !important;
+    box-shadow: 0 0 0 0.2rem rgba(255,79,154,0.2) !important;
+}
+.input-neon.is-valid {
+    border-color: rgba(40,167,69,0.6) !important;
+    box-shadow: none !important;
+}
+.label-neon {
+    color: #b0b7e0;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.4rem;
+}
+.sc-feedback {
+    color: #ff9e9e;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: none;
+}
+.check-neon .form-check-input {
+    background-color: rgba(15,23,42,0.5);
+    border: 1px solid rgba(127,90,240,0.5);
+    width: 1.1em;
+    height: 1.1em;
+}
+.check-neon .form-check-input:checked {
+    background-color: #7f5af0;
+    border-color: #7f5af0;
+}
+.check-neon .form-check-label { color: #b0b7e0; font-size: 0.9rem; }
+.btn-addr-save {
+    background: linear-gradient(45deg, #7f5af0, #6b49d1);
+    border: none;
+    color: #fff;
+    padding: 11px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-addr-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(127,90,240,0.4);
+    color: #fff;
+}
+.btn-addr-cancel {
+    background: transparent;
+    border: 1px solid rgba(127,90,240,0.4);
+    color: #b0b7e0;
+    padding: 11px 24px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+}
+.btn-addr-cancel:hover {
+    background: rgba(127,90,240,0.1);
+    border-color: #7f5af0;
+    color: #e4eaff;
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
 
-<div class="container mt-4">
-  <h2>
-    {% if form.instance.pk %}
-      {% trans "Editar dirección" %}
-    {% else %}
-      {% trans "Nueva dirección" %}
-    {% endif %}
-  </h2>
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb" style="background:transparent;">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounts:list_address' %}" style="color:#2cb1ff; text-decoration:none;">
+                            <i class="bi bi-geo-alt me-1"></i>{% trans "Mis direcciones" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" style="color:#a0a7d0;">
+                        {% if form.instance.pk %}{% trans "Editar" %}{% else %}{% trans "Nueva" %}{% endif %}
+                    </li>
+                </ol>
+            </nav>
 
-  <form method="post" class="mt-3">
-    {% csrf_token %}
+            <div class="addr-card p-4 p-md-5">
+                <!-- Header -->
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:48px;height:48px;background:rgba(127,90,240,0.15);">
+                        <i class="bi bi-geo-alt-fill fs-4" style="color:#7f5af0;"></i>
+                    </div>
+                    <div>
+                        <h1 class="h4 fw-bold mb-0" style="color:#e4eaff;">
+                            {% if form.instance.pk %}
+                                {% trans "Editar dirección" %}
+                            {% else %}
+                                {% trans "Nueva dirección" %}
+                            {% endif %}
+                        </h1>
+                        <p class="small mb-0" style="color:#a0a7d0;">
+                            {% trans "Tus datos de entrega y correspondencia" %}
+                        </p>
+                    </div>
+                </div>
 
-    <div class="mb-3">
-      <label class="form-label">{% trans "Etiqueta" %}</label>
-      {{ form.label }}
+                <form method="post" id="addr-form" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Etiqueta -->
+                    <div class="mb-3">
+                        <label class="label-neon" for="{{ form.label.id_for_label }}">
+                            <i class="bi bi-tag me-1"></i>{% trans "Etiqueta" %}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="label" id="{{ form.label.id_for_label }}"
+                               class="form-control input-neon"
+                               placeholder="{% trans "Ej: Casa, Trabajo, Gimnasio" %}"
+                               value="{{ form.label.value|default:'' }}"
+                               maxlength="100">
+                        {% for error in form.label.errors %}
+                            <div class="sc-feedback" style="display:block;">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                        <label class="label-neon" for="{{ form.address.id_for_label }}">
+                            <i class="bi bi-map me-1"></i>{% trans "Dirección" %}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="address" id="{{ form.address.id_for_label }}"
+                               class="form-control input-neon"
+                               placeholder="{% trans "Calle, número, colonia" %}"
+                               value="{{ form.address.value|default:'' }}">
+                        {% for error in form.address.errors %}
+                            <div class="sc-feedback" style="display:block;">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Ciudad + CP en fila -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-8">
+                            <label class="label-neon" for="{{ form.city.id_for_label }}">
+                                <i class="bi bi-building me-1"></i>{% trans "Ciudad" %}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="city" id="{{ form.city.id_for_label }}"
+                                   class="form-control input-neon"
+                                   placeholder="{% trans "Ej: Guanajuato" %}"
+                                   value="{{ form.city.value|default:'' }}">
+                            {% for error in form.city.errors %}
+                                <div class="sc-feedback" style="display:block;">
+                                    <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-4">
+                            <label class="label-neon" for="{{ form.zip_code.id_for_label }}">
+                                <i class="bi bi-mailbox me-1"></i>{% trans "C.P." %}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="zip_code" id="{{ form.zip_code.id_for_label }}"
+                                   class="form-control input-neon"
+                                   placeholder="00000"
+                                   maxlength="5"
+                                   inputmode="numeric"
+                                   value="{{ form.zip_code.value|default:'' }}">
+                            {% for error in form.zip_code.errors %}
+                                <div class="sc-feedback" style="display:block;">
+                                    <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Dirección predeterminada -->
+                    <div class="form-check check-neon mb-4">
+                        <input class="form-check-input" type="checkbox" name="is_default"
+                               id="{{ form.is_default.id_for_label }}"
+                               {% if form.is_default.value %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ form.is_default.id_for_label }}">
+                            <i class="bi bi-star me-1" style="color:#ffc107;"></i>
+                            {% trans "Usar como dirección principal" %}
+                        </label>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="d-flex gap-3 flex-column flex-sm-row">
+                        <button type="submit" class="btn btn-addr-save flex-sm-fill">
+                            <i class="bi bi-check-lg me-2"></i>{% trans "Guardar dirección" %}
+                        </button>
+                        <a href="{% url 'accounts:list_address' %}" class="btn btn-addr-cancel flex-sm-fill text-center">
+                            <i class="bi bi-x-lg me-2"></i>{% trans "Cancelar" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
     </div>
-
-    <div class="mb-3">
-      <label class="form-label">{% trans "Dirección" %}</label>
-      {{ form.address }}
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">{% trans "Ciudad" %}</label>
-      {{ form.city }}
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">{% trans "Código postal" %}</label>
-      {{ form.zip_code }}
-    </div>
-
-    <div class="form-check mb-3">
-      {{ form.is_default }}
-      <label class="form-check-label">
-        {% trans "Usar como dirección principal" %}
-      </label>
-    </div>
-
-    <div class="d-flex gap-2">
-      <button type="submit" class="btn btn-primary">
-        {% trans "Guardar" %}
-      </button>
-      <a href="{% url 'accounts:list_address' %}" class="btn btn-secondary">
-        {% trans "Cancelar" %}
-      </a>
-    </div>
-  </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Restrict zip_code to digits only
+    const zipInput = document.querySelector('input[name="zip_code"]');
+    if (zipInput) {
+        zipInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 5);
+        });
+    }
+
+    ScValidation.init(document.getElementById('addr-form'), {
+        label: [
+            ScValidation.rules.required('La etiqueta es obligatoria (ej: Casa)'),
+            ScValidation.rules.maxLen(100, 'Máximo 100 caracteres'),
+        ],
+        address: [
+            ScValidation.rules.required('La dirección es obligatoria'),
+        ],
+        city: [
+            ScValidation.rules.required('La ciudad es obligatoria'),
+        ],
+        zip_code: [
+            ScValidation.rules.required('El código postal es obligatorio'),
+            ScValidation.rules.zipMx('El código postal debe tener exactamente 5 dígitos'),
+        ],
+    });
+});
+</script>
 {% endblock %}

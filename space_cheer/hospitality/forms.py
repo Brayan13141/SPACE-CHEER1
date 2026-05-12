@@ -211,15 +211,76 @@ class HospitalityPreferenceForm(forms.ModelForm):
 
     def __init__(self, event, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        User = apps.get_model(settings.AUTH_USER_MODEL)
         self.fields['preferred_hotel'].queryset = Hotel.objects.filter(event=event, is_active=True)
         self.fields['preferred_room_type'].queryset = RoomType.objects.filter(hotel__event=event)
-        self.fields['roommate_preferences'].queryset = (
-            User.objects.filter(is_active=True)
-            .exclude(pk=user.pk)
-            .order_by('first_name', 'last_name')
+        self.fields['roommate_preferences'].queryset = self._roommate_qs(event, user)
+        self.fields['roommate_preferences'].help_text = (
+            'Solo tus alumnos a cargo aparecen como opciones.'
+            if user.roles.filter(name='GUARDIAN').exists()
+            else 'Solo miembros activos de tu equipo registrado en este evento.'
         )
         self.fields['preferred_hotel'].required = False
         self.fields['preferred_room_type'].required = False
         for f in self.fields.values():
             _bs(f)
+
+    @staticmethod
+    def _roommate_qs(event, user):
+        User = apps.get_model(settings.AUTH_USER_MODEL)
+        from events.models import EventTeamRegistration  # inline — evita importación circular
+        from teams.models import UserTeamMembership, Team
+
+        # ── Guardianes: solo sus alumnos a cargo ─────────────────────────────
+        if user.roles.filter(name='GUARDIAN').exists():
+            return (
+                User.objects
+                .filter(is_active=True, athleteprofile__guardian=user)
+                .distinct()
+                .exclude(pk=user.pk)
+                .order_by('first_name', 'last_name')
+            )
+
+        # ── Todos los demás: miembros del mismo equipo en este evento ─────────
+        # Equipos inscritos al evento (cualquier estado — las preferencias se
+        # pueden registrar antes de que la inscripción sea confirmada)
+        event_team_ids = EventTeamRegistration.objects.filter(
+            event=event
+        ).values_list('team_id', flat=True)
+
+        # Equipos del usuario como miembro aceptado
+        member_team_ids = (
+            UserTeamMembership.objects
+            .filter(
+                user=user,
+                team_id__in=event_team_ids,
+                status='accepted',
+                is_active=True,
+            )
+            .values_list('team_id', flat=True)
+        )
+
+        # Equipos del usuario como entrenador principal (Team.coach FK)
+        coached_team_ids = (
+            Team.objects
+            .filter(coach=user, pk__in=event_team_ids)
+            .values_list('pk', flat=True)
+        )
+
+        user_team_ids = list(set(list(member_team_ids) + list(coached_team_ids)))
+
+        if not user_team_ids:
+            return User.objects.none()
+
+        # Todos los miembros activos y aceptados de esos equipos (atletas + staff)
+        return (
+            User.objects
+            .filter(
+                is_active=True,
+                team_memberships__team_id__in=user_team_ids,
+                team_memberships__status='accepted',
+                team_memberships__is_active=True,
+            )
+            .distinct()
+            .exclude(pk=user.pk)
+            .order_by('first_name', 'last_name')
+        )

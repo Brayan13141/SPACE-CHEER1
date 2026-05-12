@@ -7,6 +7,19 @@ from accounts.forms import UserAddressForm, UserProfilingForm, CurpForm
 
 
 @login_required
+def coach_pending_approval(request):
+    return render(request, "account/coach_pending.html")
+
+
+@login_required
+def coach_rejected(request):
+    reason = ""
+    if hasattr(request.user, "coachprofile"):
+        reason = request.user.coachprofile.rejection_reason
+    return render(request, "account/coach_rejected.html", {"reason": reason})
+
+
+@login_required
 def profile_setup_view(request):
     user = request.user
     if request.method == "POST":

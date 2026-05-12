@@ -1,0 +1,37 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}Cuenta en Revisión | SPACE CHEER{% endblock %}
+
+{% block page_title %}Cuenta en Revisión{% endblock %}
+
+{% block content %}
+<div class="text-center py-2">
+    <div class="mb-4" style="font-size: 4rem; line-height: 1;">⏳</div>
+    <h4 class="fw-bold mb-3">Tu solicitud está siendo revisada</h4>
+    <p class="mb-4" style="color: #a0a7d0;">
+        Hemos recibido tu registro como entrenador. Nuestro equipo está verificando
+        tus datos y credenciales. Te notificaremos cuando tu cuenta sea aprobada.
+    </p>
+
+    <div class="alert mb-4 text-start" role="alert"
+         style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffd060; border-radius: 8px;">
+        <i class="bi bi-clock-history me-2"></i>
+        El proceso de verificación suele tardar entre <strong>24 y 72 horas hábiles</strong>.
+    </div>
+
+    <a href="{% url 'account_logout' %}" class="btn btn-neon-outline">
+        <i class="bi bi-box-arrow-left me-2"></i>
+        {% trans "Cerrar sesión" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    ¿Tienes dudas?
+    <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">
+        Cerrar sesión y contactar soporte
+    </a>
+</p>
+{% endblock %}

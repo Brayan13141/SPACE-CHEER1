@@ -24,6 +24,7 @@ from django.http import HttpResponse, JsonResponse
 logger = logging.getLogger(__name__)
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_GET
+from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
 from accounts.forms_profile import (
@@ -221,6 +222,7 @@ def profile_settings(request):
 
 @role_required("HEADCOACH", "ADMIN")
 @require_GET
+@ratelimit(key="user", rate="30/m", method="GET", block=True)
 def user_search_api(request):
     """
     Endpoint de búsqueda de usuarios.
@@ -276,6 +278,7 @@ def user_search_api(request):
 
 
 @role_required("HEADCOACH", "ADMIN")
+@ratelimit(key="user", rate="10/m", method="POST", block=True)
 def bulk_import_athletes(request):
     """
     Importa atletas desde un archivo CSV.
@@ -287,6 +290,11 @@ def bulk_import_athletes(request):
 
         if not csv_file:
             messages.error(request, "Debes subir un archivo CSV.")
+            return redirect("accounts:bulk_import_athletes")
+
+        # A5 — Validar tamaño antes de procesar
+        if csv_file.size > 2 * 1024 * 1024:
+            messages.error(request, "El archivo no puede superar 2MB.")
             return redirect("accounts:bulk_import_athletes")
 
         # Validar extensión

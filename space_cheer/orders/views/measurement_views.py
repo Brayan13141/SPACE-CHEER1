@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
+from accounts.models import AthleteProfile
 from orders.models import Order, OrderItemAthlete
 from django.db import transaction
 from django.contrib.admin.views.decorators import staff_member_required
@@ -23,12 +24,29 @@ def item_measurements_order_add(request, athlete_item_id):
         OrderItemAthlete.objects.select_related(
             "order_item__order",
             "order_item__product",
+            "athlete",
+            "athlete__athleteprofile",
+            "athlete__athleteprofile__guardian",
         ),
         pk=athlete_item_id,
-        order_item__order__created_by=request.user,
     )
 
     order = athlete_item.order_item.order
+    user = request.user
+
+    # Permiso: creador de la orden O guardian del atleta menor
+    is_creator = order.created_by == user
+    is_guardian = False
+    try:
+        profile = athlete_item.athlete.athleteprofile
+        if profile.guardian == user and athlete_item.athlete.is_minor:
+            is_guardian = True
+    except AthleteProfile.DoesNotExist:
+        pass
+
+    if not is_creator and not is_guardian:
+        raise PermissionDenied
+
     product = athlete_item.order_item.product
 
     if not order.can_edit_general():
@@ -97,15 +115,30 @@ def order_item_measurements(request, athlete_item_id):
             "order_item__order",
             "order_item__product",
             "athlete",
+            "athlete__athleteprofile",
+            "athlete__athleteprofile__guardian",
         ).prefetch_related(
             "measurements__field",
             "order_item__product__measurement_fields__field",
         ),
         pk=athlete_item_id,
-        order_item__order__in=Order.objects.visible_for_user(request.user),
     )
 
     order = athlete_item.order_item.order
+    user = request.user
+
+    is_authorized = Order.objects.visible_for_user(user).filter(pk=order.pk).exists()
+    is_guardian = False
+    try:
+        profile = athlete_item.athlete.athleteprofile
+        if profile.guardian == user and athlete_item.athlete.is_minor:
+            is_guardian = True
+    except AthleteProfile.DoesNotExist:
+        pass
+
+    if not is_authorized and not is_guardian:
+        raise PermissionDenied
+
     product = athlete_item.order_item.product
 
     if not product.requires_measurements:

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 from teams.models import UserTeamMembership
 
 
@@ -15,6 +16,16 @@ def home(request):
         })
 
     return render(request, "core/home.html")
+
+
+@cache_page(60 * 60 * 24)
+def contact(request):
+    return render(request, "core/contact.html")
+
+
+@cache_page(60 * 60 * 24)
+def privacy(request):
+    return render(request, "core/privacy.html")
 
 
 def user_teams_context(request):

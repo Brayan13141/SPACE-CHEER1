@@ -65,15 +65,16 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
                 )
 
         # -----------------------------
-        # COACH
+        # COACH / HEADCOACH
         # -----------------------------
-        elif role_name == "coach":
+        elif role_name in ("coach", "headcoach"):
             try:
                 profile, created = CoachProfile.objects.get_or_create(user=instance)
                 logger.info(
-                    "CoachProfile %s para usuario_id=%s",
+                    "CoachProfile %s para usuario_id=%s (rol=%s)",
                     "creado" if created else "existente",
                     instance.id,
+                    role.name,
                 )
             except Exception:
                 logger.error(

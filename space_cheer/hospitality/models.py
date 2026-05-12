@@ -98,7 +98,7 @@ class Room(models.Model):
     is_available = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('hotel', 'room_number')
+        unique_together = ('hotel', 'room_number', 'floor')
         verbose_name = "Habitación"
         verbose_name_plural = "Habitaciones"
 
@@ -110,8 +110,26 @@ class Room(models.Model):
             if self.room_type.hotel_id != self.hotel_id:
                 raise ValidationError({'room_type': "El tipo de habitación no pertenece a este hotel."})
 
+    def _validate_unique_room(self):
+        if self.hotel_id and self.room_number and self.floor is not None:
+            qs = Room.objects.filter(
+                hotel_id=self.hotel_id,
+                room_number=self.room_number,
+                floor=self.floor,
+            )
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError({
+                    'room_number': (
+                        f"Ya existe una habitación con el número '{self.room_number}' "
+                        f"en el piso {self.floor} de este hotel."
+                    )
+                })
+
     def clean(self):
         self._validate_room_type_hotel()
+        self._validate_unique_room()
 
     def save(self, *args, **kwargs):
         self.full_clean()
