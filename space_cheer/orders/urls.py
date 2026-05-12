@@ -52,6 +52,10 @@ urlpatterns = [
         views.transition_order,
         name="transition",
     ),
+    # ── Carrito ────────────────────────────────────────────────────────────────
+    path("cart/", views.cart_view, name="cart"),
+    path("cart/add/<int:product_pk>/", views.cart_add, name="cart_add"),
+    path("cart/team-select/<int:product_pk>/", views.cart_team_select, name="cart_team_select"),
     # ==================================================================================
     # Lista de órdenes para admin
     # ==================================================================================

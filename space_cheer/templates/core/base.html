@@ -267,10 +267,18 @@
                     {% if user.is_authenticated %}
 
                     {# INICIO #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% if is_guardian %}{% url 'guardian:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-house-door me-1"></i>{% trans "Inicio" %}
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% if is_guardian %}{% url 'guardian:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}">
+                                <i class="bi bi-grid me-2"></i>{% trans "Panel" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:landing' %}">
+                                <i class="bi bi-rocket me-2"></i>{% trans "Landing" %}
+                            </a></li>
+                        </ul>
                     </li>
 
                     {# ── COMPETENCIAS — todos excepto guardian ── #}
@@ -398,10 +406,12 @@
                             <i class="bi bi-bag me-1"></i>{% trans "Tienda" %}
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'products:catalog' %}">
+                                <i class="bi bi-bag me-2"></i>{% trans "Catálogo" %}
+                            </a></li>
                             {% if is_admin or user.is_superuser %}
-                            <li><h6 class="dropdown-header">{% trans "Catálogo" %}</h6></li>
                             <li><a class="dropdown-item" href="{% url 'products:list_products' %}">
-                                <i class="bi bi-grid me-2"></i>{% trans "Productos" %}
+                                <i class="bi bi-grid me-2"></i>{% trans "Productos (admin)" %}
                             </a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="#">
@@ -456,24 +466,16 @@
                     {% if user.is_authenticated %}
 
 
-                    {# Campana de notificaciones #}
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary position-relative"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                  style="font-size:.55rem;">5</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" style="min-width:280px;">
-                            <li><h6 class="dropdown-header">{% trans "Notificaciones" %}</h6></li>
-                            <li><a class="dropdown-item small" href="#">{% trans "Nueva competencia disponible" %}</a></li>
-                            <li><a class="dropdown-item small" href="#">{% trans "Tu pedido ha sido actualizado" %}</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-center small" href="#">{% trans "Ver todas" %}</a></li>
-                        </ul>
-                    </div>
+                    {# Carrito #}
+                    <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-outline-secondary position-relative">
+                        <i class="bi bi-cart3"></i>
+                        {% if cart_count %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                              style="background:var(--sc-cyan);color:#000;font-size:.55rem;">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
 
-                    {# Avatar + menú de usuario #}
+{# Avatar + menú de usuario #}
                     <div class="dropdown">
                         <a class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle"
                            href="#" id="navbarUser" data-bs-toggle="dropdown" aria-expanded="false">

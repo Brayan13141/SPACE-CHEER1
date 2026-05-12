@@ -2,13 +2,41 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
-from products.models import Product
+from products.models import Product, Season
 from products.forms import ProductForm
 from products.product_templates import PRODUCT_TEMPLATES
 from measures.models import MeasurementField
 from django.db.models import Q, Min, Max
 from products.models import ProductSizeVariant, ProductMeasurementField
 from django.db.models import ProtectedError
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 0. CATÁLOGO PÚBLICO (todos los usuarios autenticados)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def catalog_view(request):
+    from orders.services.cart import CartService
+    products = CartService.get_catalog_queryset(request.user)
+
+    type_filter = request.GET.get('type', '')
+    season_filter = request.GET.get('season', '')
+
+    if type_filter:
+        products = products.filter(product_type=type_filter)
+    if season_filter:
+        products = products.filter(season_id=season_filter)
+
+    seasons = Season.objects.filter(is_active=True)
+
+    return render(request, 'products/catalog.html', {
+        'products': products,
+        'type_filter': type_filter,
+        'season_filter': season_filter,
+        'type_choices': Product.PRODUCT_TYPE_CHOICES,
+        'seasons': seasons,
+    })
 
 
 # ─────────────────────────────────────────────────────────────────────────────
