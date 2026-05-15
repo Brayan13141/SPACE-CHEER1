@@ -11,11 +11,11 @@
         <i class="bi bi-rocket" style="font-size: 4rem; color: var(--secondary-color);"></i>
     </div>
     
-    <h5 class="mb-3" style="color: var(--light-color);">
+    <h5 class="mb-3 sc-color-light">
         {% trans "Cerrar sesión" %}
     </h5>
     
-    <p class="mb-4" style="color: #b0b7e0;">
+    <p class="mb-4 sc-color-muted-light">
         {% trans '¿Estás seguro de que deseas cerrar sesión?' %}
     </p>
     
@@ -49,9 +49,9 @@
     </form>
     
     <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-        <p class="small" style="color: #a0a7d0;">
+        <p class="small sc-color-muted">
             {% trans "¿No eres tú?" %} 
-            <a href="{% url 'account_login' %}" style="color: var(--secondary-color);">
+            <a class="sc-color-secondary" href="{% url 'account_login' %}">
                 {% trans "Inicia sesión con otra cuenta" %}
             </a>
         </p>
@@ -62,7 +62,7 @@
 {% block footer_links %}
 <p class="small">
     {% trans "¿Problemas para cerrar sesión?" %} 
-    <a href="mailto:soporte@spacecheer.com" style="color: var(--secondary-color);">
+    <a class="sc-color-secondary" href="mailto:soporte@spacecheer.com">
         {% trans "Contacta a soporte" %}
     </a>
 </p>

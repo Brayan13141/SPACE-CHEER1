@@ -306,7 +306,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Animación simple para los contadores
     document.addEventListener('DOMContentLoaded', function() {
         // Aquí puedes agregar animaciones para los contadores si lo deseas

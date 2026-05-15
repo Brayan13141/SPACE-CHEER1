@@ -4,7 +4,7 @@
 {% block title %}{% blocktrans with name=athlete.get_full_name %}Asignar Guardián - {{ name }}{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     .guardian-card {
         transition: transform 0.2s;
     }
@@ -134,7 +134,7 @@
                                             </div>
                                             {% endfor %}
                                         </div>
-                                        <div id="guardianSelectionFeedback" class="invalid-feedback mt-2" style="display: none;">
+                                        <div id="guardianSelectionFeedback" class="invalid-feedback mt-2 d-none">
                                             {% trans "Por favor, selecciona un guardián de la lista." %}
                                         </div>
                                     </div>
@@ -282,7 +282,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         // Bootstrap 5 form validation logic
         const forms = document.querySelectorAll('.needs-validation');

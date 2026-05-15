@@ -9,7 +9,7 @@
 <div class="text-center py-2">
     <div class="mb-4" style="font-size: 4rem; line-height: 1;">❌</div>
     <h4 class="fw-bold mb-3" style="color: #ff6b6b;">Tu solicitud fue rechazada</h4>
-    <p class="mb-4" style="color: #a0a7d0;">
+    <p class="mb-4 sc-color-muted">
         Lamentablemente, tu solicitud de registro como entrenador no fue aprobada.
     </p>
 
@@ -37,7 +37,7 @@
 {% block footer_links %}
 <p>
     ¿Consideras que hubo un error?
-    <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">
+    <a class="sc-color-secondary" href="{% url 'account_logout' %}">
         Cerrar sesión y contactar soporte
     </a>
 </p>

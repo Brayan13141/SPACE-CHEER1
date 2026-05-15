@@ -17,9 +17,9 @@
   <div class="row g-4">
     <!-- Stay info -->
     <div class="col-lg-5">
-      <div class="card border-0 mb-3" style="background:var(--sc-surface);">
+      <div class="card border-0 mb-3 sc-bg-surface">
         <div class="card-body">
-          <h2 class="h5 mb-3"><i class="bi bi-person me-2" style="color:var(--sc-cyan);"></i>Estancia</h2>
+          <h2 class="h5 mb-3"><i class="bi bi-person me-2 sc-color-cyan"></i>Estancia</h2>
           <dl class="row mb-0 small">
             <dt class="col-5 text-secondary">Participante</dt>
             <dd class="col-7 fw-semibold">{{ stay.user.get_full_name|default:stay.user.username }}</dd>
@@ -27,11 +27,11 @@
             <dt class="col-5 text-secondary">Estado</dt>
             <dd class="col-7">
               {% if stay.status == 'REQUESTED' %}
-              <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+              <span class="badge sc-bg-warning-dark">Solicitado</span>
               {% elif stay.status == 'CONFIRMED' %}
-              <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+              <span class="badge sc-bg-cyan">Confirmado</span>
               {% elif stay.status == 'CHECKED_IN' %}
-              <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+              <span class="badge sc-bg-success">Check-in</span>
               {% elif stay.status == 'CHECKED_OUT' %}
               <span class="badge bg-secondary">Check-out</span>
               {% elif stay.status == 'CANCELLED' %}
@@ -65,7 +65,7 @@
 
       <!-- Actions -->
       {% if stay.status != 'CANCELLED' and stay.status != 'CHECKED_OUT' %}
-      <div class="card border-0" style="background:var(--sc-surface);">
+      <div class="card border-0 sc-bg-surface">
         <div class="card-body">
           <h3 class="h6 text-secondary mb-3">Acciones</h3>
           <div class="d-flex flex-column gap-2">
@@ -124,9 +124,9 @@
     <!-- Room & Bed assignments -->
     <div class="col-lg-7">
       <!-- Room assignment -->
-      <div class="card border-0 mb-3" style="background:var(--sc-surface);">
+      <div class="card border-0 mb-3 sc-bg-surface">
         <div class="card-body">
-          <h3 class="h5 mb-3"><i class="bi bi-door-closed me-2" style="color:var(--sc-cyan);"></i>Habitación</h3>
+          <h3 class="h5 mb-3"><i class="bi bi-door-closed me-2 sc-color-cyan"></i>Habitación</h3>
           {% if room_assignment %}
           <dl class="row mb-0 small">
             <dt class="col-5 text-secondary">Número</dt>
@@ -145,10 +145,10 @@
       </div>
 
       <!-- Bed assignments -->
-      <div class="card border-0" style="background:var(--sc-surface);">
+      <div class="card border-0 sc-bg-surface">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="h5 mb-0"><i class="bi bi-stars me-2" style="color:var(--sc-cyan);"></i>Camas</h3>
+            <h3 class="h5 mb-0"><i class="bi bi-stars me-2 sc-color-cyan"></i>Camas</h3>
             {% if room_assignment and stay.status != 'CANCELLED' %}
             <a href="{% url 'hospitality:bed_assign' event_pk=event.pk stay_pk=stay.pk %}" class="btn btn-sm btn-outline-primary">
               <i class="bi bi-plus"></i> Cama
@@ -180,7 +180,7 @@
 <!-- Modal: cancelar estancia -->
 <div class="modal fade" id="cancelStayModal" tabindex="-1" aria-labelledby="cancelStayModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0" style="background:var(--sc-surface);">
+    <div class="modal-content border-0 sc-bg-surface">
 
       <div class="modal-header border-0 pb-0">
         <div class="d-flex align-items-center gap-2">

@@ -126,7 +126,7 @@
 </div>
 
 <!-- SCRIPT PARA MEJORAR LOS INPUTS -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         // Añadir clases Bootstrap a todos los inputs del formulario
         const inputs = document.querySelectorAll('#measuresForm input[type="text"], #measuresForm input[type="number"]');
@@ -204,7 +204,7 @@
     });
 </script>
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
 /* Solo estilos mínimos necesarios que Bootstrap no cubre */
 .btn-close-sm {
     padding: 0.25rem;

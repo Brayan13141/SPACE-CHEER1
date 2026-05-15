@@ -829,7 +829,7 @@
 
 {% endwith %}
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
   /* Reemplaza icon-square (no existe en Bootstrap) con utilidades reales */
   .order-icon-box {
     width: 2.5rem;
@@ -852,7 +852,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
 
   // ── Tooltips ──────────────────────────────────────────────────────

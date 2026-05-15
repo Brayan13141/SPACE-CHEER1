@@ -330,7 +330,7 @@
 </div>
 
 <!-- JavaScript for filtering and search -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
   // Product search functionality
   const searchInput = document.getElementById('product-search');
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .product-card {
   transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid rgba(255,255,255,.1);

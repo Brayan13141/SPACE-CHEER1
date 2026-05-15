@@ -32,7 +32,7 @@
 
         <div class="col-md-2">
           <label class="form-label small fw-semibold mb-1">{% trans "Tipo" %}</label>
-          <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+          <select name="type" class="form-select form-select-sm js-autosubmit">
             <option value="">{% trans "Todos" %}</option>
             {% for value, label in type_choices %}
               <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>
@@ -44,7 +44,7 @@
 
         <div class="col-md-2">
           <label class="form-label small fw-semibold mb-1">{% trans "Estado" %}</label>
-          <select name="active" class="form-select form-select-sm" onchange="this.form.submit()">
+          <select name="active" class="form-select form-select-sm js-autosubmit">
             <option value="">{% trans "Todos" %}</option>
             <option value="1" {% if active_filter == "1" %}selected{% endif %}>{% trans "Activos" %}</option>
             <option value="0" {% if active_filter == "0" %}selected{% endif %}>{% trans "Inactivos" %}</option>
@@ -100,11 +100,11 @@
 
                   <div class="fw-semibold">{{ product.name }}</div>
                   {% if product.is_active %}
-                  <div class="text-muted" style="font-size:.75rem;">
+                  <div class="text-muted sc-text-xs">
                     {{ product.get_usage_type_display }}
                   </div>
                   {% else %}
-                  <div class="text-black" style="font-size:.75rem;">
+                  <div class="text-black sc-text-xs">
                     {{ product.get_usage_type_display }}
                   </div>
                   {% endif %}
@@ -183,11 +183,14 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-    new bootstrap.Tooltip(el);
-  });
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        new bootstrap.Tooltip(el);
+    });
+    document.querySelectorAll('.js-autosubmit').forEach(function (sel) {
+        sel.addEventListener('change', function () { this.form.submit(); });
+    });
 });
 </script>
 {% endblock %}

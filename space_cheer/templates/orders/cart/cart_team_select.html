@@ -4,13 +4,13 @@
 {% block title %}Seleccionar equipo — SPACE CHEER{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:560px;">
+<div class="container py-4 sc-max-w-560">
 
   <a href="{% url 'products:catalog' %}" class="text-secondary text-decoration-none small mb-3 d-inline-block">
     <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
   </a>
 
-  <div class="card border-0 mb-3" style="background:var(--sc-surface);">
+  <div class="card border-0 mb-3 sc-bg-surface">
     <div class="card-body">
       <p class="text-secondary small mb-1">Producto seleccionado</p>
       <h6 class="fw-semibold mb-0">{{ product.name }}</h6>

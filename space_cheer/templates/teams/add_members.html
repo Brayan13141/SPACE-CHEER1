@@ -143,8 +143,7 @@
                     <td class="ps-4 text-muted">{{ forloop.counter }}</td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                             style="width:38px;height:38px;">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-38">
                           {{ membership.user.get_full_name|first|upper }}
                         </div>
                         <div>
@@ -203,8 +202,7 @@
                 {% for membership in active_members %}
                 <div class="list-group-item border-bottom py-3">
                   <div class="d-flex align-items-start gap-3">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                         style="width:48px;height:48px;">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-48">
                       {{ membership.user.get_full_name|first|upper }}
                     </div>
                     <div class="flex-grow-1">
@@ -256,8 +254,7 @@
             <div class="text-center py-5">
               <i class="bi bi-people display-4 text-muted d-block mb-3"></i>
               <h5 class="text-muted mb-2">No hay miembros activos</h5>
-              <button class="btn btn-primary btn-sm mt-2"
-                      onclick="bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-available')).show()">
+              <button class="btn btn-primary btn-sm mt-2" data-action="show-available-tab">
                 <i class="bi bi-person-plus me-1"></i>Agregar miembros
               </button>
             </div>
@@ -296,8 +293,7 @@
                     <td class="ps-4 text-muted">{{ forloop.counter }}</td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                             style="width:38px;height:38px;">
+                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-38">
                           {{ membership.user.get_full_name|first|upper }}
                         </div>
                         <div>
@@ -350,8 +346,7 @@
                 {% for membership in pending_members %}
                 <div class="list-group-item border-bottom py-3">
                   <div class="d-flex align-items-start gap-3">
-                    <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                         style="width:48px;height:48px;">
+                    <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-48">
                       {{ membership.user.get_full_name|first|upper }}
                     </div>
                     <div class="flex-grow-1">
@@ -432,8 +427,7 @@
                     <td class="ps-4 text-muted">{{ forloop.counter }}</td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                             style="width:38px;height:38px;">
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-38">
                           {{ membership.user.get_full_name|first|upper }}
                         </div>
                         <div>
@@ -472,8 +466,7 @@
                 {% for membership in inactive_members %}
                 <div class="list-group-item border-bottom py-3">
                   <div class="d-flex align-items-start gap-3">
-                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                         style="width:48px;height:48px;">
+                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold sc-icon-48">
                       {{ membership.user.get_full_name|first|upper }}
                     </div>
                     <div class="flex-grow-1">
@@ -550,8 +543,7 @@
                       <small class="text-muted">@{{ user.username }}</small>
                       <div class="d-flex flex-wrap gap-1 mt-1">
                         {% for role in user.roles.all %}
-                          <span class="badge bg-info bg-opacity-10 text-info border border-info"
-                                style="font-size:.7rem;">{{ role.name }}</span>
+                          <span class="badge bg-info bg-opacity-10 text-info border border-info sc-text-xxs">{{ role.name }}</span>
                         {% endfor %}
                       </div>
                     </div>
@@ -632,13 +624,13 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
   // Inicializar DataTables en tablas de escritorio (solo si existen)
   if (typeof $.fn.DataTable !== 'undefined') {
     if ($('#activeMembersTable').length) {
       $('#activeMembersTable').DataTable({
-        language: { url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        language: { url: "{% static 'JS/datatables-es.json' %}" },
         order: [[0, 'asc']],
         pageLength: 10,
         lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
@@ -649,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if ($('#pendingMembersTable').length) {
       $('#pendingMembersTable').DataTable({
-        language: { url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        language: { url: "{% static 'JS/datatables-es.json' %}" },
         order: [[0, 'asc']],
         pageLength: 10,
         lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
@@ -658,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if ($('#inactiveMembersTable').length) {
       $('#inactiveMembersTable').DataTable({
-        language: { url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        language: { url: "{% static 'JS/datatables-es.json' %}" },
         order: [[0, 'asc']],
         pageLength: 10,
         lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
@@ -703,6 +695,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const tabEl = document.getElementById(savedTab);
     if (tabEl) bootstrap.Tab.getOrCreateInstance(tabEl).show();
   }
+
+  // Replace inline onclick handlers with delegated listener
+  document.querySelectorAll('[data-action="show-available-tab"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const tabEl = document.getElementById('tab-available');
+      if (tabEl) bootstrap.Tab.getOrCreateInstance(tabEl).show();
+    });
+  });
 });
 </script>
 {% endblock %}

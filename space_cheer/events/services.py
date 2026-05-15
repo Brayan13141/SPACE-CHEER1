@@ -310,10 +310,32 @@ class EventRegistrationService:
                     },
                 )
             except Exception:
-                # Coach participant creation is best-effort; log but don't abort
                 logger.warning(
                     'Could not create EventParticipant for coach=%s event=%s',
                     coach, event.pk, exc_info=True,
+                )
+
+        # Auto-create EventParticipant for every active accepted athlete on the team
+        athlete_memberships = team.memberships.filter(
+            status='accepted',
+            is_active=True,
+            role_in_team='ATHLETE',
+        ).select_related('user')
+
+        for membership in athlete_memberships:
+            try:
+                EventParticipant.objects.get_or_create(
+                    event=event,
+                    user=membership.user,
+                    defaults={
+                        'role': EventParticipant.ROLE_ATHLETE,
+                        'team_registration': registration,
+                    },
+                )
+            except Exception:
+                logger.warning(
+                    'Could not create EventParticipant for athlete=%s event=%s',
+                    membership.user, event.pk, exc_info=True,
                 )
 
         return registration

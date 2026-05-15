@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="curp-verification-container">
-    <p class="text-center mb-4" style="color: #a0a7d0;">
+    <p class="text-center mb-4 text-muted-light">
         <i class="bi bi-shield-check me-1"></i>
         {% trans "Este rol requiere validar tu CURP para continuar." %}
     </p>
@@ -59,7 +59,7 @@
     </form>
 </div>
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .curp-verification-container {
     max-width: 500px;
     margin: 0 auto;
@@ -90,6 +90,9 @@
     color: var(--primary-color);
 }
 
+.text-muted-light { color: #a0a7d0; }
+.link-secondary-color { color: var(--secondary-color); }
+
 /* Responsiveness */
 @media (max-width: 576px) {
     .curp-verification-container {
@@ -112,7 +115,7 @@
 {% block footer_links %}
 <p>
     {% trans "¿Necesitas ayuda para validar tu CURP?" %}
-    <a href="{% url 'account_logout' %}" style="color: var(--secondary-color);">
+    <a href="{% url 'account_logout' %}" class="link-secondary-color">
         {% trans "Salir" %}
     </a>
 </p>

@@ -13,7 +13,7 @@
         </div>
     </div>
     
-    <h5 class="mb-3" style="color: var(--light-color);">
+    <h5 class="mb-3 sc-color-light">
         {% trans "Cuenta inactiva" %}
     </h5>
     
@@ -24,7 +24,7 @@
         </p>
     </div>
     
-    <p class="mb-4" style="color: #b0b7e0;">
+    <p class="mb-4 sc-color-muted-light">
         {% trans "Por favor, contacta al administrador del sistema o al soporte técnico para reactivar tu cuenta." %}
     </p>
     
@@ -44,9 +44,9 @@
     </div>
     
     <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-        <p class="small" style="color: #a0a7d0;">
+        <p class="small sc-color-muted">
             {% trans "¿Crear una nueva cuenta?" %}
-            <a href="{% url 'account_signup' %}" style="color: var(--secondary-color);">
+            <a class="sc-color-secondary" href="{% url 'account_signup' %}">
                 {% trans "Registrarse" %}
             </a>
         </p>
@@ -57,7 +57,7 @@
 {% block footer_links %}
 <p class="small">
     {% trans "Soporte técnico:" %} 
-    <a href="mailto:soporte@spacecheer.com" style="color: var(--secondary-color);">
+    <a class="sc-color-secondary" href="mailto:soporte@spacecheer.com">
         soporte@spacecheer.com
     </a>
      

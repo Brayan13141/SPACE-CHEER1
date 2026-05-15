@@ -2,7 +2,7 @@
 {% load i18n static %}
 
 {% block extra_css %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .addr-card {
     background: rgba(26, 26, 46, 0.9);
     border: 1px solid rgba(127, 90, 240, 0.2);
@@ -101,13 +101,13 @@
 
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb" style="background:transparent;">
+                <ol class="breadcrumb sc-bg-transparent">
                     <li class="breadcrumb-item">
                         <a href="{% url 'accounts:list_address' %}" style="color:#2cb1ff; text-decoration:none;">
                             <i class="bi bi-geo-alt me-1"></i>{% trans "Mis direcciones" %}
                         </a>
                     </li>
-                    <li class="breadcrumb-item active" style="color:#a0a7d0;">
+                    <li class="breadcrumb-item active sc-color-muted">
                         {% if form.instance.pk %}{% trans "Editar" %}{% else %}{% trans "Nueva" %}{% endif %}
                     </li>
                 </ol>
@@ -118,17 +118,17 @@
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                          style="width:48px;height:48px;background:rgba(127,90,240,0.15);">
-                        <i class="bi bi-geo-alt-fill fs-4" style="color:#7f5af0;"></i>
+                        <i class="bi bi-geo-alt-fill fs-4 sc-color-purple"></i>
                     </div>
                     <div>
-                        <h1 class="h4 fw-bold mb-0" style="color:#e4eaff;">
+                        <h1 class="h4 fw-bold mb-0 sc-color-light">
                             {% if form.instance.pk %}
                                 {% trans "Editar dirección" %}
                             {% else %}
                                 {% trans "Nueva dirección" %}
                             {% endif %}
                         </h1>
-                        <p class="small mb-0" style="color:#a0a7d0;">
+                        <p class="small mb-0 sc-color-muted">
                             {% trans "Tus datos de entrega y correspondencia" %}
                         </p>
                     </div>
@@ -149,7 +149,7 @@
                                value="{{ form.label.value|default:'' }}"
                                maxlength="100">
                         {% for error in form.label.errors %}
-                            <div class="sc-feedback" style="display:block;">
+                            <div class="sc-feedback d-block">
                                 <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                             </div>
                         {% endfor %}
@@ -166,7 +166,7 @@
                                placeholder="{% trans "Calle, número, colonia" %}"
                                value="{{ form.address.value|default:'' }}">
                         {% for error in form.address.errors %}
-                            <div class="sc-feedback" style="display:block;">
+                            <div class="sc-feedback d-block">
                                 <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                             </div>
                         {% endfor %}
@@ -184,7 +184,7 @@
                                    placeholder="{% trans "Ej: Guanajuato" %}"
                                    value="{{ form.city.value|default:'' }}">
                             {% for error in form.city.errors %}
-                                <div class="sc-feedback" style="display:block;">
+                                <div class="sc-feedback d-block">
                                     <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                                 </div>
                             {% endfor %}
@@ -201,7 +201,7 @@
                                    inputmode="numeric"
                                    value="{{ form.zip_code.value|default:'' }}">
                             {% for error in form.zip_code.errors %}
-                                <div class="sc-feedback" style="display:block;">
+                                <div class="sc-feedback d-block">
                                     <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                                 </div>
                             {% endfor %}
@@ -237,8 +237,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'JS/sc-validation.js' %}"></script>
-<script>
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
     // Restrict zip_code to digits only
     const zipInput = document.querySelector('input[name="zip_code"]');

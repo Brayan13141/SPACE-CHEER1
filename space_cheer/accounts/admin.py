@@ -726,14 +726,11 @@ class UserAddressAdmin(admin.ModelAdmin):
         "zip_code",
         "default_badge",
     )
-    list_filter = ("is_default", "city")
+    list_filter = ("is_default",)
     search_fields = (
         "user__username",
         "user__email",
         "label",
-        "address",
-        "city",
-        "zip_code",
     )
     raw_id_fields = ("user",)
 

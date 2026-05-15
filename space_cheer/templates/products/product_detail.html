@@ -424,7 +424,7 @@
                   <th class="ps-4">{% trans "Talla" %}</th>
                   <th class="text-end">{% trans "Precio adicional" %}</th>
                   <th class="text-end">{% trans "Precio final" %}</th>
-                  <th style="width:60px;"></th>
+                  <th class="sc-w-60"></th>
                 </tr>
               </thead>
               <tbody>
@@ -528,7 +528,7 @@
                   <th class="ps-4">{% trans "Campo" %}</th>
                   <th>{% trans "Unidad" %}</th>
                   <th class="text-center">{% trans "Requerido" %}</th>
-                  <th style="width:60px;"></th>
+                  <th class="sc-w-60"></th>
                 </tr>
               </thead>
               <tbody>
@@ -604,7 +604,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
   const modalEl    = document.getElementById('confirmModal');
   const modal      = new bootstrap.Modal(modalEl);

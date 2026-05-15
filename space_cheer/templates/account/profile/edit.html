@@ -11,18 +11,16 @@
     <div class="col-12 col-lg-4">
 
       <!-- Tarjeta foto -->
-      <div class="card bg-dark border-0 shadow-sm mb-4" style="border: 1px solid rgba(127,90,240,0.2) !important;">
+      <div class="card bg-dark border-0 shadow-sm mb-4 sc-border-purple">
         <div class="card-body text-center p-4">
           <!-- Avatar -->
           <div class="position-relative d-inline-block mb-3">
             {% if user.foto_perfil %}
               <img src="{{ user.foto_perfil.url }}"
                    alt="Foto de perfil"
-                   class="rounded-circle object-fit-cover border border-2"
-                   style="width:110px;height:110px;border-color:rgba(127,90,240,0.5) !important;">
+                   class="rounded-circle object-fit-cover border border-2 sc-profile-avatar-border">
             {% else %}
-              <div class="rounded-circle d-flex align-items-center justify-content-center"
-                   style="width:110px;height:110px;background:linear-gradient(135deg,#7f5af0,#2cb1ff);font-size:2.5rem;color:white;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center sc-profile-avatar-placeholder">
                 {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
               </div>
             {% endif %}
@@ -34,7 +32,7 @@
           <!-- Roles -->
           <div class="d-flex flex-wrap justify-content-center gap-1 mb-4">
             {% for role in user.roles.all %}
-              <span class="badge rounded-pill" style="background:rgba(127,90,240,0.25);color:#a78bfa;border:1px solid rgba(127,90,240,0.3);">
+              <span class="badge rounded-pill sc-role-badge-pill">
                 {{ role.name }}
               </span>
             {% endfor %}
@@ -52,37 +50,35 @@
 
           <form method="post" action="{% url 'accounts:profile_photo_upload' %}" enctype="multipart/form-data" id="photo-form">
             {% csrf_token %}
-            <label for="photo-input" class="btn btn-sm w-100"
-                   style="background:rgba(127,90,240,0.15);border:1px solid rgba(127,90,240,0.4);color:#a78bfa;cursor:pointer;">
+            <label for="photo-input" class="btn btn-sm w-100 sc-btn-photo-upload">
               <i class="bi bi-camera me-1"></i>
               {% if user.foto_perfil %}{% trans "Cambiar foto" %}{% else %}{% trans "Subir foto" %}{% endif %}
             </label>
             <input type="file" id="photo-input" name="photo"
                    accept="image/jpeg,image/png,image/webp"
-                   class="d-none"
-                   onchange="document.getElementById('photo-form').submit()">
+                   class="d-none">
           </form>
 
-          <p class="text-muted mt-2" style="font-size:0.75rem;">{% trans "JPG, PNG o WEBP · Máx. 5 MB" %}</p>
+          <p class="text-muted mt-2 sc-text-xs">{% trans "JPG, PNG o WEBP · Máx. 5 MB" %}</p>
         </div>
       </div>
 
       <!-- Info rápida -->
-      <div class="card bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
+      <div class="card bg-dark border-0 shadow-sm sc-border-purple">
         <div class="card-body p-4">
-          <h6 class="text-secondary text-uppercase mb-3" style="font-size:0.75rem;letter-spacing:.05em;">
+          <h6 class="text-secondary text-uppercase mb-3 sc-text-xs sc-label-spaced">
             <i class="bi bi-info-circle me-1"></i>{% trans "Información de cuenta" %}
           </h6>
           <ul class="list-unstyled mb-0 small">
-            <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <li class="d-flex justify-content-between py-2 sc-border-bottom-subtle">
               <span class="text-secondary">{% trans "Usuario" %}</span>
               <span class="text-white font-monospace">{{ user.username }}</span>
             </li>
-            <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <li class="d-flex justify-content-between py-2 sc-border-bottom-subtle">
               <span class="text-secondary">{% trans "Registrado" %}</span>
               <span class="text-white">{{ user.date_joined|date:"d M Y" }}</span>
             </li>
-            <li class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <li class="d-flex justify-content-between py-2 sc-border-bottom-subtle">
               <span class="text-secondary">{% trans "Perfil" %}</span>
               {% if user.profile_completed %}
                 <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>{% trans "Completo" %}</span>
@@ -93,7 +89,7 @@
             {% if user.curp %}
             <li class="d-flex justify-content-between py-2">
               <span class="text-secondary">{% trans "CURP" %}</span>
-              <span class="text-white font-monospace" style="font-size:0.7rem;">{{ user.curp }}</span>
+              <span class="text-white font-monospace sc-text-xxs">{{ user.curp }}</span>
             </li>
             {% endif %}
           </ul>
@@ -105,10 +101,10 @@
     <!-- COLUMNA DERECHA: Formulario -->
     <div class="col-12 col-lg-8">
 
-      <div class="card bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
-        <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
+      <div class="card bg-dark border-0 shadow-sm sc-border-purple">
+        <div class="card-header bg-transparent py-3 sc-border-bottom-purple">
           <h5 class="mb-0 text-white">
-            <i class="bi bi-pencil-square me-2" style="color:#7f5af0;"></i>{% trans "Editar perfil" %}
+            <i class="bi bi-pencil-square me-2 sc-color-purple"></i>{% trans "Editar perfil" %}
           </h5>
         </div>
 
@@ -149,7 +145,7 @@
                 {% if form.phone.errors %}
                   <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
                 {% endif %}
-                <div class="text-muted" style="font-size:0.75rem;">10 dígitos, sin espacios</div>
+                <div class="text-muted sc-text-xs">10 dígitos, sin espacios</div>
               </div>
 
               <!-- Género -->
@@ -183,19 +179,18 @@
                     <i class="bi bi-envelope me-1"></i>Cambiar
                   </a>
                 </div>
-                <div class="text-muted" style="font-size:0.75rem;">Para cambiar el email usa el enlace</div>
+                <div class="text-muted sc-text-xs">Para cambiar el email usa el enlace</div>
               </div>
 
             </div>
 
-            <hr style="border-color:rgba(127,90,240,0.15);" class="my-4">
+            <hr class="my-4 sc-hr-purple">
 
             <div class="d-flex justify-content-between align-items-center">
               <a href="{% url 'accounts:profile_settings' %}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-gear me-1"></i>Configuración
               </a>
-              <button type="submit" class="btn px-4"
-                      style="background:linear-gradient(45deg,#7f5af0,#6b49d1);border:none;color:white;">
+              <button type="submit" class="btn px-4 sc-btn-gradient-purple">
                 <i class="bi bi-check-lg me-1"></i>{% trans "Guardar cambios" %}
               </button>
             </div>
@@ -205,10 +200,10 @@
       </div>
 
       <!-- Zona para Cambio de Contraseña -->
-      <div class="card mt-4 bg-dark border-0 shadow-sm" style="border: 1px solid rgba(127,90,240,0.2) !important;">
-        <div class="card-header bg-transparent py-3" style="border-bottom:1px solid rgba(127,90,240,0.15);">
+      <div class="card mt-4 bg-dark border-0 shadow-sm sc-border-purple">
+        <div class="card-header bg-transparent py-3 sc-border-bottom-purple">
           <h5 class="mb-0 text-white">
-            <i class="bi bi-key me-2" style="color:#7f5af0;"></i>{% trans "Cambiar contraseña" %}
+            <i class="bi bi-key me-2 sc-color-purple"></i>{% trans "Cambiar contraseña" %}
           </h5>
         </div>
         <div class="card-body p-4">
@@ -224,7 +219,7 @@
                   </label>
                   {{ field }}
                   {% if field.help_text %}
-                    <div class="text-muted mt-1" style="font-size:0.75rem;">{{ field.help_text|safe }}</div>
+                    <div class="text-muted mt-1 sc-text-xs">{{ field.help_text|safe }}</div>
                   {% endif %}
                   {% if field.errors %}
                     <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
@@ -234,8 +229,7 @@
             </div>
 
             <div class="d-flex justify-content-end mt-4">
-              <button type="submit" class="btn px-4"
-                      style="background:rgba(127,90,240,0.15);border:1px solid rgba(127,90,240,0.4);color:#a78bfa;">
+              <button type="submit" class="btn px-4 sc-btn-photo-upload">
                 {% trans "Actualizar contraseña" %}
               </button>
             </div>
@@ -244,7 +238,7 @@
       </div>
 
       <!-- Zona de peligro -->
-      <div class="card mt-4 border-0 shadow-sm" style="border: 1px solid rgba(220,53,69,0.2) !important;background:rgba(220,53,69,0.05);">
+      <div class="card mt-4 border-0 shadow-sm sc-card-danger">
         <div class="card-body p-4 d-flex justify-content-between align-items-center">
           <div>
             <h6 class="text-danger mb-1"><i class="bi bi-exclamation-triangle me-2"></i>{% trans "Zona de peligro" %}</h6>
@@ -259,4 +253,22 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<style nonce="{{ request.csp_nonce }}">
+.sc-profile-avatar-border  { width:110px; height:110px; border-color:rgba(127,90,240,0.5) !important; }
+.sc-profile-avatar-placeholder { width:110px; height:110px; background:linear-gradient(135deg,#7f5af0,#2cb1ff); font-size:2.5rem; color:white; }
+.sc-btn-photo-upload       { background:rgba(127,90,240,0.15); border:1px solid rgba(127,90,240,0.4); color:#a78bfa; cursor:pointer; }
+.sc-label-spaced           { letter-spacing:.05em; }
+.sc-btn-gradient-purple    { background:linear-gradient(45deg,#7f5af0,#6b49d1); border:none; color:white; }
+.sc-card-danger            { border:1px solid rgba(220,53,69,0.2) !important; background:rgba(220,53,69,0.05); }
+</style>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('photo-input').addEventListener('change', function () {
+        document.getElementById('photo-form').submit();
+    });
+});
+</script>
 {% endblock %}

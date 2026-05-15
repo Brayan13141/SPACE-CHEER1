@@ -221,7 +221,7 @@
 
 {# Mantener el tab activo si el POST fue a jueces #}
 {% if judge_form.errors %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
   var tab = new bootstrap.Tab(document.getElementById('judges-tab'));
   tab.show();

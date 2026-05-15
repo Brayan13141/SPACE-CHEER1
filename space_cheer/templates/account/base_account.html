@@ -10,8 +10,9 @@
     <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/sc-utils.css' %}">
 
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
     :root {
         --primary-color: #7f5af0;
         --secondary-color: #2cb1ff;
@@ -328,10 +329,10 @@
     </div>
 
     <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'JS/sc-validation.js' %}"></script>
+    <script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
     
     
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     // Simple particles effect
     function createParticles() {
         const container = document.getElementById('particles-container');

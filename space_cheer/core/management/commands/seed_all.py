@@ -37,6 +37,11 @@ SEEDS = [
         "command": "seed_room_features",
         "label": "Características de habitaciones",
     },
+    {
+        "key": "categories",
+        "command": "seed_categories",
+        "label": "Categorías USASF (All-Star + School)",
+    },
 ]
 
 

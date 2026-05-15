@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/fontawesome-free-7.1.0-web/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'CSS/CORE/base.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/sc-utils.css' %}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         /* ─── VARIABLES ──────────────────────────────────── */
         :root {
             --sc-purple: #7f5af0;
@@ -470,8 +471,7 @@
                     <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-outline-secondary position-relative">
                         <i class="bi bi-cart3"></i>
                         {% if cart_count %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                              style="background:var(--sc-cyan);color:#000;font-size:.55rem;">{{ cart_count }}</span>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill sc-nav-cart-badge">{{ cart_count }}</span>
                         {% endif %}
                     </a>
 
@@ -495,8 +495,7 @@
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUser"
-                            style="min-width:220px;">
+                        <ul class="dropdown-menu dropdown-menu-end sc-dropdown-wide" aria-labelledby="navbarUser">
 
                             {# Cabecera con info del usuario #}
                             <li>
@@ -509,17 +508,16 @@
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <div class="text-white fw-semibold" style="font-size:.9rem;">
+                                        <div class="text-white fw-semibold sc-nav-username">
                                             {{ user.get_full_name|default:user.username }}
                                         </div>
-                                        <div class="text-secondary" style="font-size:.75rem;">
+                                        <div class="text-secondary sc-text-xs">
                                             {{ user.email|truncatechars:26 }}
                                         </div>
                                         {# Rol principal #}
                                         {% with role=user.roles.first %}
                                         {% if role %}
-                                        <span class="role-badge mt-1"
-                                              style="background:rgba(127,90,240,0.2);color:#a78bfa;border:1px solid rgba(127,90,240,0.3);">
+                                        <span class="role-badge mt-1 sc-role-badge-pill">
                                             {{ role.name }}
                                         </span>
                                         {% endif %}
@@ -590,7 +588,7 @@
                             {% if is_admin or user.is_superuser %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'admin:index' %}">
-                                <i class="bi bi-shield-shaded me-2" style="color:var(--sc-pink);"></i>{% trans "Panel Admin" %}
+                                <i class="bi bi-shield-shaded me-2 sc-color-pink"></i>{% trans "Panel Admin" %}
                             </a></li>
                             {% endif %}
 
@@ -605,8 +603,7 @@
                         <a class="btn btn-sm btn-outline-light" href="{% url 'account_login' %}">
                             <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Iniciar Sesión" %}
                         </a>
-                        <a class="btn btn-sm" href="{% url 'account_signup' %}"
-                           style="background:var(--sc-purple);color:white;border:none;">
+                        <a class="btn btn-sm sc-btn-register" href="{% url 'account_signup' %}">
                             <i class="bi bi-person-plus me-1"></i>{% trans "Registrarse" %}
                         </a>
                     {% endif %}
@@ -649,7 +646,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 style="color:var(--sc-purple);">SPACE CHEER</h5>
+                    <h5 class="sc-color-purple">SPACE CHEER</h5>
                     <p class="small text-secondary">{% trans "Especialistas en competencias de cheerleading y venta de uniformes." %}</p>
                 </div>
                 <div class="col-md-2 mb-4 mb-md-0">
@@ -680,7 +677,7 @@
                     </ul>
                 </div>
             </div>
-            <hr class="my-3" style="border-color:rgba(127,90,240,0.2);">
+            <hr class="my-3 sc-hr-purple">
             <div class="d-flex justify-content-between small text-secondary">
                 <span>&copy; {% now "Y" %} SPACE CHEER — {% trans "Todos los derechos reservados." %}</span>
             </div>
@@ -695,7 +692,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/bundle@3/tsparticles.bundle.min.js"></script>
     <script src="{% static '/JS/CORE/particles.min.js' %}"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     particlesJS.load('tsparticles', "{% static '/JS/CORE/particles-config.json' %}");
 
     document.addEventListener('DOMContentLoaded', function () {

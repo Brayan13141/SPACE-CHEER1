@@ -7,7 +7,7 @@
 
 {% block content %}
 {% if user.emailaddress_set.all %}
-    <p class="mb-4" style="color: #b0b7e0;">
+    <p class="mb-4 sc-color-muted-light">
         {% trans 'Las siguientes direcciones de correo electrónico están asociadas con tu cuenta:' %}
     </p>
 
@@ -24,7 +24,7 @@
                                {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked{% endif %}>
                         
                         <label for="email_radio_{{forloop.counter}}" class="form-check-label">
-                            <span style="color: var(--light-color);">{{ emailaddress.email }}</span>
+                            <span class="sc-color-light">{{ emailaddress.email }}</span>
                             {% if emailaddress.verified %}
                                 <span class="badge rounded-pill" style="background: rgba(25,135,84,0.2); color: #6dffb8;">
                                     <i class="bi bi-check-circle me-1"></i>{% trans "Verificado" %}
@@ -72,7 +72,7 @@
 
 <hr style="border-color: rgba(255,255,255,0.05);">
 
-<h6 class="mt-4 mb-3" style="color: var(--light-color);">
+<h6 class="mt-4 mb-3 sc-color-light">
     <i class="bi bi-plus-circle me-2"></i>
     {% trans "Agregar dirección de correo electrónico" %}
 </h6>
@@ -97,7 +97,7 @@
 </form>
 
 <div class="text-center mt-5">
-    <a href="{% url 'core:dashboard' %}" class="text-decoration-none" style="color: var(--secondary-color);">
+    <a href="{% url 'core:dashboard' %}" class="text-decoration-none sc-color-secondary">
         <i class="bi bi-arrow-left me-1"></i>
         {% trans "Volver a la cuenta" %}
     </a>

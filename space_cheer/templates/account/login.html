@@ -7,7 +7,10 @@
 {% block page_title %}{% trans "Accede a tu cuenta" %}{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
+.text-muted-light { color: #a0a7d0; }
+.link-secondary-color { color: var(--secondary-color); }
+
 /* Versión más sutil para "Powered by" */
 .powered-by-neon {
     display: flex;
@@ -111,8 +114,7 @@
                 {% trans "Recordar sesión" %}
             </label>
         </div>
-        <a class="text-decoration-none" href="{% url 'account_reset_password' %}" 
-           style="color: var(--secondary-color);">
+        <a class="text-decoration-none link-secondary-color" href="{% url 'account_reset_password' %}">
             {% trans "¿Olvidaste tu contraseña?" %}
         </a>
     </div>
@@ -152,7 +154,7 @@
         </div>
     {% else %}
         <div class="text-center mt-3">
-            <p class="mb-2" style="color: #a0a7d0;">
+            <p class="mb-2 text-muted-light">
                 {% trans "¿No tienes cuenta?" %}
             </p>
         </div>
@@ -192,7 +194,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
     ScValidation.init(document.querySelector('form.login'), {
         login: [

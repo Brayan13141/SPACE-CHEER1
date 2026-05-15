@@ -8,7 +8,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="mb-1">
-        <i class="bi bi-shield-heart me-2" style="color: var(--sc-purple);"></i>
+        <i class="bi bi-shield-heart me-2 sc-color-purple"></i>
         {% trans "Panel de Guardian" %}
       </h2>
       <p class="text-muted mb-0">
@@ -46,7 +46,7 @@
   <!-- ATLETAS BAJO CUSTODIA -->
   <div class="card border-0 shadow-sm">
     <div class="card-header d-flex align-items-center gap-2" style="border-bottom: 1px solid rgba(255,255,255,.1);">
-      <i class="bi bi-people-fill" style="color: var(--sc-cyan);"></i>
+      <i class="bi bi-people-fill sc-color-cyan"></i>
       <span class="fw-semibold">{% trans "Mis Atletas" %}</span>
       {% if athletes %}
         <span class="badge rounded-pill ms-auto" style="background-color: var(--sc-cyan); color: #000;">
@@ -64,7 +64,7 @@
               <div class="card-body">
                 <!-- Nombre -->
                 <h6 class="card-title fw-bold mb-1">
-                  <i class="bi bi-person-fill me-1" style="color: var(--sc-pink);"></i>
+                  <i class="bi bi-person-fill me-1 sc-color-pink"></i>
                   {{ athlete.get_full_name }}
                 </h6>
 
