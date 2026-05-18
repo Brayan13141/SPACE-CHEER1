@@ -8,8 +8,8 @@
 {% block content %}
 <div class="text-center">
     <div class="mb-4">
-        <div class="feature-icon mx-auto" style="width: 5rem; height: 5rem; background-color: rgba(13, 110, 253, 0.1);">
-            <i class="bi bi-envelope-check" style="font-size: 2rem; color: var(--secondary-color);"></i>
+        <div class="feature-icon mx-auto sc-icon-5rem sc-icon-bg-blue" >
+            <i class="bi bi-envelope-check sc-fs-2rem sc-color-secondary" ></i>
         </div>
     </div>
     
@@ -24,7 +24,7 @@
         {% endblocktrans %}
     </p>
     
-    <div class="alert alert-info" style="background: rgba(13, 110, 253, 0.1); border-color: rgba(13, 110, 253, 0.3);">
+    <div class="alert alert-info sc-badge-primary-outline" >
         <i class="bi bi-info-circle me-2"></i>
         <div class="small">
             <strong>{% trans "Importante:" %}</strong> 
@@ -45,7 +45,7 @@
         </form>
     </div>
     
-    <div class="mt-5 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+    <div class="mt-5 pt-3 border-top sc-border-white-05" >
         <a href="{% url 'account_login' %}" class="text-decoration-none sc-color-secondary">
             <i class="bi bi-arrow-left me-1"></i>
             {% trans "Volver al inicio de sesión" %}

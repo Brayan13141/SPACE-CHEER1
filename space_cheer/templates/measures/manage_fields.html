@@ -52,7 +52,7 @@
                         </button>
                         {% else %}
                         <!-- HABILITAR -->
-                        <form method="post" style="display:inline;">
+                        <form method="post" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <button type="submit" name="habilitar_medida" class="btn btn-sm btn-outline-success">

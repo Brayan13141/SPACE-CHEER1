@@ -148,9 +148,9 @@
               <!-- Product Image -->
               <div class="position-relative">
                 {% if product.image %}
-                  <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                  <img src="{{ product.image.url }}" class="card-img-top sc-img-200" alt="{{ product.name }}" >
                 {% else %}
-                  <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: var(--sc-panel, #1a1a2e);">
+                  <div class="card-img-top d-flex align-items-center justify-content-center sc-img-200-panel" >
                     <i class="bi bi-image text-muted display-4"></i>
                   </div>
                 {% endif %}
@@ -211,7 +211,7 @@
                       <span class="badge bg-secondary border">
                         {{ field.field.name }}
                         {% if field.required %}
-                          <i class="bi bi-asterisk text-danger ms-1" style="font-size: 0.6rem;"></i>
+                          <i class="bi bi-asterisk text-danger ms-1 sc-text-6xs" ></i>
                         {% endif %}
                       </span>
                       {% endfor %}

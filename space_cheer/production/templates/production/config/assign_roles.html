@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Operarios — {{ prod_role.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'production:manage_roles' %}" class="btn btn-outline-secondary btn-sm">← Roles</a>
+    <h2 class="mb-0">Rol: <strong>{{ prod_role.name }}</strong></h2>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if all_operarios %}
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-people me-2"></i>{% trans "Operarios del sistema" %}
+        <span class="badge bg-secondary ms-1">{{ all_operarios|length }}</span>
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="ps-4">{% trans "Operario" %}</th>
+              <th class="text-center">{% trans "Estado" %}</th>
+              <th class="sc-w-120"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for op in all_operarios %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-semibold">{{ op.get_full_name|default:op.username }}</div>
+                <small class="text-muted">{{ op.email }}</small>
+              </td>
+              <td class="text-center">
+                {% if op.pk in assigned_ids %}
+                  <span class="badge bg-success">{% trans "Asignado" %}</span>
+                {% else %}
+                  <span class="badge bg-secondary">{% trans "Sin asignar" %}</span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-3">
+                {% if op.pk in assigned_ids %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="operario_id" value="{{ op.pk }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-x-lg me-1"></i>{% trans "Quitar" %}
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="assign">
+                    <input type="hidden" name="operario_id" value="{{ op.pk }}">
+                    <button type="submit" class="btn btn-sm btn-outline-success">
+                      <i class="bi bi-plus-lg me-1"></i>{% trans "Asignar" %}
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>{% trans "No hay operarios registrados en el sistema." %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

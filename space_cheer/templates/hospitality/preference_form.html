@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{% else %}Mis{% endif %} Preferencias — {{ event.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:640px;">
+<div class="container py-4 sc-max-w-640" >
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -35,7 +35,7 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold">{{ form.preferred_features.label }}</label>
-            <div class="border rounded p-3" style="background:var(--sc-bg);">
+            <div class="border rounded p-3 sc-bg-surface" >
               {% for choice in form.preferred_features %}
               <div class="form-check">
                 {{ choice.tag }}
@@ -52,7 +52,7 @@
             {% if form.roommate_preferences.help_text %}
             <p class="text-secondary small mb-1">{{ form.roommate_preferences.help_text }}</p>
             {% endif %}
-            <div class="border rounded p-3" style="background:var(--sc-bg);max-height:180px;overflow-y:auto;">
+            <div class="border rounded p-3 sc-scrollable-180" >
               {% for choice in form.roommate_preferences %}
               <div class="form-check">
                 {{ choice.tag }}

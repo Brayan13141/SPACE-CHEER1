@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}{% blocktrans with name=event.name %}Editar {{ name }}{% endblocktrans %}{% else %}{% trans "Crear Evento" %}{% endif %} — SPACE CHEER{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:760px;">
+<div class="container py-4 sc-max-w-760" >
   <div class="d-flex align-items-center gap-2 mb-4">
     <a href="{% if is_edit %}{% url 'events:event_detail' event.pk %}{% else %}{% url 'events:event_list' %}{% endif %}"
        class="btn btn-outline-secondary btn-sm">
@@ -46,7 +46,7 @@
           {{ form.banner }}
           {% if is_edit and event.banner %}
           <div class="mt-2">
-            <img src="{{ event.banner.url }}" style="max-height:100px;" class="rounded">
+            <img src="{{ event.banner.url }}" class="sc-max-h-100" class="rounded">
             <div class="form-text">{% trans "Imagen actual — sube una nueva para reemplazarla" %}</div>
           </div>
           {% endif %}

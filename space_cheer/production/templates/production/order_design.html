@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block title %}Diseño — Orden #{{ job.order.id }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary btn-sm mb-3">← Volver</a>
+  <h3>Diseño aprobado — Orden #{{ job.order.id }}</h3>
+  {% if design_image %}
+    <img src="{{ design_image.image.url }}" class="img-fluid rounded border border-secondary mt-3" alt="Diseño aprobado">
+  {% else %}
+    <p class="text-muted mt-3">No hay diseño final disponible.</p>
+  {% endif %}
+</div>
+{% endblock %}

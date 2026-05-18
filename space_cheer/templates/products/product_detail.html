@@ -79,11 +79,11 @@
           {% if product.image %}
             <img src="{{ product.image.url }}"
                  class="img-fluid rounded"
-                 style="max-height:200px; object-fit:cover; width:100%;"
+                 class="sc-img-200-full"
                  alt="{{ product.name }}">
           {% else %}
             <div class="rounded d-flex align-items-center justify-content-center"
-                 style="height:160px;background:var(--sc-panel,#1a1a2e);">
+                 class="sc-img-160-panel">
               <div class="text-center text-secondary">
                 <i class="bi bi-image display-4 d-block mb-2"></i>
                 <small>{% trans "Sin imagen" %}</small>
@@ -499,7 +499,7 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="col-sm-3 d-flex align-items-center" style="padding-top:1.5rem;">
+              <div class="col-sm-3 d-flex align-items-center pt-3" >
                 <div class="form-check mb-0">
                   <input type="checkbox" name="required" class="form-check-input" id="required_check" checked>
                   <label class="form-check-label small" for="required_check">{% trans "Obligatorio" %}</label>
@@ -573,6 +573,93 @@
         </div>
       </div>
       {% endif %}
+
+      <!-- ─── ETAPAS DE PRODUCCIÓN -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-diagram-3 me-2"></i>{% trans "Etapas de producción" %}
+            <span class="badge bg-primary ms-1">{{ stage_configs|length }}</span>
+          </h5>
+          {% if available_stages %}
+          <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addStagePanel">
+            <i class="bi bi-plus me-1"></i>{% trans "Agregar" %}
+          </button>
+          {% endif %}
+        </div>
+
+        {% if available_stages %}
+        <div class="collapse" id="addStagePanel">
+          <div class="card-body border-bottom">
+            <form method="post" class="row g-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_stage">
+              <div class="col-sm-6">
+                <label class="form-label small fw-semibold mb-1">{% trans "Etapa" %}</label>
+                <select name="stage_id" class="form-select form-select-sm">
+                  {% for stage in available_stages %}
+                  <option value="{{ stage.id }}">{{ stage.icon }} {{ stage.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-sm-3">
+                <label class="form-label small fw-semibold mb-1">{% trans "Orden" %}</label>
+                <input type="number" name="stage_order" value="{{ stage_configs|length|add:1 }}" min="1" class="form-control form-control-sm">
+              </div>
+              <div class="col-sm-3">
+                <button type="submit" class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar" %}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th class="ps-4">{% trans "Etapa" %}</th>
+                  <th class="text-center">{% trans "Orden" %}</th>
+                  <th class="sc-w-60"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for config in stage_configs %}
+                <tr>
+                  <td class="ps-4 fw-semibold">{{ config.stage.icon }} {{ config.stage.name }}</td>
+                  <td class="text-center text-muted small">{{ config.display_order }}</td>
+                  <td class="text-end pe-3">
+                    <form id="removeStage_{{ config.stage.id }}" method="post" class="d-none">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove_stage">
+                      <input type="hidden" name="stage_id" value="{{ config.stage.id }}">
+                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-confirm
+                            data-title="{% trans 'Eliminar etapa' %}"
+                            data-body="¿Eliminar la etapa <strong>{{ config.stage.name }}</strong> de este producto?"
+                            data-form="removeStage_{{ config.stage.id }}"
+                            data-variant="danger">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center text-muted py-4">
+                    <i class="bi bi-diagram-3 d-block mb-2 fs-3"></i>
+                    {% trans "No hay etapas configuradas." %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>

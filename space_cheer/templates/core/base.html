@@ -818,5 +818,21 @@
     </script>
 
     {% block extra_js %}{% endblock %}
+
+    <script nonce="{{ request.csp_nonce }}">
+    (function () {
+        var SCROLL_KEY = 'sc_scroll_restore';
+        // Restore on load
+        var saved = sessionStorage.getItem(SCROLL_KEY);
+        if (saved !== null) {
+            sessionStorage.removeItem(SCROLL_KEY);
+            window.scrollTo(0, parseInt(saved, 10));
+        }
+        // Save before any form submit
+        document.addEventListener('submit', function () {
+            sessionStorage.setItem(SCROLL_KEY, window.scrollY);
+        });
+    })();
+    </script>
 </body>
 </html>

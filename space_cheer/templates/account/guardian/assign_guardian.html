@@ -60,7 +60,7 @@
                     <h5 class="alert-heading text-white fw-bold mb-1">
                         <i class="bi bi-shield-check me-2"></i> {% blocktrans with name=current_guardian.get_full_name %}Guardián Actual: {{ name }}{% endblocktrans %}
                     </h5>
-                    <p class="mb-0 text-white small" style="opacity: 0.85;">
+                    <p class="mb-0 text-white small opacity-75" >
                         {% trans "Si seleccionas otro guardián de la lista y guardas, el actual será" %} <strong class="text-danger">{% trans "reemplazado (Transferencia)" %}</strong>.
                     </p>
                 </div>
@@ -252,7 +252,7 @@
 {% if current_guardian %}
 <div class="modal fade" id="removeGuardianModal" tabindex="-1" aria-labelledby="removeGuardianModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="background: #1a1a2e;">
+        <div class="modal-content border-0 shadow-lg sc-bg-panel" >
             <div class="modal-header border-bottom border-secondary">
                 <h5 class="modal-title text-danger fw-bold" id="removeGuardianModalLabel">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i> {% trans "Remover Guardián" %}

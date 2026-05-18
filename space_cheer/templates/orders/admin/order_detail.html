@@ -321,7 +321,7 @@
         {{ measurements_summary.percent }}%
       </span>
     </div>
-    <div class="progress" style="height: 10px;">
+    <div class="progress sc-h-10" >
       <div class="progress-bar
         {% if measurements_summary.percent == 100 %}bg-success
         {% elif measurements_summary.percent >= 50 %}bg-warning
@@ -441,7 +441,7 @@
                 <img src="{{ design.image.url }}"
                      class="card-img-top"
                      alt="{% trans 'Diseño' %}"
-                     style="height: 160px; object-fit: cover; cursor: pointer;"
+                     class="sc-img-160-click"
                      data-bs-toggle="modal"
                      data-bs-target="#designModal{{ design.id }}">
                 <div class="card-body p-2 text-center">

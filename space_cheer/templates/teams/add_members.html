@@ -231,7 +231,7 @@
                         <form method="post" action="{% url 'coach:change_team_role' membership.id %}"
                               class="d-flex gap-1">
                           {% csrf_token %}
-                          <select name="role_in_team" class="form-select form-select-sm bg-dark text-light border-secondary" style="width:auto;">
+                          <select name="role_in_team" class="form-select form-select-sm bg-dark text-light border-secondary w-auto" >
                             {% for value, label in role_choices %}
                               <option value="{{ value }}" {% if membership.role_in_team == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
@@ -535,7 +535,7 @@
                 <div class="card-body d-flex flex-column">
                   <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
-                         style="width:44px;height:44px;">
+                         class="sc-avatar-44">
                       {{ user.get_full_name|first|upper }}
                     </div>
                     <div>

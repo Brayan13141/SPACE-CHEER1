@@ -100,7 +100,7 @@
                required
                {% if form.terms.value %}checked{% endif %}>
                
-        <label class="form-check-label" for="id_terms" style="font-size: 0.85rem;">
+        <label class="form-check-label sc-text-85" for="id_terms" >
             {% trans "Acepto los" %}
             <a class="sc-color-secondary" href="{% url 'core:contact' %}" target="_blank" rel="noopener">{% trans "Términos de servicio" %}</a>
             {% trans "y" %}
@@ -123,7 +123,7 @@
 
 <!-- Already have account -->
 <div class="text-center mt-3">
-    <p style="color: #a0a7d0; margin-bottom: 0.5rem;">
+    <p class="sc-color-muted mb-2">
         {% trans "¿Ya tienes una cuenta?" %}
     </p>
     <a href="{% url 'account_login' %}" class="btn btn-neon-outline">

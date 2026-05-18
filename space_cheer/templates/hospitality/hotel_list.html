@@ -34,9 +34,9 @@
     <div class="col-sm-6 col-xl-4">
       <div class="card h-100 border-0 sc-bg-surface">
         {% if hotel.image %}
-        <img src="{{ hotel.image.url }}" class="card-img-top" style="height:160px;object-fit:cover;" alt="{{ hotel.name }}">
+        <img src="{{ hotel.image.url }}" class="card-img-top sc-img-160"  alt="{{ hotel.name }}">
         {% else %}
-        <div class="d-flex align-items-center justify-content-center" style="height:160px;background:var(--sc-bg);">
+        <div class="d-flex align-items-center justify-content-center sc-img-160-bg" >
           <i class="bi bi-building display-4 text-secondary"></i>
         </div>
         {% endif %}

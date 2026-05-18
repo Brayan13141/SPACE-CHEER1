@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Característica{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:480px;">
+<div class="container py-4 sc-max-w-480" >
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -36,7 +36,7 @@
           <label class="form-label fw-semibold">{{ form.icon.label }}</label>
           <div class="input-group">
             {{ form.icon }}
-            <span class="input-group-text" id="icon-preview" style="min-width:44px;justify-content:center;">
+            <span class="input-group-text sc-min-w-44 justify-content-center" id="icon-preview" >
               {% if is_edit and feature.icon %}
               <i class="{{ feature.icon }}"></i>
               {% else %}

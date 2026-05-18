@@ -103,7 +103,7 @@
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb sc-bg-transparent">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'accounts:list_address' %}" style="color:#2cb1ff; text-decoration:none;">
+                        <a href="{% url 'accounts:list_address' %}" class="sc-color-cyan text-decoration-none">
                             <i class="bi bi-geo-alt me-1"></i>{% trans "Mis direcciones" %}
                         </a>
                     </li>
@@ -117,7 +117,7 @@
                 <!-- Header -->
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                         style="width:48px;height:48px;background:rgba(127,90,240,0.15);">
+                         class="sc-avatar-48 sc-avatar-bg-purple-lt">
                         <i class="bi bi-geo-alt-fill fs-4 sc-color-purple"></i>
                     </div>
                     <div>
@@ -214,7 +214,7 @@
                                id="{{ form.is_default.id_for_label }}"
                                {% if form.is_default.value %}checked{% endif %}>
                         <label class="form-check-label" for="{{ form.is_default.id_for_label }}">
-                            <i class="bi bi-star me-1" style="color:#ffc107;"></i>
+                            <i class="bi bi-star me-1 text-warning" ></i>
                             {% trans "Usar como dirección principal" %}
                         </label>
                     </div>

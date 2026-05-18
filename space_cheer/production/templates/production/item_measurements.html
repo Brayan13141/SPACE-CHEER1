@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block title %}Medidas — {{ item.product.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary btn-sm mb-3">← Volver</a>
+  <h3>Medidas — {{ item.product.name }}</h3>
+  {% for athlete in athletes %}
+    <div class="card bg-dark border-secondary mb-2">
+      <div class="card-header">{{ athlete.athlete.get_full_name }}</div>
+      <div class="card-body">
+        {% for m in athlete.measurements.all %}
+          <div class="row"><div class="col-6 text-muted">{{ m.field.name }}</div><div class="col-6">{{ m.value }} {{ m.field.unit }}</div></div>
+        {% empty %}
+          <p class="text-muted">Sin medidas registradas.</p>
+        {% endfor %}
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted">No hay atletas asignados.</p>
+  {% endfor %}
+</div>
+{% endblock %}

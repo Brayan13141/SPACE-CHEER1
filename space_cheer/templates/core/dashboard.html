@@ -79,6 +79,19 @@
   </div>
   {% endif %}
 
+  {% if is_admin %}
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <a href="{% url 'production:admin_overview' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-diagram-3 fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Producción" %}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   {% if is_headcoach or is_admin %}
   <div class="mt-3">
     <a href="{% url 'guardian:headcoach_dashboard' %}" class="btn btn-outline-light btn-sm">
@@ -128,6 +141,14 @@
       </a>
     </div>
     <div class="col-md-3">
+      <a href="{% url 'production:admin_overview' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-diagram-3 fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Producción" %}</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
       <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
           <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
@@ -141,7 +162,7 @@
   {% elif is_athlete %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100 sc-card-purple">
+      <a href="{% url 'teams:athlete_team' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
           <i class="bi bi-people-fill fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Equipo" %}</div>
@@ -198,6 +219,27 @@
         <div class="card-body text-center py-4">
           <i class="bi bi-heart fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Atletas" %}</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- OPERARIO -->
+  {% elif is_operario %}
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <a href="{% url 'production:dashboard' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-tools fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Mis Tareas" %}</div>
         </div>
       </a>
     </div>

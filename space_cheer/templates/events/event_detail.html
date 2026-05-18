@@ -191,39 +191,39 @@
               {% if step.state == 'current' %}
                 <div class="d-flex flex-column align-items-center flex-shrink-0 sc-min-w-60">
                   <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                       style="width:34px;height:34px;background:var(--sc-purple);color:#fff;font-size:.8rem;">
+                       class="sc-step-bubble sc-step-current">
                     {{ step.num }}
                   </div>
-                  <span class="text-center mt-1" style="font-size:.65rem;color:var(--sc-purple);max-width:60px;">
+                  <span class="text-center mt-1 sc-step-label sc-step-label-purple" >
                     {{ step.label }}
                   </span>
                 </div>
               {% elif step.state == 'done' %}
                 <div class="d-flex flex-column align-items-center flex-shrink-0 sc-min-w-60">
                   <div class="rounded-circle d-flex align-items-center justify-content-center"
-                       style="width:34px;height:34px;background:rgba(25,135,84,.25);color:#198754;">
+                       class="sc-step-bubble sc-step-done">
                     <i class="bi bi-check2"></i>
                   </div>
-                  <span class="text-center text-success mt-1" style="font-size:.65rem;max-width:60px;">
+                  <span class="text-center text-success mt-1 sc-step-label" >
                     {{ step.label }}
                   </span>
                 </div>
               {% elif step.state == 'cancelled' %}
                 <div class="d-flex flex-column align-items-center flex-shrink-0 sc-min-w-60">
                   <div class="rounded-circle d-flex align-items-center justify-content-center text-muted"
-                       style="width:34px;height:34px;background:rgba(108,117,125,.15);font-size:.8rem;">
+                       class="sc-step-bubble sc-step-muted">
                     {{ step.num }}
                   </div>
-                  <span class="text-center text-muted mt-1" style="font-size:.65rem;max-width:60px;">—</span>
+                  <span class="text-center text-muted mt-1 sc-step-label" >—</span>
                 </div>
               {% else %}
                 {# future #}
                 <div class="d-flex flex-column align-items-center flex-shrink-0 sc-min-w-60">
                   <div class="rounded-circle d-flex align-items-center justify-content-center text-muted"
-                       style="width:34px;height:34px;border:1px solid rgba(108,117,125,.35);font-size:.8rem;">
+                       class="sc-step-bubble sc-step-future">
                     {{ step.num }}
                   </div>
-                  <span class="text-center text-muted mt-1" style="font-size:.65rem;max-width:60px;">
+                  <span class="text-center text-muted mt-1 sc-step-label" >
                     {{ step.label }}
                   </span>
                 </div>
@@ -232,7 +232,7 @@
               {# Conector entre burbujas #}
               {% if not forloop.last %}
               <div class="flex-grow-1 mx-1"
-                   style="height:1px;background:rgba(108,117,125,.3);min-width:8px;margin-bottom:18px;">
+                   class="sc-step-connector">
               </div>
               {% endif %}
 
@@ -241,12 +241,12 @@
             {# Nodo CANCELADO — fuera del flujo lineal #}
             {% if is_cancelled %}
             <div class="ms-2 d-flex flex-column align-items-center flex-shrink-0 sc-min-w-60">
-              <div class="flex-shrink-0" style="height:1px;width:12px;background:rgba(220,53,69,.4);margin-bottom:18px;"></div>
+              <div class="flex-shrink-0 sc-step-connector-danger" ></div>
               <div class="rounded-circle d-flex align-items-center justify-content-center"
-                   style="width:34px;height:34px;background:rgba(220,53,69,.2);color:#dc3545;">
-                <i class="bi bi-x-lg" style="font-size:.8rem;"></i>
+                   class="sc-step-bubble sc-step-cancelled">
+                <i class="bi bi-x-lg form-text-sm" ></i>
               </div>
-              <span class="text-center text-danger mt-1" style="font-size:.65rem;">{% trans "Cancelado" %}</span>
+              <span class="text-center text-danger mt-1 sc-text-xxs" >{% trans "Cancelado" %}</span>
             </div>
             {% endif %}
           </div>
@@ -295,22 +295,22 @@
                             aria-controls="block-{{ t.status }}">
                       <i class="bi bi-lock text-secondary"></i>
                       <span class="text-secondary">{{ t.label }}</span>
-                      <span class="badge ms-1" style="background:rgba(255,193,7,.2);color:#ffc107;">
+                      <span class="badge ms-1 sc-bg-warning-badge" >
                         {{ t.blocking|length }} {% trans "pendiente" %}{% if t.blocking|length != 1 %}s{% endif %}
                       </span>
                       <i class="bi bi-chevron-down ms-auto"></i>
                     </button>
 
                     <div id="block-{{ t.status }}" class="collapse">
-                      <div class="mt-1 p-3 rounded" style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);">
-                        <p class="small mb-2" style="color:#ffc107;">
+                      <div class="mt-1 p-3 rounded sc-bg-warning-card" >
+                        <p class="small mb-2 text-warning" >
                           <i class="bi bi-info-circle me-1"></i>
                           {% trans "Completa estos pasos para poder" %} <strong>{{ t.label|lower }}</strong>:
                         </p>
                         <ul class="mb-2 small text-secondary ps-3">
                           {% for step in t.blocking %}
                           <li class="mb-1">
-                            <i class="bi bi-circle me-1" style="font-size:.6rem;"></i>{{ step }}
+                            <i class="bi bi-circle me-1 sc-text-6xs" ></i>{{ step }}
                           </li>
                           {% endfor %}
                         </ul>
@@ -348,7 +348,7 @@
           {% else %}
             {# Estado terminal #}
             <div class="text-center text-secondary py-2">
-              <i class="bi bi-check2-all opacity-50" style="font-size:1.6rem;"></i>
+              <i class="bi bi-check2-all opacity-50 sc-fs-16" ></i>
               <p class="small mt-2 mb-0">
                 {% if event.status == 'COMPLETED' %}
                   {% trans "Evento completado. No hay más transiciones disponibles." %}

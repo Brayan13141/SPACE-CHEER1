@@ -13,19 +13,19 @@
             <p class="small text-muted mb-3">Guarda estas credenciales y entrégaselas al alumno. Solo se muestran una vez.</p>
             <div class="row g-2">
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-person me-1"></i>Nombre</div>
                         <div class="fw-semibold">{{ new_athlete.name }}</div>
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-at me-1"></i>Usuario</div>
                         <code class="text-light fw-bold">{{ new_athlete.username }}</code>
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-key me-1"></i>Contraseña temporal</div>
                         <code class="text-warning fw-bold">{{ new_athlete.password }}</code>
                     </div>
@@ -33,7 +33,7 @@
             </div>
             <div class="mt-2">
                 {% if new_athlete.email_sent %}
-                <p class="small mb-0" style="color:#4ade80;">
+                <p class="small mb-0 sc-color-green-light" >
                     <i class="bi bi-envelope-check me-1"></i>
                     Credenciales enviadas a <strong>{{ new_athlete.email }}</strong>.
                     El alumno puede cambiar su contraseña desde su perfil.
@@ -55,7 +55,7 @@
         <div class="col-md-8">
             <div class="d-flex align-items-center">
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
-                     style="width: 55px; height: 55px;">
+                     class="sc-avatar-55">
                     <i class="bi bi-people fs-3"></i>
                 </div>
                 <div>
@@ -116,7 +116,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 42px; height: 42px;">
+                                         class="sc-avatar-42">
                                         <i class="bi bi-person fs-5 text-primary"></i>
                                     </div>
                                     <div>
@@ -233,7 +233,7 @@
             <div class="text-center py-5">
                 <div class="mb-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto" 
-                         style="width: 100px; height: 100px;">
+                         class="sc-avatar-100">
                         <i class="bi bi-people display-3 text-primary"></i>
                     </div>
                 </div>

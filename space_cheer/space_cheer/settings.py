@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "social",
     "orders",
     "products",
+    "production.apps.ProductionConfig",
     #
     "widget_tweaks",
     # Allauth

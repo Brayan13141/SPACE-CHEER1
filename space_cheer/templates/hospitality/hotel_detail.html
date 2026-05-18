@@ -65,7 +65,7 @@
               {% if rt.features.all %}
               <div class="d-flex flex-wrap gap-1 mt-1">
                 {% for f in rt.features.all %}
-                <span class="badge rounded-pill" style="background:var(--sc-bg);color:var(--sc-text-muted);">
+                <span class="badge rounded-pill sc-bg-surface text-secondary" >
                   {% if f.icon %}<i class="{{ f.icon }} me-1"></i>{% endif %}{{ f.name }}
                 </span>
                 {% endfor %}

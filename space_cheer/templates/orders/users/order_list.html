@@ -152,12 +152,12 @@
                   <div class="d-flex align-items-center">
                     {% if order.owner_user %}
                       <i class="bi bi-person-circle text-muted me-2"></i>
-                      <span class="text-truncate" style="max-width: 180px;">
+                      <span class="text-truncate sc-max-w-180" >
                         {{ order.owner_user.get_full_name|default:order.owner_user.email }}
                       </span>
                     {% elif order.owner_team %}
                       <i class="bi bi-people text-muted me-2"></i>
-                      <span class="text-truncate" style="max-width: 180px;">
+                      <span class="text-truncate sc-max-w-180" >
                         {{ order.owner_team.name }}
                       </span>
                     {% endif %}

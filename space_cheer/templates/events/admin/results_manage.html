@@ -70,12 +70,12 @@
           {% for result in results %}
           <tr>
             <td>
-              <form method="post" class="d-flex align-items-center gap-1" style="width:80px;">
+              <form method="post" class="d-flex align-items-center gap-1 sc-w-80" >
                 {% csrf_token %}
                 <input type="hidden" name="action" value="set_placement">
                 <input type="hidden" name="result_pk" value="{{ result.pk }}">
                 <input type="number" name="placement" value="{{ result.placement }}"
-                       class="form-control form-control-sm" style="width:55px;" min="1">
+                       class="form-control form-control-sm sc-w-55"  min="1">
                 <button class="btn btn-outline-secondary btn-sm p-1">
                   <i class="bi bi-check"></i>
                 </button>
