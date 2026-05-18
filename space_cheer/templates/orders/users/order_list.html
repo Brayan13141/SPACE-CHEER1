@@ -30,7 +30,7 @@
           </h6>
         </div>
         <div class="col-lg-8">
-          <form method="get" class="mb-0">
+          <form method="get" class="mb-0" id="orderFilterForm">
             <div class="d-flex flex-column flex-md-row gap-3">
               <div class="d-flex gap-4">
                 <div class="form-check form-check-inline">
@@ -41,7 +41,6 @@
                     id="filter-active"
                     value="active"
                     {% if filter_status != "finalized" %}checked{% endif %}
-                    onchange="this.form.submit()"
                   >
                   <label class="form-check-label d-flex align-items-center" for="filter-active">
                     <i class="bi bi-clock-history me-2"></i>{% trans "Activas" %}
@@ -55,7 +54,6 @@
                     id="filter-finalized"
                     value="finalized"
                     {% if filter_status == "finalized" %}checked{% endif %}
-                    onchange="this.form.submit()"
                   >
                   <label class="form-check-label d-flex align-items-center" for="filter-finalized">
                     <i class="bi bi-check-circle me-2"></i>{% trans "Finalizadas" %}
@@ -154,12 +152,12 @@
                   <div class="d-flex align-items-center">
                     {% if order.owner_user %}
                       <i class="bi bi-person-circle text-muted me-2"></i>
-                      <span class="text-truncate" style="max-width: 180px;">
+                      <span class="text-truncate sc-max-w-180" >
                         {{ order.owner_user.get_full_name|default:order.owner_user.email }}
                       </span>
                     {% elif order.owner_team %}
                       <i class="bi bi-people text-muted me-2"></i>
-                      <span class="text-truncate" style="max-width: 180px;">
+                      <span class="text-truncate sc-max-w-180" >
                         {{ order.owner_team.name }}
                       </span>
                     {% endif %}
@@ -256,10 +254,17 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if orders %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Auto-submit filter form on radio change (always active, regardless of order count)
+    document.querySelectorAll('#orderFilterForm input[type="radio"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('orderFilterForm').submit();
+        });
+    });
+
+    {% if orders %}
     // Inicializar tooltips Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -270,19 +275,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var table = $('#ordersTable').DataTable({
         responsive: true,
         pageLength: 10,
-        paging: false,  // Desactivar paginación de DataTables
+        paging: false,
         lengthMenu: [10, 25, 50, 100],
         ordering: true,
         order: [[0, 'desc']],
         language: {
-            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+            url: "{% static 'JS/datatables-es.json' %}"
         },
         columnDefs: [
             { orderable: false, targets: -1 }
         ]
     });
+    {% endif %}
 
 });
 </script>
-{% endif%}
 {% endblock %}

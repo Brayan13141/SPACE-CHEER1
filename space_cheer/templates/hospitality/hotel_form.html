@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{{ else }}Nuevo{% endif %} Hotel — {{ event.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:680px;">
+<div class="container py-4 sc-max-w-680" >
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -17,10 +17,10 @@
     </ol>
   </nav>
 
-  <div class="card border-0" style="background:var(--sc-surface);">
-    <div class="card-header border-0 pb-0" style="background:transparent;">
+  <div class="card border-0 sc-bg-surface">
+    <div class="card-header border-0 pb-0 sc-bg-transparent">
       <h1 class="h4 mb-0">
-        <i class="bi bi-building me-2" style="color:var(--sc-cyan);"></i>
+        <i class="bi bi-building me-2 sc-color-cyan"></i>
         {% if is_edit %}Editar Hotel{% else %}Nuevo Hotel{% endif %}
       </h1>
     </div>
@@ -63,7 +63,7 @@
             {{ form.image }}
             {% if is_edit and hotel.image %}
             <div class="mt-2">
-              <img src="{{ hotel.image.url }}" style="height:80px;border-radius:6px;" alt="Imagen actual">
+              <img src="{{ hotel.image.url }}" class="sc-img-80" alt="Imagen actual">
             </div>
             {% endif %}
           </div>

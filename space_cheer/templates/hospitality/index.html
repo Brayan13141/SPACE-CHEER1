@@ -8,7 +8,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="h2 mb-1"><i class="bi bi-building me-2" style="color:var(--sc-cyan);"></i>Hospitalidad</h1>
+      <h1 class="h2 mb-1"><i class="bi bi-building me-2 sc-color-cyan"></i>Hospitalidad</h1>
       <p class="text-secondary mb-0">
         {% if is_admin %}Gestión de hoteles y estancias por evento{% else %}Tus estancias en eventos{% endif %}
       </p>
@@ -23,7 +23,7 @@
   <div class="row g-3 mb-4">
     {% for event in events %}
     <div class="col-sm-6 col-lg-4">
-      <div class="card border-0 h-100" style="background:var(--sc-surface);">
+      <div class="card border-0 h-100 sc-bg-surface">
         <div class="card-body">
           <h3 class="h6 fw-semibold mb-1">{{ event.name }}</h3>
           <p class="text-secondary small mb-3">
@@ -79,22 +79,22 @@
 
   {# ── Estancias propias del admin ── #}
   {% if my_stays %}
-  <hr style="border-color:var(--sc-border,rgba(255,255,255,.1));margin:2rem 0;">
+  <hr class="sc-border-color my-4">
   <h2 class="h5 mb-3 text-secondary"><i class="bi bi-house-heart me-2"></i>Mis estancias</h2>
   <div class="row g-3">
     {% for stay in my_stays %}
     <div class="col-sm-6 col-lg-4">
-      <div class="card border-0 h-100" style="background:var(--sc-surface);">
+      <div class="card border-0 h-100 sc-bg-surface">
         <div class="card-body">
           <h3 class="h6 fw-semibold mb-1">{{ stay.event.name }}</h3>
           <p class="text-secondary small mb-2">{{ stay.event.start_date }}</p>
           <div class="mb-3">
             {% if stay.status == 'REQUESTED' %}
-            <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+            <span class="badge sc-bg-warning-dark">Solicitado</span>
             {% elif stay.status == 'CONFIRMED' %}
-            <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+            <span class="badge sc-bg-cyan">Confirmado</span>
             {% elif stay.status == 'CHECKED_IN' %}
-            <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+            <span class="badge sc-bg-success">Check-in</span>
             {% elif stay.status == 'CHECKED_OUT' %}
             <span class="badge bg-secondary">Check-out</span>
             {% elif stay.status == 'CANCELLED' %}
@@ -121,17 +121,17 @@
   <div class="row g-3">
     {% for stay in stays %}
     <div class="col-sm-6 col-lg-4">
-      <div class="card border-0 h-100" style="background:var(--sc-surface);">
+      <div class="card border-0 h-100 sc-bg-surface">
         <div class="card-body">
           <h3 class="h6 fw-semibold mb-1">{{ stay.event.name }}</h3>
           <p class="text-secondary small mb-2">{{ stay.event.start_date }}</p>
           <div class="mb-3">
             {% if stay.status == 'REQUESTED' %}
-            <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+            <span class="badge sc-bg-warning-dark">Solicitado</span>
             {% elif stay.status == 'CONFIRMED' %}
-            <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+            <span class="badge sc-bg-cyan">Confirmado</span>
             {% elif stay.status == 'CHECKED_IN' %}
-            <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+            <span class="badge sc-bg-success">Check-in</span>
             {% elif stay.status == 'CHECKED_OUT' %}
             <span class="badge bg-secondary">Check-out</span>
             {% elif stay.status == 'CANCELLED' %}

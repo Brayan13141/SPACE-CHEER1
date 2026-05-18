@@ -4,6 +4,7 @@ from decouple import config
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 
@@ -18,6 +19,29 @@ from .models import Team, TeamCategory, UserTeamMembership
 from .forms import TeamForm, TeamCategoryForm, QuickAthleteRegisterForm
 from .services import TeamService, MembershipService
 from accounts.tasks import send_athlete_credentials
+
+
+@login_required
+def athlete_team(request):
+    memberships = (
+        UserTeamMembership.objects.filter(user=request.user, is_active=True)
+        .select_related("team", "team__coach", "team__category")
+        .order_by("team__name")
+    )
+    items = []
+    for membership in memberships:
+        teammates = (
+            UserTeamMembership.objects.filter(
+                team=membership.team,
+                is_active=True,
+                status="accepted",
+            )
+            .exclude(user=request.user)
+            .select_related("user")
+            .order_by("role_in_team", "user__first_name")
+        )
+        items.append({"membership": membership, "team": membership.team, "teammates": teammates})
+    return render(request, "teams/athlete_team.html", {"items": items})
 
 
 @role_required("ADMIN", "HEADCOACH")

@@ -8,13 +8,13 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="mb-1">
-        <i class="bi bi-geo-alt-fill me-2" style="color: var(--sc-cyan);"></i>
+        <i class="bi bi-geo-alt-fill me-2 sc-color-cyan"></i>
         {% trans "Mis Direcciones" %}
       </h2>
       <p class="text-muted mb-0">{% trans "Gestiona tus direcciones registradas" %}</p>
     </div>
     <a href="{% url 'accounts:create_address' %}" class="btn"
-       style="background-color: var(--sc-purple); color: #fff;">
+       class="sc-bg-purple-solid">
       <i class="bi bi-plus-lg me-1"></i> {% trans "Nueva Dirección" %}
     </a>
   </div>
@@ -29,14 +29,14 @@
 
           {% if address.is_default %}
             <span class="position-absolute top-0 end-0 m-2 badge"
-                  style="background-color: var(--sc-cyan); color: #000;">
+                  class="sc-bg-cyan">
               <i class="bi bi-star-fill me-1"></i> {% trans "Principal" %}
             </span>
           {% endif %}
 
           <div class="card-body pb-2">
             <h6 class="card-title fw-bold mb-3">
-              <i class="bi bi-tag-fill me-1" style="color: var(--sc-pink);"></i>
+              <i class="bi bi-tag-fill me-1 sc-color-pink"></i>
               {{ address.label }}
             </h6>
 
@@ -55,7 +55,7 @@
           </div>
 
           <div class="card-footer d-flex gap-2 justify-content-end"
-               style="background: transparent; border-top: 1px solid rgba(255,255,255,.08);">
+               class="bg-transparent sc-border-top-faint">
             <a href="{% url 'accounts:update_address' address.pk %}"
                class="btn btn-sm btn-outline-secondary">
               <i class="bi bi-pencil me-1"></i> {% trans "Editar" %}
@@ -79,7 +79,7 @@
         <h5 class="mt-3 mb-1">{% trans "Sin direcciones registradas" %}</h5>
         <p class="text-muted mb-4">{% trans "Agrega una dirección para facilitar tus pedidos y envíos." %}</p>
         <a href="{% url 'accounts:create_address' %}" class="btn"
-           style="background-color: var(--sc-purple); color: #fff;">
+           class="sc-bg-purple-solid">
           <i class="bi bi-plus-lg me-1"></i> {% trans "Agregar primera dirección" %}
         </a>
       </div>

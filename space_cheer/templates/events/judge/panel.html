@@ -4,7 +4,7 @@
 {% block title %}{% trans "Panel de Juez" %} — {{ event.name }}{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
   .score-input {
     width: 78px; text-align: center;
     background: rgba(255,255,255,0.07);
@@ -52,10 +52,10 @@
 
     {# Scoring table #}
     <div class="col-xl-8">
-      <div class="card border-secondary" style="background:rgba(255,255,255,0.03);">
+      <div class="card border-secondary sc-bg-white-04" >
         <div class="card-header border-secondary d-flex justify-content-between align-items-center">
           <span class="text-light small fw-semibold">{% trans "Evaluación" %}</span>
-          <span id="global-status" class="text-muted" style="font-size:0.75rem;"></span>
+          <span id="global-status" class="text-muted sc-text-xs"></span>
         </div>
         <div class="card-body p-0">
           {% if registrations %}
@@ -63,12 +63,12 @@
             <table class="table table-dark table-bordered table-hover mb-0" id="scoring-table">
               <thead>
                 <tr class="align-middle">
-                  <th class="text-secondary fw-normal" style="min-width:140px;">{% trans "Equipo" %}</th>
-                  <th class="text-secondary fw-normal text-center" style="width:80px;">{% trans "Cat." %}</th>
+                  <th class="text-secondary fw-normal sc-min-w-140" >{% trans "Equipo" %}</th>
+                  <th class="text-secondary fw-normal text-center sc-w-80" >{% trans "Cat." %}</th>
                   {% for c in criteria %}
-                  <th class="text-secondary fw-normal text-center criteria-th" style="min-width:95px;">
+                  <th class="text-secondary fw-normal text-center criteria-th sc-min-w-95" >
                     {{ c.name }}<br>
-                    <span class="text-muted" style="font-size:0.65rem;">máx {{ c.max_score }}</span>
+                    <span class="text-muted sc-text-xxs" >máx {{ c.max_score }}</span>
                   </th>
                   {% endfor %}
                 </tr>
@@ -78,7 +78,7 @@
                 <tr class="align-middle">
                   <td class="text-light fw-semibold small">{{ reg.team.name }}</td>
                   <td class="text-center">
-                    <span class="badge" style="background:rgba(108,117,125,.4);font-size:.65rem;">
+                    <span class="badge sc-badge-secondary-dark" >
                       {{ reg.category.name }}
                     </span>
                   </td>
@@ -116,12 +116,12 @@
 
     {# Live leaderboard #}
     <div class="col-xl-4">
-      <div class="card border-secondary h-100" style="background:rgba(255,255,255,0.03);">
+      <div class="card border-secondary h-100 sc-bg-white-04" >
         <div class="card-header border-secondary d-flex justify-content-between align-items-center">
           <span class="text-light small fw-semibold">
             <i class="bi bi-trophy me-1 text-warning"></i>{% trans "Leaderboard en vivo" %}
           </span>
-          <span id="lb-ts" class="text-muted" style="font-size:0.65rem;"></span>
+          <span id="lb-ts" class="text-muted sc-text-xxs" ></span>
         </div>
         <div id="lb-body" class="card-body p-0">
           <div class="text-center text-secondary py-5">
@@ -135,7 +135,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const SCORE_URL   = "{% url 'events:judge_score_submit' event.pk %}";
 const LB_URL      = "{% url 'events:judge_leaderboard_api' event.pk %}";
 const CSRF_TOKEN  = "{{ csrf_token }}";
@@ -261,7 +261,7 @@ function renderLeaderboard(entries) {
       <div class="fs-5 flex-shrink-0">${medals[e.rank - 1] || `#${e.rank}`}</div>
       <div class="flex-grow-1 overflow-hidden">
         <div class="text-light fw-semibold text-truncate small">${e.team}</div>
-        <div class="text-muted" style="font-size:.65rem;">${e.category}</div>
+        <div class="text-muted sc-text-xxs" >${e.category}</div>
       </div>
       <div class="text-info fw-bold flex-shrink-0">${e.total_score.toFixed(2)}</div>
     </div>

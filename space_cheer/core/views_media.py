@@ -10,7 +10,7 @@ def serve_protected_media(request, path):
     requested = (media_root / path).resolve()
 
     # Previene path traversal: la ruta resuelta debe estar dentro de MEDIA_ROOT
-    if not str(requested).startswith(str(media_root) + ("/" if not str(media_root).endswith("/") else "")):
+    if not requested.is_relative_to(media_root):
         raise Http404
 
     if not requested.is_file():

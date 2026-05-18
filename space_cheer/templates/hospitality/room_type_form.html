@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{% else %}Nuevo{% endif %} Tipo de Habitación{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:600px;">
+<div class="container py-4 sc-max-w-600">
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -15,10 +15,10 @@
     </ol>
   </nav>
 
-  <div class="card border-0" style="background:var(--sc-surface);">
-    <div class="card-header border-0 pb-0" style="background:transparent;">
+  <div class="card border-0 sc-bg-surface">
+    <div class="card-header border-0 pb-0 sc-bg-transparent">
       <h1 class="h4 mb-0">
-        <i class="bi bi-grid me-2" style="color:var(--sc-cyan);"></i>
+        <i class="bi bi-grid me-2 sc-color-cyan"></i>
         {% if is_edit %}Editar Tipo{% else %}Nuevo Tipo de Habitación{% endif %}
       </h1>
       <p class="text-secondary small mt-1 mb-0">{{ hotel.name }}</p>
@@ -48,7 +48,7 @@
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">{{ form.features.label }}</label>
-            <div class="border rounded p-3" style="background:var(--sc-bg);">
+            <div class="border rounded p-3 sc-bg-surface" >
               {% for choice in form.features %}
               <div class="form-check">
                 {{ choice.tag }}

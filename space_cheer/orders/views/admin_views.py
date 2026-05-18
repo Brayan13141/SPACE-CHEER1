@@ -147,10 +147,8 @@ def admin_order_list(request):
     # Paginación
     # ─────────────────────────────
     try:
-        page_size = int(page_size)
-        if page_size <= 0:
-            page_size = 25
-    except ValueError:
+        page_size = max(1, min(int(page_size), 100))
+    except (ValueError, TypeError):
         page_size = 25
 
     paginator = Paginator(orders, page_size)

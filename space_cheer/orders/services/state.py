@@ -425,10 +425,11 @@ class OrderStateService:
     @classmethod
     def _post_transition_hooks(cls, order, from_status, to_status, user):
         """Hooks para acciones post-transición (notificaciones, etc.)"""
-        # Aquí puedes agregar notificaciones por email, webhooks, etc.
         if to_status == "DESIGN_APPROVED":
             cls._notify_design_approved(order, user)
         elif to_status == "IN_PRODUCTION":
+            from production.services import ProductionJobService
+            ProductionJobService.create_for_order(order)
             cls._notify_production_started(order, user)
         elif to_status == "DELIVERED":
             cls._notify_order_delivered(order, user)

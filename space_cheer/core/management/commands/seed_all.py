@@ -37,6 +37,21 @@ SEEDS = [
         "command": "seed_room_features",
         "label": "Características de habitaciones",
     },
+    {
+        "key": "categories",
+        "command": "seed_categories",
+        "label": "Categorías USASF (All-Star + School)",
+    },
+    {
+        "key": "production_stages",
+        "command": "seed_production_stages",
+        "label": "Etapas de producción",
+    },
+    {
+        "key": "production_roles",
+        "command": "seed_production_roles",
+        "label": "Roles base de producción",
+    },
 ]
 
 

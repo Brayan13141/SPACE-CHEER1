@@ -128,7 +128,7 @@
     </h5>
   </div>
   <div class="card-body">
-    <form method="post" action="{% url 'orders:admin_update_order_dates' order.id %}">
+    <form method="post" action="{% url 'orders:admin_update_order_dates' order.id %}" id="datesForm" novalidate>
       {% csrf_token %}
       <div class="row g-3">
 
@@ -321,7 +321,7 @@
         {{ measurements_summary.percent }}%
       </span>
     </div>
-    <div class="progress" style="height: 10px;">
+    <div class="progress sc-h-10" >
       <div class="progress-bar
         {% if measurements_summary.percent == 100 %}bg-success
         {% elif measurements_summary.percent >= 50 %}bg-warning
@@ -441,7 +441,7 @@
                 <img src="{{ design.image.url }}"
                      class="card-img-top"
                      alt="{% trans 'Diseño' %}"
-                     style="height: 160px; object-fit: cover; cursor: pointer;"
+                     class="sc-img-160-click"
                      data-bs-toggle="modal"
                      data-bs-target="#designModal{{ design.id }}">
                 <div class="card-body p-2 text-center">
@@ -572,7 +572,7 @@
 </div>
 
 <!-- Opcional: estilos adicionales para la galería -->
-<style>
+<style nonce="{{ request.csp_nonce }}">
   .design-card {
     transition: transform 0.2s;
   }
@@ -586,12 +586,18 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  // Activar tooltips de Bootstrap (si se usan)
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
   document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+
+    ScValidation.init(document.getElementById('datesForm'), {
+      uniform_delivery_date: [
+        ScValidation.rules.dateAfter(
+          'measurements_due_date',
+          'La entrega de uniformes no puede ser anterior a la fecha límite de medidas.'
+        ),
+      ],
     });
   });
 </script>

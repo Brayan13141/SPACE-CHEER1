@@ -16,7 +16,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="h2 mb-1"><i class="bi bi-people me-2" style="color:var(--sc-cyan);"></i>Estancias</h1>
+      <h1 class="h2 mb-1"><i class="bi bi-people me-2 sc-color-cyan"></i>Estancias</h1>
       <p class="text-secondary mb-0">{{ event.name }}</p>
     </div>
     <a href="{% url 'hospitality:stay_create' event_pk=event.pk %}" class="btn btn-primary">
@@ -56,11 +56,11 @@
           </td>
           <td>
             {% if stay.status == 'REQUESTED' %}
-            <span class="badge" style="background:var(--sc-warning,#ffc107);color:#000;">Solicitado</span>
+            <span class="badge sc-bg-warning-dark">Solicitado</span>
             {% elif stay.status == 'CONFIRMED' %}
-            <span class="badge" style="background:var(--sc-cyan);">Confirmado</span>
+            <span class="badge sc-bg-cyan">Confirmado</span>
             {% elif stay.status == 'CHECKED_IN' %}
-            <span class="badge" style="background:var(--sc-success,#198754);">Check-in</span>
+            <span class="badge sc-bg-success">Check-in</span>
             {% elif stay.status == 'CHECKED_OUT' %}
             <span class="badge bg-secondary">Check-out</span>
             {% elif stay.status == 'CANCELLED' %}

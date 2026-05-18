@@ -1,0 +1,107 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Operarios{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h2 class="mb-0">{% trans "Operarios de Producción" %}</h2>
+    <a href="{% url 'production:manage_roles' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Roles" %}
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Crear operario -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% trans "Crear nuevo operario" %}</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Usuario" %} *</label>
+            <input name="username" class="form-control" placeholder="usuario123" required maxlength="150">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Nombre" %}</label>
+            <input name="first_name" class="form-control" placeholder="Juan" maxlength="150">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Apellido" %}</label>
+            <input name="last_name" class="form-control" placeholder="López" maxlength="150">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Correo" %}</label>
+            <input name="email" type="email" class="form-control" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Contraseña temporal" %} *</label>
+            <input name="password" type="password" class="form-control" required minlength="8">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-primary w-100">
+              <i class="bi bi-plus-lg me-1"></i>{% trans "Crear operario" %}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de operarios -->
+  <div class="card shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <h5 class="mb-0">
+        <i class="bi bi-people me-2"></i>{% trans "Operarios activos" %}
+        <span class="badge bg-secondary ms-1">{{ operarios|length }}</span>
+      </h5>
+    </div>
+    {% if operarios %}
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="ps-4">{% trans "Nombre" %}</th>
+              <th>{% trans "Usuario" %}</th>
+              <th>{% trans "Correo" %}</th>
+              <th class="sc-w-120"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for op in operarios %}
+            <tr>
+              <td class="ps-4 fw-semibold">{{ op.get_full_name|default:"—" }}</td>
+              <td><span class="text-muted">{{ op.username }}</span></td>
+              <td><small class="text-muted">{{ op.email|default:"—" }}</small></td>
+              <td class="text-end pe-3">
+                <a href="{% url 'production:operario_detail' op.pk %}" class="btn btn-sm btn-outline-info">
+                  <i class="bi bi-person-gear me-1"></i>{% trans "Roles" %}
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="card-body">
+      <p class="text-muted mb-0">{% trans "No hay operarios registrados." %}</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

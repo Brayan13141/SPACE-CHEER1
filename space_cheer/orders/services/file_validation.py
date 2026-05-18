@@ -19,7 +19,7 @@ class FileValidator:
         "image/webp": ["webp"],
     }
 
-    MAX_IMAGE_SIZE_MB = 10
+    MAX_IMAGE_SIZE_MB = 5
     MAX_IMAGE_DIMENSIONS = (5000, 5000)  # width, height
 
     @classmethod

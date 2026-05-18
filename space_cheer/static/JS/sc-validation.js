@@ -19,13 +19,35 @@ const ScValidation = (() => {
     return field.value;
   }
 
-  function getFeedbackContainer(field) {
-    // Look for an existing .sc-feedback sibling; otherwise append one
+  // Find the existing .sc-feedback for a field.
+  // - Inside .input-group: look at siblings AFTER the group.
+  // - Otherwise: look at direct children of the parent.
+  function findFeedback(field) {
     const parent = field.parentElement;
-    let fb = parent.querySelector('.sc-feedback');
-    if (!fb) {
-      fb = document.createElement('div');
-      fb.className = 'sc-feedback';
+    if (parent.classList.contains('input-group')) {
+      let sib = parent.nextElementSibling;
+      while (sib) {
+        if (sib.classList.contains('sc-feedback')) return sib;
+        sib = sib.nextElementSibling;
+      }
+      return null;
+    }
+    for (const child of parent.children) {
+      if (child.classList.contains('sc-feedback')) return child;
+    }
+    return null;
+  }
+
+  function getFeedbackContainer(field) {
+    let fb = findFeedback(field);
+    if (fb) return fb;
+    fb = document.createElement('div');
+    fb.className = 'sc-feedback text-danger small mt-1';
+    const parent = field.parentElement;
+    if (parent.classList.contains('input-group')) {
+      // Insert after the input-group so it appears below it, not inside the flexbox.
+      parent.insertAdjacentElement('afterend', fb);
+    } else {
       parent.appendChild(fb);
     }
     return fb;
@@ -42,13 +64,13 @@ const ScValidation = (() => {
   function clearError(field) {
     field.classList.remove('is-invalid');
     field.classList.add('is-valid');
-    const fb = field.parentElement.querySelector('.sc-feedback');
+    const fb = findFeedback(field);
     if (fb) fb.style.display = 'none';
   }
 
   function resetField(field) {
     field.classList.remove('is-invalid', 'is-valid');
-    const fb = field.parentElement.querySelector('.sc-feedback');
+    const fb = findFeedback(field);
     if (fb) fb.style.display = 'none';
   }
 
@@ -175,6 +197,20 @@ const ScValidation = (() => {
     /** Checkbox must be checked */
     checked(msg) {
       return { test: v => v === true, message: msg };
+    },
+
+    /** Date must be >= another field's date (by name, within same form). Skips if either is empty. */
+    dateAfter(otherName, msg) {
+      return {
+        test: (v, field) => {
+          if (!v) return true;
+          const form = field.closest('form');
+          const other = form?.querySelector(`[name="${otherName}"]`);
+          if (!other || !other.value) return true;
+          return new Date(v) >= new Date(other.value);
+        },
+        message: msg,
+      };
     },
 
     /** Date must not be in the future */

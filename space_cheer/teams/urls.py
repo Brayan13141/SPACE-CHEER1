@@ -6,6 +6,7 @@ from . import views
 app_name = "teams"
 
 urlpatterns = [
+    path("my-team/", views.athlete_team, name="athlete_team"),
     # Rutas para la gestión de categorías
     path("categories/", views.manage_categories, name="manage_categories"),
     # Ruta para crear una nuevo equipo

@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Característica{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:480px;">
+<div class="container py-4 sc-max-w-480" >
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -14,10 +14,10 @@
     </ol>
   </nav>
 
-  <div class="card border-0" style="background:var(--sc-surface);">
-    <div class="card-header border-0 pb-0" style="background:transparent;">
+  <div class="card border-0 sc-bg-surface">
+    <div class="card-header border-0 pb-0 sc-bg-transparent">
       <h1 class="h4 mb-0">
-        <i class="bi bi-tags me-2" style="color:var(--sc-cyan);"></i>
+        <i class="bi bi-tags me-2 sc-color-cyan"></i>
         {% if is_edit %}Editar Característica{% else %}Nueva Característica{% endif %}
       </h1>
     </div>
@@ -36,7 +36,7 @@
           <label class="form-label fw-semibold">{{ form.icon.label }}</label>
           <div class="input-group">
             {{ form.icon }}
-            <span class="input-group-text" id="icon-preview" style="min-width:44px;justify-content:center;">
+            <span class="input-group-text sc-min-w-44 justify-content-center" id="icon-preview" >
               {% if is_edit and feature.icon %}
               <i class="{{ feature.icon }}"></i>
               {% else %}
@@ -60,7 +60,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
   // Preview del ícono en tiempo real
   const iconInput = document.getElementById('{{ form.icon.id_for_label }}');
   const preview = document.querySelector('#icon-preview i');

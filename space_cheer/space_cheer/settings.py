@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import Csv, config
+from csp.constants import NONCE as CSP_NONCE
 from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,6 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = config("SECRET_KEY")
+
+# F — Fernet encryption keys for PII fields (curp, address).
+# Generate a key: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Supports key rotation: add new key first, old key(s) after — MultiFernet tries in order.
+FERNET_KEYS = config("FERNET_KEYS", cast=Csv())
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 AUTH_USER_MODEL = "accounts.User"
@@ -56,6 +62,7 @@ INSTALLED_APPS = [
     "social",
     "orders",
     "products",
+    "production.apps.ProductionConfig",
     #
     "widget_tweaks",
     # Allauth
@@ -275,8 +282,8 @@ ADMIN_URL = config("ADMIN_URL", default="admin/")
 ADMIN_ALLOWED_IPS = config("ADMIN_ALLOWED_IPS", default="", cast=Csv())
 
 # A1 — Content Security Policy
-# 'unsafe-inline' en script-src/style-src es deuda técnica conocida:
-# base.html tiene <style> y <script> inline. Migrar a nonces cuando se refactorice base.html.
+# Nonces habilitados via CSP_INCLUDE_NONCE_IN; 'unsafe-inline' eliminado.
+# Todas las etiquetas <style> y <script> inline usan nonce="{{ request.csp_nonce }}".
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": ["'self'"],
@@ -285,12 +292,12 @@ CONTENT_SECURITY_POLICY = {
             "https://code.jquery.com",
             "https://cdn.datatables.net",
             "https://cdn.jsdelivr.net",
-            "'unsafe-inline'",
+            CSP_NONCE,
         ],
         "style-src": [
             "'self'",
             "https://cdn.datatables.net",
-            "'unsafe-inline'",
+            CSP_NONCE,
         ],
         "font-src": ["'self'", "data:"],
         "img-src": ["'self'", "data:", "blob:"],

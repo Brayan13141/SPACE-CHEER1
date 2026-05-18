@@ -27,6 +27,7 @@ urlpatterns = [
     # hospitality
     path("hospitality/", include("hospitality.urls", namespace="hospitality")),
     path("social/", include("social.urls", namespace="social")),
+    path("production/", include("production.urls", namespace="production")),
     path(
         "invitations/",
         include(("invitations.urls", "invitations"), namespace="invitations"),

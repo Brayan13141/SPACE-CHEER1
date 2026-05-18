@@ -21,7 +21,7 @@
     {# ── Tarjetas de resumen ── #}
     <div class="row g-3 mb-4">
         <div class="col-sm-4">
-            <div class="card text-center border-0" style="background:rgba(25,135,84,0.15);">
+            <div class="card text-center border-0 sc-bg-success-faint" >
                 <div class="card-body py-3">
                     <div class="display-5 fw-bold text-success">{{ result.success_count }}</div>
                     <div class="small text-muted mt-1">{% trans "Importados correctamente" %}</div>
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card text-center border-0" style="background:rgba(13,202,240,0.1);">
+            <div class="card text-center border-0 sc-bg-cyan-tint" >
                 <div class="card-body py-3">
                     <div class="display-5 fw-bold text-info">{{ result.skipped_count }}</div>
                     <div class="small text-muted mt-1">{% trans "Omitidos (ya en tu grupo)" %}</div>
@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card text-center border-0" style="background:rgba(220,53,69,0.15);">
+            <div class="card text-center border-0 sc-bg-danger-faint" >
                 <div class="card-body py-3">
                     <div class="display-5 fw-bold text-danger">{{ result.error_rows|length }}</div>
                     <div class="small text-muted mt-1">{% trans "Filas con error" %}</div>
@@ -90,7 +90,7 @@
                 <table class="table table-sm mb-0">
                     <thead>
                         <tr>
-                            <th style="width:60px;">{% trans "Fila" %}</th>
+                            <th class="sc-w-60">{% trans "Fila" %}</th>
                             <th>{% trans "Nombre en CSV" %}</th>
                             <th>{% trans "Error" %}</th>
                         </tr>

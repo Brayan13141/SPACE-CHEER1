@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Etapas de Producción{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Catálogo de Etapas</h2>
+
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header">Nueva etapa</div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-3"><input name="name" class="form-control bg-dark text-light" placeholder="Nombre" required></div>
+          <div class="col-md-2"><input name="slug" class="form-control bg-dark text-light" placeholder="slug" required></div>
+          <div class="col-md-1"><input name="icon" class="form-control bg-dark text-light" placeholder="🎨" maxlength="10"></div>
+          <div class="col-md-1"><input name="display_order" type="number" class="form-control bg-dark text-light" placeholder="0" value="0"></div>
+          <div class="col-md-3"><input name="description" class="form-control bg-dark text-light" placeholder="Descripción (opcional)"></div>
+          <div class="col-md-2"><button class="btn btn-primary w-100">Crear</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <table class="table table-dark table-bordered">
+    <thead><tr><th>#</th><th>Icono</th><th>Nombre</th><th>Slug</th><th>Orden</th></tr></thead>
+    <tbody>
+      {% for stage in stages %}
+        <tr>
+          <td>{{ stage.pk }}</td>
+          <td>{{ stage.icon }}</td>
+          <td>{{ stage.name }}</td>
+          <td><code>{{ stage.slug }}</code></td>
+          <td>{{ stage.display_order }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Sin etapas configuradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

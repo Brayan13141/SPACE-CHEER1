@@ -281,6 +281,37 @@ def product_detail(request, product_id):
                 )
             return redirect("products:product_detail", product_id=product.id)
 
+        # ── Agregar etapa de producción ───────────────
+        elif action == "add_stage":
+            from production.models import ProductionStage, ProductStageConfig
+            stage_id = request.POST.get("stage_id")
+            stage_order = request.POST.get("stage_order", 1)
+            if not stage_id:
+                messages.error(request, "Selecciona una etapa.")
+            else:
+                stage = get_object_or_404(ProductionStage, pk=stage_id)
+                _, created = ProductStageConfig.objects.get_or_create(
+                    product=product,
+                    stage=stage,
+                    defaults={"display_order": int(stage_order)},
+                )
+                if created:
+                    messages.success(request, f"Etapa '{stage.name}' agregada.")
+                else:
+                    messages.warning(request, f"La etapa '{stage.name}' ya está configurada.")
+            return redirect("products:product_detail", product_id=product.id)
+
+        # ── Eliminar etapa de producción ──────────────
+        elif action == "remove_stage":
+            from production.models import ProductionStage, ProductStageConfig
+            stage_id = request.POST.get("stage_id")
+            if stage_id:
+                ProductStageConfig.objects.filter(
+                    product=product, stage_id=stage_id
+                ).delete()
+                messages.success(request, "Etapa eliminada.")
+            return redirect("products:product_detail", product_id=product.id)
+
     # GET: form con instancia para autocompletar campos
     form = ProductForm(instance=product)
 
@@ -369,6 +400,11 @@ def product_detail(request, product_id):
         "requires_sizes": requires_sizes,
         "requires_team": product.requires_team,
     }
+    from production.models import ProductionStage, ProductStageConfig
+    stage_configs = ProductStageConfig.objects.filter(product=product).select_related("stage").order_by("display_order")
+    configured_stage_ids = stage_configs.values_list("stage_id", flat=True)
+    available_stages = ProductionStage.objects.exclude(id__in=configured_stage_ids).order_by("display_order")
+
     context = {
         "product": product,
         "form": form,
@@ -384,6 +420,8 @@ def product_detail(request, product_id):
         "is_configured": product.is_configured,
         "protection_info": protection_info,
         "requirements": requirements,
+        "stage_configs": stage_configs,
+        "available_stages": available_stages,
     }
 
     return render(request, "products/product_detail.html", context)

@@ -1,0 +1,82 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Panel de Producción - SPACE CHEER{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <h2 class="mb-0">Mis Tareas</h2>
+    {% for assignment in prod_roles %}
+      <span class="badge bg-secondary">{{ assignment.role.name }}</span>
+    {% endfor %}
+  </div>
+
+  {% if not prod_roles %}
+    <div class="alert alert-warning">
+      Contacta al administrador para que te asigne tus roles de producción.
+    </div>
+  {% endif %}
+
+  {% if tasks %}
+    <div class="row g-3">
+      {% for task in tasks %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card bg-dark border-secondary h-100 {% if task.job.is_urgent %}border-danger{% endif %}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="fs-4">{{ task.stage.icon }}</span>
+                {% if task.job.is_urgent %}
+                  <span class="badge bg-danger">Urgente</span>
+                {% endif %}
+              </div>
+              <h5 class="card-title">{{ task.stage.name }}</h5>
+              <p class="card-text text-muted small">
+                {{ task.order_item.product.name }}<br>
+                Orden #{{ task.job.order.id }}
+              </p>
+              <button type="button" class="btn btn-success btn-sm mt-2"
+                data-bs-toggle="modal" data-bs-target="#completeModal{{ task.pk }}">
+                Completar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal completar -->
+        <div class="modal fade" id="completeModal{{ task.pk }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+              <div class="modal-header">
+                <h5 class="modal-title">Completar — {{ task.stage.name }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <form method="post" action="{% url 'production:task_complete' task.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Fecha de inicio</label>
+                    <input type="datetime-local" name="started_at" class="form-control bg-dark text-light"
+                      value="{{ task.started_at|date:'Y-m-d' }}T{{ task.started_at|time:'H:i' }}"
+                      min="{{ task.job.created_at|date:'Y-m-d' }}T{{ task.job.created_at|time:'H:i' }}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Notas (opcional)</label>
+                    <textarea name="notes" class="form-control bg-dark text-light" rows="3"></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="submit" class="btn btn-success">Confirmar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% if prod_roles %}
+      <p class="text-muted">No tienes tareas pendientes.</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

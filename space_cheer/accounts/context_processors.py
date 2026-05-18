@@ -11,6 +11,7 @@ def user_roles(request):
     is_staff_role = "STAFF" in roles
     is_athlete = "ATHLETE" in roles
     is_guardian = "GUARDIAN" in roles
+    is_operario = "OPERARIO" in roles
     # Puede gestionar equipos/atletas (tiene panel de coach)
     can_manage = is_admin or is_headcoach or is_coach
 
@@ -21,6 +22,7 @@ def user_roles(request):
         "is_staff_role": is_staff_role,
         "is_athlete": is_athlete,
         "is_guardian": is_guardian,
+        "is_operario": is_operario,
         "can_manage": can_manage,
         "user_roles_list": roles,
     }

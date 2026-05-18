@@ -4,7 +4,7 @@
 {% block title %}{% trans "Menores sin Guardián" %}{% endblock %}
 
 {% block extra_css %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
 
     .action-buttons .btn {
         margin-right: 0.25rem;
@@ -90,7 +90,7 @@
                                 <td data-label="Nombre">
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-placeholder bg-primary rounded-circle text-white d-inline-flex align-items-center justify-content-center me-2" 
-                                             style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                             class="sc-avatar-32">
                                             {{ minor.first_name|slice:":1" }}{{ minor.last_name|slice:":1" }}
                                         </div>
                                         {{ minor.get_full_name }}
@@ -167,7 +167,7 @@
                     <div class="card card-body">
                         <p class="small text-muted mb-2">{% trans "Puedes exportar esta lista o enviar recordatorios." %}</p>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary btn-sm" onclick="exportTableToCSV()">
+                            <button class="btn btn-outline-primary btn-sm" id="exportCsvBtn">
                                 <i class="bi bi-download"></i> {% trans "Exportar CSV" %}
                             </button>
                             <button class="btn btn-outline-secondary btn-sm" disabled>
@@ -210,7 +210,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function exportTableToCSV() {
         let csv = [];
         let rows = document.querySelectorAll('#minorsTable tr');
@@ -230,10 +230,13 @@
         URL.revokeObjectURL(a.href);
     }
 
-    // Inicializar tooltips si existen
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+    document.addEventListener('DOMContentLoaded', function () {
+        var exportBtn = document.getElementById('exportCsvBtn');
+        if (exportBtn) exportBtn.addEventListener('click', exportTableToCSV);
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
     });
 </script>
 {% endblock %}

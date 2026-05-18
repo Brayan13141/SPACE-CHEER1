@@ -105,7 +105,7 @@
               {% endif %}
 
               <!-- Contenedor de equipo solo visible si aplica -->
-              <div class="col-md-6" id="owner-team-container" style="display:none;">
+              <div class="col-md-6 d-none" id="owner-team-container">
                 <label class="form-label fw-semibold">{% trans "Equipo exclusivo" %}</label>
                 {{ form.owner_team }}
                 <small class="text-muted">{% trans "Solo si el alcance es \"Solo un equipo\"" %}</small>
@@ -142,11 +142,11 @@
           <div class="card-body text-center">
             <div id="preview-container" class="mb-3">
               <div class="rounded d-flex align-items-center justify-content-center"
-                   style="height:160px;background:var(--sc-panel,#1a1a2e);" id="placeholder">
+                   class="sc-img-160-panel" id="placeholder">
                 <i class="bi bi-image text-secondary display-4"></i>
               </div>
               <img id="img-preview" src="#" alt="Preview"
-                   class="img-fluid rounded d-none" style="max-height:160px;">
+                   class="img-fluid rounded d-none sc-max-h-160" >
             </div>
             {{ form.image }}
             <small class="text-muted d-block mt-2">{% trans "JPG, PNG. Máx 5MB." %}</small>
@@ -179,7 +179,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 // Preview de imagen
 document.querySelector('input[type="file"]')?.addEventListener('change', function () {
   const file = this.files[0];

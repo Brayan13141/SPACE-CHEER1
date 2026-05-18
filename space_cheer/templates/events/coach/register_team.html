@@ -3,7 +3,7 @@
 {% block title %}{% trans "Registrar Equipo" %} — {{ event.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:600px;">
+<div class="container py-4 sc-max-w-600">
   <div class="d-flex align-items-center gap-2 mb-4">
     <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left"></i>
@@ -41,11 +41,11 @@
         <a href="?team={{ t.pk }}"
            class="d-flex align-items-center gap-3 px-4 py-3 text-decoration-none border-bottom border-secondary
                   {% if not forloop.last %}{% endif %}"
-           style="transition: background .15s;">
+           class="sc-hover-bg">
           <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-               style="width:40px;height:40px;background:rgba(108,117,125,.2);">
+               class="sc-avatar-40 sc-avatar-bg-gray-lt">
             {% if t.logo %}
-              <img src="{{ t.logo.url }}" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">
+              <img src="{{ t.logo.url }}" class="rounded-circle sc-avatar-40 object-fit-cover" >
             {% else %}
               <i class="bi bi-people-fill text-secondary"></i>
             {% endif %}
@@ -89,7 +89,7 @@
 
         {% if auto_category %}
           {# Única categoría válida — se asigna automáticamente #}
-          <div class="alert alert-info border-0 mb-3" style="background:rgba(13,202,240,.12);">
+          <div class="alert alert-info border-0 mb-3 sc-bg-cyan-tint" >
             <i class="bi bi-info-circle me-2"></i>
             {% blocktrans with cat=auto_category.name %}
               Tu equipo competirá automáticamente en la categoría <strong>{{ cat }}</strong>.

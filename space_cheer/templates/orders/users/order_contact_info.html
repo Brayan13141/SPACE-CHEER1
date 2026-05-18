@@ -22,9 +22,9 @@
     </div>
   {% endif %}
 
-  <div class="card shadow-sm" style="max-width: 600px;">
+  <div class="card shadow-sm sc-max-w-600">
     <div class="card-body">
-      <form method="post">
+      <form method="post" id="contactInfoForm">
         {% csrf_token %}
 
         <div class="row g-3">
@@ -118,4 +118,21 @@
 
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('contactInfoForm');
+  ScValidation.init(form, {
+    contact_name:          [ScValidation.rules.required('El nombre de contacto es obligatorio.')],
+    contact_email:         [ScValidation.rules.required('El email es obligatorio.'),
+                            ScValidation.rules.email('Ingresa un email válido.')],
+    contact_phone:         [ScValidation.rules.phoneMx('Teléfono inválido (7-15 dígitos).')],
+    shipping_postal_code:  [ScValidation.rules.zipMx('El código postal debe tener 5 dígitos.')],
+  });
+});
+</script>
 {% endblock %}

@@ -9,13 +9,13 @@
 {% block content %}
 <div class="text-center">
     <div class="mb-4">
-        <i class="bi bi-envelope-check" style="font-size: 4rem; color: var(--secondary-color);"></i>
+        <i class="bi bi-envelope-check sc-fs-icon-xl sc-color-secondary" ></i>
     </div>
     
     {% if confirmation %}
         {% user_display confirmation.email_address.user as user_display %}
         
-        <p class="mb-4" style="color: #b0b7e0;">
+        <p class="mb-4 sc-color-muted-light">
             {% blocktrans with confirmation.email_address.email as email %}
             Por favor, confirma que 
             <strong class="text-primary">{{ email }}</strong> 
@@ -39,10 +39,10 @@
             {% trans "Este enlace de confirmación de correo electrónico ha expirado o no es válido." %}
         </div>
         
-        <p class="mt-3" style="color: #b0b7e0;">
+        <p class="mt-3 sc-color-muted-light">
             {% blocktrans %}
             Por favor, solicita un 
-            <a href="{{ email_url }}" style="color: var(--secondary-color);">nuevo enlace de confirmación</a>.
+            <a class="sc-color-secondary" href="{{ email_url }}">nuevo enlace de confirmación</a>.
             {% endblocktrans %}
         </p>
     {% endif %}
@@ -59,7 +59,7 @@
 {% block footer_links %}
 <p class="small">
     {% trans "¿Problemas con la confirmación?" %} 
-    <a href="{% url 'account_email' %}" style="color: var(--secondary-color);">
+    <a class="sc-color-secondary" href="{% url 'account_email' %}">
         {% trans "Reenviar confirmación" %}
     </a>
 </p>

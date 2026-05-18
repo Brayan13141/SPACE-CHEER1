@@ -37,7 +37,7 @@
                 </div>
             </div>
             <div class="col-lg-6 text-center">
-                <img src="{% static 'CORE/images/hero-image.png' %}" alt="Cheerleading Team" class="img-fluid rounded-3 shadow-lg" style="max-height: 500px;">
+                <img src="{% static 'CORE/images/hero-image.png' %}" alt="Cheerleading Team" class="img-fluid rounded-3 shadow-lg sc-max-h-500" >
             </div>
         </div>
     </div>
@@ -306,7 +306,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Animación simple para los contadores
     document.addEventListener('DOMContentLoaded', function() {
         // Aquí puedes agregar animaciones para los contadores si lo deseas

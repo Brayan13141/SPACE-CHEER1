@@ -123,7 +123,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form method="POST">
+      <form method="POST" id="categoriaCrearForm" novalidate>
         {% csrf_token %}
         <input type="hidden" name="crear_categoria" value="1">
 
@@ -153,7 +153,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form method="POST">
+      <form method="POST" id="categoriaEditarForm" novalidate>
         {% csrf_token %}
         <input type="hidden" name="editar_categoria" value="1">
         <input type="hidden" name="categoria_id" id="editar_categoria_id">
@@ -182,19 +182,22 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
 
     // Rellenar formulario de edición
     document.querySelectorAll(".btn-editar").forEach(btn => {
         btn.addEventListener("click", function () {
-            let id = this.dataset.id;
-            let name = this.dataset.name;
+            document.getElementById("editar_categoria_id").value = this.dataset.id;
 
-            document.getElementById("editar_categoria_id").value = id;
-
-            const inputName = document.querySelector("#modalEditar form input[name='name']");
-            if (inputName) inputName.value = name;
+            const form = document.querySelector("#modalEditar form");
+            const inputName = form.querySelector("input[name='name']");
+            const inputLevel = form.querySelector("input[name='level']");
+            const inputDesc = form.querySelector("textarea[name='description']");
+            if (inputName) inputName.value = this.dataset.name || '';
+            if (inputLevel) inputLevel.value = this.dataset.level || '';
+            if (inputDesc) inputDesc.value = this.dataset.description || '';
         });
     });
 
@@ -206,6 +209,13 @@ document.addEventListener("DOMContentLoaded", function () {
     {% if abrir_modal_editar %}
         new bootstrap.Modal(document.getElementById('modalEditar')).show();
     {% endif %}
+
+    const categoriaRules = {
+        name: [ScValidation.rules.required('El nombre de la categoría es obligatorio.')],
+        level: [ScValidation.rules.required('El nivel es obligatorio.')],
+    };
+    ScValidation.init(document.getElementById('categoriaCrearForm'), categoriaRules);
+    ScValidation.init(document.getElementById('categoriaEditarForm'), categoriaRules);
 });
 </script>
 {% endblock %}

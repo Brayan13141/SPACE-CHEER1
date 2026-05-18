@@ -8,7 +8,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="mb-1">
-        <i class="bi bi-shield-heart me-2" style="color: var(--sc-purple);"></i>
+        <i class="bi bi-shield-heart me-2 sc-color-purple"></i>
         {% trans "Panel de Guardian" %}
       </h2>
       <p class="text-muted mb-0">
@@ -45,11 +45,11 @@
 
   <!-- ATLETAS BAJO CUSTODIA -->
   <div class="card border-0 shadow-sm">
-    <div class="card-header d-flex align-items-center gap-2" style="border-bottom: 1px solid rgba(255,255,255,.1);">
-      <i class="bi bi-people-fill" style="color: var(--sc-cyan);"></i>
+    <div class="card-header d-flex align-items-center gap-2 sc-border-bottom-light" >
+      <i class="bi bi-people-fill sc-color-cyan"></i>
       <span class="fw-semibold">{% trans "Mis Atletas" %}</span>
       {% if athletes %}
-        <span class="badge rounded-pill ms-auto" style="background-color: var(--sc-cyan); color: #000;">
+        <span class="badge rounded-pill ms-auto sc-bg-cyan" >
           {{ athletes|length }}
         </span>
       {% endif %}
@@ -64,7 +64,7 @@
               <div class="card-body">
                 <!-- Nombre -->
                 <h6 class="card-title fw-bold mb-1">
-                  <i class="bi bi-person-fill me-1" style="color: var(--sc-pink);"></i>
+                  <i class="bi bi-person-fill me-1 sc-color-pink"></i>
                   {{ athlete.get_full_name }}
                 </h6>
 
@@ -86,7 +86,7 @@
                   {% if memberships %}
                     <div class="mb-2">
                       {% for membership in memberships %}
-                        <span class="badge me-1 mb-1" style="background-color: rgba(44,177,255,.2); color: var(--sc-cyan); border: 1px solid var(--sc-cyan);">
+                        <span class="badge me-1 mb-1 sc-badge-cyan-outline" >
                           <i class="bi bi-people me-1"></i>{{ membership.team.name }}
                         </span>
                       {% endfor %}
@@ -103,7 +103,7 @@
                   {% if roles %}
                     <div class="mb-3">
                       {% for role in roles %}
-                        <span class="badge me-1" style="background-color: rgba(127,90,240,.2); color: var(--sc-purple); border: 1px solid var(--sc-purple);">
+                        <span class="badge me-1 sc-badge-purple-outline" >
                           {{ role.name }}
                         </span>
                       {% endfor %}
@@ -115,7 +115,7 @@
                   <form method="post" action="{% url 'guardian:create_order_for_minor' athlete.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm w-100"
-                            style="background-color: var(--sc-purple); color: #fff;">
+                            class="sc-bg-purple-solid">
                       <i class="bi bi-bag-plus me-1"></i> {% trans "Nuevo pedido" %}
                     </button>
                   </form>

@@ -18,37 +18,37 @@
   {% if can_manage %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-people-fill fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Equipos" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'teams:manage_athletes' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'teams:manage_athletes' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-person-video fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-person-video fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Alumnos" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'accounts:bulk_import_athletes' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'accounts:bulk_import_athletes' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-upload fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-upload fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Bulk Import" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
       {% if is_admin %}
-      <a href="{% url 'orders:admin_order_list' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'orders:admin_order_list' %}" class="card text-decoration-none h-100 sc-card-purple">
       {% else %}
-      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100 sc-card-purple">
       {% endif %}
         <div class="card-body text-center py-4">
-          <i class="bi bi-list-ul fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-list-ul fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Pedidos" %}</div>
         </div>
       </a>
@@ -63,18 +63,31 @@
       <div class="col-12 col-md-4 col-lg-3">
         <div class="card h-100 bg-dark text-white border-secondary">
           {% if team.logo %}
-            <img src="{{ team.logo.url }}" class="card-img-top" alt="{{ team.name }}" style="height: 120px; object-fit: contain; background: #1a1a2e; padding: 10px;">
+            <img src="{{ team.logo.url }}" class="card-img-top sc-team-logo-img" alt="{{ team.name }}">
           {% else %}
-            <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 120px; background: #1a1a2e;">
+            <div class="card-img-top d-flex align-items-center justify-content-center sc-team-logo-placeholder">
               <span class="fs-1 text-secondary fw-bold text-uppercase">{{ team.name|first }}</span>
             </div>
           {% endif %}
-          <div class="card-body text-center p-2 border-top border-secondary" style="background: rgba(127,90,240,0.1);">
+          <div class="card-body text-center p-2 border-top border-secondary sc-bg-purple-faint">
             <h6 class="card-title mb-0 fw-semibold">{{ team.name }}</h6>
           </div>
         </div>
       </div>
       {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if is_admin %}
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <a href="{% url 'production:admin_overview' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-diagram-3 fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Producción" %}</div>
+        </div>
+      </a>
     </div>
   </div>
   {% endif %}
@@ -91,25 +104,25 @@
   {% elif is_coach %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'coach:manage_owned_users' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'coach:manage_owned_users' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-people fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-people fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Crew" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-people-fill fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Equipos" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-bag fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-bag fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Pedidos" %}</div>
         </div>
       </a>
@@ -120,17 +133,25 @@
   {% elif is_staff_role %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'orders:admin_order_list' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'orders:admin_order_list' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-list-ul fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-list-ul fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Administrar Pedidos" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'production:admin_overview' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-diagram-3 fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Producción" %}</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>
@@ -141,25 +162,25 @@
   {% elif is_athlete %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'teams:manage_teams' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'teams:athlete_team' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-people-fill fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-people-fill fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Equipo" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'orders:manage_orders' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-bag fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-bag fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Pedidos" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>
@@ -174,13 +195,13 @@
       <div class="col-12 col-md-4 col-lg-3">
         <div class="card h-100 bg-dark text-white border-secondary">
           {% if team.logo %}
-            <img src="{{ team.logo.url }}" class="card-img-top" alt="{{ team.name }}" style="height: 120px; object-fit: contain; background: #1a1a2e; padding: 10px;">
+            <img src="{{ team.logo.url }}" class="card-img-top sc-team-logo-img" alt="{{ team.name }}">
           {% else %}
-            <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 120px; background: #1a1a2e;">
+            <div class="card-img-top d-flex align-items-center justify-content-center sc-team-logo-placeholder">
               <span class="fs-1 text-secondary fw-bold text-uppercase">{{ team.name|first }}</span>
             </div>
           {% endif %}
-          <div class="card-body text-center p-2 border-top border-secondary" style="background: rgba(127,90,240,0.1);">
+          <div class="card-body text-center p-2 border-top border-secondary sc-bg-purple-faint">
             <h6 class="card-title mb-0 fw-semibold">{{ team.name }}</h6>
           </div>
         </div>
@@ -194,17 +215,38 @@
   {% elif is_guardian %}
   <div class="row g-4 mb-4">
     <div class="col-md-3">
-      <a href="{% url 'guardian:dashboard' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'guardian:dashboard' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-heart fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-heart fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mis Atletas" %}</div>
         </div>
       </a>
     </div>
     <div class="col-md-3">
-      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100" style="background:rgba(127,90,240,0.08);border:1px solid rgba(127,90,240,0.2);">
+      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
         <div class="card-body text-center py-4">
-          <i class="bi bi-person-circle fs-2 mb-3 d-block" style="color:var(--sc-purple);"></i>
+          <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- OPERARIO -->
+  {% elif is_operario %}
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <a href="{% url 'production:dashboard' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-tools fs-2 mb-3 d-block sc-color-purple"></i>
+          <div class="fw-semibold text-white">{% trans "Mis Tareas" %}</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'accounts:profile_edit' %}" class="card text-decoration-none h-100 sc-card-purple">
+        <div class="card-body text-center py-4">
+          <i class="bi bi-person-circle fs-2 mb-3 d-block sc-color-purple"></i>
           <div class="fw-semibold text-white">{% trans "Mi Perfil" %}</div>
         </div>
       </a>

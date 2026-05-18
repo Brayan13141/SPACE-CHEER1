@@ -1,0 +1,130 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+
+{% block content %}
+<div class="container py-3 py-md-4">
+
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h1 class="h2 mb-0">{% trans "Mis Equipos" %}</h1>
+      <p class="text-muted mb-0">
+        {% if items %}
+          {% blocktrans with count=items|length %}{{ count }} equipo{% endblocktrans %}{{ items|pluralize:"s" }}
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% if items %}
+    <div class="row g-4">
+      {% for item in items %}
+        {% with membership=item.membership team=item.team teammates=item.teammates %}
+        <div class="col-12">
+          <div class="card shadow-sm sc-card-purple">
+            <div class="card-body">
+
+              <!-- Team header -->
+              <div class="d-flex align-items-center gap-3 mb-3 pb-3 sc-border-bottom-purple">
+                {% if team.logo %}
+                  <img src="{{ team.logo.url }}"
+                       alt="{{ team.name }}"
+                       class="rounded sc-avatar-55 object-fit-cover">
+                {% else %}
+                  <div class="rounded sc-avatar-55 sc-bg-purple-faint d-flex align-items-center justify-content-center">
+                    <i class="bi bi-people sc-color-purple fs-4"></i>
+                  </div>
+                {% endif %}
+                <div class="flex-grow-1">
+                  <h4 class="mb-0 text-white">{{ team.name }}</h4>
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    {% if team.category %}
+                      <span class="badge sc-badge-purple-outline">{{ team.category.name }}</span>
+                    {% endif %}
+                    {% if team.city %}
+                      <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+                        <i class="bi bi-geo-alt me-1"></i>{{ team.city }}
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+                <!-- My membership badge -->
+                <div class="text-end">
+                  <div class="sc-text-xxs text-muted mb-1">{% trans "Mi rol" %}</div>
+                  <span class="badge sc-badge-cyan-outline">{{ membership.get_role_in_team_display }}</span>
+                  <div class="sc-text-6xs text-muted mt-1">
+                    {% if membership.status == "accepted" %}
+                      <i class="bi bi-check-circle text-success me-1"></i>{% trans "Activo" %}
+                    {% elif membership.status == "pending" %}
+                      <i class="bi bi-clock text-warning me-1"></i>{% trans "Pendiente" %}
+                    {% else %}
+                      {{ membership.status }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coach row -->
+              <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                <i class="bi bi-person-badge sc-color-purple"></i>
+                <span class="text-muted sc-text-85">{% trans "Coach:" %}</span>
+                <span class="text-white">
+                  {% if team.coach %}
+                    {{ team.coach.get_full_name|default:team.coach.email }}
+                  {% else %}
+                    <span class="text-muted">{% trans "Sin asignar" %}</span>
+                  {% endif %}
+                </span>
+                {% if membership.date_joined %}
+                  <span class="ms-auto sc-text-6xs text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>{% trans "Miembro desde" %} {{ membership.date_joined|date:"d/m/Y" }}
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Teammates -->
+              {% if teammates %}
+                <div>
+                  <div class="sc-text-85 text-muted mb-2">
+                    <i class="bi bi-people me-1"></i>
+                    {% blocktrans with count=teammates|length %}{{ count }} compañero{% endblocktrans %}{{ teammates|pluralize:"s" }}
+                  </div>
+                  <div class="d-flex flex-wrap gap-2">
+                    {% for tm in teammates %}
+                      <div class="d-flex align-items-center gap-2 sc-bg-white-04 rounded px-2 py-1">
+                        <div class="rounded-circle sc-avatar-30 sc-avatar-bg-gray-lt d-flex align-items-center justify-content-center sc-text-6xs sc-color-muted fw-bold">
+                          {{ tm.user.first_name|first|upper }}{{ tm.user.last_name|first|upper }}
+                        </div>
+                        <div>
+                          <div class="sc-text-85 text-white">{{ tm.user.get_full_name|default:tm.user.username }}</div>
+                          <div class="sc-text-6xs text-muted">{{ tm.get_role_in_team_display }}</div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% else %}
+                <p class="text-muted sc-text-85 mb-0">
+                  <i class="bi bi-person me-1"></i>{% trans "No hay otros miembros activos en este equipo." %}
+                </p>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- Empty state -->
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-people display-4 sc-color-purple d-block mb-3"></i>
+        <h5 class="mb-2 text-white">{% trans "Aún no perteneces a ningún equipo" %}</h5>
+        <p class="text-muted mb-0">{% trans "Pide a tu coach que te agregue o comparte tu código de acceso." %}</p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

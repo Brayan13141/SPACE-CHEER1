@@ -8,6 +8,7 @@ claude.md
 docs
 
 *.txt
+!SERVER WSL*.txt
 *.json
 # Byte-compiled / optimized / DLL files
 __pycache__/

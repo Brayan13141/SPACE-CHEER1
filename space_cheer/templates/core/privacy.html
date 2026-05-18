@@ -5,7 +5,7 @@
 {% block page_title %}Política de Privacidad{% endblock %}
 
 {% block extra_head %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .privacy-section {
     border-left: 3px solid rgba(127,90,240,0.4);
     padding-left: 1rem;
@@ -43,24 +43,24 @@
         <i class="bi bi-shield-check me-1"></i>
         Última actualización: mayo 2026
     </span>
-    <p style="color:#a0a7d0; font-size:0.85rem;">
-        En cumplimiento con la <strong style="color:#e4eaff;">Ley Federal de Protección de Datos Personales en
+    <p class="sc-color-muted">
+        En cumplimiento con la <strong class="sc-color-light">Ley Federal de Protección de Datos Personales en
         Posesión de los Particulares (LFPDPPP)</strong> y la normativa aplicable a datos de menores de edad
         (LGDNNA), te informamos cómo tratamos tu información.
     </p>
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-person-vcard me-2" style="color:#7f5af0;"></i>Responsable del tratamiento</h3>
+    <h3><i class="bi bi-person-vcard me-2 sc-color-purple"></i>Responsable del tratamiento</h3>
     <p>
-        <strong style="color:#e4eaff;">SPACE CHEER</strong> es responsable de los datos personales que recabe
+        <strong class="sc-color-light">SPACE CHEER</strong> es responsable de los datos personales que recabe
         a través de esta plataforma. Contacto: <a href="mailto:soporte@spacecheer.mx"
-        style="color:#2cb1ff;">soporte@spacecheer.mx</a>
+        class="sc-color-cyan">soporte@spacecheer.mx</a>
     </p>
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-database me-2" style="color:#7f5af0;"></i>Datos que recopilamos</h3>
+    <h3><i class="bi bi-database me-2 sc-color-purple"></i>Datos que recopilamos</h3>
     <ul>
         <li>Nombre completo, correo electrónico y número de teléfono.</li>
         <li>Fecha de nacimiento y género (para determinar categorías de competencia).</li>
@@ -72,7 +72,7 @@
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-gear me-2" style="color:#7f5af0;"></i>Finalidad del tratamiento</h3>
+    <h3><i class="bi bi-gear me-2 sc-color-purple"></i>Finalidad del tratamiento</h3>
     <ul>
         <li>Gestionar membresías de equipos y órdenes de uniformes.</li>
         <li>Registrar y administrar medidas para la confección de prendas.</li>
@@ -82,7 +82,7 @@
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-people me-2" style="color:#7f5af0;"></i>Transferencia de datos</h3>
+    <h3><i class="bi bi-people me-2 sc-color-purple"></i>Transferencia de datos</h3>
     <p>
         No compartimos tus datos personales con terceros salvo en los casos previstos por la LFPDPPP
         o cuando sea necesario para la prestación del servicio (ej. proveedores de uniformes).
@@ -91,18 +91,18 @@
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-shield-lock me-2" style="color:#7f5af0;"></i>Derechos ARCO</h3>
+    <h3><i class="bi bi-shield-lock me-2 sc-color-purple"></i>Derechos ARCO</h3>
     <p>
-        Tienes derecho a <strong style="color:#e4eaff;">Acceder, Rectificar, Cancelar u Oponerte</strong>
+        Tienes derecho a <strong class="sc-color-light">Acceder, Rectificar, Cancelar u Oponerte</strong>
         al tratamiento de tus datos personales. Para ejercer estos derechos, envía una solicitud a
-        <a href="mailto:soporte@spacecheer.mx" style="color:#2cb1ff;">soporte@spacecheer.mx</a>
+        <a href="mailto:soporte@spacecheer.mx" class="sc-color-cyan">soporte@spacecheer.mx</a>
         indicando tu nombre, datos de contacto y el derecho que deseas ejercer.
     </p>
     <p>Responderemos en un plazo máximo de 20 días hábiles.</p>
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-lock me-2" style="color:#7f5af0;"></i>Seguridad</h3>
+    <h3><i class="bi bi-lock me-2 sc-color-purple"></i>Seguridad</h3>
     <p>
         Aplicamos medidas técnicas y organizativas para proteger tu información: cifrado en tránsito
         (HTTPS), control de acceso basado en roles, y registros de auditoría para datos sensibles.
@@ -110,7 +110,7 @@
 </div>
 
 <div class="privacy-section">
-    <h3><i class="bi bi-child me-2" style="color:#7f5af0;"></i>Menores de edad</h3>
+    <h3><i class="bi bi-child me-2 sc-color-purple"></i>Menores de edad</h3>
     <p>
         El tratamiento de datos de menores de 18 años requiere el consentimiento expreso del
         padre, madre o tutor legal. Los datos de menores están sujetos a controles adicionales
@@ -127,8 +127,8 @@
 
 {% block footer_links %}
 <p>
-    <a href="{% url 'core:contact' %}" style="color:var(--secondary-color);">Contacto</a> •
-    <a href="{% url 'account_login' %}" style="color:var(--secondary-color);">Iniciar sesión</a> •
-    <a href="{% url 'account_signup' %}" style="color:var(--secondary-color);">Registrarse</a>
+    <a class="sc-color-secondary" href="{% url 'core:contact' %}">Contacto</a> •
+    <a class="sc-color-secondary" href="{% url 'account_login' %}">Iniciar sesión</a> •
+    <a class="sc-color-secondary" href="{% url 'account_signup' %}">Registrarse</a>
 </p>
 {% endblock %}

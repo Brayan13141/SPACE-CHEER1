@@ -116,6 +116,15 @@ class Command(BaseCommand):
                 "is_judge_type": True,
                 "allow_dashboard_access": True,
             },
+            {
+                "name": "OPERARIO",
+                "requires_curp": False,
+                "is_staff_type": False,
+                "is_athlete_type": False,
+                "is_coach_type": False,
+                "is_production_type": True,
+                "allow_dashboard_access": True,
+            },
         ]
 
         for config in roles_config:

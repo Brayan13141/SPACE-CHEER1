@@ -1,3 +1,6 @@
+import hashlib
+import hmac
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -5,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from accounts.fields import EncryptedCharField, curp_hmac
 from core.file_utils import user_profile_photo_path, validate_image_magic
 
 
@@ -18,6 +22,7 @@ class Role(models.Model):
     is_athlete_type = models.BooleanField(default=False)
     is_coach_type = models.BooleanField(default=False)
     is_judge_type = models.BooleanField(default=False)
+    is_production_type = models.BooleanField(default=False)
     allow_dashboard_access = models.BooleanField(default=True)
 
     def __str__(self):
@@ -42,12 +47,19 @@ class User(AbstractUser):
         code="curp_invalida",
     )
 
-    curp = models.CharField(
+    curp = EncryptedCharField(
         max_length=18,
-        unique=True,
         null=True,
         blank=True,
         validators=[curp_validator],
+    )
+    # Deterministic HMAC used to enforce uniqueness on the encrypted curp field.
+    curp_hash = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        unique=True,
+        editable=False,
     )
 
     email = models.EmailField(
@@ -149,7 +161,16 @@ class User(AbstractUser):
 
             self.curp = curp  # Normalizar a mayúsculas
 
+            # Verificar unicidad via hash (unique=True no funciona en campos cifrados)
+            h = curp_hmac(curp)
+            if User.objects.filter(curp_hash=h).exclude(pk=self.pk).exists():
+                raise ValidationError({"curp": "Ya existe un usuario registrado con esta CURP."})
+
         super().clean()
+
+    def save(self, *args, **kwargs):
+        self.curp_hash = curp_hmac(self.curp) if self.curp else None
+        super().save(*args, **kwargs)
 
     @property
     def is_headcoach(self):
@@ -221,9 +242,9 @@ class UserAddress(models.Model):
     label = models.CharField(
         max_length=50, help_text="Etiqueta para identificar la dirección"
     )
-    address = models.CharField(max_length=255, help_text="Calle y número")
-    city = models.CharField(max_length=100, help_text="Ciudad")
-    zip_code = models.CharField(max_length=10, help_text="Código postal")
+    address = EncryptedCharField(max_length=255, help_text="Calle y número")
+    city = EncryptedCharField(max_length=100, help_text="Ciudad")
+    zip_code = EncryptedCharField(max_length=10, help_text="Código postal")
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):

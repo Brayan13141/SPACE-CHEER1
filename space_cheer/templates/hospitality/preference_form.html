@@ -4,7 +4,7 @@
 {% block title %}{% if is_edit %}Editar{% else %}Mis{% endif %} Preferencias — {{ event.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:640px;">
+<div class="container py-4 sc-max-w-640" >
 
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
@@ -13,9 +13,9 @@
     </ol>
   </nav>
 
-  <div class="card border-0" style="background:var(--sc-surface);">
-    <div class="card-header border-0 pb-0" style="background:transparent;">
-      <h1 class="h4 mb-0"><i class="bi bi-sliders me-2" style="color:var(--sc-cyan);"></i>Preferencias de Hospedaje</h1>
+  <div class="card border-0 sc-bg-surface">
+    <div class="card-header border-0 pb-0 sc-bg-transparent">
+      <h1 class="h4 mb-0"><i class="bi bi-sliders me-2 sc-color-cyan"></i>Preferencias de Hospedaje</h1>
       <p class="text-secondary small mt-1 mb-0">{{ event.name }}</p>
     </div>
     <div class="card-body">
@@ -35,7 +35,7 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold">{{ form.preferred_features.label }}</label>
-            <div class="border rounded p-3" style="background:var(--sc-bg);">
+            <div class="border rounded p-3 sc-bg-surface" >
               {% for choice in form.preferred_features %}
               <div class="form-check">
                 {{ choice.tag }}
@@ -52,7 +52,7 @@
             {% if form.roommate_preferences.help_text %}
             <p class="text-secondary small mb-1">{{ form.roommate_preferences.help_text }}</p>
             {% endif %}
-            <div class="border rounded p-3" style="background:var(--sc-bg);max-height:180px;overflow-y:auto;">
+            <div class="border rounded p-3 sc-scrollable-180" >
               {% for choice in form.roommate_preferences %}
               <div class="form-check">
                 {{ choice.tag }}

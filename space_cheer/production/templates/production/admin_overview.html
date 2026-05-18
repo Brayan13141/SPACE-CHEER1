@@ -1,0 +1,106 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Producción — Resumen Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h2 class="mb-0">{% trans "Panel de Producción" %}</h2>
+    <div class="d-flex gap-2">
+      <a href="{% url 'production:manage_stages' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-diagram-3 me-1"></i>{% trans "Etapas" %}
+      </a>
+      <a href="{% url 'production:manage_roles' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-people me-1"></i>{% trans "Roles" %}
+      </a>
+      <a href="{% url 'production:manage_operarios' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-person-badge me-1"></i>{% trans "Operarios" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary text-center p-3">
+        <div class="fs-2 fw-bold text-info">{{ stats.in_production }}</div>
+        <small class="text-muted">{% trans "En producción" %}</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary text-center p-3">
+        <div class="fs-2 fw-bold text-danger">{{ stats.urgent }}</div>
+        <small class="text-muted">{% trans "Urgentes" %}</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary text-center p-3">
+        <div class="fs-2 fw-bold text-warning">{{ stats.pending_tasks }}</div>
+        <small class="text-muted">{% trans "Tareas pendientes" %}</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary text-center p-3">
+        <div class="fs-2 fw-bold text-success">{{ stats.completed_today }}</div>
+        <small class="text-muted">{% trans "Completadas hoy" %}</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="d-flex gap-2 mb-3">
+    <a href="?filter=all" class="btn btn-sm {% if filter_by == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "Todas" %}</a>
+    <a href="?filter=urgent" class="btn btn-sm {% if filter_by == 'urgent' %}btn-danger{% else %}btn-outline-secondary{% endif %}">{% trans "Urgentes" %}</a>
+    <a href="?filter=unassigned" class="btn btn-sm {% if filter_by == 'unassigned' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">{% trans "Sin asignar" %}</a>
+  </div>
+
+  <!-- Jobs -->
+  {% for job in jobs %}
+  <div class="card bg-dark border-{% if job.is_urgent %}danger{% else %}secondary{% endif %} mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">
+        {% trans "Orden" %} #{{ job.order.id }}
+        {% if job.is_urgent %}<span class="badge bg-danger ms-2">{% trans "Urgente" %}</span>{% endif %}
+      </span>
+      <div class="d-flex gap-2">
+        <a href="{% url 'production:admin_job_detail' job.pk %}" class="btn btn-sm btn-outline-info">
+          <i class="bi bi-eye me-1"></i>{% trans "Detalle" %}
+        </a>
+        <form method="post" action="{% url 'production:toggle_urgent' job.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm {% if job.is_urgent %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+            {% if job.is_urgent %}{% trans "Quitar urgente" %}{% else %}{% trans "Marcar urgente" %}{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="card-body pb-2">
+      <div class="progress sc-progress-thin mb-2">
+        <div class="progress-bar bg-success"
+             role="progressbar"
+             data-done="{{ job.completed_tasks }}"
+             data-total="{{ job.total_tasks }}"
+             aria-valuenow="{{ job.completed_tasks }}"
+             aria-valuemin="0"
+             aria-valuemax="{{ job.total_tasks }}">
+        </div>
+      </div>
+      <small class="text-muted">{{ job.completed_tasks }}/{{ job.total_tasks }} {% trans "etapas completadas" %}</small>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{% trans "No hay órdenes en producción." %}</p>
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.csp_nonce }}">
+document.querySelectorAll('.progress-bar[data-done]').forEach(function (bar) {
+  var done = parseInt(bar.dataset.done, 10) || 0;
+  var total = parseInt(bar.dataset.total, 10) || 0;
+  bar.style.width = (total > 0 ? Math.round(done / total * 100) : 0) + '%';
+});
+</script>
+{% endblock %}

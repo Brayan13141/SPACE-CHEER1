@@ -63,7 +63,7 @@
             <div class="flex-shrink-0 mb-3 mb-md-0 me-md-3">
               <img src="{{ product.image.url }}"
                    class="rounded"
-                   style="width:120px;height:120px;object-fit:cover">
+                   class="sc-avatar-120">
             </div>
             {% endif %}
 
@@ -106,7 +106,7 @@
 
 
     <div class="col-lg-4">
-      <div class="card shadow-sm h-100" style="background: var(--sc-panel, #1a1a2e)">
+      <div class="card shadow-sm h-100 sc-bg-panel" >
         <div class="card-body">
 
           <h5 class="card-title mb-3">
@@ -234,7 +234,7 @@
 
           {% if athlete_item.customization %}
 
-          <div class="p-2 rounded mb-3" style="background: var(--sc-dark, #0d0d1a)">
+          <div class="p-2 rounded mb-3 sc-bg-darkest" >
             <span class="small text-muted d-block">{% trans "Personalización" %}</span>
             <span class="fw-semibold">{{ athlete_item.customization.custom_text }}</span>
           </div>
@@ -289,7 +289,7 @@
 
   <hr class="my-4">
 
-  <div class="card" style="background: var(--sc-panel, #1a1a2e)">
+  <div class="card sc-bg-panel" >
 
     <div class="card-body">
 

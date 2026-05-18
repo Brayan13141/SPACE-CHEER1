@@ -15,12 +15,12 @@
   </nav>
 
   <!-- Hotel header -->
-  <div class="card border-0 mb-4" style="background:var(--sc-surface);">
+  <div class="card border-0 mb-4 sc-bg-surface">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
           <h1 class="h3 mb-1">
-            <i class="bi bi-building me-2" style="color:var(--sc-cyan);"></i>{{ hotel.name }}
+            <i class="bi bi-building me-2 sc-color-cyan"></i>{{ hotel.name }}
             {% if not hotel.is_active %}<span class="badge bg-secondary ms-2">Inactivo</span>{% endif %}
           </h1>
           {% if hotel.city %}<p class="text-secondary mb-1"><i class="bi bi-geo-alt me-1"></i>{{ hotel.city }}{% if hotel.address %} — {{ hotel.address }}{% endif %}</p>{% endif %}
@@ -39,7 +39,7 @@
     <!-- Room Types -->
     <div class="col-lg-5">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h5 mb-0"><i class="bi bi-grid me-2" style="color:var(--sc-cyan);"></i>Tipos de habitación</h2>
+        <h2 class="h5 mb-0"><i class="bi bi-grid me-2 sc-color-cyan"></i>Tipos de habitación</h2>
         <div class="d-flex gap-1">
           <form method="post" action="{% url 'hospitality:room_type_preset_apply' event_pk=event.pk hotel_pk=hotel.pk %}">
             {% csrf_token %}
@@ -53,7 +53,7 @@
         </div>
       </div>
       {% for rt in room_types %}
-      <div class="card border-0 mb-2" style="background:var(--sc-surface);">
+      <div class="card border-0 mb-2 sc-bg-surface">
         <div class="card-body py-3">
           <div class="d-flex justify-content-between align-items-start">
             <div>
@@ -65,7 +65,7 @@
               {% if rt.features.all %}
               <div class="d-flex flex-wrap gap-1 mt-1">
                 {% for f in rt.features.all %}
-                <span class="badge rounded-pill" style="background:var(--sc-bg);color:var(--sc-text-muted);">
+                <span class="badge rounded-pill sc-bg-surface text-secondary" >
                   {% if f.icon %}<i class="{{ f.icon }} me-1"></i>{% endif %}{{ f.name }}
                 </span>
                 {% endfor %}
@@ -86,7 +86,7 @@
     <!-- Rooms -->
     <div class="col-lg-7">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h5 mb-0"><i class="bi bi-door-closed me-2" style="color:var(--sc-cyan);"></i>Habitaciones</h2>
+        <h2 class="h5 mb-0"><i class="bi bi-door-closed me-2 sc-color-cyan"></i>Habitaciones</h2>
         <a href="{% url 'hospitality:room_create' event_pk=event.pk hotel_pk=hotel.pk %}" class="btn btn-sm btn-outline-primary">
           <i class="bi bi-plus"></i> Habitación
         </a>
@@ -118,7 +118,7 @@
               </td>
               <td>
                 {% if room.is_available %}
-                <span class="badge" style="background:var(--sc-success,#198754);">Disponible</span>
+                <span class="badge sc-bg-success">Disponible</span>
                 {% else %}
                 <span class="badge bg-secondary">No disponible</span>
                 {% endif %}

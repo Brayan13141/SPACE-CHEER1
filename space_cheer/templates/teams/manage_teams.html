@@ -8,7 +8,7 @@
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-4">
         <div class="d-flex align-items-center">
             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
-                 style="width: 50px; height: 50px;">
+                 class="sc-avatar-50">
                 <i class="bi bi-people fs-4"></i>
             </div>
             <div>
@@ -60,10 +60,10 @@
                             <td>
                                 {% if team.logo %}
                                 <img src="{{ team.logo.url }}" alt="{{ team.name }}"
-                                     class="rounded-circle border" width="40" height="40" style="object-fit:cover;">
+                                     class="rounded-circle border object-fit-cover" width="40" height="40" >
                                 {% else %}
                                 <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center border"
-                                     style="width: 40px; height: 40px;">
+                                     class="sc-avatar-40">
                                     <i class="bi bi-people"></i>
                                 </div>
                                 {% endif %}
@@ -76,7 +76,7 @@
                                 {% if team.coach %}
                                 <div class="d-flex align-items-center">
                                     <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2"
-                                         style="width: 30px; height: 30px;">
+                                         class="sc-avatar-30">
                                         <i class="bi bi-person text-info"></i>
                                     </div>
                                     <div>
@@ -148,10 +148,10 @@
                             <div class="me-3">
                                 {% if team.logo %}
                                 <img src="{{ team.logo.url }}" alt="{{ team.name }}"
-                                     class="rounded-circle border" width="50" height="50" style="object-fit:cover;">
+                                     class="rounded-circle border object-fit-cover" width="50" height="50" >
                                 {% else %}
                                 <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center border"
-                                     style="width: 50px; height: 50px;">
+                                     class="sc-avatar-50">
                                     <i class="bi bi-people fs-5"></i>
                                 </div>
                                 {% endif %}
@@ -321,7 +321,7 @@
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data" id="editarForm">
+            <form method="POST" enctype="multipart/form-data" id="editarForm" novalidate>
                 {% csrf_token %}
                 <input type="hidden" name="editar_team" value="1">
                 <input type="hidden" name="team_id" id="editar_team_id">
@@ -433,7 +433,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
     // Mejorar el formato de form.as_p con clases de Bootstrap
     function mejorarFormularios() {
@@ -514,44 +515,17 @@ document.addEventListener("DOMContentLoaded", function() {
     modalEditar.show();
     {% endif %}
 
-    // Validación de formularios
-    const crearForm = document.getElementById('crearForm');
-    const editarForm = document.getElementById('editarForm');
-
-    [crearForm, editarForm].forEach(form => {
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const nameInput = this.querySelector('input[name="name"]');
-                if (nameInput && !nameInput.value.trim()) {
-                    e.preventDefault();
-                    nameInput.classList.add('is-invalid');
-
-                    // Mostrar alerta si está en móvil
-                    if (window.innerWidth < 768) {
-                        alert('Por favor, ingresa el nombre del equipo.');
-                    }
-
-                    nameInput.focus();
-                    return false;
-                }
-                return true;
-            });
-        }
-    });
-
-    // Remover clase de error cuando el usuario empiece a escribir
-    document.querySelectorAll('.formulario-equipo input').forEach(input => {
-        input.addEventListener('input', function() {
-            if (this.classList.contains('is-invalid')) {
-                this.classList.remove('is-invalid');
-            }
-        });
-    });
+    const teamRules = {
+        name: [ScValidation.rules.required('El nombre del equipo es obligatorio.')],
+        phone: [ScValidation.rules.phoneMx('Teléfono inválido (7-15 dígitos).')],
+    };
+    ScValidation.init(document.getElementById('crearForm'), teamRules);
+    ScValidation.init(document.getElementById('editarForm'), teamRules);
 });
 </script>
 
 <!-- ESTILOS MÍNIMOS PARA MEJORAR FORM.AS_P -->
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .formulario-equipo p {
     margin-bottom: 1rem;
 }

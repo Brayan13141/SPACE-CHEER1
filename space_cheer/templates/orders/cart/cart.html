@@ -8,7 +8,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="h2 mb-1"><i class="bi bi-cart3 me-2" style="color:var(--sc-cyan);"></i>Mi Carrito</h1>
+      <h1 class="h2 mb-1"><i class="bi bi-cart3 me-2 sc-color-cyan"></i>Mi Carrito</h1>
       <p class="text-secondary mb-0">Pedidos en borrador</p>
     </div>
     <a href="{% url 'products:catalog' %}" class="btn btn-outline-secondary btn-sm">
@@ -19,26 +19,26 @@
   {% if draft_orders %}
 
   {% for order in draft_orders %}
-  <div class="card border-0 mb-4" style="background:var(--sc-surface);">
+  <div class="card border-0 mb-4 sc-bg-surface">
     <div class="card-header border-0 d-flex justify-content-between align-items-center py-3"
-         style="background:rgba(255,255,255,.04);">
+         class="sc-bg-white-04">
       <div>
         {% if order.order_type == 'PERSONAL' %}
-        <h2 class="h6 mb-0"><i class="bi bi-person me-2" style="color:var(--sc-cyan);"></i>Pedido Personal</h2>
+        <h2 class="h6 mb-0"><i class="bi bi-person me-2 sc-color-cyan"></i>Pedido Personal</h2>
         {% else %}
-        <h2 class="h6 mb-0"><i class="bi bi-people me-2" style="color:var(--sc-purple,#7f5af0);"></i>{{ order.owner_team.name }}</h2>
+        <h2 class="h6 mb-0 sc-color-purple"><i class="bi bi-people me-2" ></i>{{ order.owner_team.name }}</h2>
         {% endif %}
         <span class="text-secondary small">Borrador · {{ order.items.count }} producto{{ order.items.count|pluralize:"s" }}</span>
       </div>
-      <span class="badge" style="background:rgba(255,255,255,.1);color:var(--sc-cyan);">BORRADOR</span>
+      <span class="badge sc-bg-cyan-ghost" >BORRADOR</span>
     </div>
 
     {% if order.items.all %}
     <div class="card-body pb-0">
       <div class="table-responsive">
-        <table class="table table-sm mb-0" style="color:inherit;">
+        <table class="table table-sm mb-0" >
           <thead>
-            <tr class="text-secondary small border-bottom" style="border-color:rgba(255,255,255,.1)!important;">
+            <tr class="text-secondary small border-bottom sc-border-subtle" >
               <th class="fw-normal pb-2 border-0">Producto</th>
               <th class="fw-normal pb-2 border-0 text-end">Cantidad</th>
               <th class="fw-normal pb-2 border-0 text-end">Precio</th>
@@ -46,10 +46,10 @@
           </thead>
           <tbody>
             {% for item in order.items.all %}
-            <tr style="border-color:rgba(255,255,255,.06);">
+            <tr class="sc-border-faint">
               <td class="py-2 border-0">
                 <p class="mb-0 fw-semibold small">{{ item.product.name }}</p>
-                <p class="mb-0 text-secondary" style="font-size:.75rem;">{{ item.product.get_product_type_display }}</p>
+                <p class="mb-0 text-secondary sc-text-xs">{{ item.product.get_product_type_display }}</p>
               </td>
               <td class="py-2 border-0 text-end text-secondary small">{{ item.quantity }}</td>
               <td class="py-2 border-0 text-end small">${{ item.product.base_price }}</td>
@@ -65,14 +65,13 @@
     </div>
     {% endif %}
 
-    <div class="card-footer border-0 d-flex gap-2 justify-content-end py-3"
-         style="background:transparent;">
+    <div class="card-footer border-0 d-flex gap-2 justify-content-end py-3 sc-bg-transparent">
       <a href="{% url 'orders:add_item_product_order' order_id=order.pk %}"
          class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-plus-circle me-1"></i>Agregar producto
       </a>
       <a href="{% url 'orders:detail_order' order_id=order.pk %}"
-         class="btn btn-sm fw-semibold" style="background:var(--sc-cyan);color:#000;">
+         class="btn btn-sm fw-semibold sc-bg-cyan" >
         <i class="bi bi-arrow-right me-1"></i>Ver pedido completo
       </a>
     </div>
@@ -83,7 +82,7 @@
   <div class="text-center py-5">
     <i class="bi bi-cart-x display-4 text-secondary"></i>
     <p class="text-secondary mt-3 mb-3">Tu carrito está vacío.</p>
-    <a href="{% url 'products:catalog' %}" class="btn" style="background:var(--sc-cyan);color:#000;">
+    <a href="{% url 'products:catalog' %}" class="btn sc-bg-cyan" >
       <i class="bi bi-bag me-1"></i>Ver catálogo
     </a>
   </div>

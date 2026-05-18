@@ -13,19 +13,19 @@
             <p class="small text-muted mb-3">Guarda estas credenciales y entrégaselas al alumno. Solo se muestran una vez.</p>
             <div class="row g-2">
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-person me-1"></i>Nombre</div>
                         <div class="fw-semibold">{{ new_athlete.name }}</div>
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-at me-1"></i>Usuario</div>
                         <code class="text-light fw-bold">{{ new_athlete.username }}</code>
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="rounded p-3" style="background: rgba(0,0,0,0.35);">
+                    <div class="rounded p-3 sc-bg-overlay" >
                         <div class="small text-muted mb-1"><i class="bi bi-key me-1"></i>Contraseña temporal</div>
                         <code class="text-warning fw-bold">{{ new_athlete.password }}</code>
                     </div>
@@ -33,7 +33,7 @@
             </div>
             <div class="mt-2">
                 {% if new_athlete.email_sent %}
-                <p class="small mb-0" style="color:#4ade80;">
+                <p class="small mb-0 sc-color-green-light" >
                     <i class="bi bi-envelope-check me-1"></i>
                     Credenciales enviadas a <strong>{{ new_athlete.email }}</strong>.
                     El alumno puede cambiar su contraseña desde su perfil.
@@ -55,7 +55,7 @@
         <div class="col-md-8">
             <div class="d-flex align-items-center">
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
-                     style="width: 55px; height: 55px;">
+                     class="sc-avatar-55">
                     <i class="bi bi-people fs-3"></i>
                 </div>
                 <div>
@@ -116,7 +116,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 42px; height: 42px;">
+                                         class="sc-avatar-42">
                                         <i class="bi bi-person fs-5 text-primary"></i>
                                     </div>
                                     <div>
@@ -179,8 +179,7 @@
                     {% for athlete in athletes %}
                     <div class="list-group-item border-bottom py-3">
                         <div class="d-flex align-items-start gap-3">
-                            <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
-                                 style="width: 48px; height: 48px;">
+                            <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 sc-icon-48">
                                 <i class="bi bi-person fs-4 text-primary"></i>
                             </div>
                             <div class="flex-grow-1">
@@ -234,7 +233,7 @@
             <div class="text-center py-5">
                 <div class="mb-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto" 
-                         style="width: 100px; height: 100px;">
+                         class="sc-avatar-100">
                         <i class="bi bi-people display-3 text-primary"></i>
                     </div>
                 </div>
@@ -257,7 +256,7 @@
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" novalidate>
+            <form method="POST" novalidate id="crearAlumnoForm">
                 {% csrf_token %}
                 <input type="hidden" name="crear_alumno" value="1">
 
@@ -281,13 +280,9 @@
                                 </span>
                                 {{ form_crear.first_name }}
                             </div>
-                            {% if form_crear.first_name.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form_crear.first_name.errors %}
-                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
-                                {% endfor %}
+                            <div class="sc-feedback text-danger small mt-1 d-none"{% if not form_crear.first_name.errors %}{% endif %}>
+                                {% for error in form_crear.first_name.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="col-md-6">
@@ -300,13 +295,9 @@
                                 </span>
                                 {{ form_crear.last_name }}
                             </div>
-                            {% if form_crear.last_name.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form_crear.last_name.errors %}
-                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
-                                {% endfor %}
+                            <div class="sc-feedback text-danger small mt-1 d-none"{% if not form_crear.last_name.errors %}{% endif %}>
+                                {% for error in form_crear.last_name.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="col-md-6">
@@ -319,13 +310,9 @@
                                 </span>
                                 {{ form_crear.email }}
                             </div>
-                            {% if form_crear.email.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form_crear.email.errors %}
-                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
-                                {% endfor %}
+                            <div class="sc-feedback text-danger small mt-1 d-none"{% if not form_crear.email.errors %}{% endif %}>
+                                {% for error in form_crear.email.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="col-md-6">
@@ -338,13 +325,9 @@
                                 </span>
                                 {{ form_crear.phone }}
                             </div>
-                            {% if form_crear.phone.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form_crear.phone.errors %}
-                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
-                                {% endfor %}
+                            <div class="sc-feedback text-danger small mt-1 d-none"{% if not form_crear.phone.errors %}{% endif %}>
+                                {% for error in form_crear.phone.errors %}<i class="bi bi-exclamation-circle me-1"></i>{{ error }}{% endfor %}
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="col-12">
@@ -377,14 +360,15 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     // Inicializar DataTables en la tabla principal (solo en escritorio)
     if (typeof $.fn.DataTable !== 'undefined' && $('#athletesTable').length) {
         $('#athletesTable').DataTable({
             responsive: false,  // No responsive porque ya tenemos vista móvil aparte
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"  // Español
+                url: "{% static 'JS/datatables-es.json' %}"
             },
             order: [[1, 'asc']],  // Ordenar por nombre (columna 1)
             pageLength: 10,
@@ -411,49 +395,18 @@ document.addEventListener("DOMContentLoaded", function () {
     modalCrear.show();
     {% endif %}
 
-    // Validación de email en tiempo real
-    const emailInput = document.querySelector('#modalCrear input[name="email"]');
-    if (emailInput) {
-        emailInput.addEventListener('blur', function() {
-            const email = this.value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (email && !emailRegex.test(email)) {
-                this.classList.add('is-invalid');
-                let errorDiv = this.parentNode.querySelector('.invalid-feedback');
-                if (!errorDiv) {
-                    errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback';
-                    errorDiv.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Formato de email inválido';
-                    this.parentNode.appendChild(errorDiv);
-                }
-            } else {
-                this.classList.remove('is-invalid');
-                const errorDiv = this.parentNode.querySelector('.invalid-feedback');
-                if (errorDiv) errorDiv.remove();
-            }
-        });
-    }
-
     // Enfoque automático al abrir modal
     document.getElementById('modalCrear')?.addEventListener('shown.bs.modal', function () {
         const firstInput = this.querySelector('input');
         if (firstInput) firstInput.focus();
     });
 
-    // Validación antes de enviar
-    const crearForm = document.querySelector('#modalCrear form');
-    if (crearForm) {
-        crearForm.addEventListener('submit', function(e) {
-            const nombre = this.querySelector('input[name="first_name"]').value.trim();
-            const apellido = this.querySelector('input[name="last_name"]').value.trim();
-            if (!nombre || !apellido) {
-                e.preventDefault();
-                alert('Por favor, completa el nombre y apellido del alumno.');
-                return false;
-            }
-            return true;
-        });
-    }
+    ScValidation.init(document.getElementById('crearAlumnoForm'), {
+        first_name: [ScValidation.rules.required('El nombre es obligatorio.')],
+        last_name:  [ScValidation.rules.required('El apellido es obligatorio.')],
+        email:      [ScValidation.rules.email('Formato de email inválido.')],
+        phone:      [ScValidation.rules.phoneMx('Teléfono inválido (7-15 dígitos).')],
+    });
 
     // Inicializar tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
