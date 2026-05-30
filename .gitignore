@@ -6,6 +6,8 @@
 .continue/skills/
 claude.md
 docs
+.superpowers/
+.vscode
 
 *.txt
 !SERVER WSL*.txt
