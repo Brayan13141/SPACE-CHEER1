@@ -136,7 +136,7 @@ class TaskCompleteTests(TestCase):
     def test_post_completes_task(self, mock_notify):
         self.client.force_login(self.operario)
         url = reverse("production:task_complete", kwargs={"pk": self.task.pk})
-        started_at = self.task.started_at.strftime("%Y-%m-%dT%H:%M")
+        started_at = self.job.created_at.strftime("%Y-%m-%dT%H:%M")
         self.client.post(url, {"started_at": started_at, "notes": ""})
         self.task.refresh_from_db()
         self.assertEqual(self.task.status, "COMPLETED")
@@ -145,7 +145,7 @@ class TaskCompleteTests(TestCase):
     def test_post_redirects_after_complete(self, mock_notify):
         self.client.force_login(self.operario)
         url = reverse("production:task_complete", kwargs={"pk": self.task.pk})
-        started_at = self.task.started_at.strftime("%Y-%m-%dT%H:%M")
+        started_at = self.job.created_at.strftime("%Y-%m-%dT%H:%M")
         response = self.client.post(url, {"started_at": started_at, "notes": ""})
         self.assertEqual(response.status_code, 302)
 

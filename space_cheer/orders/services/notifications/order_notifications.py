@@ -82,6 +82,43 @@ class OrderNotificationService:
 
         cls._send_email(subject, recipients, text, html)
 
+    @classmethod
+    def notify_production_task_completed(cls, task, recipients):
+        if not recipients:
+            return
+
+        to_emails = [u.email for u in recipients if u.email]
+        if not to_emails:
+            return
+
+        product_name = task.order_item.product.name if task.order_item_id else "N/A"
+        completed_by = str(task.completed_by) if task.completed_by else "Desconocido"
+        notes_text = f"\nNotas: {task.notes}" if task.notes else ""
+
+        subject = f"Orden #{task.job.order_id} — Etapa '{task.stage.name}' completada"
+
+        text = f"""
+        La etapa "{task.stage.name}" ha sido completada.
+
+        Orden: #{task.job.order_id}
+        Producto: {product_name}
+        Completada por: {completed_by}
+        Fecha: {task.completed_at}{notes_text}
+        """
+
+        html = f"""
+        <h2>Etapa completada</h2>
+        <p>La etapa <strong>{task.stage.name}</strong> de la orden <strong>#{task.job.order_id}</strong> ha sido completada.</p>
+        <ul>
+            <li><b>Producto:</b> {product_name}</li>
+            <li><b>Completada por:</b> {completed_by}</li>
+            <li><b>Fecha:</b> {task.completed_at}</li>
+        </ul>
+        {f'<p><b>Notas:</b> {task.notes}</p>' if task.notes else ''}
+        """
+
+        cls._send_email(subject, to_emails, text, html)
+
     # =====================================================
     # HELPERS
     # =====================================================

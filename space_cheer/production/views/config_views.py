@@ -4,12 +4,12 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import role_required
-from accounts.models import Role
 from production.models import (
     OperarioRoleAssignment,
     ProductionRole,
     ProductionStage,
 )
+from production.services import OperarioService
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -96,14 +96,10 @@ def manage_role_operarios(request, pk):
             try:
                 operario = User.objects.get(pk=operario_id, roles__name="OPERARIO", is_active=True)
                 if action == "assign":
-                    OperarioRoleAssignment.objects.get_or_create(
-                        user=operario,
-                        role=prod_role,
-                        defaults={"assigned_by": request.user},
-                    )
+                    OperarioService.assign_role(operario, prod_role, request.user)
                     messages.success(request, f"Rol asignado a {operario.get_full_name() or operario.username}.")
                 elif action == "remove":
-                    OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).delete()
+                    OperarioService.remove_role(operario, prod_role)
                     messages.success(request, f"Rol removido de {operario.get_full_name() or operario.username}.")
             except User.DoesNotExist:
                 messages.error(request, "Operario no encontrado.")
@@ -129,23 +125,17 @@ def manage_operarios(request):
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "").strip()
         if username and password:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, f"El usuario '{username}' ya existe.")
-            else:
-                op_role, _ = Role.objects.get_or_create(
-                    name="OPERARIO", defaults={"is_production_type": True}
-                )
-                user = User.objects.create_user(
+            try:
+                OperarioService.create(
                     username=username,
+                    password=password,
                     first_name=first_name,
                     last_name=last_name,
                     email=email,
-                    password=password,
                 )
-                user.profile_completed = True
-                user.save(update_fields=["profile_completed"])
-                user.roles.add(op_role)
                 messages.success(request, f"Operario '{username}' creado.")
+            except ValueError as exc:
+                messages.error(request, str(exc))
         else:
             messages.error(request, "Usuario y contraseña son obligatorios.")
         return redirect("production:manage_operarios")
@@ -167,16 +157,10 @@ def operario_detail(request, pk):
             try:
                 prod_role = ProductionRole.objects.get(pk=role_id)
                 if action == "assign":
-                    OperarioRoleAssignment.objects.get_or_create(
-                        user=operario,
-                        role=prod_role,
-                        defaults={"assigned_by": request.user},
-                    )
+                    OperarioService.assign_role(operario, prod_role, request.user)
                     messages.success(request, f"Rol '{prod_role.name}' asignado.")
                 elif action == "remove":
-                    OperarioRoleAssignment.objects.filter(
-                        user=operario, role=prod_role
-                    ).delete()
+                    OperarioService.remove_role(operario, prod_role)
                     messages.success(request, f"Rol '{prod_role.name}' removido.")
             except ProductionRole.DoesNotExist:
                 messages.error(request, "Rol no encontrado.")

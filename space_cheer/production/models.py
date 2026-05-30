@@ -78,17 +78,18 @@ class ProductionJob(models.Model):
 
 
 class ProductionTask(models.Model):
-    STATUS_CHOICES = [
-        ("PENDING", "Pendiente"),
-        ("COMPLETED", "Completada"),
-    ]
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendiente"
+        COMPLETED = "COMPLETED", "Completada"
 
     job = models.ForeignKey(ProductionJob, on_delete=models.CASCADE, related_name="tasks")
     order_item = models.ForeignKey(
         "orders.OrderItem", on_delete=models.CASCADE, related_name="production_tasks"
     )
     stage = models.ForeignKey(ProductionStage, on_delete=models.PROTECT)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -103,7 +104,7 @@ class ProductionTask(models.Model):
         on_delete=models.SET_NULL,
         related_name="completed_production_tasks",
     )
-    started_at = models.DateTimeField()
+    started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
 
