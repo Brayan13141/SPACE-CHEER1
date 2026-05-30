@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Cuenta pendiente de aprobación — SPACE CHEER{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="card bg-dark border-warning mx-auto" style="max-width:560px">
+    <div class="card-body text-center">
+      <h3 class="card-title text-warning">Cuenta pendiente de aprobación</h3>
+      <p class="card-text">
+        Tu cuenta de entrenador fue creada y está <strong>pendiente de aprobación</strong>
+        por un administrador. Te avisaremos por correo en cuanto sea activada.
+      </p>
+      <a href="{% url 'account_login' %}" class="btn btn-outline-light mt-2">Volver al inicio de sesión</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block title %}Unirme a un equipo — SPACE CHEER{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:480px">
+  <h2 class="mb-3">Unirme a un equipo</h2>
+  <p class="text-muted">Ingresa el código que te dio tu entrenador.</p>
+  <form method="post" action="{% url 'teams:join_by_code' %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <input type="text" name="code" maxlength="12" required
+             class="form-control bg-dark text-light text-uppercase"
+             placeholder="Código del equipo">
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar solicitud</button>
+    <a href="{% url 'teams:athlete_team' %}" class="btn btn-outline-light">Volver</a>
+  </form>
+</div>
+{% endblock %}

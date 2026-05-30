@@ -187,6 +187,24 @@ class AccountPermissions:
         return team.coach == user
 
     @staticmethod
+    def can_review_requests(user, team) -> bool:
+        """¿Puede aceptar/rechazar solicitudes de unión de este equipo?
+
+        ADMIN / HEADCOACH dueño (can_manage_team) o COACH con membresía aceptada.
+        """
+        if AccountPermissions.can_manage_team(user, team):
+            return True
+        from teams.models import UserTeamMembership
+
+        return UserTeamMembership.objects.filter(
+            user=user,
+            team=team,
+            role_in_team="COACH",
+            status="accepted",
+            is_active=True,
+        ).exists()
+
+    @staticmethod
     def can_manage_teams(user) -> bool:
         """ADMIN y HEADCOACH pueden crear/editar/eliminar equipos y categorías."""
         return (

@@ -16,8 +16,8 @@ def get_user_redirect_flow(user):
     if role.requires_curp and not user.curp:
         return reverse("accounts:curp_verification")
 
-    # Coach/Headcoach pendiente de aprobación o rechazado
-    if user.roles.filter(name__in=["COACH", "HEADCOACH"]).exists():
+    # Solo HEADCOACH requiere aprobación del admin. El COACH lo agrega un HEADCOACH ya aprobado.
+    if user.roles.filter(name="HEADCOACH").exists():
         try:
             status = user.coachprofile.approval_status
             if status == "PENDING":

@@ -178,7 +178,7 @@
                     </td>
                     <td class="text-center">
                       <form id="removeMember_{{ membership.id }}" method="post"
-                            action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
+                            action="{% url 'teams:remove_member' membership.id %}" class="d-none">
                         {% csrf_token %}
                       </form>
                       <button type="button"
@@ -212,7 +212,7 @@
                           <small class="text-muted">@{{ membership.user.username }}</small>
                         </div>
                         <form id="removeMemberMobile_{{ membership.id }}" method="post"
-                              action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
+                              action="{% url 'teams:remove_member' membership.id %}" class="d-none">
                           {% csrf_token %}
                         </form>
                         <button type="button"
@@ -312,16 +312,14 @@
                     </td>
                     <td class="text-center">
                       <div class="d-flex gap-2 justify-content-center">
-                        <form method="post" action="{% url 'coach:add_team_member' team.id %}">
+                        <form method="post" action="{% url 'teams:accept_request' membership.id %}">
                           {% csrf_token %}
-                          <input type="hidden" name="user_id" value="{{ membership.user.id }}">
-                          <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
                           <button type="submit" class="btn btn-sm btn-success rounded-pill">
                             <i class="bi bi-check-lg me-1"></i>Aceptar
                           </button>
                         </form>
                         <form id="rejectMember_{{ membership.id }}" method="post"
-                              action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
+                              action="{% url 'teams:reject_request' membership.id %}" class="d-none">
                           {% csrf_token %}
                         </form>
                         <button type="button"
@@ -357,16 +355,14 @@
                         </div>
                       </div>
                       <div class="mt-2 d-flex flex-wrap gap-2">
-                        <form method="post" action="{% url 'coach:add_team_member' team.id %}">
+                        <form method="post" action="{% url 'teams:accept_request' membership.id %}">
                           {% csrf_token %}
-                          <input type="hidden" name="user_id" value="{{ membership.user.id }}">
-                          <input type="hidden" name="role_in_team" value="{{ membership.role_in_team }}">
                           <button type="submit" class="btn btn-sm btn-success">
                             <i class="bi bi-check-lg"></i> Aceptar
                           </button>
                         </form>
                         <form id="rejectMemberMobile_{{ membership.id }}" method="post"
-                              action="{% url 'coach:remove_team_member' membership.id %}" class="d-none">
+                              action="{% url 'teams:reject_request' membership.id %}" class="d-none">
                           {% csrf_token %}
                         </form>
                         <button type="button"

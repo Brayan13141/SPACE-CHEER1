@@ -1,0 +1,7 @@
+Hola {{ coach_name }},
+
+{{ athlete_name }} solicitó unirse a tu equipo "{{ team_name }}".
+
+Revisa la solicitud en tu panel de equipos.
+
+— SPACE CHEER

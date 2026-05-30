@@ -71,6 +71,19 @@
                             <td>
                                 <div class="fw-bold">{{ team.name }}</div>
                                 <small class="">ID: {{ team.id }}</small>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                        {% trans "Código" %}: {{ team.join_code }}
+                                    </span>
+                                    {% if puede_editar %}
+                                    <form method="post" action="{% url 'teams:regenerate_code' team.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                                            <i class="bi bi-arrow-repeat me-1 d-none d-md-inline"></i>{% trans "Regenerar" %}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                             <td>
                                 {% if team.coach %}
@@ -167,6 +180,9 @@
                                         <i class="bi bi-geo-alt me-1"></i>{{ team.city }}
                                     </span>
                                     {% endif %}
+                                    <span class="badge bg-info bg-opacity-10 text-info">
+                                        <i class="bi bi-key me-1"></i>{{ team.join_code }}
+                                    </span>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -180,6 +196,14 @@
                                         </a>
                                     </li>
                                     {% if puede_editar %}
+                                    <li>
+                                        <form method="post" action="{% url 'teams:regenerate_code' team.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-arrow-repeat me-2"></i>{% trans "Regenerar código" %}
+                                            </button>
+                                        </form>
+                                    </li>
                                     <li>
                                         <a class="dropdown-item btn-editar"
                                            data-id="{{ team.id }}"
