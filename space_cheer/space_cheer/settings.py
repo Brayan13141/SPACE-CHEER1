@@ -187,10 +187,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "space_cheer.wsgi.application"
 
 SESSION_COOKIE_HTTPONLY = True  # JS no puede leer la cookie
-# Solo HTTPS (actívalo en producción)
-#SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)
 SESSION_COOKIE_SAMESITE = "Lax"  # Protección CSRF adicional
-#CSRF_COOKIE_SECURE = True  # Cookie CSRF solo sobre HTTPS
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=False, cast=bool)
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -263,12 +262,16 @@ SESSION_COOKIE_SAMESITE = "Strict"
 # SECURITY HEADERS (A05 — Security Misconfiguration)
 # =================================================================
 # Redirige todo el tráfico HTTP a HTTPS. Desactivar solo en desarrollo local.
-#SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=False, cast=bool)
 
-#HSTS: indica al navegador que solo use HTTPS por 1 año
-#SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)
-#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-#SECURE_HSTS_PRELOAD = True
+# HSTS: indica al navegador que solo use HTTPS por 1 año
+SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False, cast=bool)
+SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", default=False, cast=bool)
+
+# Requerido para que Django sepa que está detrás de un proxy HTTPS (Nginx).
+# Sin esto allauth 65.x devuelve 403 en login y request.is_secure() = False.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Protección contra clickjacking (complementa XFrameOptionsMiddleware)
 X_FRAME_OPTIONS = "DENY"
