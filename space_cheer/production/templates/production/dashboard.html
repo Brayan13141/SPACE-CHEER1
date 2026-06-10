@@ -54,9 +54,11 @@
                 <div class="modal-body">
                   <div class="mb-3">
                     <label class="form-label">Fecha de inicio</label>
+                    {% with start=task.started_at|default:task.job.created_at %}
                     <input type="datetime-local" name="started_at" class="form-control bg-dark text-light"
-                      value="{{ task.started_at|date:'Y-m-d' }}T{{ task.started_at|time:'H:i' }}"
+                      value="{{ start|date:'Y-m-d' }}T{{ start|time:'H:i' }}"
                       min="{{ task.job.created_at|date:'Y-m-d' }}T{{ task.job.created_at|time:'H:i' }}">
+                    {% endwith %}
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Notas (opcional)</label>

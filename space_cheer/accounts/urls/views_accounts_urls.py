@@ -1,6 +1,7 @@
 # accounts/urls.py
 from django.urls import path
 from accounts.views import views_accounts, views_profile
+from accounts.views.views_admin_approvals import headcoach_approvals
 
 app_name = "accounts"
 
@@ -9,6 +10,7 @@ urlpatterns = [
     path("complete-profile/", views_accounts.profile_setup_view, name="profile_setup"),
     path("coach/pending/", views_accounts.coach_pending_approval, name="coach_pending_approval"),
     path("coach/rejected/", views_accounts.coach_rejected, name="coach_rejected"),
+    path("admin/headcoach-approvals/", headcoach_approvals, name="headcoach_approvals"),
     path(
         "complete-profile/curp/",
         views_accounts.curp_verification,

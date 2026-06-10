@@ -1,0 +1,7 @@
+Hola {{ name }},
+
+¡Buenas noticias! Tu cuenta de entrenador en SPACE CHEER fue aprobada y ya está activa.
+
+Ya puedes iniciar sesión aquí: {{ login_url }}
+
+— Equipo SPACE CHEER

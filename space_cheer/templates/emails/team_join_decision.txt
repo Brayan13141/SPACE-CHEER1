@@ -1,0 +1,5 @@
+Hola {{ athlete_name }},
+
+Tu solicitud para unirte al equipo "{{ team_name }}" fue {{ verb }}.
+
+— SPACE CHEER

@@ -22,7 +22,9 @@ def admin_overview(request):
         .prefetch_related("tasks__stage", "tasks__assigned_to", "order__items__product")
         .annotate(
             total_tasks=Count("tasks"),
-            completed_tasks=Count("tasks", filter=Q(tasks__status="COMPLETED")),
+            completed_tasks=Count(
+                "tasks", filter=Q(tasks__status=ProductionTask.Status.COMPLETED)
+            ),
         )
         .order_by("-is_urgent", "order__uniform_delivery_date")
     )
@@ -31,16 +33,23 @@ def admin_overview(request):
     if filter_by == "urgent":
         jobs = jobs.filter(is_urgent=True)
     elif filter_by == "unassigned":
-        jobs = jobs.filter(tasks__assigned_to__isnull=True, tasks__status="PENDING").distinct()
+        jobs = jobs.filter(
+            tasks__assigned_to__isnull=True,
+            tasks__status=ProductionTask.Status.PENDING,
+        ).distinct()
 
-    pending_tasks = ProductionTask.objects.filter(status="PENDING").count()
+    jobs = list(jobs)
+
+    pending_tasks = ProductionTask.objects.filter(
+        status=ProductionTask.Status.PENDING
+    ).count()
     completed_today = ProductionTask.objects.filter(
-        status="COMPLETED", completed_at__date=today
+        status=ProductionTask.Status.COMPLETED, completed_at__date=today
     ).count()
 
     stats = {
-        "in_production": jobs.count(),
-        "urgent": jobs.filter(is_urgent=True).count(),
+        "in_production": len(jobs),
+        "urgent": sum(1 for j in jobs if j.is_urgent),
         "pending_tasks": pending_tasks,
         "completed_today": completed_today,
     }

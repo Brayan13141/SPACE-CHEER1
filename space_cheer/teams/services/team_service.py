@@ -1,4 +1,5 @@
 import logging
+import secrets
 from django.db import transaction
 from django.db.models import ProtectedError
 
@@ -28,6 +29,18 @@ class TeamService:
 
         logger.info("Equipo creado: %s (coach=%s)", team.name, team.coach)
         return team
+
+    @staticmethod
+    def regenerate_join_code(team: Team) -> Team:
+        """Genera un nuevo join_code único e invalida el anterior."""
+        for _ in range(10):
+            code = secrets.token_hex(3).upper()
+            if not Team.objects.filter(join_code=code).exists():
+                team.join_code = code
+                team.save(update_fields=["join_code"])
+                logger.info("join_code regenerado para equipo %s", team.id)
+                return team
+        raise RuntimeError("No se pudo generar un join_code único.")
 
     @staticmethod
     def delete_team(*, team: Team) -> tuple[bool, str]:

@@ -62,17 +62,16 @@ class Team(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.join_code:
-            # generar código seguro y legible
-            # intentamos hasta generar un código único
+            # Generar un código seguro y único; reintentar ante colisión.
             for _ in range(10):
                 code = secrets.token_hex(3).upper()  # 6 hex chars
                 if not Team.objects.filter(join_code=code).exists():
                     self.join_code = code
                     break
-                else:
-                    raise RuntimeError(
-                        "No se pudo generar un join_code único. Contacta al administrador."
-                    )
+            else:
+                raise RuntimeError(
+                    "No se pudo generar un join_code único. Contacta al administrador."
+                )
         super().save(*args, **kwargs)
 
     def __str__(self):

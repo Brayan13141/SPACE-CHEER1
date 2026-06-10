@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,91 @@ from .models import Team, TeamCategory, UserTeamMembership
 from .forms import TeamForm, TeamCategoryForm, QuickAthleteRegisterForm
 from .services import TeamService, MembershipService
 from accounts.tasks import send_athlete_credentials
+
+
+@role_required("ADMIN", "HEADCOACH")
+@require_POST
+def regenerate_code(request, team_id):
+    team = get_object_or_404(Team, id=team_id, is_active=True)
+    if not AccountPermissions.can_manage_team(request.user, team):
+        raise PermissionDenied
+    TeamService.regenerate_join_code(team)
+    messages.success(request, "Código de equipo regenerado.")
+    return redirect("teams:manage_teams")
+
+
+@role_required("ADMIN", "HEADCOACH", "COACH")
+@require_POST
+def accept_request(request, membership_id):
+    membership = get_object_or_404(
+        UserTeamMembership, id=membership_id, status="pending"
+    )
+    if not AccountPermissions.can_review_requests(request.user, membership.team):
+        raise PermissionDenied
+    MembershipService.accept_request(membership=membership, by=request.user)
+    messages.success(request, "Solicitud aceptada.")
+    return redirect(request.META.get("HTTP_REFERER") or "teams:manage_teams")
+
+
+@role_required("ADMIN", "HEADCOACH", "COACH")
+@require_POST
+def reject_request(request, membership_id):
+    membership = get_object_or_404(
+        UserTeamMembership, id=membership_id, status="pending"
+    )
+    if not AccountPermissions.can_review_requests(request.user, membership.team):
+        raise PermissionDenied
+    MembershipService.reject_request(membership=membership, by=request.user)
+    messages.info(request, "Solicitud rechazada.")
+    return redirect(request.META.get("HTTP_REFERER") or "teams:manage_teams")
+
+
+@role_required("ADMIN", "HEADCOACH")
+@require_POST
+def remove_member(request, membership_id):
+    membership = get_object_or_404(UserTeamMembership, id=membership_id)
+    if not AccountPermissions.can_manage_team(request.user, membership.team):
+        raise PermissionDenied
+    MembershipService.remove_member(membership=membership, removed_by=request.user)
+    messages.success(request, "Miembro dado de baja.")
+    return redirect("teams:manage_team_members", team_id=membership.team_id)
+
+
+@role_required("COACH")
+def coach_teams(request):
+    coach_memberships = (
+        UserTeamMembership.objects.filter(
+            user=request.user, role_in_team="COACH",
+            status="accepted", is_active=True,
+        ).select_related("team", "team__coach")
+    )
+    items = []
+    for cm in coach_memberships:
+        team = cm.team
+        roster = (
+            UserTeamMembership.objects.filter(team=team, is_active=True, status="accepted")
+            .select_related("user").order_by("role_in_team", "user__first_name")
+        )
+        pending = (
+            UserTeamMembership.objects.filter(team=team, status="pending")
+            .select_related("user")
+        )
+        items.append({"team": team, "roster": roster, "pending": pending})
+    return render(request, "teams/coach_teams.html", {"items": items})
+
+
+@role_required("ATHLETE")
+def join_by_code(request):
+    if request.method == "POST":
+        code = request.POST.get("code", "")
+        try:
+            MembershipService.request_join_by_code(user=request.user, code=code)
+            messages.success(request, "Solicitud enviada. El entrenador la revisará pronto.")
+            return redirect("teams:athlete_team")
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0] if exc.messages else "No se pudo unir.")
+        return redirect("teams:join_by_code")
+    return render(request, "teams/join_by_code.html")
 
 
 @login_required

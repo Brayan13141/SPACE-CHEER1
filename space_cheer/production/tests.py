@@ -157,12 +157,12 @@ class ProductionJobServiceCreateTests(TestCase):
         job = ProductionJob.objects.get(order=self.order)
         self.assertEqual(job.tasks.count(), 2)
 
-    def test_create_for_order_tasks_started_at_equals_job_created_at(self):
-        """Todas las tasks deben tener started_at = job.created_at"""
+    def test_create_for_order_tasks_have_no_started_at(self):
+        """Las tasks recién creadas (PENDING) no tienen started_at: se setea al completar"""
         ProductionJobService.create_for_order(self.order)
         job = ProductionJob.objects.get(order=self.order)
         for task in job.tasks.all():
-            self.assertEqual(task.started_at, job.created_at)
+            self.assertIsNone(task.started_at)
 
     def test_create_for_order_tasks_are_all_pending(self):
         """Todas las tasks creadas deben tener status PENDING"""
@@ -287,3 +287,67 @@ class OrderStateServiceProductionHookTests(TestCase):
         user = UserFactory()
         OrderStateService._post_transition_hooks(order, "PENDING", "DESIGN_APPROVED", user)
         mock_create.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# OperarioService — creación de operarios + asignación de roles de producción
+# ---------------------------------------------------------------------------
+
+class OperarioServiceTests(TestCase):
+
+    def setUp(self):
+        from accounts.models import Role
+        self.op_role, _ = Role.objects.get_or_create(
+            name="OPERARIO", defaults={"is_production_type": True}
+        )
+        self.admin = UserFactory()
+
+    def test_create_makes_active_operario_with_role(self):
+        """create() crea un OPERARIO con perfil completo y password utilizable"""
+        from production.services import OperarioService
+        user = OperarioService.create(
+            username="op_svc",
+            first_name="Ana",
+            last_name="Lopez",
+            email="ana@test.com",
+            password="TestPass123!",
+        )
+        self.assertTrue(user.roles.filter(name="OPERARIO").exists())
+        self.assertTrue(user.profile_completed)
+        self.assertTrue(user.check_password("TestPass123!"))
+
+    def test_create_duplicate_username_raises_valueerror(self):
+        """create() con un username existente levanta ValueError"""
+        from production.services import OperarioService
+        OperarioService.create(username="dup", password="TestPass123!")
+        with self.assertRaises(ValueError):
+            OperarioService.create(username="dup", password="Other123!")
+
+    def test_assign_role_creates_assignment(self):
+        from production.services import OperarioService
+        operario = OperarioService.create(username="op_a", password="TestPass123!")
+        prod_role = ProductionRole.objects.create(name="Cortador", created_by=self.admin)
+        OperarioService.assign_role(operario, prod_role, self.admin)
+        self.assertTrue(
+            OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).exists()
+        )
+
+    def test_assign_role_is_idempotent(self):
+        from production.services import OperarioService
+        operario = OperarioService.create(username="op_b", password="TestPass123!")
+        prod_role = ProductionRole.objects.create(name="Cortador2", created_by=self.admin)
+        OperarioService.assign_role(operario, prod_role, self.admin)
+        OperarioService.assign_role(operario, prod_role, self.admin)
+        self.assertEqual(
+            OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).count(), 1
+        )
+
+    def test_remove_role_deletes_assignment(self):
+        from production.services import OperarioService
+        operario = OperarioService.create(username="op_c", password="TestPass123!")
+        prod_role = ProductionRole.objects.create(name="Cortador3", created_by=self.admin)
+        OperarioService.assign_role(operario, prod_role, self.admin)
+        OperarioService.remove_role(operario, prod_role)
+        self.assertFalse(
+            OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).exists()
+        )

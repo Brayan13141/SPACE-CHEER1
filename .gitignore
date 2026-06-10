@@ -6,9 +6,12 @@
 .continue/skills/
 claude.md
 docs
+.superpowers/
+.vscode
 
 *.txt
 !SERVER WSL*.txt
+!space_cheer/templates/emails/*.txt
 *.json
 # Byte-compiled / optimized / DLL files
 __pycache__/

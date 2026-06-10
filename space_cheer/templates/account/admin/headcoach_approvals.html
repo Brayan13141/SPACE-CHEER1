@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% block title %}Aprobación de entrenadores — SPACE CHEER{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Entrenadores pendientes de aprobación</h2>
+  {% if pending_profiles %}
+    <div class="row g-3">
+      {% for profile in pending_profiles %}
+        <div class="col-12 col-md-6">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+              <p class="card-text small text-muted">
+                {{ profile.user.email }}<br>
+                Experiencia: {{ profile.experience_years }} año(s)
+              </p>
+              <div class="d-flex gap-2">
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <input type="hidden" name="profile_id" value="{{ profile.pk }}">
+                  <button class="btn btn-success btn-sm" type="submit">Aprobar</button>
+                </form>
+                <button class="btn btn-outline-danger btn-sm" type="button"
+                        data-bs-toggle="modal" data-bs-target="#rejectModal{{ profile.pk }}">
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="rejectModal{{ profile.pk }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <input type="hidden" name="profile_id" value="{{ profile.pk }}">
+                <div class="modal-header"><h5 class="modal-title">Rechazar entrenador</h5></div>
+                <div class="modal-body">
+                  <label class="form-label">Motivo (opcional)</label>
+                  <textarea name="reason" class="form-control bg-dark text-light" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="submit" class="btn btn-danger">Rechazar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No hay entrenadores pendientes.</p>
+  {% endif %}
+</div>
+{% endblock %}
