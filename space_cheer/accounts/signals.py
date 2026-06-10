@@ -121,6 +121,15 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
                     instance.id,
                     exc_info=True,
                 )
+        # -----------------------------
+        # PRODUCCION
+        # -----------------------------
+        elif role.is_production_type or role_name == "operario":
+            logger.info(
+                "Rol de produccion '%s' asignado a usuario_id=%s; sin perfil automatico.",
+                role.name,
+                instance.id,
+            )
         else:
             logger.warning(
                 "Rol desconocido '%s' para usuario_id=%s",
