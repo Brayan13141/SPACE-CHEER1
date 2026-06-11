@@ -34,7 +34,7 @@ def profile_setup_view(request):
             user_instance.profile_completed = True
             user_instance.save()
 
-            if selected_role.name == "HEADCOACH":
+            if selected_role.name == "HEADCOACH" and not user_instance.is_superuser:
                 from accounts.services.coach_approval_service import CoachApprovalService
                 from django.contrib.auth import logout
 

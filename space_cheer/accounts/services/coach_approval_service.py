@@ -14,6 +14,9 @@ class CoachApprovalService:
 
     @staticmethod
     def submit_headcoach(user):
+        if user.is_superuser:
+            logger.info("HEADCOACH %s es superusuario, omitiendo aprobación", user.id)
+            return user
         user.is_active = False
         user.save(update_fields=["is_active"])
         logger.info("HEADCOACH %s enviado a aprobación (is_active=False)", user.id)

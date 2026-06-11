@@ -1,7 +1,23 @@
+SPACE CHEER
+============
+Plataforma de Cheerleading
+
+Nueva solicitud de equipo
+--------------------------
+
 Hola {{ coach_name }},
 
-{{ athlete_name }} solicitó unirse a tu equipo "{{ team_name }}".
+Tienes una nueva solicitud de membresía:
 
-Revisa la solicitud en tu panel de equipos.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Atleta:          {{ athlete_name }}
+  Equipo:          {{ team_name }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-— SPACE CHEER
+Puedes aceptar o rechazar la solicitud desde el
+panel de tu equipo en Space Cheer:
+{{ login_url }}
+
+— El equipo de Space Cheer
+
+© 2026 SPACE CHEER · Guanajuato, México
