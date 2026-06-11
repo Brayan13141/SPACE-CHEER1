@@ -3,7 +3,7 @@
   {% if event.banner %}
   <img src="{{ event.banner.url }}" class="card-img-top sc-img-160"  alt="{{ event.name }}">
   {% else %}
-  <div class="card-img-top bg-body-secondary d-flex align-items-center justify-content-center sc-img-160-bare" >
+  <div class="card-img-top d-flex align-items-center justify-content-center sc-img-160-bare" style="background:var(--sc-panel)">
     <i class="bi bi-trophy display-4 text-secondary"></i>
   </div>
   {% endif %}

@@ -34,8 +34,8 @@
 
       <!-- Tarjeta de info del usuario -->
       <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-          <h5 class="card-title mb-0">
+        <div class="card-header" style="background:var(--sc-panel)">
+          <h5 class="card-title mb-0 text-white">
             <i class="bi bi-person me-2"></i>{% trans "Usuario" %}
           </h5>
         </div>
@@ -53,7 +53,7 @@
               <div class="text-muted small">{{ ownership.user.email|default:"Sin email" }}</div>
               <div class="d-flex flex-wrap gap-1 mt-1">
                 {% for role in ownership.user.roles.all %}
-                  <span class="badge bg-secondary bg-opacity-10 text-dark border small">
+                  <span class="badge bg-secondary border small">
                     {{ role.name }}
                   </span>
                 {% endfor %}
@@ -66,7 +66,7 @@
           <div class="d-flex align-items-center gap-2 small text-muted">
             <i class="bi bi-person-check"></i>
             <span>{% trans "Coach actual:" %}
-              <strong class="text-dark">
+              <strong class="text-white">
                 {{ ownership.owner.get_full_name|default:ownership.owner.username }}
               </strong>
             </span>
@@ -77,8 +77,8 @@
       <!-- Formulario reasignación — solo para ADMIN -->
       {% if available_coaches %}
       <div class="card shadow-sm">
-        <div class="card-header bg-light">
-          <h5 class="card-title mb-0">
+        <div class="card-header" style="background:var(--sc-panel)">
+          <h5 class="card-title mb-0 text-white">
             <i class="bi bi-arrow-left-right me-2"></i>{% trans "Nuevo coach" %}
           </h5>
         </div>

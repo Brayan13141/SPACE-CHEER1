@@ -1,8 +1,120 @@
-{% autoescape on %}
-<div style="font-family:sans-serif;background:#0d1117;color:#e6edf3;padding:24px;border-radius:8px">
-  <h2 style="color:#58a6ff">Nueva solicitud de unión</h2>
-  <p>Hola {{ coach_name }},</p>
-  <p><strong>{{ athlete_name }}</strong> solicitó unirse a tu equipo <strong>{{ team_name }}</strong>.</p>
-  <p>Revisa la solicitud en tu panel de equipos.</p>
-</div>
-{% endautoescape %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nueva solicitud de equipo — SPACE CHEER</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:'Segoe UI',Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table width="100%" style="max-width:560px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+
+        <!-- HEADER -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0d0d1a 0%,#1a1a2e 100%);padding:32px 40px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;letter-spacing:1px;background:linear-gradient(45deg,#7f5af0,#2cb1ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;color:#7f5af0;">
+              ✦ SPACE CHEER
+            </div>
+            <div style="color:#a0a7d0;font-size:13px;margin-top:6px;">
+              Plataforma de Cheerleading
+            </div>
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td style="background:#ffffff;padding:36px 40px;">
+
+            <div style="text-align:center;margin-bottom:20px;font-size:48px;line-height:1;">
+              🏆
+            </div>
+
+            <h2 style="margin:0 0 8px;font-size:22px;color:#1a1a2e;text-align:center;">
+              Nueva solicitud de equipo
+            </h2>
+            <p style="margin:0 0 28px;color:#555;font-size:15px;line-height:1.6;text-align:center;">
+              Hola <strong>{{ coach_name }}</strong>, tienes una nueva solicitud de membresía.
+            </p>
+
+            <!-- INFO BOX -->
+            <table width="100%" style="background:#f8f7ff;border:1px solid #7f5af0;border-radius:10px;margin-bottom:28px;">
+              <tr>
+                <td style="padding:20px 24px;">
+
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:8px 0;border-bottom:1px solid #ede9ff;">
+                        <span style="font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#888;font-weight:600;">
+                          Atleta
+                        </span><br>
+                        <span style="font-size:17px;font-weight:700;color:#1a1a2e;">
+                          {{ athlete_name }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:12px 0 4px;">
+                        <span style="font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#888;font-weight:600;">
+                          Equipo solicitado
+                        </span><br>
+                        <span style="font-size:17px;font-weight:700;color:#7f5af0;">
+                          {{ team_name }}
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+
+            <!-- CTA BUTTON -->
+            <table width="100%" style="margin-bottom:24px;">
+              <tr>
+                <td align="center">
+                  <a href="{{ login_url }}"
+                     style="display:inline-block;background:linear-gradient(45deg,#7f5af0,#6b49d1);color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 40px;border-radius:8px;">
+                    Revisar solicitud →
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- INFO NOTE -->
+            <table width="100%" style="background:#e0f2fe;border-left:4px solid #2cb1ff;border-radius:0 8px 8px 0;margin-bottom:24px;">
+              <tr>
+                <td style="padding:14px 18px;">
+                  <p style="margin:0;font-size:13px;color:#0c4a6e;line-height:1.5;">
+                    <strong>ℹ️ Nota:</strong> Puedes aceptar o rechazar la solicitud desde el panel de tu equipo en Space Cheer.
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:24px 0 0;font-size:13px;color:#999;text-align:center;">
+              — El equipo de Space Cheer
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="background:#f0eeff;padding:20px 40px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#999;">
+              © 2026 SPACE CHEER · Guanajuato, México<br>
+              <a href="{{ login_url }}" style="color:#7f5af0;text-decoration:none;">Ir a la plataforma</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

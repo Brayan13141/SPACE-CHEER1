@@ -8,6 +8,9 @@ from django.template.loader import render_to_string
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+SITE_NAME = "Space Cheer"
+SITE_URL = "https://spacecheer.com"
+
 
 @shared_task(
     bind=True,
@@ -44,6 +47,8 @@ def send_athlete_credentials(self, user_id: int, temp_password: str, login_url: 
         "username": user.username,
         "temp_password": temp_password,
         "login_url": login_url,
+        "site_name": SITE_NAME,
+        "site_url": SITE_URL,
     }
 
     subject = "Tus credenciales de acceso — SPACE CHEER"
@@ -86,7 +91,9 @@ def notify_headcoach_approved(self, user_id: int):
 
     context = {
         "name": user.get_full_name() or user.username,
-        "login_url": reverse("account_login"),
+        "login_url": SITE_URL + reverse("account_login"),
+        "site_name": SITE_NAME,
+        "site_url": SITE_URL,
     }
     subject = "Tu cuenta de entrenador fue aprobada — SPACE CHEER"
     text_body = render_to_string("emails/headcoach_approved.txt", context)
@@ -137,6 +144,9 @@ def notify_team_join_request(self, membership_id: int):
         "coach_name": m.team.coach.get_full_name() or m.team.coach.username,
         "athlete_name": m.user.get_full_name() or m.user.username,
         "team_name": m.team.name,
+        "login_url": SITE_URL,
+        "site_name": SITE_NAME,
+        "site_url": SITE_URL,
     }
     subject = f"Nueva solicitud de unión — {m.team.name}"
     text_body = render_to_string("emails/team_join_request.txt", context)
@@ -167,6 +177,10 @@ def notify_join_decision(self, membership_id: int, accepted: bool):
         "athlete_name": m.user.get_full_name() or m.user.username,
         "team_name": m.team.name,
         "verb": verb,
+        "accepted": accepted,
+        "login_url": SITE_URL,
+        "site_name": SITE_NAME,
+        "site_url": SITE_URL,
     }
     subject = f"Tu solicitud fue {verb} — {m.team.name}"
     text_body = render_to_string("emails/team_join_decision.txt", context)

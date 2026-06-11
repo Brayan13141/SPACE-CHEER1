@@ -1,7 +1,24 @@
+SPACE CHEER
+============
+Plataforma de Cheerleading
+
+¡Tu cuenta fue aprobada!
+------------------------
+
 Hola {{ name }},
 
-¡Buenas noticias! Tu cuenta de entrenador en SPACE CHEER fue aprobada y ya está activa.
+¡Buenas noticias! Tu cuenta de entrenador en Space Cheer fue aprobada
+y ya está activa. Ya puedes acceder a todas las funciones de entrenador.
 
-Ya puedes iniciar sesión aquí: {{ login_url }}
+Inicia sesión aquí:
+{{ login_url }}
 
-— Equipo SPACE CHEER
+Desde tu panel podrás gestionar tu equipo, atletas,
+pedidos de uniformes y mucho más.
+
+Si no esperabas este correo, ignóralo.
+Para soporte: soporte@spacecheer.mx
+
+— El equipo de Space Cheer
+
+© 2026 SPACE CHEER · Guanajuato, México
