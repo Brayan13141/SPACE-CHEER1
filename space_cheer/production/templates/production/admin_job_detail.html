@@ -24,7 +24,7 @@
           {% else %}
             <form method="post" action="{% url 'production:assign_task' task.pk %}" class="d-flex gap-1">
               {% csrf_token %}
-              <select name="operario_id" class="form-select form-select-sm bg-dark text-light" style="width:auto">
+              <select name="operario_id" class="form-select form-select-sm bg-dark text-light w-auto">
                 <option value="">Sin asignar</option>
                 {% for op in operarios %}
                   <option value="{{ op.pk }}" {% if task.assigned_to == op %}selected{% endif %}>{{ op.get_full_name }}</option>
