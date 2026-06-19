@@ -1,6 +1,9 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.db.models import Count, Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import role_required
@@ -8,6 +11,7 @@ from production.models import (
     OperarioRoleAssignment,
     ProductionRole,
     ProductionStage,
+    ProductionTask,
 )
 from production.services import OperarioService
 
@@ -119,6 +123,20 @@ def manage_role_operarios(request, pk):
 @role_required("ADMIN")
 def manage_operarios(request):
     if request.method == "POST":
+        action = request.POST.get("action", "create")
+
+        if action == "reactivate":
+            op_id = request.POST.get("operario_id")
+            try:
+                op = User.objects.get(pk=op_id, roles__name="OPERARIO")
+                op.is_active = True
+                op.save(update_fields=["is_active"])
+                messages.success(request, f"Operario '{op.username}' reactivado.")
+            except User.DoesNotExist:
+                messages.error(request, "Operario no encontrado.")
+            return redirect("production:manage_operarios")
+
+        # create
         username = request.POST.get("username", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
@@ -141,17 +159,55 @@ def manage_operarios(request):
         return redirect("production:manage_operarios")
 
     operarios = User.objects.filter(roles__name="OPERARIO", is_active=True).distinct()
-    return render(request, "production/config/operarios.html", {"operarios": operarios})
+    inactive_operarios = User.objects.filter(roles__name="OPERARIO", is_active=False).distinct()
+    return render(request, "production/config/operarios.html", {
+        "operarios": operarios,
+        "inactive_operarios": inactive_operarios,
+    })
 
 
 @role_required("ADMIN")
 def operario_detail(request, pk):
     operario = get_object_or_404(
-        User.objects.filter(roles__name="OPERARIO", is_active=True), pk=pk
+        User.objects.filter(roles__name="OPERARIO"), pk=pk
     )
 
     if request.method == "POST":
         action = request.POST.get("action")
+
+        if action == "edit":
+            operario.first_name = request.POST.get("first_name", "").strip()
+            operario.last_name = request.POST.get("last_name", "").strip()
+            operario.email = request.POST.get("email", "").strip()
+            operario.save(update_fields=["first_name", "last_name", "email"])
+            messages.success(request, "Datos actualizados.")
+            return redirect("production:operario_detail", pk=pk)
+
+        if action == "deactivate":
+            operario.is_active = False
+            operario.save(update_fields=["is_active"])
+            messages.success(request, f"Operario '{operario.username}' desactivado.")
+            return redirect("production:manage_operarios")
+
+        if action == "reactivate":
+            operario.is_active = True
+            operario.save(update_fields=["is_active"])
+            messages.success(request, f"Operario '{operario.username}' reactivado.")
+            return redirect("production:operario_detail", pk=pk)
+
+        if action == "reset_password":
+            new_password = request.POST.get("new_password", "").strip()
+            try:
+                validate_password(new_password, user=operario)
+                operario.set_password(new_password)
+                operario.save(update_fields=["password"])
+                messages.success(request, "Contraseña actualizada.")
+            except ValidationError as exc:
+                for err in exc.messages:
+                    messages.error(request, err)
+            return redirect("production:operario_detail", pk=pk)
+
+        # assign / remove role
         role_id = request.POST.get("role_id")
         if role_id:
             try:
@@ -170,8 +226,25 @@ def operario_detail(request, pk):
         OperarioRoleAssignment.objects.filter(user=operario).values_list("role_id", flat=True)
     )
     prod_roles = ProductionRole.objects.prefetch_related("stages").all()
+
+    task_stats = ProductionTask.objects.filter(completed_by=operario).aggregate(
+        total_completed=Count("pk"),
+        last_activity=Max("completed_at"),
+    )
+    pending_count = ProductionTask.objects.filter(
+        assigned_to=operario, status=ProductionTask.Status.PENDING
+    ).count()
+    recent_tasks = (
+        ProductionTask.objects.filter(completed_by=operario)
+        .select_related("stage", "job__order", "order_item__product")
+        .order_by("-completed_at")[:10]
+    )
+
     return render(request, "production/config/operario_detail.html", {
         "operario": operario,
         "prod_roles": prod_roles,
         "assigned_role_ids": assigned_role_ids,
+        "task_stats": task_stats,
+        "pending_count": pending_count,
+        "recent_tasks": recent_tasks,
     })
