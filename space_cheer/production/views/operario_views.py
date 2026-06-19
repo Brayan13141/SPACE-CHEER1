@@ -79,7 +79,7 @@ def task_complete(request, pk):
 @role_required("OPERARIO")
 def order_design(request, pk):
     job = get_object_or_404(
-        ProductionJob.objects.select_related("order"),
+        ProductionJob.objects.select_related("order").distinct(),
         pk=pk,
         tasks__assigned_to=request.user,
     )
@@ -95,7 +95,7 @@ def item_measurements(request, pk):
     from orders.models import OrderItem
     allowed_stages = _get_allowed_stages(request.user)
     item = get_object_or_404(
-        OrderItem,
+        OrderItem.objects.distinct(),
         pk=pk,
         production_tasks__assigned_to=request.user,
         production_tasks__stage__in=allowed_stages,

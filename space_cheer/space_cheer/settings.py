@@ -254,9 +254,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # TEMPLATES EN UNA SOLA SECCION
 
 CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 #CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = "Strict"
 
 # =================================================================
 # SECURITY HEADERS (A05 — Security Misconfiguration)
