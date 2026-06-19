@@ -239,15 +239,27 @@
 
         /* ─── MOBILE NAVBAR ──────────────────────────────────── */
         @media (max-width: 991.98px) {
-            #navbarMain {
+            /*
+             * Al mostrar el menú hamburguesa, el collapse se convierte en un
+             * overlay fixed sobre el contenido (no expande el navbar hacia abajo).
+             * Bootstrap anima height 0→auto; con position:fixed eso se ve como
+             * un slide-down suave sin mover el scroll de la página.
+             */
+            #navbarMain.show,
+            #navbarMain.collapsing {
+                position: fixed;
+                top: 76px;
+                left: 0;
+                right: 0;
+                z-index: 1045;
                 max-height: calc(100svh - 76px);
                 overflow-y: auto;
-                background: rgba(10, 10, 20, 0.98);
-                padding: 0.5rem 0.75rem 1rem;
-                border-top: 1px solid rgba(127,90,240,0.15);
-                border-radius: 0 0 0.5rem 0.5rem;
+                background: rgba(10, 10, 20, 0.97);
+                padding: 0.75rem 1rem 2rem;
+                border-top: 1px solid rgba(127,90,240,0.2);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             }
-            /* Dropdown del avatar: alinear a la derecha en móvil */
+            /* Dropdown del avatar: anclar a la derecha del viewport */
             .sc-dropdown-wide {
                 left: auto !important;
                 right: 0 !important;
