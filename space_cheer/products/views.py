@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 from products.models import Product, Season
 from products.forms import ProductForm
@@ -192,8 +193,12 @@ def product_detail(request, product_id):
                 )
             form = ProductForm(post_data, request.FILES, instance=product)
             if form.is_valid():
-                form.save()
-                messages.success(request, "Producto actualizado.")
+                try:
+                    form.save()
+                    messages.success(request, "Producto actualizado.")
+                except ValidationError as e:
+                    for msg in e.messages:
+                        messages.error(request, msg)
             else:
                 for field, errors in form.errors.items():
                     for error in errors:
@@ -211,20 +216,32 @@ def product_detail(request, product_id):
         # ── Agregar talla ──────────────────────────────
         elif action == "add_size" and requires_sizes:
             size = request.POST.get("size", "").strip().upper()
-            price = request.POST.get("additional_price") or "0"
+            price_raw = request.POST.get("additional_price") or "0"
+
+            try:
+                price = float(price_raw)
+                if price < 0:
+                    raise ValueError("negative")
+            except (ValueError, TypeError):
+                messages.error(request, "El precio adicional debe ser un número mayor o igual a 0.")
+                return redirect("products:product_detail", product_id=product.id)
 
             if not size:
                 messages.error(request, "Ingresa una talla.")
             elif ProductSizeVariant.objects.filter(product=product, size=size).exists():
                 messages.error(request, f"La talla '{size}' ya existe.")
             else:
-                ProductSizeVariant.objects.create(
-                    product=product,
-                    size=size,
-                    additional_price=float(price),
-                )
-                product.update_configuration_status()
-                messages.success(request, f"Talla '{size}' agregada.")
+                try:
+                    ProductSizeVariant.objects.create(
+                        product=product,
+                        size=size,
+                        additional_price=price,
+                    )
+                    product.update_configuration_status()
+                    messages.success(request, f"Talla '{size}' agregada.")
+                except ValidationError as e:
+                    for msg in e.messages:
+                        messages.error(request, msg)
             return redirect("products:product_detail", product_id=product.id)
 
         # ── Eliminar talla ─────────────────────────────
@@ -240,6 +257,9 @@ def product_detail(request, product_id):
                     request,
                     f"No se puede eliminar la talla '{variant.size}' porque está usada en {len(e.protected_objects)} orden(es).",
                 )
+            except ValidationError as e:
+                for msg in e.messages:
+                    messages.error(request, msg)
             return redirect("products:product_detail", product_id=product.id)
 
         # ── Agregar campo de medida ────────────────────
@@ -257,11 +277,15 @@ def product_detail(request, product_id):
                         request, f"'{field.name}' ya está en este producto."
                     )
                 else:
-                    ProductMeasurementField.objects.create(
-                        product=product, field=field, required=required
-                    )
-                    product.update_configuration_status()
-                    messages.success(request, f"Campo '{field.name}' agregado.")
+                    try:
+                        ProductMeasurementField.objects.create(
+                            product=product, field=field, required=required
+                        )
+                        product.update_configuration_status()
+                        messages.success(request, f"Campo '{field.name}' agregado.")
+                    except ValidationError as e:
+                        for msg in e.messages:
+                            messages.error(request, msg)
             return redirect("products:product_detail", product_id=product.id)
 
         # ── Eliminar campo de medida ──────────────────
@@ -279,6 +303,9 @@ def product_detail(request, product_id):
                     request,
                     f"No se puede eliminar el campo '{pmf.field.name}' porque está en {len(e.protected_objects)} orden(es).",
                 )
+            except ValidationError as e:
+                for msg in e.messages:
+                    messages.error(request, msg)
             return redirect("products:product_detail", product_id=product.id)
 
         # ── Agregar etapa de producción ───────────────

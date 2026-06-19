@@ -131,11 +131,13 @@ class Product(models.Model):
         """
         Guarda el producto después de ejecutar las validaciones completas.
         Se llama a full_clean() para asegurar que se ejecuten clean() y las validaciones de campo.
+        Los saves parciales (update_fields) omiten full_clean para evitar errores no relacionados.
         """
-        if self.usage_type == "GLOBAL" and self.size_strategy == "NONE":
-            self.is_configured = True
-
-        self.full_clean()  # Dispara clean() y validaciones de campo
+        update_fields = kwargs.get("update_fields")
+        if update_fields is None:
+            if self.usage_type == "GLOBAL" and self.size_strategy == "NONE":
+                self.is_configured = True
+            self.full_clean()
         super().save(*args, **kwargs)
 
     @property
