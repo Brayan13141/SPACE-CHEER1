@@ -131,6 +131,26 @@ class OperarioService:
         return user
 
     @staticmethod
+    def assign_existing(user):
+        """Agrega el rol OPERARIO a un usuario ya registrado en el sistema.
+
+        No modifica contraseña ni datos del usuario. Levanta ValueError si ya
+        tiene el rol OPERARIO.
+        """
+        from accounts.models import Role
+
+        op_role, _ = Role.objects.get_or_create(
+            name="OPERARIO", defaults={"is_production_type": True}
+        )
+        if user.roles.filter(pk=op_role.pk).exists():
+            raise ValueError(f"'{user.username}' ya es operario.")
+
+        user.profile_completed = True
+        user.save(update_fields=["profile_completed"])
+        user.roles.add(op_role)
+        return user
+
+    @staticmethod
     def assign_role(operario, prod_role, assigned_by):
         from production.models import OperarioRoleAssignment
 

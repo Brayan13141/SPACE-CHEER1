@@ -136,6 +136,18 @@ def manage_operarios(request):
                 messages.error(request, "Operario no encontrado.")
             return redirect("production:manage_operarios")
 
+        if action == "assign_existing":
+            user_id = request.POST.get("user_id")
+            try:
+                user = User.objects.get(pk=user_id, is_superuser=False)
+                OperarioService.assign_existing(user)
+                messages.success(request, f"'{user.get_full_name() or user.username}' ahora es operario.")
+            except User.DoesNotExist:
+                messages.error(request, "Usuario no encontrado.")
+            except ValueError as exc:
+                messages.error(request, str(exc))
+            return redirect("production:manage_operarios")
+
         # create
         username = request.POST.get("username", "").strip()
         first_name = request.POST.get("first_name", "").strip()
@@ -160,9 +172,30 @@ def manage_operarios(request):
 
     operarios = User.objects.filter(roles__name="OPERARIO", is_active=True).distinct()
     inactive_operarios = User.objects.filter(roles__name="OPERARIO", is_active=False).distinct()
+
+    # Búsqueda de usuarios existentes para asignar
+    search_query = request.GET.get("q", "").strip()
+    search_results = None
+    if search_query:
+        operario_ids = User.objects.filter(roles__name="OPERARIO").values_list("pk", flat=True)
+        search_results = (
+            User.objects.filter(
+                Q(username__icontains=search_query)
+                | Q(first_name__icontains=search_query)
+                | Q(last_name__icontains=search_query)
+                | Q(email__icontains=search_query),
+                is_superuser=False,
+            )
+            .exclude(pk__in=operario_ids)
+            .prefetch_related("roles")
+            .order_by("first_name", "last_name")[:20]
+        )
+
     return render(request, "production/config/operarios.html", {
         "operarios": operarios,
         "inactive_operarios": inactive_operarios,
+        "search_results": search_results,
+        "search_query": search_query,
     })
 
 
