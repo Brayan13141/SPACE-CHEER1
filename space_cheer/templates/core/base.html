@@ -236,6 +236,38 @@
             border-radius: 3px;
             font-size: 0.9rem;
         }
+
+        /* ─── MOBILE NAVBAR ──────────────────────────────────── */
+        @media (max-width: 991.98px) {
+            /*
+             * Al mostrar el menú hamburguesa, el collapse se convierte en un
+             * overlay fixed sobre el contenido (no expande el navbar hacia abajo).
+             * Bootstrap anima height 0→auto; con position:fixed eso se ve como
+             * un slide-down suave sin mover el scroll de la página.
+             */
+            #navbarMain.show,
+            #navbarMain.collapsing {
+                position: fixed;
+                top: 76px;
+                left: 0;
+                right: 0;
+                z-index: 1045;
+                max-height: calc(100svh - 76px);
+                overflow-y: auto;
+                background: rgba(10, 10, 20, 0.97);
+                padding: 0.75rem 1rem 2rem;
+                border-top: 1px solid rgba(127,90,240,0.2);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            }
+            /* Dropdown del avatar: anclar a la derecha del viewport */
+            .sc-dropdown-wide {
+                left: auto !important;
+                right: 0 !important;
+                width: min(340px, 96vw) !important;
+                max-height: calc(100svh - 140px);
+                overflow-y: auto;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -462,7 +494,7 @@
                 </ul>
 
                 {# ── Menú derecho: notificaciones + usuario ── #}
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-end gap-2 mt-2 mt-lg-0">
 
                     {% if user.is_authenticated %}
 
@@ -542,26 +574,35 @@
                                 <i class="bi bi-person me-2"></i>{% trans "Mi Perfil" %}
                             </a></li>
 
-                            {# Selector de idioma — items directos, sin dropdown anidado #}
+                            {# Selector de idioma — sub-dropdown colapsable #}
                             <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">{% trans "Idioma" %}</h6></li>
-                            {% get_current_language as CURRENT_LANG %}
-                            {% get_available_languages as LANGUAGES %}
-                            {% for lang_code, lang_name in LANGUAGES %}
                             <li>
+                                <button class="dropdown-item d-flex align-items-center justify-content-between"
+                                        id="scLangToggle" type="button">
+                                    <span><i class="bi bi-translate me-2"></i>{% trans "Idioma" %}
+                                    {% get_current_language as CURRENT_LANG %}
+                                    {% if CURRENT_LANG == 'es' %}<small class="text-muted ms-1">🇲🇽</small>
+                                    {% elif CURRENT_LANG == 'en' %}<small class="text-muted ms-1">🇺🇸</small>{% endif %}
+                                    </span>
+                                    <i class="bi bi-chevron-down small" id="scLangChevron"></i>
+                                </button>
+                            </li>
+                            <li id="scLangSubmenu" class="d-none">
+                                {% get_available_languages as LANGUAGES %}
+                                {% for lang_code, lang_name in LANGUAGES %}
                                 <form method="post" action="{% url 'set_language' %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="language" value="{{ lang_code }}">
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 {% if lang_code == CURRENT_LANG %}fw-bold{% endif %}">
+                                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 ps-4 {% if lang_code == CURRENT_LANG %}fw-bold text-light{% endif %}">
                                         {% if lang_code == 'es' %}<span>🇲🇽</span> Español
                                         {% elif lang_code == 'en' %}<span>🇺🇸</span> English
                                         {% else %}{{ lang_name }}{% endif %}
-                                        {% if lang_code == CURRENT_LANG %}<i class="bi bi-check2 ms-auto"></i>{% endif %}
+                                        {% if lang_code == CURRENT_LANG %}<i class="bi bi-check2 ms-auto text-success"></i>{% endif %}
                                     </button>
                                 </form>
+                                {% endfor %}
                             </li>
-                            {% endfor %}
 
                             {# Todos: mis pedidos (enlace según rol) #}
                             {% if is_admin or is_staff_role %}
@@ -583,6 +624,30 @@
                             <li><a class="dropdown-item" href="{% url 'accounts:profile_settings' %}">
                                 <i class="bi bi-gear me-2"></i>{% trans "Configuración" %}
                             </a></li>
+
+                            {# PRODUCCIÓN: operarios, staff y admin #}
+                            {% if is_admin or is_staff_role or is_operario %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header"><i class="bi bi-tools me-1"></i>{% trans "Producción" %}</h6></li>
+                            {% if is_operario %}
+                            <li><a class="dropdown-item" href="{% url 'production:dashboard' %}">
+                                <i class="bi bi-check2-square me-2"></i>{% trans "Mis Tareas" %}
+                            </a></li>
+                            {% endif %}
+                            {% if is_admin or is_staff_role %}
+                            <li><a class="dropdown-item" href="{% url 'production:admin_overview' %}">
+                                <i class="bi bi-diagram-3 me-2"></i>{% trans "Panel de Producción" %}
+                            </a></li>
+                            {% endif %}
+                            {% if is_admin %}
+                            <li><a class="dropdown-item" href="{% url 'production:manage_operarios' %}">
+                                <i class="bi bi-person-badge me-2"></i>{% trans "Operarios" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:manage_stages' %}">
+                                <i class="bi bi-sliders me-2"></i>{% trans "Configuración" %}
+                            </a></li>
+                            {% endif %}
+                            {% endif %}
 
                             {# ADMIN: acceso al panel de admin #}
                             {% if is_admin or user.is_superuser %}
@@ -796,6 +861,22 @@
             mainContent.classList.add('profile-sidebar-collapsed');
             const icon = toggleProfile?.querySelector('i');
             if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-left'); }
+        }
+
+        // ── Sub-dropdown idioma ──────────────────────────────
+        var langToggle  = document.getElementById('scLangToggle');
+        var langSubmenu = document.getElementById('scLangSubmenu');
+        var langChevron = document.getElementById('scLangChevron');
+        if (langToggle && langSubmenu) {
+            langToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = !langSubmenu.classList.contains('d-none');
+                langSubmenu.classList.toggle('d-none', open);
+                if (langChevron) {
+                    langChevron.classList.toggle('bi-chevron-down', open);
+                    langChevron.classList.toggle('bi-chevron-up', !open);
+                }
+            });
         }
 
         // Spinner en submit de forms
