@@ -1,0 +1,217 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Reporte #{{ report.pk }} — Space Cheer{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:860px">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'production:error_report_list' %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
+    <div>
+      <h2 class="mb-0">Reporte de Error #{{ report.pk }}</h2>
+      <small class="text-muted">{{ report.reported_at|date:"d/m/Y H:i" }} — Reportado por {{ report.reported_by.get_full_name|default:report.reported_by.username|default:"—" }}</small>
+    </div>
+    {% if report.requires_reposition and not report.is_exception %}
+      <span class="badge bg-danger ms-auto">⚠️ Reposición requerida</span>
+    {% elif report.is_exception %}
+      <span class="badge bg-info text-dark ms-auto">Excepción otorgada</span>
+    {% endif %}
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Sección 1 -->
+  <div class="card bg-dark border-primary mb-3">
+    <div class="card-header bg-primary text-white fw-bold">ℹ️ 1. Información General</div>
+    <div class="card-body">
+      <dl class="row mb-0 small">
+        {% if report.order %}
+          <dt class="col-sm-4">Cliente / Pedido</dt>
+          <dd class="col-sm-8">Orden #{{ report.order.id }}{% if report.order.team %} — {{ report.order.team }}{% endif %}</dd>
+        {% endif %}
+        {% if report.stage %}
+          <dt class="col-sm-4">Etapa</dt>
+          <dd class="col-sm-8">{{ report.stage.icon }} {{ report.stage.name }}</dd>
+        {% endif %}
+        {% if report.area %}
+          <dt class="col-sm-4">Área</dt>
+          <dd class="col-sm-8">{{ report.area }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  <!-- Sección 2 -->
+  <div class="card bg-dark border-warning mb-3">
+    <div class="card-header bg-warning text-dark fw-bold">⚠️ 2. Tipo de Error</div>
+    <div class="card-body">
+      {% for label in report.get_error_types_display %}
+        <span class="badge bg-secondary me-1">{{ label }}</span>
+      {% empty %}
+        <span class="text-muted">—</span>
+      {% endfor %}
+      {% if report.error_type_other %}
+        <div class="mt-1 small text-muted">Otro: {{ report.error_type_other }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sección 3 -->
+  <div class="card bg-dark border-danger mb-3">
+    <div class="card-header bg-danger text-white fw-bold">✖ 3. Descripción del Error</div>
+    <div class="card-body">
+      <p class="mb-0" style="white-space:pre-line">{{ report.description }}</p>
+    </div>
+  </div>
+
+  <!-- Sección 4 -->
+  <div class="card bg-dark border-secondary mb-3">
+    <div class="card-header fw-bold" style="background:#3a3a3a">👤 4. Responsable del Error</div>
+    <div class="card-body small">
+      <dl class="row mb-2">
+        <dt class="col-sm-4">Nombre</dt>
+        <dd class="col-sm-8">{{ report.responsible.get_full_name|default:report.responsible.username|default:"—" }}</dd>
+        {% if report.responsible_area %}
+          <dt class="col-sm-4">Área / Puesto</dt>
+          <dd class="col-sm-8">{{ report.responsible_area }}</dd>
+        {% endif %}
+      </dl>
+      <strong>Causas:</strong>
+      <div class="mb-1">
+        {% for label in report.get_error_causes_display %}
+          <span class="badge bg-secondary me-1">{{ label }}</span>
+        {% empty %}
+          <span class="text-muted">—</span>
+        {% endfor %}
+        {% if report.cause_other %}<span class="text-muted"> / {{ report.cause_other }}</span>{% endif %}
+      </div>
+      {% if report.cause_detail %}
+        <p class="text-muted mb-0" style="white-space:pre-line">{{ report.cause_detail }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sección 5 -->
+  <div class="card bg-dark border-secondary mb-3">
+    <div class="card-header fw-bold" style="background:#3a3a3a">📋 5. Impacto del Error</div>
+    <div class="card-body small">
+      {% for label in report.get_error_impacts_display %}
+        <span class="badge bg-secondary me-1">{{ label }}</span>
+      {% empty %}
+        <span class="text-muted">—</span>
+      {% endfor %}
+      {% if report.impact_other %}<span class="text-muted"> / {{ report.impact_other }}</span>{% endif %}
+      {% if report.impact_description %}
+        <p class="mt-2 text-muted mb-0" style="white-space:pre-line">{{ report.impact_description }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Secciones 6 y 7 -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-header fw-bold" style="background:#3a3a3a">🔧 6. Acciones Correctivas</div>
+        <div class="card-body small">
+          {% if report.corrective_actions %}
+            <p class="mb-0" style="white-space:pre-line">{{ report.corrective_actions }}</p>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-dark border-warning h-100">
+        <div class="card-header bg-warning text-dark fw-bold">📈 7. Prevención</div>
+        <div class="card-body small">
+          {% if report.prevention_actions %}
+            <p class="mb-0" style="white-space:pre-line">{{ report.prevention_actions }}</p>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revisión por Dirección -->
+  <div class="card bg-dark border-success mb-4">
+    <div class="card-header bg-success text-white fw-bold">👁 Revisión por Dirección</div>
+    <div class="card-body">
+      {% if report.reviewed_by %}
+        <dl class="row small mb-2">
+          <dt class="col-sm-3">Revisado por</dt>
+          <dd class="col-sm-9">{{ report.reviewed_by.get_full_name|default:report.reviewed_by.username }} — {{ report.reviewed_at|date:"d/m/Y H:i" }}</dd>
+          <dt class="col-sm-3">Estado</dt>
+          <dd class="col-sm-9">{{ report.get_review_status_display }}</dd>
+          {% if report.review_notes %}
+            <dt class="col-sm-3">Notas</dt>
+            <dd class="col-sm-9" style="white-space:pre-line">{{ report.review_notes }}</dd>
+          {% endif %}
+          {% if report.is_exception and report.exception_reason %}
+            <dt class="col-sm-3">Razón excepción</dt>
+            <dd class="col-sm-9">{{ report.exception_reason }}</dd>
+          {% endif %}
+        </dl>
+      {% else %}
+        <p class="text-muted small mb-3">Pendiente de revisión por Dirección.</p>
+      {% endif %}
+
+      {% if request.user.roles.filter(name="ADMIN").exists or perms.production %}
+        {% comment %}Admin review form{% endcomment %}
+      {% endif %}
+
+      <!-- Formulario de revisión (solo ADMIN) -->
+      <form method="post" action="{% url 'production:review_error_report' report.pk %}">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label small">Estado de revisión</label>
+            <select name="review_status" class="form-select form-select-sm bg-dark text-light">
+              {% for value, label in review_statuses %}
+                <option value="{{ value }}" {% if report.review_status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label small">Notas de revisión</label>
+            <textarea name="review_notes" class="form-control form-control-sm bg-dark text-light" rows="2"
+                      placeholder="Observaciones de dirección…">{{ report.review_notes }}</textarea>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="is_exception" value="1"
+                     id="is_exception" {% if report.is_exception %}checked{% endif %}>
+              <label class="form-check-label small" for="is_exception">
+                Otorgar excepción (no se aplica reposición)
+              </label>
+            </div>
+          </div>
+          <div class="col-12">
+            <textarea name="exception_reason" class="form-control form-control-sm bg-dark text-light" rows="2"
+                      placeholder="Razón de la excepción…">{{ report.exception_reason }}</textarea>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-success">Guardar revisión</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if report.requires_reposition and not report.is_exception %}
+    <div class="alert alert-danger">
+      <strong>⚠️ Reposición requerida.</strong>
+      El responsable del error deberá cubrir el costo de reposición determinado por la Dirección.
+      <em>El costo del error a pagar es la prenda completa.</em>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Reporte de Error — Space Cheer{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:860px">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    {% if job %}
+      <a href="{% url 'production:admin_job_detail' job.pk %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
+    {% else %}
+      <a href="{% url 'production:error_report_list' %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
+    {% endif %}
+    <div>
+      <h2 class="mb-0">Reporte de Error</h2>
+      <small class="text-muted">Calidad • Responsabilidad • Mejora Continua</small>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Sección 1: Información general -->
+    <div class="card bg-dark border-primary mb-3">
+      <div class="card-header bg-primary text-white fw-bold">
+        ℹ️ 1. Información General
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% if job %}
+            <div class="col-12">
+              <div class="alert alert-secondary py-2 mb-0">
+                Orden #{{ job.order.id }}{% if job.order.team %} — {{ job.order.team }}{% endif %}
+              </div>
+            </div>
+          {% else %}
+            <div class="col-md-6">
+              <label class="form-label">Área donde ocurrió el error</label>
+              <input type="text" name="area" class="form-control bg-dark text-light" placeholder="Ej. Costura, Cristalería…">
+            </div>
+          {% endif %}
+          <div class="col-md-6">
+            <label class="form-label">Etapa de producción</label>
+            <select name="stage" class="form-select bg-dark text-light">
+              <option value="">— Seleccionar etapa —</option>
+              {% for stage in stages %}
+                <option value="{{ stage.pk }}">{{ stage.icon }} {{ stage.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 2: Tipo de error -->
+    <div class="card bg-dark border-warning mb-3">
+      <div class="card-header bg-warning text-dark fw-bold">
+        ⚠️ 2. Tipo de Error
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          {% for value, label in error_types %}
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="error_types"
+                       value="{{ value }}" id="et_{{ value }}">
+                <label class="form-check-label" for="et_{{ value }}">{{ label }}</label>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-2">
+          <label class="form-label small text-muted">Otro (especifica)</label>
+          <input type="text" name="error_type_other" class="form-control form-control-sm bg-dark text-light"
+                 placeholder="Describe otro tipo de error…">
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 3: Descripción del error -->
+    <div class="card bg-dark border-danger mb-3">
+      <div class="card-header bg-danger text-white fw-bold">
+        ✖ 3. Descripción del Error
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-2">
+          Describe detalladamente qué ocurrió, qué se hizo mal y en qué parte del proceso se detectó el error.
+        </p>
+        <textarea name="description" class="form-control bg-dark text-light" rows="4"
+                  placeholder="Descripción detallada del error…" required></textarea>
+      </div>
+    </div>
+
+    <!-- Sección 4: Responsable del error -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header fw-bold" style="background:#3a3a3a">
+        👤 4. Responsable del Error
+      </div>
+      <div class="card-body">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre del responsable</label>
+            <select name="responsible" class="form-select bg-dark text-light">
+              <option value="">— Seleccionar —</option>
+              {% for op in operarios %}
+                <option value="{{ op.pk }}">{{ op.get_full_name|default:op.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Área / Puesto</label>
+            <input type="text" name="responsible_area" class="form-control bg-dark text-light"
+                   placeholder="Ej. Costura, Cristalería…">
+          </div>
+        </div>
+        <p class="fw-semibold small mb-2">¿Por qué ocurrió el error?</p>
+        <div class="row g-2 mb-2">
+          {% for value, label in error_causes %}
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="error_causes"
+                       value="{{ value }}" id="ec_{{ value }}">
+                <label class="form-check-label" for="ec_{{ value }}">{{ label }}</label>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <input type="text" name="cause_other" class="form-control form-control-sm bg-dark text-light mb-2"
+               placeholder="Otro motivo…">
+        <label class="form-label small text-muted">Explica en detalle la causa</label>
+        <textarea name="cause_detail" class="form-control bg-dark text-light" rows="2"
+                  placeholder="Detalle de la causa…"></textarea>
+      </div>
+    </div>
+
+    <!-- Sección 5: Impacto del error -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header fw-bold" style="background:#3a3a3a">
+        📋 5. Impacto del Error
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold small mb-2">¿En qué afectó?</p>
+        <div class="row g-2 mb-2">
+          {% for value, label in error_impacts %}
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="error_impacts"
+                       value="{{ value }}" id="ei_{{ value }}">
+                <label class="form-check-label" for="ei_{{ value }}">{{ label }}</label>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <input type="text" name="impact_other" class="form-control form-control-sm bg-dark text-light mb-2"
+               placeholder="Otro impacto…">
+        <label class="form-label small text-muted">Descripción del impacto</label>
+        <textarea name="impact_description" class="form-control bg-dark text-light" rows="2"
+                  placeholder="Describe el impacto…"></textarea>
+      </div>
+    </div>
+
+    <!-- Sección 6: Acciones correctivas -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header fw-bold" style="background:#3a3a3a">
+        🔧 6. Acciones Correctivas Inmediatas
+      </div>
+      <div class="card-body">
+        <label class="form-label small text-muted">¿Qué acciones se tomaron para corregir el error?</label>
+        <textarea name="corrective_actions" class="form-control bg-dark text-light" rows="3"
+                  placeholder="Acciones correctivas…"></textarea>
+      </div>
+    </div>
+
+    <!-- Sección 7: Prevención -->
+    <div class="card bg-dark border-warning mb-4">
+      <div class="card-header bg-warning text-dark fw-bold">
+        📈 7. Acciones para Evitar que Vuelva a Ocurrir
+      </div>
+      <div class="card-body">
+        <label class="form-label small text-muted">¿Qué se hará para prevenir que este error se repita?</label>
+        <textarea name="prevention_actions" class="form-control bg-dark text-light" rows="3"
+                  placeholder="Acciones preventivas…"></textarea>
+      </div>
+    </div>
+
+    <div class="alert alert-warning">
+      <strong>Recuerda:</strong> Reportar a tiempo es responsabilidad de todos.
+      Ocultar errores o retrasar su reporte se considera una <strong>falta grave</strong>.
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger px-4">Enviar Reporte</button>
+      {% if job %}
+        <a href="{% url 'production:admin_job_detail' job.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+      {% else %}
+        <a href="{% url 'production:error_report_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

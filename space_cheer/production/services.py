@@ -1,4 +1,5 @@
 import logging
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from production.tasks import notify_production_stage_complete
@@ -50,6 +51,25 @@ class ProductionJobService:
     @staticmethod
     def complete_task(task, user, started_at, notes=""):
         from production.models import ProductionTask
+
+        # Regla de Oro: no pasar a la siguiente etapa si la anterior está pendiente.
+        blocked_by = (
+            ProductionTask.objects.filter(
+                job=task.job,
+                order_item=task.order_item,
+                stage__display_order__lt=task.stage.display_order,
+                status=ProductionTask.Status.PENDING,
+            )
+            .select_related("stage")
+            .order_by("-stage__display_order")
+            .first()
+        )
+        if blocked_by:
+            raise ValidationError(
+                f"No se puede completar «{task.stage.name}»: "
+                f"la etapa «{blocked_by.stage.name}» aún está pendiente."
+            )
+
         with transaction.atomic():
             locked = (
                 ProductionTask.objects.select_for_update()
@@ -64,7 +84,11 @@ class ProductionJobService:
             locked.completed_at = timezone.now()
             locked.started_at = started_at
             locked.notes = notes
-            locked.save(update_fields=["status", "completed_by", "completed_at", "started_at", "notes"])
+            locked.save(
+                update_fields=[
+                    "status", "completed_by", "completed_at", "started_at", "notes"
+                ]
+            )
 
         notify_production_stage_complete.delay(task.pk)
 
@@ -84,10 +108,6 @@ class OperarioService:
 
     @staticmethod
     def create(*, username, password, first_name="", last_name="", email=""):
-        """Crea un usuario OPERARIO con perfil completo.
-
-        Levanta ValueError si el username ya existe.
-        """
         from django.contrib.auth import get_user_model
         from accounts.models import Role
 
@@ -112,7 +132,6 @@ class OperarioService:
 
     @staticmethod
     def assign_role(operario, prod_role, assigned_by):
-        """Asigna un ProductionRole al operario (idempotente)."""
         from production.models import OperarioRoleAssignment
 
         OperarioRoleAssignment.objects.get_or_create(
@@ -123,7 +142,88 @@ class OperarioService:
 
     @staticmethod
     def remove_role(operario, prod_role):
-        """Quita un ProductionRole del operario."""
         from production.models import OperarioRoleAssignment
 
         OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).delete()
+
+
+class ErrorReportService:
+
+    @staticmethod
+    def create(
+        *,
+        reported_by,
+        description,
+        error_types,
+        order=None,
+        job=None,
+        stage=None,
+        area="",
+        error_type_other="",
+        responsible=None,
+        responsible_area="",
+        error_causes=None,
+        cause_other="",
+        cause_detail="",
+        error_impacts=None,
+        impact_other="",
+        impact_description="",
+        corrective_actions="",
+        prevention_actions="",
+    ):
+        from production.models import ErrorReport
+
+        report = ErrorReport.objects.create(
+            reported_by=reported_by,
+            description=description,
+            error_types=error_types or [],
+            order=order,
+            job=job,
+            stage=stage,
+            area=area,
+            error_type_other=error_type_other,
+            responsible=responsible,
+            responsible_area=responsible_area,
+            error_causes=error_causes or [],
+            cause_other=cause_other,
+            cause_detail=cause_detail,
+            error_impacts=error_impacts or [],
+            impact_other=impact_other,
+            impact_description=impact_description,
+            corrective_actions=corrective_actions,
+            prevention_actions=prevention_actions,
+            requires_reposition=False,
+        )
+        # Auto-flag reposition if error type warrants it
+        if report.is_reposition_type:
+            report.requires_reposition = True
+            report.save(update_fields=["requires_reposition"])
+
+        logger.info(
+            "ErrorReport #%s creado por user=%s (reposicion=%s)",
+            report.pk,
+            reported_by,
+            report.requires_reposition,
+        )
+        return report
+
+    @staticmethod
+    def review(report, reviewed_by, review_status, review_notes="", is_exception=False, exception_reason=""):
+        from production.models import ErrorReport
+
+        report.review_status = review_status
+        report.reviewed_by = reviewed_by
+        report.reviewed_at = timezone.now()
+        report.review_notes = review_notes
+        report.is_exception = is_exception
+        report.exception_reason = exception_reason
+        if review_status == ErrorReport.ReviewStatus.EXCEPTION_GRANTED:
+            report.requires_reposition = False
+            report.is_exception = True
+        report.save(
+            update_fields=[
+                "review_status", "reviewed_by", "reviewed_at",
+                "review_notes", "is_exception", "exception_reason", "requires_reposition",
+            ]
+        )
+        return report

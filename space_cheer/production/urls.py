@@ -1,5 +1,5 @@
 from django.urls import path
-from production.views import operario_views, admin_views, config_views
+from production.views import operario_views, admin_views, config_views, error_report_views
 
 app_name = "production"
 
@@ -14,6 +14,12 @@ urlpatterns = [
     path("admin/job/<int:pk>/", admin_views.admin_job_detail, name="admin_job_detail"),
     path("admin/job/<int:pk>/toggle-urgent/", admin_views.toggle_urgent, name="toggle_urgent"),
     path("admin/task/<int:pk>/assign/", admin_views.assign_task, name="assign_task"),
+    # Error Reports
+    path("errores/", error_report_views.error_report_list, name="error_report_list"),
+    path("errores/nuevo/", error_report_views.create_error_report, name="create_error_report"),
+    path("errores/nuevo/job/<int:job_pk>/", error_report_views.create_error_report, name="create_error_report_job"),
+    path("errores/<int:pk>/", error_report_views.error_report_detail, name="error_report_detail"),
+    path("errores/<int:pk>/revisar/", error_report_views.review_error_report, name="review_error_report"),
     # Config (Admin only)
     path("config/stages/", config_views.manage_stages, name="manage_stages"),
     path("config/roles/", config_views.manage_roles, name="manage_roles"),

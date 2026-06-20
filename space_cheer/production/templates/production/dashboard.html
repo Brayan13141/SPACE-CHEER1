@@ -3,12 +3,23 @@
 {% block title %}Panel de Producción - SPACE CHEER{% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
-  <div class="d-flex align-items-center gap-2 mb-4">
+  <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
     <h2 class="mb-0">Mis Tareas</h2>
     {% for assignment in prod_roles %}
       <span class="badge bg-secondary">{{ assignment.role.name }}</span>
     {% endfor %}
+    <a href="{% url 'production:create_error_report' %}" class="btn btn-sm btn-outline-danger ms-auto">
+      ⚠️ Reportar Error
+    </a>
   </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
 
   {% if not prod_roles %}
     <div class="alert alert-warning">
@@ -20,23 +31,41 @@
     <div class="row g-3">
       {% for task in tasks %}
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card bg-dark border-secondary h-100 {% if task.job.is_urgent %}border-danger{% endif %}">
+          <div class="card bg-dark border-{% if task.job.is_urgent %}danger{% else %}secondary{% endif %} h-100">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="fs-4">{{ task.stage.icon }}</span>
-                {% if task.job.is_urgent %}
-                  <span class="badge bg-danger">Urgente</span>
-                {% endif %}
+                <div class="d-flex gap-1">
+                  {% if task.job.is_urgent %}
+                    <span class="badge bg-danger">Urgente</span>
+                  {% endif %}
+                  <span class="badge bg-dark border border-secondary text-muted small">
+                    Etapa {{ task.stage.display_order }}
+                  </span>
+                </div>
               </div>
               <h5 class="card-title">{{ task.stage.name }}</h5>
               <p class="card-text text-muted small">
                 {{ task.order_item.product.name }}<br>
                 Orden #{{ task.job.order.id }}
               </p>
-              <button type="button" class="btn btn-success btn-sm mt-2"
-                data-bs-toggle="modal" data-bs-target="#completeModal{{ task.pk }}">
-                Completar
-              </button>
+
+              {% if task.blocked_by %}
+                <div class="alert alert-warning py-1 px-2 small mb-2">
+                  🔒 Bloqueada — espera: <strong>{{ task.blocked_by }}</strong>
+                </div>
+              {% endif %}
+
+              <div class="d-flex gap-2 mt-2">
+                <button type="button" class="btn btn-success btn-sm"
+                  data-bs-toggle="modal" data-bs-target="#completeModal{{ task.pk }}">
+                  Completar
+                </button>
+                {% if task.job.order.design_images.filter %}
+                  <a href="{% url 'production:order_design' task.job.pk %}"
+                     class="btn btn-outline-secondary btn-sm">Ver diseño</a>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
@@ -46,12 +75,15 @@
           <div class="modal-dialog">
             <div class="modal-content bg-dark">
               <div class="modal-header">
-                <h5 class="modal-title">Completar — {{ task.stage.name }}</h5>
+                <h5 class="modal-title">{{ task.stage.icon }} Completar — {{ task.stage.name }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
               </div>
               <form method="post" action="{% url 'production:task_complete' task.pk %}">
                 {% csrf_token %}
                 <div class="modal-body">
+                  <p class="small text-muted">
+                    Orden #{{ task.job.order.id }} — {{ task.order_item.product.name }}
+                  </p>
                   <div class="mb-3">
                     <label class="form-label">Fecha de inicio</label>
                     {% with start=task.started_at|default:task.job.created_at %}
@@ -62,7 +94,12 @@
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Notas (opcional)</label>
-                    <textarea name="notes" class="form-control bg-dark text-light" rows="3"></textarea>
+                    <textarea name="notes" class="form-control bg-dark text-light" rows="3"
+                              placeholder="Observaciones sobre esta etapa…"></textarea>
+                  </div>
+                  <div class="alert alert-secondary small py-2">
+                    <strong>Regla de Oro:</strong> Solo completa esta etapa si cumple con los estándares
+                    de calidad Space Cheer. No pases trabajo defectuoso a la siguiente etapa.
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -77,7 +114,7 @@
     </div>
   {% else %}
     {% if prod_roles %}
-      <p class="text-muted">No tienes tareas pendientes.</p>
+      <p class="text-muted">No tienes tareas pendientes. ¡Buen trabajo! 🎉</p>
     {% endif %}
   {% endif %}
 </div>
