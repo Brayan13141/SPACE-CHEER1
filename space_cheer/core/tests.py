@@ -111,3 +111,35 @@ class PageHelpContextProcessorTests(TestCase):
         user = make_user_with_role("ADMIN")
         response = self._get(user, "accounts:profile_settings")
         self.assertEqual(response.context["page_help_text"], "")
+
+
+from django.template import Context, Template
+
+
+class HelpIconTagTests(TestCase):
+
+    def _render(self, snippet):
+        tpl = Template("{% load help_tags %}" + snippet)
+        return tpl.render(Context({}))
+
+    def test_renders_popover_button(self):
+        html = self._render('{% help_icon "Texto de ayuda." %}')
+        self.assertIn('data-bs-toggle="popover"', html)
+        self.assertIn("Texto de ayuda.", html)
+        self.assertIn("bi-info-circle", html)
+
+    def test_default_placement_is_top(self):
+        html = self._render('{% help_icon "Test." %}')
+        self.assertIn('data-bs-placement="top"', html)
+
+    def test_custom_placement(self):
+        html = self._render('{% help_icon "Test." "right" %}')
+        self.assertIn('data-bs-placement="right"', html)
+
+    def test_trigger_is_hover_focus(self):
+        html = self._render('{% help_icon "Test." %}')
+        self.assertIn('data-bs-trigger="hover focus"', html)
+
+    def test_has_aria_label(self):
+        html = self._render('{% help_icon "Test." %}')
+        self.assertIn('aria-label="Más información"', html)
