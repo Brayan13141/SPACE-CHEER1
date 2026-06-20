@@ -52,3 +52,42 @@ class DashboardProductionLinksTests(TestCase):
         user = make_user_with_role("STAFF", is_staff_type=True)
         response = self._get(user)
         self.assertContains(response, reverse("production:admin_overview"))
+
+
+from unittest.mock import MagicMock
+from core.help_registry import get_help_text
+
+
+class GetHelpTextTests(TestCase):
+
+    def _user(self, *role_names):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.roles.values_list.return_value = list(role_names)
+        return user
+
+    def test_role_specific_text_returned(self):
+        user = self._user("ADMIN")
+        self.assertIn("administración", get_help_text("core:dashboard", user))
+
+    def test_first_matching_role_wins(self):
+        # user has both ATHLETE and ADMIN; ADMIN entry exists, ATHLETE does not for dashboard
+        user = self._user("ADMIN", "ATHLETE")
+        self.assertNotEqual(get_help_text("core:dashboard", user), "")
+
+    def test_none_fallback_when_no_role_match(self):
+        user = self._user("ATHLETE")
+        # orders:manage_orders has a None-keyed entry
+        self.assertNotEqual(get_help_text("orders:manage_orders", user), "")
+
+    def test_unauthenticated_returns_empty(self):
+        user = MagicMock()
+        user.is_authenticated = False
+        self.assertEqual(get_help_text("core:dashboard", user), "")
+
+    def test_unknown_view_returns_empty(self):
+        user = self._user("ADMIN")
+        self.assertEqual(get_help_text("nonexistent:view", user), "")
+
+    def test_none_user_returns_empty(self):
+        self.assertEqual(get_help_text("core:dashboard", None), "")
