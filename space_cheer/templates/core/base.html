@@ -268,6 +268,34 @@
                 overflow-y: auto;
             }
         }
+
+        /* ─── HELP FAB ───────────────────────────────── */
+        #sc-help-fab {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1rem;
+            z-index: 1045;
+        }
+        #sc-help-fab button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--sc-cyan, #0dcaf0);
+            color: #000;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,.4);
+            cursor: pointer;
+        }
+        #sc-help-fab button:hover {
+            background: #58d6ff;
+        }
+        @media (max-width: 575.98px) {
+            .popover { max-width: 280px; }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -750,6 +778,20 @@
         </div>
     </footer>
 
+    {# ── Help FAB ────────────────────────────────────────────────────── #}
+    {% if page_help_text %}
+    <div id="sc-help-fab">
+        <button type="button"
+                data-bs-toggle="popover"
+                data-bs-placement="auto"
+                data-bs-trigger="click"
+                data-bs-content="{{ page_help_text }}"
+                title="¿Cómo funciona esta página?">
+            <i class="bi bi-question-circle-fill"></i>
+        </button>
+    </div>
+    {% endif %}
+
     {# ═══════════════════════════════════════════════════════ SCRIPTS #}
     <script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -783,6 +825,11 @@
         // ── Tooltips ─────────────────────────────────────────────
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
             new bootstrap.Tooltip(el);
+        });
+
+        // ── Popovers (help FAB + inline ⓘ) ───────────────────────
+        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) {
+            new bootstrap.Popover(el);
         });
 
         // ── Sidebars ─────────────────────────────────────────────
