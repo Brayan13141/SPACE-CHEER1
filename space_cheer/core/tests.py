@@ -91,3 +91,23 @@ class GetHelpTextTests(TestCase):
 
     def test_none_user_returns_empty(self):
         self.assertEqual(get_help_text("core:dashboard", None), "")
+
+
+class PageHelpContextProcessorTests(TestCase):
+
+    def _get(self, user, url_name, **kwargs):
+        client = Client()
+        client.force_login(user)
+        return client.get(reverse(url_name, **kwargs))
+
+    def test_page_help_text_present_for_admin_dashboard(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertIn("page_help_text", response.context)
+        self.assertIn("administración", response.context["page_help_text"])
+
+    def test_page_help_text_empty_for_unregistered_view(self):
+        # accounts:profile_settings has no registry entry
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "accounts:profile_settings")
+        self.assertEqual(response.context["page_help_text"], "")

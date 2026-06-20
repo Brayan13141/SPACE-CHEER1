@@ -177,6 +177,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "accounts.context_processors.user_roles",
                 "orders.context_processors.cart_context",
+                "core.context_processors.page_help",
                 "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
