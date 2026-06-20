@@ -2,28 +2,61 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 
+# Roles based on Space Cheer's official process organization.
+# Each role maps to the stages where that person is the PRIMARY responsible.
 ROLES = [
     {
-        "name": "Diseñador",
-        "stages": ["diseno", "logos"],
+        "name": "CONE",
+        "stages": [
+            "seleccion-tallas",
+            "sublimacion",
+            "calidad-final",
+            "empaque",
+        ],
     },
     {
-        "name": "Cristalero",
-        "stages": ["cristaleria", "pega_cristaleria"],
+        "name": "SR. TINO",
+        "stages": [
+            "planeacion-materiales",
+            "corte",
+        ],
     },
     {
-        "name": "Cortador/Costurero",
-        "stages": ["moldaje", "corte", "semiarmado", "armado_final"],
+        "name": "DANI",
+        "stages": [
+            "control-surtido-materiales",
+            "calidad-aplicaciones",
+        ],
     },
     {
-        "name": "Logística",
-        "stages": ["envio"],
+        "name": "CHINO",
+        "stages": [
+            "cristaleria-plantillas",
+        ],
+    },
+    {
+        "name": "SRA. CHIVIS",
+        "stages": [
+            "costura",
+        ],
+    },
+    {
+        "name": "TERE",
+        "stages": [
+            "calidad-costura",
+        ],
+    },
+    {
+        "name": "MANUEL",
+        "stages": [
+            "envios",
+        ],
     },
 ]
 
 
 class Command(BaseCommand):
-    help = "Crea los roles base de producción (idempotente)"
+    help = "Crea los roles base de producción Space Cheer (idempotente)"
 
     def add_arguments(self, parser):
         parser.add_argument("--verbose", action="store_true")
@@ -47,9 +80,13 @@ class Command(BaseCommand):
                     created_count += 1
                     if verbose:
                         self.stdout.write(
-                            f"  Rol creado: {role.name} "
+                            f"  [+] {role.name} "
                             f"({', '.join(s.name for s in stages)})"
                         )
+                elif verbose:
+                    self.stdout.write(
+                        f"  [=] {role.name} (etapas sincronizadas)"
+                    )
 
         self.stdout.write(
             self.style.SUCCESS(

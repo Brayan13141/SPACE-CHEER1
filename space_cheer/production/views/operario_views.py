@@ -1,5 +1,6 @@
 import logging
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -70,6 +71,8 @@ def task_complete(request, pk):
             return redirect("production:dashboard")
         ProductionJobService.complete_task(task, request.user, started_at, notes)
         messages.success(request, "Tarea completada.")
+    except ValidationError as exc:
+        messages.error(request, exc.message)
     except Exception as exc:
         logger.exception("Error al completar task %s: %s", pk, exc)
         messages.error(request, "Error al completar la tarea.")

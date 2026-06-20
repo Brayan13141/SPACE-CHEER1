@@ -1,0 +1,96 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Reportes de Error — Space Cheer{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0">Reportes de Error</h2>
+      <small class="text-muted">Calidad • Responsabilidad • Mejora Continua</small>
+    </div>
+    <a href="{% url 'production:create_error_report' %}" class="btn btn-danger">
+      + Nuevo Reporte
+    </a>
+  </div>
+
+  <!-- Filtros -->
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+      <select name="status" class="form-select form-select-sm bg-dark text-light">
+        <option value="">Todos los estados</option>
+        {% for value, label in review_statuses %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <select name="reposition" class="form-select form-select-sm bg-dark text-light">
+        <option value="">Con/sin reposición</option>
+        <option value="1" {% if reposition_filter == "1" %}selected{% endif %}>Con reposición</option>
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrar</button>
+    </div>
+  </form>
+
+  {% if reports %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle">
+        <thead class="table-secondary">
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Etapa</th>
+            <th>Tipos de Error</th>
+            <th>Reportado por</th>
+            <th>Responsable</th>
+            <th>Estado</th>
+            <th>Reposición</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+            <tr>
+              <td>{{ report.pk }}</td>
+              <td class="small">{{ report.reported_at|date:"d/m/Y H:i" }}</td>
+              <td class="small">{% if report.stage %}{{ report.stage.icon }} {{ report.stage.name }}{% else %}—{% endif %}</td>
+              <td class="small">
+                {% for label in report.get_error_types_display %}
+                  <span class="badge bg-secondary">{{ label }}</span>
+                {% endfor %}
+              </td>
+              <td class="small">{{ report.reported_by.get_full_name|default:report.reported_by.username|default:"—" }}</td>
+              <td class="small">{{ report.responsible.get_full_name|default:report.responsible.username|default:"—" }}</td>
+              <td>
+                {% if report.review_status == "PENDING" %}
+                  <span class="badge bg-warning text-dark">{{ report.get_review_status_display }}</span>
+                {% elif report.review_status == "REVIEWED" %}
+                  <span class="badge bg-success">{{ report.get_review_status_display }}</span>
+                {% elif report.review_status == "EXCEPTION_GRANTED" %}
+                  <span class="badge bg-info text-dark">{{ report.get_review_status_display }}</span>
+                {% elif report.review_status == "REPOSITION_REQUIRED" %}
+                  <span class="badge bg-danger">{{ report.get_review_status_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if report.requires_reposition %}
+                  <span class="badge bg-danger">Sí</span>
+                {% else %}
+                  <span class="text-muted">No</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'production:error_report_detail' report.pk %}" class="btn btn-sm btn-outline-light">Ver</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-secondary">No hay reportes de error con los filtros seleccionados.</div>
+  {% endif %}
+</div>
+{% endblock %}
