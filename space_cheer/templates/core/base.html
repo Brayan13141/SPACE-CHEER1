@@ -281,9 +281,10 @@
         <div class="container-fluid">
 
             {# ── Brand ── #}
-            <a class="navbar-brand d-flex align-items-center"
+            <a class="navbar-brand d-flex align-items-center gap-2"
                href="{% if is_guardian %}{% url 'guardian:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}">
-                <i class="bi bi-stars me-2"></i>SPACE CHEER
+                <img src="{% static 'IMAGES/LOGO.png' %}" alt="SPACE CHEER" height="36" class="d-inline-block">
+                <span class="d-none d-sm-inline fw-bold">SPACE CHEER</span>
             </a>
 
             <button class="navbar-toggler" type="button"

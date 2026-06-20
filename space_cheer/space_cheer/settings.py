@@ -36,7 +36,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
-SITE_ID = 1
+SITE_ID = 2
 
 # Application definition
 
@@ -174,6 +174,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "accounts.context_processors.user_roles",
                 "orders.context_processors.cart_context",
                 "django.template.context_processors.debug",
@@ -238,6 +239,7 @@ LANGUAGES = [
 ]
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
+LANGUAGE_COOKIE_AGE = 365 * 24 * 3600
 
 TIME_ZONE = "UTC"
 
