@@ -143,3 +143,43 @@ class HelpIconTagTests(TestCase):
     def test_has_aria_label(self):
         html = self._render('{% help_icon "Test." %}')
         self.assertIn('aria-label="Más información"', html)
+
+
+class RegistrySpotCheckTests(TestCase):
+
+    def _user(self, *role_names):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.roles.values_list.return_value = list(role_names)
+        return user
+
+    def test_operario_gets_operario_text_on_production_dashboard(self):
+        text = get_help_text("production:dashboard", self._user("OPERARIO"))
+        self.assertIn("tareas", text)
+
+    def test_headcoach_gets_headcoach_text_on_dashboard(self):
+        text = get_help_text("core:dashboard", self._user("HEADCOACH"))
+        self.assertIn("equipo", text)
+
+    def test_guardian_gets_guardian_text_on_dashboard(self):
+        text = get_help_text("core:dashboard", self._user("GUARDIAN"))
+        self.assertIn("tutor", text)
+
+    def test_none_keyed_entry_serves_all_roles(self):
+        for role in ("ADMIN", "HEADCOACH", "ATHLETE", "COACH"):
+            with self.subTest(role=role):
+                text = get_help_text("orders:manage_orders", self._user(role))
+                self.assertNotEqual(text, "")
+
+    def test_athlete_gets_catalog_text(self):
+        text = get_help_text("products:catalog", self._user("ATHLETE"))
+        self.assertIn("Catálogo", text)
+
+    def test_admin_gets_operarios_management_text(self):
+        text = get_help_text("production:manage_operarios", self._user("ADMIN"))
+        self.assertIn("operarios", text.lower())
+
+    def test_error_report_list_differs_by_role(self):
+        admin_text = get_help_text("production:error_report_list", self._user("ADMIN"))
+        op_text = get_help_text("production:error_report_list", self._user("OPERARIO"))
+        self.assertNotEqual(admin_text, op_text)
