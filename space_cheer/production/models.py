@@ -34,6 +34,11 @@ class ProductStageConfig(models.Model):
 class ProductionRole(models.Model):
     name = models.CharField(max_length=100)
     stages = models.ManyToManyField(ProductionStage, blank=True)
+    # Bullet list of error types this role is accountable for (one per line).
+    error_responsibilities = models.TextField(
+        blank=True,
+        help_text="Una responsabilidad por línea. Ej: Tallas incorrectas",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
@@ -41,6 +46,9 @@ class ProductionRole(models.Model):
 
     def __str__(self):
         return self.name
+
+    def error_responsibilities_list(self):
+        return [line.strip() for line in self.error_responsibilities.splitlines() if line.strip()]
 
 
 class OperarioRoleAssignment(models.Model):

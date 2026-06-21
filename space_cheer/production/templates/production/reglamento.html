@@ -1,0 +1,211 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Reglamento de Producción — Space Cheer{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:1000px">
+
+  <!-- Encabezado -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold">📋 Reglamento de Producción</h1>
+    <p class="text-muted">
+      Responsabilidades, calidad y cumplimiento de fechas — Space Cheer
+    </p>
+  </div>
+
+  <!-- ── REGLA DE ORO ─────────────────────────────────────────────────────── -->
+  <div class="card border-warning mb-5" style="background:#1a1600">
+    <div class="card-body text-center py-4">
+      <div class="fs-2 mb-2">⭐</div>
+      <h4 class="text-warning fw-bold mb-3">REGLA DE ORO</h4>
+      <p class="lead mb-1">
+        Cada responsable es dueño de su proceso, de la calidad de su trabajo
+        y del cumplimiento de las fechas comprometidas.
+      </p>
+      <p class="text-warning fw-semibold mb-0">
+        Ningún trabajo deberá pasar a la siguiente etapa si no cumple con
+        los estándares de calidad de Space Cheer.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── OBJETIVO ─────────────────────────────────────────────────────────── -->
+  <div class="alert alert-secondary mb-5">
+    <strong>Objetivo:</strong> Definir claramente las responsabilidades de cada área para
+    mantener la calidad de nuestros productos, cumplir con las fechas pactadas con nuestros
+    clientes y asegurar el correcto funcionamiento de Space Cheer.
+  </div>
+
+  <!-- ── ORGANIZACIÓN DE PROCESOS ─────────────────────────────────────────── -->
+  <h3 class="fw-bold mb-3">🏭 Organización de Procesos</h3>
+  <p class="text-muted small mb-3">
+    Responsable primario y auxiliares por etapa de producción.
+  </p>
+  <div class="table-responsive mb-5">
+    <table class="table table-dark table-bordered align-middle">
+      <thead class="table-secondary text-center">
+        <tr>
+          <th style="width:3rem">#</th>
+          <th>Proceso / Área</th>
+          <th>Responsable</th>
+          <th>Auxiliar(es)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in responsibilities %}
+          <tr>
+            <td class="text-center text-muted">{{ r.stage.display_order }}</td>
+            <td>
+              <span class="me-2">{{ r.stage.icon }}</span>
+              <strong>{{ r.stage.name }}</strong>
+              {% if r.stage.description %}
+                <div class="text-muted small mt-1">{{ r.stage.description }}</div>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <span class="badge bg-primary fs-6 px-3 py-2">{{ r.responsible_role.name }}</span>
+            </td>
+            <td class="text-center">
+              {% for aux in r.auxiliary_roles.all %}
+                <span class="badge bg-secondary me-1">{{ aux.name }}</span>
+              {% empty %}
+                <span class="text-muted">—</span>
+              {% endfor %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted text-center">Sin configuración. Ejecuta seed_stage_responsibilities.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── RESPONSABLES OFICIALES ───────────────────────────────────────────── -->
+  <h3 class="fw-bold mb-3">👤 Responsables Oficiales</h3>
+  <div class="row g-3 mb-5">
+    {% for role in roles %}
+      <div class="col-md-4">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-header fw-bold text-center">{{ role.name }}</div>
+          <div class="card-body">
+            <p class="small text-muted mb-2 fw-semibold">Etapas a cargo:</p>
+            <ul class="list-unstyled mb-0 small">
+              {% for stage in role.stages.all %}
+                <li>{{ stage.icon }} {{ stage.name }}</li>
+              {% empty %}
+                <li class="text-muted">—</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── RESPONSABILIDAD POR ERRORES ──────────────────────────────────────── -->
+  <h3 class="fw-bold mb-3">⚠️ Responsabilidad por Errores</h3>
+  <div class="row g-3 mb-5">
+    {% for role in roles %}
+      {% if role.error_responsibilities %}
+        <div class="col-md-6">
+          <div class="card bg-dark h-100" style="border-color:#ffc107">
+            <div class="card-header fw-bold" style="background:#332900;border-color:#ffc107">
+              ⚠️ {{ role.name }}
+            </div>
+            <div class="card-body">
+              <p class="small text-muted mb-2 fw-semibold">Responsable de:</p>
+              <ul class="small mb-0 ps-3">
+                {% for item in role.error_responsibilities_list %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- ── REGLAS GENERALES ─────────────────────────────────────────────────── -->
+  <h3 class="fw-bold mb-3">📜 Reglas Generales de Space Cheer</h3>
+  <div class="row g-3 mb-5">
+    {% for rule in general_rules %}
+      <div class="col-md-6">
+        <div class="card bg-dark border-{{ rule.color }} h-100">
+          <div class="card-header fw-bold text-{{ rule.color }}">
+            {{ rule.icon }} {{ rule.number }}. {{ rule.title }}
+          </div>
+          <div class="card-body">
+            <ul class="small mb-0 ps-3">
+              {% for item in rule.items %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── RESPONSABILIDAD DE REPOSICIÓN ────────────────────────────────────── -->
+  <h3 class="fw-bold mb-3">💰 Responsabilidad de Reposición por Errores</h3>
+
+  <div class="card bg-dark border-danger mb-3">
+    <div class="card-header bg-danger text-white fw-bold">2. Costo de Reposición</div>
+    <div class="card-body">
+      <p class="mb-2">
+        Cuando un error provoque la necesidad de fabricar nuevamente una prenda, accesorio
+        o producto completo, el responsable del proceso deberá cubrir el costo de reposición
+        determinado por la Dirección de Space Cheer.
+      </p>
+      <div class="alert alert-danger mb-3 fw-bold text-center">
+        EL COSTO DEL ERROR A PAGAR ES LA PRENDA COMPLETA.
+      </div>
+      <p class="fw-semibold mb-2">Se consideran errores sujetos a reposición:</p>
+      <ul class="small mb-0">
+        {% for e in reposition_errors %}
+          <li>❌ {{ e }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-success mb-3">
+    <div class="card-header bg-success text-white fw-bold">4. Excepciones</div>
+    <div class="card-body">
+      <p class="text-muted small mb-2">No se considerará responsabilidad del colaborador cuando:</p>
+      <ul class="small mb-0">
+        {% for e in reposition_exceptions %}
+          <li>✅ {{ e }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-warning mb-3">
+    <div class="card-header bg-warning text-dark fw-bold">5. Obligación de Reporte</div>
+    <div class="card-body small">
+      <p class="mb-1">
+        Todo colaborador está obligado a informar cualquier error detectado <strong>inmediatamente</strong>.
+      </p>
+      <p class="mb-0 text-danger fw-semibold">
+        Ocultar errores, retrasar su reporte o permitir que continúen en producción
+        será considerado una <strong>falta grave</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ACCIONES ──────────────────────────────────────────────────────────── -->
+  <div class="d-flex gap-3 mt-4 flex-wrap">
+    <a href="{% url 'production:error_report_list' %}" class="btn btn-danger">
+      ⚠️ Ver Reportes de Error
+    </a>
+    <a href="{% url 'production:create_error_report' %}" class="btn btn-outline-danger">
+      + Nuevo Reporte de Error
+    </a>
+    <a href="{% url 'production:admin_overview' %}" class="btn btn-outline-secondary">
+      ← Volver al Panel
+    </a>
+  </div>
+
+</div>
+{% endblock %}

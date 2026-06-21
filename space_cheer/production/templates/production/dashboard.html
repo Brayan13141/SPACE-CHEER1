@@ -8,9 +8,14 @@
     {% for assignment in prod_roles %}
       <span class="badge bg-secondary">{{ assignment.role.name }}</span>
     {% endfor %}
-    <a href="{% url 'production:create_error_report' %}" class="btn btn-sm btn-outline-danger ms-auto">
-      ⚠️ Reportar Error
-    </a>
+    <div class="ms-auto d-flex gap-2">
+      <a href="{% url 'production:mi_area' %}" class="btn btn-sm btn-outline-primary">
+        📋 Mi Área
+      </a>
+      <a href="{% url 'production:create_error_report' %}" class="btn btn-sm btn-outline-danger">
+        ⚠️ Reportar Error
+      </a>
+    </div>
   </div>
 
   {% if messages %}
