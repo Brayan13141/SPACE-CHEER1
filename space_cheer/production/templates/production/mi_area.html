@@ -1,0 +1,225 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Mi Área de Producción — SPACE CHEER{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1">📋 Mi Área</h2>
+      <div class="d-flex flex-wrap gap-1">
+        {% for assignment in user_roles %}
+          <span class="badge bg-info text-dark">{{ assignment.role.name }}</span>
+        {% empty %}
+          <span class="badge bg-warning text-dark">Sin roles asignados</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'production:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+        ← Mis Tareas
+      </a>
+      <a href="{% url 'production:create_error_report' %}" class="btn btn-sm btn-outline-danger">
+        ⚠️ Reportar Error
+      </a>
+    </div>
+  </div>
+
+  {% if not user_roles %}
+  <div class="alert alert-warning">
+    No tienes roles de producción asignados. Contacta al administrador.
+  </div>
+  {% else %}
+
+  <!-- Etapas como Responsable Primario -->
+  <div class="card bg-dark border-primary mb-4">
+    <div class="card-header border-primary">
+      <h5 class="mb-0 text-primary">⭐ Mis Etapas — Responsable Primario</h5>
+    </div>
+    <div class="card-body">
+      {% if primary_stages %}
+      <div class="row g-3">
+        {% for stage in primary_stages %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card bg-dark border-primary h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="fs-3">{{ stage.icon }}</span>
+                <div>
+                  <h6 class="mb-0">{{ stage.name }}</h6>
+                  <small class="text-muted">Etapa {{ stage.display_order }}</small>
+                </div>
+              </div>
+              {% if stage.description %}
+              <p class="small text-light mb-2">{{ stage.description }}</p>
+              {% endif %}
+              {% if stage.responsibility %}
+              {% with aux=stage.responsibility.auxiliary_roles.all %}
+              {% if aux %}
+              <p class="small text-muted mb-1">Auxiliares que te apoyan:</p>
+              <div class="d-flex flex-wrap gap-1">
+                {% for a in aux %}
+                  <span class="badge bg-secondary">{{ a.name }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% endwith %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No tienes etapas como responsable primario.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Etapas como Auxiliar -->
+  {% if auxiliary_stages %}
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header border-secondary">
+      <h5 class="mb-0 text-secondary">🤝 Etapas donde eres Auxiliar</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        {% for stage in auxiliary_stages %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="fs-3">{{ stage.icon }}</span>
+                <div>
+                  <h6 class="mb-0">{{ stage.name }}</h6>
+                  <small class="text-muted">Etapa {{ stage.display_order }}</small>
+                </div>
+              </div>
+              {% if stage.responsibility %}
+              <p class="small text-muted mb-0">
+                Responsable primario:
+                <span class="badge bg-primary ms-1">{{ stage.responsibility.responsible_role.name }}</span>
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Mis Errores -->
+  {% if primary_stages %}
+  <div class="card bg-dark border-danger mb-4">
+    <div class="card-header border-danger">
+      <h5 class="mb-0 text-danger">⚠️ Errores de mi Responsabilidad</h5>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-3">
+        Como responsable primario de las siguientes etapas, los errores ocurridos en ellas
+        son de tu responsabilidad:
+      </p>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for stage in primary_stages %}
+          <span class="badge bg-dark border border-danger py-2 px-3">
+            {{ stage.icon }} {{ stage.name }}
+          </span>
+        {% endfor %}
+      </div>
+      <div class="alert alert-danger py-2 small mb-0">
+        Si detectas un error en tu etapa, <strong>repórtalo de inmediato</strong>.
+        No avances trabajo defectuoso a la siguiente etapa.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Reglas Generales -->
+  <h5 class="mb-3">📌 Reglas Generales</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <h6 class="text-warning">📅 Fechas</h6>
+          <p class="small text-light mb-0">
+            Completa tu etapa en el tiempo asignado. Si anticipas un retraso,
+            notifica de inmediato — nunca al final del plazo.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <h6 class="text-warning">✅ Calidad</h6>
+          <p class="small text-light mb-0">
+            No avances una prenda con defecto. Detén el proceso y reporta el error.
+            Quien detecta un defecto y no lo reporta comparte la responsabilidad.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <h6 class="text-warning">📦 Materiales</h6>
+          <p class="small text-light mb-0">
+            Verifica que los materiales que recibes estén completos y en buen estado
+            antes de iniciar. Una vez que los aceptas, eres responsable de su correcta utilización.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <h6 class="text-warning">💬 Comunicación</h6>
+          <p class="small text-light mb-0">
+            Cualquier duda o problema comunícalo de inmediato. No asumas — pregunta.
+            Un error reportado a tiempo es un error a tiempo de corregirse.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Política de Reposición -->
+  <div class="card bg-dark border-warning mb-4">
+    <div class="card-header border-warning">
+      <h5 class="mb-0 text-warning">🔄 Política de Reposición</h5>
+    </div>
+    <div class="card-body">
+      <p class="text-light small mb-2">Errores que generan reposición:</p>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="badge bg-danger">Tallas incorrectas</span>
+        <span class="badge bg-danger">Corte equivocado</span>
+        <span class="badge bg-danger">Sublimación incorrecta</span>
+        <span class="badge bg-danger">Aplicación / Cristalería incorrecta</span>
+        <span class="badge bg-danger">Costura defectuosa</span>
+        <span class="badge bg-danger">Pedido incompleto</span>
+      </div>
+      <ul class="text-light small mb-0">
+        <li class="mb-1">
+          <strong>Excepciones:</strong> La dirección puede otorgar excepción si el error
+          fue causado por información incorrecta del cliente o causas externas documentadas.
+        </li>
+        <li>
+          <strong>Obligación de reporte:</strong> Todo error que genere o pueda generar reposición
+          <strong class="text-warning">debe reportarse de inmediato</strong>, sin excepción.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Botón reportar -->
+  <div class="text-center mb-2">
+    <a href="{% url 'production:create_error_report' %}" class="btn btn-danger btn-lg px-5">
+      ⚠️ Reportar un Error
+    </a>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

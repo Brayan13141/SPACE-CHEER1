@@ -91,6 +91,25 @@ def toggle_urgent(request, pk):
 
 
 @role_required("ADMIN", "STAFF")
+def reglamento(request):
+    from production.models import ProductionStage, ProductionRole
+    stages = (
+        ProductionStage.objects
+        .select_related("responsibility__responsible_role")
+        .prefetch_related("responsibility__auxiliary_roles")
+        .order_by("display_order")
+    )
+    roles = ProductionRole.objects.prefetch_related(
+        "primary_stages",
+        "auxiliary_stages",
+    ).order_by("name")
+    return render(request, "production/reglamento.html", {
+        "stages": stages,
+        "roles": roles,
+    })
+
+
+@role_required("ADMIN", "STAFF")
 @require_POST
 def assign_task(request, pk):
     task = get_object_or_404(ProductionTask, pk=pk)

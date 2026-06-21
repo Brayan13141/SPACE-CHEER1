@@ -94,6 +94,34 @@ def order_design(request, pk):
 
 
 @role_required("OPERARIO")
+def mi_area(request):
+    user_roles = list(
+        OperarioRoleAssignment.objects
+        .filter(user=request.user)
+        .select_related("role")
+    )
+    primary_stages = (
+        ProductionStage.objects
+        .filter(responsibility__responsible_role__operarioroleassignment__user=request.user)
+        .select_related("responsibility__responsible_role")
+        .prefetch_related("responsibility__auxiliary_roles")
+        .order_by("display_order")
+    )
+    auxiliary_stages = (
+        ProductionStage.objects
+        .filter(responsibility__auxiliary_roles__operarioroleassignment__user=request.user)
+        .exclude(responsibility__responsible_role__operarioroleassignment__user=request.user)
+        .select_related("responsibility__responsible_role")
+        .order_by("display_order")
+    )
+    return render(request, "production/mi_area.html", {
+        "user_roles": user_roles,
+        "primary_stages": primary_stages,
+        "auxiliary_stages": auxiliary_stages,
+    })
+
+
+@role_required("OPERARIO")
 def item_measurements(request, pk):
     from orders.models import OrderItem
     allowed_stages = _get_allowed_stages(request.user)

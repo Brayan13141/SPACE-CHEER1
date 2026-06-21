@@ -7,6 +7,12 @@
   <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <h2 class="mb-0">{% trans "Panel de Producción" %}</h2>
     <div class="d-flex gap-2">
+      <a href="{% url 'production:reglamento' %}" class="btn btn-sm btn-outline-warning">
+        📋 Reglamento
+      </a>
+      <a href="{% url 'production:error_report_list' %}" class="btn btn-sm btn-outline-danger">
+        ⚠️ Reportes de Error
+      </a>
       <a href="{% url 'production:manage_stages' %}" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-diagram-3 me-1"></i>{% trans "Etapas" %}
       </a>

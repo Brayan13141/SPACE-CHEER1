@@ -6,11 +6,13 @@ app_name = "production"
 urlpatterns = [
     # Operario
     path("", operario_views.dashboard, name="dashboard"),
+    path("mi-area/", operario_views.mi_area, name="mi_area"),
     path("task/<int:pk>/complete/", operario_views.task_complete, name="task_complete"),
     path("order/<int:pk>/design/", operario_views.order_design, name="order_design"),
     path("item/<int:pk>/measurements/", operario_views.item_measurements, name="item_measurements"),
     # Admin / Staff
     path("admin/", admin_views.admin_overview, name="admin_overview"),
+    path("reglamento/", admin_views.reglamento, name="reglamento"),
     path("admin/job/<int:pk>/", admin_views.admin_job_detail, name="admin_job_detail"),
     path("admin/job/<int:pk>/toggle-urgent/", admin_views.toggle_urgent, name="toggle_urgent"),
     path("admin/task/<int:pk>/assign/", admin_views.assign_task, name="assign_task"),
