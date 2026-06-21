@@ -302,9 +302,10 @@ CONTENT_SECURITY_POLICY = {
         "style-src": [
             "'self'",
             "https://cdn.datatables.net",
+            "https://fonts.googleapis.com",
             CSP_NONCE,
         ],
-        "font-src": ["'self'", "data:"],
+        "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
         "img-src": ["'self'", "data:", "blob:"],
         "connect-src": ["'self'"],
         "frame-ancestors": ["'none'"],

@@ -9,6 +9,10 @@
     <link rel="icon" type="image/png" sizes="64x64" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
     <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/fontawesome-free-7.1.0-web/css/all.min.css' %}">
@@ -156,16 +160,27 @@
         .navbar-brand { font-weight: 700; letter-spacing: .03em; }
         .navbar-brand i { color: var(--sc-purple); }
         .sc-brand-text {
-            font-size: 1.15rem;
-            font-weight: 800;
-            letter-spacing: .12em;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: .18em;
             text-transform: uppercase;
-            background: linear-gradient(90deg, var(--sc-purple) 0%, var(--sc-cyan) 100%);
+            background: linear-gradient(90deg,
+                var(--sc-purple) 0%,
+                var(--sc-cyan)   35%,
+                var(--sc-pink)   60%,
+                var(--sc-purple) 100%);
+            background-size: 250% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: none;
-            filter: drop-shadow(0 0 6px rgba(127,90,240,.45));
+            filter: drop-shadow(0 0 8px rgba(127,90,240,.55));
+            animation: sc-brand-shimmer 4s ease-in-out infinite;
+        }
+        @keyframes sc-brand-shimmer {
+            0%   { background-position: 0%   50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0%   50%; }
         }
 
         .user-avatar {
