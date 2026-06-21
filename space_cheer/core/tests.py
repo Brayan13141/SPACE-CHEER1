@@ -55,7 +55,7 @@ class DashboardProductionLinksTests(TestCase):
 
 
 from unittest.mock import MagicMock
-from core.help_registry import get_help_text
+from core.help_registry import get_help_text, get_help_cards
 
 
 class GetHelpTextTests(TestCase):
@@ -63,6 +63,7 @@ class GetHelpTextTests(TestCase):
     def _user(self, *role_names):
         user = MagicMock()
         user.is_authenticated = True
+        user.help_dismissed = False
         user.roles.values_list.return_value = list(role_names)
         return user
 
@@ -112,6 +113,25 @@ class PageHelpContextProcessorTests(TestCase):
         response = self._get(user, "accounts:profile_settings")
         self.assertEqual(response.context["page_help_text"], "")
 
+    def test_page_help_cards_present_for_admin_dashboard(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertIn("page_help_cards", response.context)
+        self.assertGreaterEqual(len(response.context["page_help_cards"]), 2)
+
+    def test_page_help_cards_empty_for_unregistered_view(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "accounts:profile_settings")
+        self.assertEqual(response.context["page_help_cards"], [])
+
+    def test_page_help_text_is_first_card(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertEqual(
+            response.context["page_help_text"],
+            response.context["page_help_cards"][0],
+        )
+
 
 from django.template import Context, Template
 
@@ -150,6 +170,7 @@ class RegistrySpotCheckTests(TestCase):
     def _user(self, *role_names):
         user = MagicMock()
         user.is_authenticated = True
+        user.help_dismissed = False
         user.roles.values_list.return_value = list(role_names)
         return user
 
@@ -183,3 +204,166 @@ class RegistrySpotCheckTests(TestCase):
         admin_text = get_help_text("production:error_report_list", self._user("ADMIN"))
         op_text = get_help_text("production:error_report_list", self._user("OPERARIO"))
         self.assertNotEqual(admin_text, op_text)
+
+
+class GetHelpCardsTests(TestCase):
+    """v2: get_help_cards returns list[str]."""
+
+    def _user(self, *role_names, dismissed=False):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.help_dismissed = dismissed
+        user.roles.values_list.return_value = list(role_names)
+        return user
+
+    def test_returns_list_of_cards_for_role_entry(self):
+        cards = get_help_cards("core:dashboard", self._user("ADMIN"))
+        self.assertIsInstance(cards, list)
+        self.assertGreaterEqual(len(cards), 2)
+        self.assertTrue(all(isinstance(c, str) for c in cards))
+
+    def test_unauthenticated_returns_empty_list(self):
+        user = MagicMock()
+        user.is_authenticated = False
+        self.assertEqual(get_help_cards("core:dashboard", user), [])
+
+    def test_none_user_returns_empty_list(self):
+        self.assertEqual(get_help_cards("core:dashboard", None), [])
+
+    def test_dismissed_user_returns_empty_list(self):
+        cards = get_help_cards("core:dashboard", self._user("ADMIN", dismissed=True))
+        self.assertEqual(cards, [])
+
+    def test_unknown_view_returns_empty_list(self):
+        self.assertEqual(get_help_cards("nope:view", self._user("ADMIN")), [])
+
+    def test_none_fallback_serves_all_roles(self):
+        cards = get_help_cards("orders:manage_orders", self._user("ATHLETE"))
+        self.assertGreaterEqual(len(cards), 2)
+
+    def test_first_matching_role_wins(self):
+        cards = get_help_cards("core:dashboard", self._user("ADMIN", "ATHLETE"))
+        self.assertGreaterEqual(len(cards), 1)
+
+    def test_events_list_has_three_cards(self):
+        cards = get_help_cards("events:event_list", self._user("ATHLETE"))
+        self.assertEqual(len(cards), 3)
+
+    def test_social_send_invite_present(self):
+        cards = get_help_cards("social:send_invite", self._user("HEADCOACH"))
+        self.assertGreaterEqual(len(cards), 2)
+
+    def test_hospitality_index_present(self):
+        cards = get_help_cards("hospitality:index", self._user("ATHLETE"))
+        self.assertGreaterEqual(len(cards), 2)
+
+    def test_get_help_text_returns_first_card(self):
+        """Backward compat: get_help_text returns first card of the list."""
+        cards = get_help_cards("core:dashboard", self._user("ADMIN"))
+        text = get_help_text("core:dashboard", self._user("ADMIN"))
+        self.assertEqual(text, cards[0])
+
+
+class HelpFabRenderTests(TestCase):
+
+    def _get(self, user, url_name):
+        client = Client()
+        client.force_login(user)
+        return client.get(reverse(url_name))
+
+    def test_modal_rendered_when_cards_present(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertContains(response, 'id="scHelpModal"')
+        self.assertContains(response, 'id="scHelpCarousel"')
+        self.assertContains(response, "carousel-item")
+
+    def test_fab_hidden_when_no_cards(self):
+        # accounts:profile_settings has no registry entry → no FAB/modal
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "accounts:profile_settings")
+        self.assertNotContains(response, 'id="scHelpModal"')
+
+    def test_modal_hidden_when_help_dismissed(self):
+        user = make_user_with_role("ADMIN")
+        user.help_dismissed = True
+        user.save(update_fields=["help_dismissed"])
+        response = self._get(user, "core:dashboard")
+        self.assertNotContains(response, 'id="scHelpModal"')
+
+    def test_settings_shows_reactivate_when_dismissed(self):
+        user = make_user_with_role("ADMIN")
+        user.help_dismissed = True
+        user.save(update_fields=["help_dismissed"])
+        response = self._get(user, "accounts:profile_settings")
+        self.assertContains(response, 'value="enable"')
+
+
+class HelpDismissedFieldTests(TestCase):
+
+    def test_defaults_false(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        self.assertFalse(user.help_dismissed)
+
+
+class ToggleHelpViewTests(TestCase):
+
+    def _client(self, user):
+        client = Client()
+        client.force_login(user)
+        return client
+
+    def test_anonymous_redirected(self):
+        response = Client().post(reverse("accounts:toggle_help"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_get_not_allowed(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        response = self._client(user).get(reverse("accounts:toggle_help"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_dismiss_sets_flag_true(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        response = self._client(user).post(
+            reverse("accounts:toggle_help"),
+            {"action": "dismiss", "next": "/"},
+        )
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertTrue(user.help_dismissed)
+
+    def test_enable_sets_flag_false(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        user.help_dismissed = True
+        user.save(update_fields=["help_dismissed"])
+        response = self._client(user).post(
+            reverse("accounts:toggle_help"),
+            {"action": "enable", "next": "/"},
+        )
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertFalse(user.help_dismissed)
+
+    def test_default_action_is_dismiss(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        self._client(user).post(reverse("accounts:toggle_help"), {"next": "/"})
+        user.refresh_from_db()
+        self.assertTrue(user.help_dismissed)
+
+    def test_external_next_is_rejected(self):
+        """Open redirect guard: external next falls back to '/'."""
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        response = self._client(user).post(
+            reverse("accounts:toggle_help"),
+            {"action": "dismiss", "next": "https://evil.example.com/phish"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/")
+
+    def test_safe_relative_next_is_honored(self):
+        user = make_user_with_role("ATHLETE", is_athlete_type=True)
+        response = self._client(user).post(
+            reverse("accounts:toggle_help"),
+            {"action": "dismiss", "next": "/accounts/profile/settings/"},
+        )
+        self.assertEqual(response["Location"], "/accounts/profile/settings/")

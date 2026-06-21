@@ -103,6 +103,45 @@
       </div>
     </div>
 
+    <!-- SISTEMA DE AYUDA -->
+    <div class="col-12 col-lg-6">
+      <div class="card bg-dark border-0 shadow-sm h-100 sc-border-purple">
+        <div class="card-header bg-transparent py-3 sc-border-bottom-purple">
+          <h6 class="mb-0 text-white">
+            <i class="bi bi-question-circle me-2 sc-color-cyan"></i>{% trans "Sistema de ayuda" %}
+          </h6>
+        </div>
+        <div class="card-body p-4">
+          {% if request.user.help_dismissed %}
+            <p class="text-secondary small mb-3">
+              {% trans "La ayuda contextual está desactivada. Actívala para ver consejos en cada página." %}
+            </p>
+            <form method="post" action="{% url 'accounts:toggle_help' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="enable">
+              <input type="hidden" name="next" value="{% url 'accounts:profile_settings' %}">
+              <button type="submit" class="btn btn-sm btn-outline-info">
+                <i class="bi bi-question-circle-fill me-1"></i>{% trans "Reactivar ayuda" %}
+              </button>
+            </form>
+          {% else %}
+            <p class="text-secondary small mb-3">
+              <i class="bi bi-check-circle text-success me-1"></i>
+              {% trans "La ayuda contextual está activa." %}
+            </p>
+            <form method="post" action="{% url 'accounts:toggle_help' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="dismiss">
+              <input type="hidden" name="next" value="{% url 'accounts:profile_settings' %}">
+              <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-eye-slash me-1"></i>{% trans "Desactivar ayuda" %}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}

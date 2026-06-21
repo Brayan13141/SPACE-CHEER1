@@ -94,6 +94,9 @@ class User(AbstractUser):
         default=False
     )  # Marca cuando ya pasó onboarding
 
+    # Sistema de ayuda contextual: si True, el usuario ocultó los consejos por página.
+    help_dismissed = models.BooleanField(default=False)
+
     def clean(self):
         """
         Validación personalizada a nivel de modelo

@@ -29,6 +29,7 @@ urlpatterns = [
         name="profile_photo_delete",
     ),
     path("profile/settings/", views_profile.profile_settings, name="profile_settings"),
+    path("help/toggle/", views_profile.toggle_help, name="toggle_help"),
     path(
         "profile/deactivate/",
         views_profile.account_deactivate,

@@ -277,21 +277,29 @@
             z-index: 1045;
         }
         #sc-help-fab button {
-            width: 44px;
-            height: 44px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             border: none;
-            background: var(--sc-cyan, #0dcaf0);
-            color: #000;
-            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--sc-purple), var(--sc-cyan));
+            color: #fff;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,.4);
+            box-shadow: 0 4px 15px rgba(127,90,240,.5);
             cursor: pointer;
+            animation: sc-help-pulse 2.5s infinite;
+        }
+        @keyframes sc-help-pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(127,90,240,.5); }
+            50%      { box-shadow: 0 4px 25px rgba(44,177,255,.7), 0 0 0 8px rgba(44,177,255,.08); }
         }
         #sc-help-fab button:hover {
-            background: #58d6ff;
+            animation: none;
+            background: linear-gradient(135deg, var(--sc-cyan), var(--sc-purple));
+            transform: scale(1.08);
+            transition: transform .15s ease;
         }
         @media (max-width: 575.98px) {
             .popover { max-width: 280px; }
@@ -778,17 +786,67 @@
         </div>
     </footer>
 
-    {# ── Help FAB ────────────────────────────────────────────────────── #}
-    {% if page_help_text %}
+    {# ── Help FAB + modal con carousel ───────────────────────────────── #}
+    {% if page_help_cards %}
     <div id="sc-help-fab">
-        <button type="button"
-                data-bs-toggle="popover"
-                data-bs-placement="auto"
-                data-bs-trigger="click"
-                data-bs-content="{{ page_help_text }}"
-                title="¿Cómo funciona esta página?">
+        <button type="button" data-bs-toggle="modal" data-bs-target="#scHelpModal"
+                title="{% trans '¿Cómo funciona esta página?' %}">
             <i class="bi bi-question-circle-fill"></i>
         </button>
+    </div>
+
+    <div class="modal fade" id="scHelpModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content bg-dark border border-secondary">
+          <div class="modal-header border-secondary py-2">
+            <h6 class="modal-title">
+              <i class="bi bi-question-circle-fill me-2 text-info"></i>
+              {% trans "¿Cómo funciona esta página?" %}
+            </h6>
+            <button type="button" class="btn-close btn-close-white"
+                    data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
+          </div>
+          <div class="modal-body p-0">
+            <div id="scHelpCarousel" class="carousel slide" data-bs-ride="false">
+              <div class="carousel-inner">
+                {% for card in page_help_cards %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %} px-4 py-3">
+                  <p class="mb-0 text-white-50">{{ card }}</p>
+                  <div class="text-end mt-2 text-muted small">
+                    {% trans "Consejo" %} {{ forloop.counter }} / {{ page_help_cards|length }}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% if page_help_cards|length > 1 %}
+              <button class="carousel-control-prev" type="button"
+                      data-bs-target="#scHelpCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Anterior" %}</span>
+              </button>
+              <button class="carousel-control-next" type="button"
+                      data-bs-target="#scHelpCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Siguiente" %}</span>
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          <div class="modal-footer border-secondary py-2 justify-content-between">
+            <form method="post" action="{% url 'accounts:toggle_help' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="dismiss">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-eye-slash me-1"></i>{% trans "No volver a mostrar" %}
+              </button>
+            </form>
+            <button type="button" class="btn btn-sm btn-outline-info" data-bs-dismiss="modal">
+              {% trans "Cerrar" %}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     {% endif %}
 

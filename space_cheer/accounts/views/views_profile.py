@@ -20,6 +20,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import HttpResponse, JsonResponse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 logger = logging.getLogger(__name__)
 from django.shortcuts import redirect, render
@@ -115,6 +116,43 @@ def profile_edit(request):
             "user": user,
         },
     )
+
+
+# =============================================================================
+# SISTEMA DE AYUDA — activar/desactivar consejos contextuales
+# =============================================================================
+
+
+@login_required
+@require_POST
+def toggle_help(request):
+    """Activa o desactiva el sistema de ayuda contextual del usuario.
+
+    action=dismiss  → oculta los consejos (help_dismissed=True)
+    action=enable   → reactiva los consejos (help_dismissed=False)
+    Redirige a `next` (o a la home) tras aplicar el cambio.
+    """
+    action = request.POST.get("action", "dismiss")
+    if action == "enable":
+        request.user.help_dismissed = False
+        request.user.save(update_fields=["help_dismissed"])
+        messages.success(request, "Sistema de ayuda reactivado.")
+    else:
+        request.user.help_dismissed = True
+        request.user.save(update_fields=["help_dismissed"])
+        messages.info(
+            request,
+            "Ayuda desactivada. Puedes reactivarla en Configuración.",
+        )
+    # Validar el destino para evitar open redirect a dominios externos.
+    next_url = request.POST.get("next") or "/"
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        next_url = "/"
+    return redirect(next_url)
 
 
 # =============================================================================
