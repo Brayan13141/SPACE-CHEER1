@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 from invitations.utils import get_invitation_model
-from ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
 
