@@ -16,6 +16,7 @@ urlpatterns = [
     path("admin/job/<int:pk>/", admin_views.admin_job_detail, name="admin_job_detail"),
     path("admin/job/<int:pk>/toggle-urgent/", admin_views.toggle_urgent, name="toggle_urgent"),
     path("admin/task/<int:pk>/assign/", admin_views.assign_task, name="assign_task"),
+    path("admin/job/<int:pk>/bulk-reassign/", admin_views.bulk_reassign_tasks, name="bulk_reassign_tasks"),
     # Error Reports
     path("errores/", error_report_views.error_report_list, name="error_report_list"),
     path("errores/nuevo/", error_report_views.create_error_report, name="create_error_report"),
@@ -32,4 +33,5 @@ urlpatterns = [
     ),
     path("config/operarios/", config_views.manage_operarios, name="manage_operarios"),
     path("config/operarios/<int:pk>/", config_views.operario_detail, name="operario_detail"),
+    path("config/responsabilidades/", config_views.manage_responsibilities, name="manage_responsibilities"),
 ]

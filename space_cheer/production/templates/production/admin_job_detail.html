@@ -68,6 +68,101 @@
     <p class="text-muted">Sin tareas.</p>
   {% endfor %}
 
+  <!-- Reasignación masiva de tasks pendientes -->
+  <!-- URL: registrar como production:bulk_reassign_tasks con path production/admin/job/<pk>/bulk-reassign/ -->
+  <hr class="my-4 border-secondary">
+  <div class="mb-2">
+    <button class="btn btn-sm btn-outline-info" type="button"
+            data-bs-toggle="collapse" data-bs-target="#bulk-reassign-panel"
+            aria-expanded="false" aria-controls="bulk-reassign-panel">
+      <i class="bi bi-people-fill me-1"></i>Reasignación masiva
+    </button>
+  </div>
+
+  <div class="collapse" id="bulk-reassign-panel">
+    <div class="card bg-dark border-secondary mb-4">
+      <div class="card-header text-light fw-semibold">
+        <i class="bi bi-arrow-left-right me-1"></i>Reasignar tareas pendientes
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url 'production:bulk_reassign_tasks' job.pk %}">
+          {% csrf_token %}
+
+          <!-- Selector de operario destino -->
+          <div class="mb-3">
+            <label for="bulk-operario-select" class="form-label text-light small fw-semibold">
+              Operario destino
+            </label>
+            <select name="operario_id" id="bulk-operario-select"
+                    class="form-select form-select-sm bg-dark text-light">
+              <option value="">— Desasignar —</option>
+              {% for op in operarios %}
+                <option value="{{ op.pk }}">{{ op.get_full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Lista de tasks pendientes con checkboxes -->
+          <div class="mb-3">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="bulk-select-all">
+              <label class="form-check-label text-light small fw-semibold" for="bulk-select-all">
+                Seleccionar todas las tareas pendientes
+              </label>
+            </div>
+            <div class="d-flex flex-column gap-1">
+              {% for task in job.tasks.all %}
+                {% if task.status != 'COMPLETED' %}
+                  <div class="form-check ms-1">
+                    <input class="form-check-input bulk-task-cb" type="checkbox"
+                           name="task_ids" value="{{ task.pk }}"
+                           id="bulk-task-{{ task.pk }}">
+                    <label class="form-check-label text-light small" for="bulk-task-{{ task.pk }}">
+                      <span class="me-1">{{ task.stage.icon }}</span>
+                      <strong>{{ task.stage.name }}</strong>
+                      <span class="text-muted ms-1">— {{ task.order_item.product.name }}</span>
+                      {% if task.assigned_to %}
+                        <span class="badge bg-secondary ms-1">{{ task.assigned_to.get_full_name }}</span>
+                      {% else %}
+                        <span class="badge bg-outline-secondary ms-1 text-muted">Sin asignar</span>
+                      {% endif %}
+                    </label>
+                  </div>
+                {% endif %}
+              {% empty %}
+                <p class="text-muted small mb-0">Sin tareas pendientes.</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-sm btn-primary">
+            <i class="bi bi-check2-all me-1"></i>Reasignar seleccionados
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var selectAll = document.getElementById('bulk-select-all');
+      if (!selectAll) return;
+      selectAll.addEventListener('change', function () {
+        document.querySelectorAll('.bulk-task-cb').forEach(function (cb) {
+          cb.checked = selectAll.checked;
+        });
+      });
+      document.querySelectorAll('.bulk-task-cb').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var all = document.querySelectorAll('.bulk-task-cb');
+          var checked = document.querySelectorAll('.bulk-task-cb:checked');
+          selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+          selectAll.checked = checked.length === all.length;
+        });
+      });
+    })();
+  </script>
+
   <!-- Reportes de error asociados a este job -->
   {% if job.error_reports.exists %}
     <hr class="my-4 border-secondary">

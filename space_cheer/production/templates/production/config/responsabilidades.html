@@ -1,0 +1,97 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}Responsabilidades de Etapa{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="mb-0"><i class="bi bi-person-badge me-2"></i>{% trans "Responsabilidades de Etapa" %}</h2>
+    <a href="{% url 'production:manage_roles' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-shield-check me-1"></i>{% trans "Gestionar roles" %}
+    </a>
+  </div>
+
+  {% for stage in stages %}
+  {% with resp=stage.responsibility %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="fw-semibold">
+        {% if stage.icon %}<span class="me-1">{{ stage.icon }}</span>{% endif %}
+        {{ stage.name }}
+      </div>
+      {% if resp %}
+        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>{% trans "Asignada" %}</span>
+      {% else %}
+        <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>{% trans "Sin asignar" %}</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      {% if resp %}
+      <div class="mb-3">
+        <div class="small text-muted mb-1">{% trans "Responsable primario" %}</div>
+        <span class="badge bg-primary fs-6">{{ resp.responsible_role.name }}</span>
+      </div>
+      <div class="mb-3">
+        <div class="small text-muted mb-1">{% trans "Roles auxiliares" %}</div>
+        {% for aux in resp.auxiliary_roles.all %}
+          <span class="badge bg-secondary me-1">{{ aux.name }}</span>
+        {% empty %}
+          <span class="text-muted small">{% trans "Ninguno" %}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <button class="btn btn-sm btn-outline-primary" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#edit-stage-{{ stage.pk }}"
+              aria-expanded="false">
+        <i class="bi bi-pencil me-1"></i>{% if resp %}{% trans "Editar" %}{% else %}{% trans "Asignar" %}{% endif %}
+      </button>
+
+      <div class="collapse mt-3" id="edit-stage-{{ stage.pk }}">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="stage_id" value="{{ stage.pk }}">
+          <div class="row g-3 align-items-start">
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">{% trans "Responsable primario" %} <span class="text-danger">*</span></label>
+              <select name="responsible_role_id" class="form-select" required>
+                <option value="">{% trans "— Seleccionar —" %}</option>
+                {% for role in roles %}
+                  <option value="{{ role.pk }}"
+                    {% if resp and resp.responsible_role_id == role.pk %}selected{% endif %}>
+                    {{ role.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">{% trans "Roles auxiliares" %}</label>
+              <div class="d-flex flex-wrap gap-2">
+                {% for role in roles %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox"
+                         name="auxiliary_role_ids"
+                         value="{{ role.pk }}"
+                         id="aux_{{ stage.pk }}_{{ role.pk }}"
+                         {% if resp and role in resp.auxiliary_roles.all %}checked{% endif %}>
+                  <label class="form-check-label small" for="aux_{{ stage.pk }}_{{ role.pk }}">{{ role.name }}</label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">{% trans "Guardar" %}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% empty %}
+  <p class="text-muted">{% trans "No hay etapas configuradas." %}</p>
+  {% endfor %}
+
+</div>
+{% endblock %}

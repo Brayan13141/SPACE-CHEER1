@@ -12,6 +12,7 @@ from production.models import (
     ProductionRole,
     ProductionStage,
     ProductionTask,
+    StageResponsibility,
 )
 from production.services import OperarioService
 
@@ -280,4 +281,40 @@ def operario_detail(request, pk):
         "task_stats": task_stats,
         "pending_count": pending_count,
         "recent_tasks": recent_tasks,
+    })
+
+
+@role_required("ADMIN")
+def manage_responsibilities(request):
+    if request.method == "POST":
+        stage_id = request.POST.get("stage_id")
+        responsible_role_id = request.POST.get("responsible_role_id")
+        auxiliary_role_ids = request.POST.getlist("auxiliary_role_ids")
+
+        if stage_id and responsible_role_id:
+            stage = get_object_or_404(ProductionStage, pk=stage_id)
+            responsible_role = get_object_or_404(ProductionRole, pk=responsible_role_id)
+            responsibility, created = StageResponsibility.objects.update_or_create(
+                stage=stage,
+                defaults={"responsible_role": responsible_role},
+            )
+            responsibility.auxiliary_roles.set(auxiliary_role_ids)
+            if created:
+                messages.success(request, f"Responsabilidad asignada a la etapa '{stage.name}'.")
+            else:
+                messages.success(request, f"Responsabilidad de '{stage.name}' actualizada.")
+        else:
+            messages.error(request, "La etapa y el rol responsable son obligatorios.")
+
+        return redirect("production:manage_responsibilities")
+
+    stages = ProductionStage.objects.prefetch_related(
+        "responsibility__responsible_role",
+        "responsibility__auxiliary_roles",
+    ).order_by("display_order", "name")
+    roles = ProductionRole.objects.all().order_by("name")
+
+    return render(request, "production/config/responsabilidades.html", {
+        "stages": stages,
+        "roles": roles,
     })

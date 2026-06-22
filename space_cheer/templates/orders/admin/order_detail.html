@@ -522,15 +522,105 @@
         <div class="row g-2">
           {% for status in available_transitions %}
             <div class="col-12 col-md-6 col-lg-4">
-              <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary w-100 py-3">
-                  <i class="bi bi-arrow-right-circle me-2"></i>{% blocktrans with s=status|title %}Pasar a {{ s }}{% endblocktrans %}
+
+              {% if status == "DESIGN_APPROVED" %}
+                <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-warning w-100 py-3 fw-semibold">
+                    ✅ {% trans "Aprobar Diseño" %}
+                  </button>
+                </form>
+
+              {% elif status == "IN_PRODUCTION" %}
+                {% if measurements_summary.pending > 0 %}
+                  <div class="alert alert-warning py-2 px-3 mb-2 small">
+                    ⚠️ {% blocktrans with n=measurements_summary.pending %}Hay {{ n }} medidas sin completar{% endblocktrans %}
+                  </div>
+                {% endif %}
+                <button type="button"
+                        class="btn btn-success w-100 py-3 fw-semibold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalInProduction">
+                  🚀 {% trans "Enviar a Producción" %}
                 </button>
-              </form>
+
+              {% elif status == "DELIVERED" %}
+                <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">
+                    📦 {% trans "Marcar Entregado" %}
+                  </button>
+                </form>
+
+              {% elif status == "CANCELLED" %}
+                <button type="button"
+                        class="btn btn-danger w-100 py-3 fw-semibold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalCancelled">
+                  ✖ {% trans "Cancelar Pedido" %}
+                </button>
+
+              {% else %}
+                <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-secondary w-100 py-3">
+                    <i class="bi bi-arrow-right-circle me-2"></i>{{ status|title|cut:"_" }}
+                  </button>
+                </form>
+              {% endif %}
+
             </div>
           {% endfor %}
         </div>
+
+        {# ── Modal: Enviar a Producción ── #}
+        {% if "IN_PRODUCTION" in available_transitions %}
+        <div class="modal fade" id="modalInProduction" tabindex="-1" aria-labelledby="modalInProductionLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalInProductionLabel">🚀 {% trans "Confirmar envío a producción" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
+              </div>
+              <div class="modal-body">
+                {% trans "¿Confirmas que el diseño y las medidas están listos? Esto enviará el pedido al piso de producción." %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+                <form method="post" action="{% url 'orders:transition_admin' order.id 'IN_PRODUCTION' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success fw-semibold">🚀 {% trans "Sí, enviar a producción" %}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {# ── Modal: Cancelar Pedido ── #}
+        {% if "CANCELLED" in available_transitions %}
+        <div class="modal fade" id="modalCancelled" tabindex="-1" aria-labelledby="modalCancelledLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalCancelledLabel">✖ {% trans "Confirmar cancelación" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
+              </div>
+              <div class="modal-body">
+                {% trans "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?" %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "No, mantener pedido" %}</button>
+                <form method="post" action="{% url 'orders:transition_admin' order.id 'CANCELLED' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger fw-semibold">✖ {% trans "Sí, cancelar pedido" %}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
       {% else %}
         <div class="text-center py-3">
           <i class="bi bi-check2-circle text-muted display-6"></i>

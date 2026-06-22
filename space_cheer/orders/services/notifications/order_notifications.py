@@ -119,6 +119,39 @@ class OrderNotificationService:
 
         cls._send_email(subject, to_emails, text, html)
 
+    @classmethod
+    def notify_task_assigned(cls, task):
+        operario = task.assigned_to
+        if not operario or not operario.email:
+            return
+
+        order = task.job.order
+        subject = f"Nueva tarea asignada: {task.stage.name} — Pedido #{order.id}"
+
+        text = f"""
+        Hola {operario.get_full_name() or operario.username},
+
+        Se te ha asignado una nueva tarea de producción:
+
+        Etapa: {task.stage.name}
+        Pedido: #{order.id}
+
+        Ingresa al dashboard de producción para ver los detalles y marcarla como completada.
+        """
+
+        html = f"""
+        <h2>Nueva tarea asignada</h2>
+        <p>Hola <strong>{operario.get_full_name() or operario.username}</strong>,</p>
+        <p>Se te ha asignado una nueva tarea de producción:</p>
+        <ul>
+            <li><b>Etapa:</b> {task.stage.name}</li>
+            <li><b>Pedido:</b> #{order.id}</li>
+        </ul>
+        <p>Ingresa al dashboard de producción para ver los detalles y marcarla como completada.</p>
+        """
+
+        cls._send_email(subject, [operario.email], text, html)
+
     # =====================================================
     # HELPERS
     # =====================================================

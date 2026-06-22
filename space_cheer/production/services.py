@@ -96,6 +96,9 @@ class ProductionJobService:
     def assign_task(task, operario):
         task.assigned_to = operario
         task.save(update_fields=["assigned_to"])
+        if operario is not None:
+            from production.tasks import notify_task_assigned
+            notify_task_assigned.delay(task.pk)
 
     @staticmethod
     def toggle_urgent(job):

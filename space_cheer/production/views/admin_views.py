@@ -125,3 +125,50 @@ def assign_task(request, pk):
         ProductionJobService.assign_task(task, None)
         messages.success(request, "Asignación removida.")
     return redirect("production:admin_job_detail", pk=task.job_id)
+
+
+@role_required("ADMIN", "STAFF")
+@require_POST
+def bulk_reassign_tasks(request, pk):
+    """
+    pk = ProductionJob.pk
+    POST params:
+        task_ids: lista de int (getlist)
+        operario_id: int o "" para desasignar
+    """
+    job = get_object_or_404(ProductionJob, pk=pk)
+    task_ids = request.POST.getlist("task_ids")
+    operario_id = request.POST.get("operario_id", "").strip()
+
+    operario = None
+    if operario_id:
+        try:
+            operario = User.objects.get(pk=operario_id, roles__name="OPERARIO", is_active=True)
+        except User.DoesNotExist:
+            messages.error(request, "El operario seleccionado no es válido.")
+            return redirect("production:admin_job_detail", pk=pk)
+
+    if not task_ids:
+        messages.warning(request, "No seleccionaste ninguna tarea.")
+        return redirect("production:admin_job_detail", pk=pk)
+
+    tasks = ProductionTask.objects.filter(
+        pk__in=task_ids,
+        job=job,
+        status=ProductionTask.Status.PENDING,
+    )
+
+    count = 0
+    for task in tasks:
+        ProductionJobService.assign_task(task, operario)
+        count += 1
+
+    if count:
+        if operario:
+            messages.success(request, f"{count} tarea(s) reasignadas a {operario.get_full_name()}.")
+        else:
+            messages.success(request, f"{count} tarea(s) desasignadas.")
+    else:
+        messages.warning(request, "No se encontraron tareas pendientes con los IDs seleccionados.")
+
+    return redirect("production:admin_job_detail", pk=pk)
