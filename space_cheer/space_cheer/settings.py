@@ -109,6 +109,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirige al home después de logout
 ACCOUNT_LOGOUT_ON_GET = False  # Obliga a usar POST para logout (más seguro)
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True  # Invalida otras sesiones al cambiar contraseña
 # Redirige a esta URL después de un inicio de sesión exitoso o después de la configuración inicial
 LOGIN_REDIRECT_URL = "/"
 # settings.py

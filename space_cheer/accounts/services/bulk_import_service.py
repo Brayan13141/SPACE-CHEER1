@@ -239,7 +239,7 @@ class BulkImportService:
                     phone=phone,
                     birth_date=birth_date,
                     gender=gender or None,
-                    password=config("ATLETA_TEMP_PASSWORD"),  # Definir en .env — nunca en código
+                    password=config("ATHLETE_TEMP_PASSWORD"),  # Definir en .env — nunca en código
                     profile_completed=False,
                     is_active=True,
                 )

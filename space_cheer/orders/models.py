@@ -26,7 +26,9 @@ class OrderQuerySet(models.QuerySet):
         if user.is_superuser or user.is_staff:
             return self
         return self.filter(
-            Q(created_by=user) | Q(order_type="TEAM", owner_team__coach=user)
+            Q(created_by=user)
+            | Q(order_type="TEAM", owner_team__coach=user)
+            | Q(order_type="PERSONAL", owner_user=user)
         ).distinct()
 
     def with_display_data(self):

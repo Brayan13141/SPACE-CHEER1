@@ -135,11 +135,12 @@
   </div>
 </div>
 
+{{ my_scores_json|json_script:"existing-scores-data" }}
 <script nonce="{{ request.csp_nonce }}">
 const SCORE_URL   = "{% url 'events:judge_score_submit' event.pk %}";
 const LB_URL      = "{% url 'events:judge_leaderboard_api' event.pk %}";
 const CSRF_TOKEN  = "{{ csrf_token }}";
-const existingScores = {{ my_scores_json|safe }};
+const existingScores = JSON.parse(document.getElementById('existing-scores-data').textContent);
 
 let currentRound = 'FINAL';
 const debounceTimers = {};
