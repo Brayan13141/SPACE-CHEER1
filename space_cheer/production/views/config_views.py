@@ -12,6 +12,9 @@ from production.models import (
     ProductionRole,
     ProductionStage,
     ProductionTask,
+    ProductionTemplate,
+    ProductionTemplateStage,
+    ProductStageConfig,
     StageResponsibility,
 )
 from production.services import OperarioService
@@ -285,6 +288,138 @@ def operario_detail(request, pk):
 
 
 @role_required("ADMIN")
+def product_stages_matrix(request):
+    from products.models import Product
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "apply_template":
+            product_id = request.POST.get("product_id")
+            template_id = request.POST.get("template_id")
+            merge_mode = request.POST.get("merge_mode", "replace")
+            try:
+                product = Product.objects.get(pk=product_id, is_active=True)
+                template = ProductionTemplate.objects.prefetch_related(
+                    "template_stages__stage"
+                ).get(pk=template_id)
+            except (Product.DoesNotExist, ProductionTemplate.DoesNotExist):
+                messages.error(request, "Producto o plantilla no encontrados.")
+                return redirect("production:product_stages_matrix")
+
+            if merge_mode == "replace":
+                ProductStageConfig.objects.filter(product=product).delete()
+                for ts in template.template_stages.all():
+                    ProductStageConfig.objects.create(
+                        product=product,
+                        stage=ts.stage,
+                        display_order=ts.display_order,
+                    )
+                messages.success(
+                    request,
+                    f"Plantilla '{template.name}' aplicada a '{product.name}' (reemplazar).",
+                )
+            else:  # merge
+                existing_stage_ids = set(
+                    ProductStageConfig.objects.filter(product=product).values_list(
+                        "stage_id", flat=True
+                    )
+                )
+                created = 0
+                for ts in template.template_stages.all():
+                    if ts.stage_id not in existing_stage_ids:
+                        ProductStageConfig.objects.create(
+                            product=product,
+                            stage=ts.stage,
+                            display_order=ts.display_order,
+                        )
+                        created += 1
+                messages.success(
+                    request,
+                    f"Plantilla '{template.name}' fusionada con '{product.name}' ({created} etapa(s) añadida(s)).",
+                )
+            return redirect("production:product_stages_matrix")
+
+        if action == "add_stage":
+            product_id = request.POST.get("product_id")
+            stage_id = request.POST.get("stage_id")
+            try:
+                display_order = int(request.POST.get("display_order", 0))
+            except (ValueError, TypeError):
+                display_order = 0
+            try:
+                product = Product.objects.get(pk=product_id, is_active=True)
+                stage = ProductionStage.objects.get(pk=stage_id)
+            except (Product.DoesNotExist, ProductionStage.DoesNotExist):
+                messages.error(request, "Producto o etapa no encontrados.")
+                return redirect("production:product_stages_matrix")
+            _, created = ProductStageConfig.objects.get_or_create(
+                product=product,
+                stage=stage,
+                defaults={"display_order": display_order},
+            )
+            if created:
+                messages.success(
+                    request, f"Etapa '{stage.name}' añadida a '{product.name}'."
+                )
+            else:
+                messages.info(
+                    request,
+                    f"'{product.name}' ya tiene la etapa '{stage.name}'.",
+                )
+            return redirect("production:product_stages_matrix")
+
+        if action == "remove_stage":
+            product_id = request.POST.get("product_id")
+            stage_id = request.POST.get("stage_id")
+            deleted, _ = ProductStageConfig.objects.filter(
+                product_id=product_id, stage_id=stage_id
+            ).delete()
+            if deleted:
+                messages.success(request, "Etapa quitada del producto.")
+            return redirect("production:product_stages_matrix")
+
+        messages.error(request, "Acción no reconocida.")
+        return redirect("production:product_stages_matrix")
+
+    # GET
+    all_stages = ProductionStage.objects.order_by("display_order", "name")
+    products = (
+        Product.objects.filter(is_active=True)
+        .prefetch_related("stage_configs__stage")
+        .order_by("name")
+    )
+    templates = ProductionTemplate.objects.prefetch_related(
+        "template_stages__stage"
+    ).order_by("name")
+
+    products_data = []
+    for product in products:
+        configured_stage_ids = {sc.stage_id for sc in product.stage_configs.all()}
+        available_stages = [s for s in all_stages if s.pk not in configured_stage_ids]
+        products_data.append(
+            {
+                "product": product,
+                "stage_configs": sorted(
+                    product.stage_configs.all(), key=lambda sc: sc.display_order
+                ),
+                "configured_stage_ids": configured_stage_ids,
+                "available_stages": available_stages,
+            }
+        )
+
+    return render(
+        request,
+        "production/config/product_stages_matrix.html",
+        {
+            "products_data": products_data,
+            "all_stages": all_stages,
+            "templates": templates,
+        },
+    )
+
+
+@role_required("ADMIN")
 def manage_responsibilities(request):
     if request.method == "POST":
         stage_id = request.POST.get("stage_id")
@@ -317,4 +452,84 @@ def manage_responsibilities(request):
     return render(request, "production/config/responsabilidades.html", {
         "stages": stages,
         "roles": roles,
+    })
+
+
+@role_required("ADMIN")
+def manage_templates(request):
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+
+        if action == "create":
+            name = request.POST.get("name", "").strip()
+            description = request.POST.get("description", "").strip()
+            if name:
+                ProductionTemplate.objects.create(
+                    name=name,
+                    description=description,
+                    created_by=request.user,
+                )
+                messages.success(request, "Plantilla creada.")
+            else:
+                messages.error(request, "El nombre de la plantilla es obligatorio.")
+
+        elif action == "add_stage":
+            template_id = request.POST.get("template_id")
+            stage_id = request.POST.get("stage_id")
+            try:
+                display_order = int(request.POST.get("display_order", 0))
+            except (ValueError, TypeError):
+                display_order = 0
+            if template_id and stage_id:
+                template = get_object_or_404(ProductionTemplate, pk=template_id)
+                stage = get_object_or_404(ProductionStage, pk=stage_id)
+                _, created = ProductionTemplateStage.objects.get_or_create(
+                    template=template,
+                    stage=stage,
+                    defaults={"display_order": display_order},
+                )
+                if created:
+                    messages.success(request, f"Etapa '{stage.name}' agregada a la plantilla.")
+                else:
+                    messages.error(request, "Esa etapa ya está en la plantilla.")
+            else:
+                messages.error(request, "Plantilla y etapa son obligatorias.")
+
+        elif action == "remove_stage":
+            template_id = request.POST.get("template_id")
+            stage_id = request.POST.get("stage_id")
+            if template_id and stage_id:
+                deleted, _ = ProductionTemplateStage.objects.filter(
+                    template_id=template_id, stage_id=stage_id
+                ).delete()
+                if deleted:
+                    messages.success(request, "Etapa eliminada de la plantilla.")
+                else:
+                    messages.error(request, "No se encontró esa etapa en la plantilla.")
+            else:
+                messages.error(request, "Plantilla y etapa son obligatorias.")
+
+        elif action == "delete_template":
+            template_id = request.POST.get("template_id")
+            template = get_object_or_404(ProductionTemplate, pk=template_id)
+            stage_ids = template.stages.values_list("pk", flat=True)
+            if ProductStageConfig.objects.filter(stage__in=stage_ids).exists():
+                messages.error(
+                    request,
+                    f"No se puede eliminar '{template.name}': sus etapas están en uso por uno o más productos.",
+                )
+            else:
+                template.delete()
+                messages.success(request, "Plantilla eliminada.")
+
+        return redirect("production:manage_templates")
+
+    templates = ProductionTemplate.objects.prefetch_related(
+        "template_stages__stage"
+    ).order_by("name")
+    all_stages = ProductionStage.objects.order_by("display_order", "name")
+
+    return render(request, "production/config/plantillas.html", {
+        "templates": templates,
+        "all_stages": all_stages,
     })

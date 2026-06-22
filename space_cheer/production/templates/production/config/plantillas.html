@@ -1,0 +1,155 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}{% trans "Plantillas de Producción" %}{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="mb-0">{% trans "Plantillas de Producción" %}</h2>
+    <a href="{% url 'production:manage_stages' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-diagram-3 me-1"></i>{% trans "Gestionar etapas" %}
+    </a>
+  </div>
+
+  {% if messages %}
+  <div class="mb-3">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show py-2" role="alert">
+      {{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Nueva plantilla ─────────────────────────────────────────────────────── #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>{% trans "Nueva plantilla" %}</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Nombre" %}</label>
+            <input name="name" class="form-control" placeholder="{% trans 'Ej: Uniforme' %}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Descripción" %}</label>
+            <input name="description" class="form-control" placeholder="{% trans 'Opcional' %}">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100">{% trans "Crear" %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ── Lista de plantillas ─────────────────────────────────────────────────── #}
+  {% for tmpl in templates %}
+  {% with tmpl_stages=tmpl.template_stages.all %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-grid-3x3-gap text-primary"></i>
+        <span class="fw-semibold">{{ tmpl.name }}</span>
+        <span class="badge bg-secondary">{{ tmpl_stages|length }} {% trans "etapas" %}</span>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-success"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#add-stage-{{ tmpl.pk }}">
+          <i class="bi bi-plus-lg me-1"></i>{% trans "Agregar etapa" %}
+        </button>
+        <form method="post"
+              onsubmit="return confirm('{% trans "¿Eliminar esta plantilla?" %}')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="delete_template">
+          <input type="hidden" name="template_id" value="{{ tmpl.pk }}">
+          <button class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>{% trans "Eliminar" %}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-body">
+      {% if tmpl.description %}
+      <p class="text-muted small mb-3">{{ tmpl.description }}</p>
+      {% endif %}
+
+      {# Etapas actuales #}
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for ts in tmpl_stages %}
+        <span class="badge bg-primary d-inline-flex align-items-center gap-1 px-2 py-1">
+          {% if ts.stage.icon %}<span>{{ ts.stage.icon }}</span>{% endif %}
+          {{ ts.stage.name }}
+          <span class="text-white-50 small">#{{ ts.display_order }}</span>
+          <form method="post" class="d-inline ms-1"
+                onsubmit="return confirm('{% trans "¿Quitar esta etapa?" %}')">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove_stage">
+            <input type="hidden" name="template_id" value="{{ tmpl.pk }}">
+            <input type="hidden" name="stage_id" value="{{ ts.stage.pk }}">
+            <button type="submit"
+                    class="btn-close btn-close-white"
+                    style="font-size:.55rem;"
+                    aria-label="{% trans 'Quitar' %}"></button>
+          </form>
+        </span>
+        {% empty %}
+        <span class="text-muted small">{% trans "Sin etapas configuradas." %}</span>
+        {% endfor %}
+      </div>
+
+      {# Formulario collapse para agregar etapa #}
+      <div class="collapse" id="add-stage-{{ tmpl.pk }}">
+        {% with used_stage_ids=tmpl_stages|dictsort:"stage_id" %}
+        <form method="post" class="border rounded p-3 bg-body-secondary">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_stage">
+          <input type="hidden" name="template_id" value="{{ tmpl.pk }}">
+          <div class="row g-2 align-items-end">
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">{% trans "Etapa" %}</label>
+              <select name="stage_id" class="form-select form-select-sm" required>
+                <option value="">— {% trans "Seleccionar" %} —</option>
+                {% for stage in all_stages %}
+                  {% with stage_in_tmpl=False %}
+                  {# Filter out stages already in this template #}
+                  {% if stage not in tmpl.stages.all %}
+                  <option value="{{ stage.pk }}">
+                    {% if stage.icon %}{{ stage.icon }} {% endif %}{{ stage.name }}
+                  </option>
+                  {% endif %}
+                  {% endwith %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-3">
+              <label class="form-label small fw-semibold">{% trans "Orden" %}</label>
+              <input type="number" name="display_order" class="form-control form-control-sm"
+                     value="0" min="0">
+            </div>
+            <div class="col-sm-3">
+              <button class="btn btn-sm btn-success w-100">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "Agregar" %}
+              </button>
+            </div>
+          </div>
+        </form>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% empty %}
+  <p class="text-muted">{% trans "Sin plantillas configuradas." %}</p>
+  {% endfor %}
+
+</div>
+{% endblock %}

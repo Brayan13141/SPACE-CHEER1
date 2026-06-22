@@ -2,6 +2,43 @@ from django.db import models
 from django.conf import settings
 
 
+class ProductionTemplate(models.Model):
+    """Grupo reutilizable de etapas de producción para aplicar a productos."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    stages = models.ManyToManyField(
+        "ProductionStage",
+        through="ProductionTemplateStage",
+        related_name="templates",
+        blank=True,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="production_templates_created",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductionTemplateStage(models.Model):
+    template = models.ForeignKey(
+        ProductionTemplate, on_delete=models.CASCADE, related_name="template_stages"
+    )
+    stage = models.ForeignKey("ProductionStage", on_delete=models.CASCADE)
+    display_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        unique_together = [("template", "stage")]
+        ordering = ["display_order"]
+
+    def __str__(self):
+        return f"{self.template.name} — {self.stage.name}"
+
+
 class ProductionStage(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)

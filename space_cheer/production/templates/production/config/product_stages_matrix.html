@@ -1,0 +1,189 @@
+{% extends "core/base.html" %}
+{% load static i18n %}
+{% block title %}{% trans "Matriz Productos × Etapas" %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="mb-0">
+      <i class="bi bi-grid-3x3-gap me-2"></i>{% trans "Matriz Productos × Etapas" %}
+    </h2>
+    <a href="{% url 'production:manage_stages' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-sliders me-1"></i>{% trans "Gestionar plantillas" %}
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Cerrar' %}"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if not products_data %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-box-seam fs-1 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">{% trans "No hay productos activos configurados." %}</p>
+      </div>
+    </div>
+  {% else %}
+
+  <div class="accordion" id="productAccordion">
+    {% for item in products_data %}
+    {% with product=item.product stage_configs=item.stage_configs available_stages=item.available_stages %}
+    <div class="accordion-item shadow-sm mb-2 border rounded">
+
+      <h2 class="accordion-header" id="heading-{{ product.pk }}">
+        <button class="accordion-button collapsed fw-semibold" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-{{ product.pk }}"
+                aria-expanded="false"
+                aria-controls="collapse-{{ product.pk }}">
+          <span class="me-2">{{ product.name }}</span>
+          <span class="badge bg-primary rounded-pill ms-1">
+            {{ stage_configs|length }}
+            {% blocktrans count count=stage_configs|length %}etapa{% plural %}etapas{% endblocktrans %}
+          </span>
+          {% if product.usage_type %}
+            <span class="badge bg-secondary ms-2 fw-normal">{{ product.get_usage_type_display }}</span>
+          {% endif %}
+        </button>
+      </h2>
+
+      <div id="collapse-{{ product.pk }}" class="accordion-collapse collapse"
+           aria-labelledby="heading-{{ product.pk }}"
+           data-bs-parent="#productAccordion">
+        <div class="accordion-body pt-3">
+
+          {# ── Etapas actuales ── #}
+          <p class="small fw-semibold text-uppercase text-muted mb-2">
+            <i class="bi bi-check2-square me-1"></i>{% trans "Etapas configuradas" %}
+          </p>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for sc in stage_configs %}
+            <form method="post" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove_stage">
+              <input type="hidden" name="product_id" value="{{ product.pk }}">
+              <input type="hidden" name="stage_id" value="{{ sc.stage.pk }}">
+              <span class="badge bg-info text-dark d-inline-flex align-items-center gap-1 px-2 py-1 fs-6">
+                {% if sc.stage.icon %}{{ sc.stage.icon }}{% endif %}
+                {{ sc.stage.name }}
+                <span class="badge bg-light text-secondary fw-normal ms-1">{{ sc.display_order }}</span>
+                <button type="submit" class="btn btn-link p-0 ms-1 text-danger lh-1"
+                        title="{% trans 'Quitar etapa' %}"
+                        aria-label="{% trans 'Quitar' %} {{ sc.stage.name }}">
+                  <i class="bi bi-x-circle-fill"></i>
+                </button>
+              </span>
+            </form>
+            {% empty %}
+            <span class="text-muted small fst-italic">{% trans "Sin etapas configuradas." %}</span>
+            {% endfor %}
+          </div>
+
+          <hr class="my-3">
+
+          <div class="row g-4">
+
+            {# ── Aplicar plantilla ── #}
+            <div class="col-md-6">
+              <p class="small fw-semibold text-uppercase text-muted mb-2">
+                <i class="bi bi-layout-text-sidebar-reverse me-1"></i>{% trans "Aplicar plantilla" %}
+              </p>
+              {% if templates %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="apply_template">
+                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                <div class="mb-2">
+                  <select name="template_id" class="form-select form-select-sm" required>
+                    <option value="" disabled selected>{% trans "Seleccionar plantilla…" %}</option>
+                    {% for tpl in templates %}
+                    <option value="{{ tpl.pk }}">
+                      {{ tpl.name }}
+                      ({{ tpl.template_stages.count }}
+                      {% blocktrans count count=tpl.template_stages.count %}etapa{% plural %}etapas{% endblocktrans %})
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="d-flex gap-3 mb-2 small">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="merge_mode"
+                           value="replace" id="replace-{{ product.pk }}" checked>
+                    <label class="form-check-label" for="replace-{{ product.pk }}">
+                      {% trans "Reemplazar" %}
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="merge_mode"
+                           value="merge" id="merge-{{ product.pk }}">
+                    <label class="form-check-label" for="merge-{{ product.pk }}">
+                      {% trans "Fusionar" %}
+                    </label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">
+                  <i class="bi bi-check2-all me-1"></i>{% trans "Aplicar" %}
+                </button>
+              </form>
+              {% else %}
+              <p class="text-muted small fst-italic">{% trans "No hay plantillas creadas." %}</p>
+              {% endif %}
+            </div>
+
+            {# ── Agregar etapa suelta ── #}
+            <div class="col-md-6">
+              <p class="small fw-semibold text-uppercase text-muted mb-2">
+                <i class="bi bi-plus-circle me-1"></i>{% trans "Agregar etapa suelta" %}
+              </p>
+              {% if available_stages %}
+              <form method="post" class="d-flex flex-wrap gap-2 align-items-end">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_stage">
+                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                <div>
+                  <label class="form-label form-label-sm small">{% trans "Etapa" %}</label>
+                  <select name="stage_id" class="form-select form-select-sm" required style="min-width:180px">
+                    <option value="" disabled selected>{% trans "Seleccionar etapa…" %}</option>
+                    {% for stage in available_stages %}
+                    <option value="{{ stage.pk }}">
+                      {% if stage.icon %}{{ stage.icon }} {% endif %}{{ stage.name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div style="width:80px">
+                  <label class="form-label form-label-sm small">{% trans "Orden" %}</label>
+                  <input type="number" name="display_order" value="0" min="0"
+                         class="form-control form-control-sm">
+                </div>
+                <div class="pb-1">
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-lg me-1"></i>{% trans "Agregar" %}
+                  </button>
+                </div>
+              </form>
+              {% else %}
+              <p class="text-muted small fst-italic">{% trans "Todas las etapas ya están configuradas." %}</p>
+              {% endif %}
+            </div>
+
+          </div>{# /row #}
+
+        </div>{# /accordion-body #}
+      </div>{# /accordion-collapse #}
+    </div>{# /accordion-item #}
+    {% endwith %}
+    {% endfor %}
+  </div>{# /accordion #}
+
+  {% endif %}
+
+</div>
+{% endblock %}

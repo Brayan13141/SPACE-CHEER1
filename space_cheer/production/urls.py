@@ -34,4 +34,6 @@ urlpatterns = [
     path("config/operarios/", config_views.manage_operarios, name="manage_operarios"),
     path("config/operarios/<int:pk>/", config_views.operario_detail, name="operario_detail"),
     path("config/responsabilidades/", config_views.manage_responsibilities, name="manage_responsibilities"),
+    path("config/plantillas/", config_views.manage_templates, name="manage_templates"),
+    path("config/product-stages/", config_views.product_stages_matrix, name="product_stages_matrix"),
 ]
