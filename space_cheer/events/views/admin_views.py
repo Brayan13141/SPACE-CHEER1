@@ -256,11 +256,7 @@ def score_entry(request, pk):
     is_judge = EventStaffAssignment.objects.filter(
         event=event,
         user=request.user,
-        role__name__icontains='juez',
-    ).exists() or EventStaffAssignment.objects.filter(
-        event=event,
-        user=request.user,
-        role__name__icontains='judge',
+        role__is_judge=True,
     ).exists()
 
     if not is_admin and not is_judge:

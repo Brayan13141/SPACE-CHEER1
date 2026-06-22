@@ -25,7 +25,7 @@
           </h1>
           {% if hotel.city %}<p class="text-secondary mb-1"><i class="bi bi-geo-alt me-1"></i>{{ hotel.city }}{% if hotel.address %} — {{ hotel.address }}{% endif %}</p>{% endif %}
           {% if hotel.phone %}<p class="text-secondary mb-1"><i class="bi bi-telephone me-1"></i>{{ hotel.phone }}</p>{% endif %}
-          {% if hotel.website %}<p class="mb-1"><i class="bi bi-globe me-1"></i><a href="{{ hotel.website }}" target="_blank" rel="noopener">{{ hotel.website }}</a></p>{% endif %}
+          {% if hotel.website %}<p class="mb-1"><i class="bi bi-globe me-1"></i><a href="{{ hotel.website }}" target="_blank" rel="noopener noreferrer">{{ hotel.website }}</a></p>{% endif %}
           {% if hotel.description %}<p class="text-secondary mt-2 mb-0">{{ hotel.description }}</p>{% endif %}
         </div>
         <a href="{% url 'hospitality:hotel_edit' event_pk=event.pk pk=hotel.pk %}" class="btn btn-outline-secondary btn-sm">

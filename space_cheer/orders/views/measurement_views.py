@@ -174,6 +174,7 @@ def order_item_measurements(request, athlete_item_id):
 
 
 @staff_member_required
+@require_POST
 def close_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
 
@@ -190,6 +191,7 @@ def close_measurements(request, order_id):
 
 
 @staff_member_required
+@require_POST
 def reopen_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
 
@@ -206,6 +208,7 @@ def reopen_measurements(request, order_id):
 
 
 @staff_member_required
+@require_POST
 def lock_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
 

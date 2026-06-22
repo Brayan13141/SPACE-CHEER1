@@ -31,7 +31,11 @@ app.conf.beat_schedule = {
 app.conf.timezone = "UTC"
 
 
+import logging as _logging
+_celery_logger = _logging.getLogger(__name__)
+
+
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     """Tarea de debug para verificar que Celery funciona"""
-    print(f"Request: {self.request!r}")
+    _celery_logger.debug("Request: %r", self.request)

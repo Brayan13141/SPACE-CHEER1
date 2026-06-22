@@ -15,7 +15,11 @@ class AdminIPWhitelistMiddleware:
         admin_url = "/" + settings.ADMIN_URL.lstrip("/")
         allowed_ips = [ip for ip in getattr(settings, "ADMIN_ALLOWED_IPS", []) if ip]
 
-        if request.path.startswith(admin_url) and allowed_ips:
+        protected_prefixes = [
+            admin_url,
+            "/orders/admin/",
+        ]
+        if any(request.path.startswith(p) for p in protected_prefixes) and allowed_ips:
             ip, _ = get_client_ip(request)
             if ip not in allowed_ips:
                 from django.http import HttpResponseForbidden

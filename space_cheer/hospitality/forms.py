@@ -113,6 +113,7 @@ class StayCreateForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 2}),
         required=False,
         label='Notas',
+        max_length=1000,
     )
 
     def __init__(self, event, *args, **kwargs):
@@ -160,6 +161,7 @@ class RoomAssignForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 2}),
         required=False,
         label='Notas',
+        max_length=1000,
     )
 
     def __init__(self, hotel, exclude_stay=None, *args, **kwargs):
@@ -178,6 +180,7 @@ class BedAssignForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 2}),
         required=False,
         label='Notas',
+        max_length=1000,
     )
 
     def __init__(self, room, *args, **kwargs):

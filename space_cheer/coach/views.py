@@ -548,7 +548,8 @@ def create_team_crew_member(request, team_id):
                 membership.activate(role=team_role)
 
         except Exception as e:
-            messages.error(request, f"Error al crear miembro: {e}")
+            logger.exception("Error al crear miembro de equipo team=%s: %s", team.id, e)
+            messages.error(request, "Ocurrió un error al crear el miembro. Contacta al administrador.")
             return redirect("coach:create_team_crew_member", team_id=team.id)
 
         action_word = "creado" if created else "agregado"

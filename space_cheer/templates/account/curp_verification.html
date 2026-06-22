@@ -32,7 +32,7 @@
                 <span class="text-danger">*</span>
             </label>
 
-            {{ form.curp|add_class:"form-control form-control-neon" }}
+            {{ form.curp|add_class:"form-control form-control-neon"|attr:"autocomplete:off" }}
 
             {% if form.curp.help_text %}
                 <small class="form-text text-muted">{{ form.curp.help_text }}</small>

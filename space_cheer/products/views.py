@@ -166,9 +166,6 @@ def product_detail(request, product_id):
         ),
         pk=product_id,
     )
-    print(
-        f"Producto '{product.name}' tiene {product.orders_count} orden(es) asociada(s), de las cuales {product.active_orders_count} están activas."
-    )
     # Flags para el template
     requires_sizes = product.requires_sizes
     requires_measurements = product.requires_measurements

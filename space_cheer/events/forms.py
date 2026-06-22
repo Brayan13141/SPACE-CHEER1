@@ -142,6 +142,8 @@ class EventTeamRegistrationForm(forms.ModelForm):
         else:
             qs = EventCategory.objects.filter(event=event).order_by('order', 'name')
         self.fields['category'].queryset = qs
+        # Enforce max_length on the unbounded TextField
+        self.fields['notes'].max_length = 1000
         for f in self.fields.values():
             _bs(f)
 
@@ -170,4 +172,5 @@ class RejectRegistrationForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         label=_('Motivo del rechazo'),
         required=False,
+        max_length=1000,
     )

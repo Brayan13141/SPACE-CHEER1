@@ -370,21 +370,30 @@
     <div class="d-flex flex-wrap gap-2">
 
       {% if measurement_actions.can_close %}
-        <a href="{% url 'orders:close_measurements' order.id %}" class="btn btn-warning">
-          <i class="bi bi-lock me-1"></i>{% trans "Cerrar medidas" %}
-        </a>
+        <form method="post" action="{% url 'orders:close_measurements' order.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning">
+            <i class="bi bi-lock me-1"></i>{% trans "Cerrar medidas" %}
+          </button>
+        </form>
       {% endif %}
 
       {% if measurement_actions.can_reopen and not measurement_actions.can_close %}
-        <a href="{% url 'orders:reopen_measurements' order.id %}" class="btn btn-success">
-          <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Reabrir" %}
-        </a>
+        <form method="post" action="{% url 'orders:reopen_measurements' order.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Reabrir" %}
+          </button>
+        </form>
       {% endif %}
 
       {% if measurement_actions.can_lock %}
-        <a href="{% url 'orders:lock_measurements' order.id %}" class="btn btn-danger">
-          <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear definitivo" %}
-        </a>
+        <form method="post" action="{% url 'orders:lock_measurements' order.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear definitivo" %}
+          </button>
+        </form>
       {% endif %}
 
     </div>
