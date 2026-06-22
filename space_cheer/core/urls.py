@@ -9,4 +9,5 @@ urlpatterns = [
     path("landing/", core_views.landing, name="landing"),
     path("contact/", core_views.contact, name="contact"),
     path("privacy/", core_views.privacy, name="privacy"),
+    path("terminos/", core_views.terminos, name="terminos"),
 ]

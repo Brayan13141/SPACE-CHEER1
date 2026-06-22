@@ -32,6 +32,11 @@ def privacy(request):
     return render(request, "core/privacy.html")
 
 
+@cache_page(60 * 60 * 24)
+def terminos(request):
+    return render(request, "core/terminos.html")
+
+
 def user_teams_context(request):
     if not request.user.is_authenticated:
         return {}

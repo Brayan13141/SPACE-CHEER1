@@ -1,0 +1,338 @@
+{% extends "account/base_account.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Términos y Condiciones" %} | SPACE CHEER{% endblock %}
+{% block page_title %}{% trans "Términos y Condiciones" %}{% endblock %}
+
+{% block extra_head %}
+<style nonce="{{ request.csp_nonce }}">
+.tc-section {
+    border-left: 3px solid rgba(127, 90, 240, 0.4);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+}
+.tc-section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e4eaff;
+    margin-bottom: 0.5rem;
+}
+.tc-section p,
+.tc-section li {
+    font-size: 0.85rem;
+    color: #a0a7d0;
+    line-height: 1.7;
+    margin-bottom: 0.25rem;
+}
+.tc-section ul {
+    padding-left: 1.2rem;
+}
+.tc-badge {
+    display: inline-block;
+    background: rgba(127, 90, 240, 0.15);
+    border: 1px solid rgba(127, 90, 240, 0.3);
+    color: #b0b7e0;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-bottom: 1.25rem;
+}
+.tc-highlight {
+    background: rgba(44, 177, 255, 0.07);
+    border: 1px solid rgba(44, 177, 255, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: #a0c8ff;
+    margin-top: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <span class="tc-badge">
+        <i class="bi bi-file-earmark-text me-1"></i>
+        {% trans "Vigentes desde" %}: 21 {% trans "de junio de" %} 2026
+    </span>
+    <p class="sc-color-muted small">
+        {% blocktrans %}
+        Al registrarte o utilizar la plataforma SPACE CHEER aceptas estos Términos y Condiciones en su totalidad.
+        Por favor léelos detenidamente antes de continuar.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 1. Aceptación de términos ──────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-check2-circle me-2 sc-color-purple"></i>1. {% trans "Aceptación de los Términos" %}</h3>
+    <p>
+        {% blocktrans %}
+        El acceso y uso de la plataforma <strong class="sc-color-light">SPACE CHEER</strong>
+        (en adelante "la Plataforma") implica la aceptación plena y sin reservas de los
+        presentes Términos y Condiciones ("T&C"). Si no estás de acuerdo con alguna disposición,
+        debes abstenerte de usar la Plataforma.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        SPACE CHEER se reserva el derecho de modificar estos T&C en cualquier momento. Los cambios
+        entrarán en vigor a partir de su publicación en la Plataforma. El uso continuado tras la
+        publicación constituye aceptación de los nuevos términos.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 2. Descripción del servicio ────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-stars me-2 sc-color-purple"></i>2. {% trans "Descripción del Servicio" %}</h3>
+    <p>
+        {% blocktrans %}
+        SPACE CHEER es una plataforma digital orientada a la gestión integral de equipos de porrismo
+        (cheerleading). Los servicios disponibles incluyen:
+        {% endblocktrans %}
+    </p>
+    <ul>
+        <li>{% trans "Gestión de equipos: membresías, roles de atleta, coach y staff." %}</li>
+        <li>{% trans "Pedidos de uniformes personalizados y productos relacionados." %}</li>
+        <li>{% trans "Registro y administración de medidas corporales de atletas." %}</li>
+        <li>{% trans "Calendario y seguimiento de competencias y eventos de cheerleading." %}</li>
+        <li>{% trans "Comunicación interna entre miembros del equipo." %}</li>
+        <li>{% trans "Acceso a contenido social del equipo (feed, publicaciones, galería)." %}</li>
+    </ul>
+    <p>
+        {% blocktrans %}
+        El acceso a las distintas funciones depende del rol asignado al usuario
+        (ADMIN, HEADCOACH, COACH, STAFF, ATLETA, ACOMPAÑANTE) y de la suscripción activa del equipo.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 3. Registro y cuentas ──────────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-person-check me-2 sc-color-purple"></i>3. {% trans "Registro y Responsabilidades de la Cuenta" %}</h3>
+    <p>
+        {% blocktrans %}
+        Para acceder a la Plataforma es necesario crear una cuenta con información veraz, completa y actualizada.
+        El usuario es el único responsable de:
+        {% endblocktrans %}
+    </p>
+    <ul>
+        <li>{% trans "Mantener la confidencialidad de sus credenciales de acceso." %}</li>
+        <li>{% trans "Todas las actividades realizadas bajo su cuenta." %}</li>
+        <li>{% trans "Notificar a SPACE CHEER de inmediato ante cualquier uso no autorizado." %}</li>
+        <li>{% trans "Proporcionar información veraz y mantenerla actualizada." %}</li>
+    </ul>
+    <p>
+        {% blocktrans %}
+        SPACE CHEER se reserva el derecho de suspender o cancelar cuentas que incumplan estos T&C,
+        proporcionen información falsa o realicen actividades que perjudiquen a otros usuarios o a la Plataforma.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        Los usuarios con rol HEADCOACH son responsables de gestionar correctamente los miembros de su equipo,
+        incluyendo la asignación de roles y el control de acceso a la información del equipo.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 4. Pedidos de uniformes ────────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-bag-check me-2 sc-color-purple"></i>4. {% trans "Pedidos de Uniformes: Proceso, Pagos y Cancelaciones" %}</h3>
+
+    <h3 class="mt-3"><i class="bi bi-list-check me-1 sc-color-cyan"></i>{% trans "Proceso de pedido" %}</h3>
+    <p>
+        {% blocktrans %}
+        Los pedidos de uniformes siguen un flujo definido de estados:
+        <strong class="sc-color-light">BORRADOR → PENDIENTE → DISEÑO APROBADO → EN PRODUCCIÓN → ENTREGADO</strong>.
+        El pedido puede cancelarse antes de que entre en producción.
+        {% endblocktrans %}
+    </p>
+    <ul>
+        <li>{% trans "Las medidas de los atletas deben registrarse dentro del plazo indicado por el HEADCOACH." %}</li>
+        <li>{% trans "Una vez aprobado el diseño, las medidas quedan bloqueadas y no pueden modificarse." %}</li>
+        <li>{% trans "El usuario recibirá notificaciones por correo electrónico en cada cambio de estado." %}</li>
+    </ul>
+
+    <h3 class="mt-3"><i class="bi bi-credit-card me-1 sc-color-cyan"></i>{% trans "Pagos" %}</h3>
+    <p>
+        {% blocktrans %}
+        Los precios de los uniformes y productos se muestran en pesos mexicanos (MXN) e incluyen IVA
+        cuando aplique. Los métodos de pago disponibles y las condiciones de pago se especificarán en
+        cada pedido. SPACE CHEER no almacena datos de tarjetas de crédito o débito.
+        {% endblocktrans %}
+    </p>
+
+    <h3 class="mt-3"><i class="bi bi-x-circle me-1 sc-color-cyan"></i>{% trans "Cancelaciones" %}</h3>
+    <p>
+        {% blocktrans %}
+        Las cancelaciones solo se aceptan antes de que el pedido entre en estado
+        <strong class="sc-color-light">EN PRODUCCIÓN</strong>. Una vez iniciada la producción,
+        no se aceptarán cancelaciones ni reembolsos, salvo defecto de fabricación comprobable.
+        {% endblocktrans %}
+    </p>
+
+    <h3 class="mt-3"><i class="bi bi-shield-check me-1 sc-color-cyan"></i>{% trans "Garantías" %}</h3>
+    <p>
+        {% blocktrans %}
+        SPACE CHEER garantiza que los productos entregados corresponderán a las especificaciones
+        del pedido aprobado. En caso de defecto de fabricación, el usuario deberá notificarlo
+        dentro de los 7 días naturales posteriores a la recepción del pedido, adjuntando evidencia
+        fotográfica. SPACE CHEER evaluará cada caso y determinará la solución apropiada (reposición,
+        reparación o crédito).
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 5. Protección de datos de menores ─────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-person-hearts me-2 sc-color-purple"></i>5. {% trans "Protección de Datos de Menores de Edad" %}</h3>
+    <div class="tc-highlight mb-3">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {% blocktrans %}
+        SPACE CHEER maneja datos de menores de edad de conformidad con la
+        <strong>Ley General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA)</strong>
+        y la <strong>Ley Federal de Protección de Datos Personales en Posesión de los
+        Particulares (LFPDPPP)</strong>.
+        {% endblocktrans %}
+    </div>
+    <p>
+        {% blocktrans %}
+        El registro y tratamiento de datos personales de atletas menores de 18 años
+        requiere el <strong class="sc-color-light">consentimiento expreso del padre, madre o
+        tutor legal</strong> (en adelante "el Tutor"). Al registrar a un menor en la Plataforma,
+        el Tutor declara:
+        {% endblocktrans %}
+    </p>
+    <ul>
+        <li>{% trans "Ser el padre, madre o tutor legal del menor." %}</li>
+        <li>{% trans "Autorizar el tratamiento de los datos personales del menor, incluyendo nombre, fecha de nacimiento, CURP y medidas corporales, para los fines de la Plataforma." %}</li>
+        <li>{% trans "Que la información proporcionada es veraz y está actualizada." %}</li>
+        <li>{% trans "Comprender que puede revocar este consentimiento en cualquier momento, solicitándolo a space.cheer.space@gmail.com." %}</li>
+    </ul>
+    <p>
+        {% blocktrans %}
+        Los datos de menores están sujetos a controles adicionales de acceso dentro de la
+        Plataforma. Solo el personal autorizado del equipo (HEADCOACH, COACH, STAFF) y el propio
+        Tutor vinculado podrán consultar esta información.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        SPACE CHEER no compartirá datos de menores con terceros, salvo obligación legal expresa.
+        Los Tutores pueden ejercer los derechos ARCO (Acceso, Rectificación, Cancelación y
+        Oposición) enviando una solicitud a
+        <a href="mailto:space.cheer.space@gmail.com" class="sc-color-cyan">space.cheer.space@gmail.com</a>.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 6. Propiedad intelectual ───────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-c-circle me-2 sc-color-purple"></i>6. {% trans "Propiedad Intelectual" %}</h3>
+    <p>
+        {% blocktrans %}
+        Todo el contenido de la Plataforma — incluyendo, sin limitación, el código fuente, diseño,
+        logotipos, textos, imágenes y funcionalidades — es propiedad exclusiva de SPACE CHEER o de
+        sus licenciantes, y está protegido por las leyes mexicanas e internacionales de propiedad
+        intelectual y derechos de autor.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        Los usuarios conservan la propiedad de los contenidos que suben a la Plataforma (fotografías,
+        diseños de uniformes, etc.), pero otorgan a SPACE CHEER una licencia no exclusiva, libre de
+        regalías, para alojar, reproducir y mostrar dicho contenido dentro de la Plataforma con el
+        único fin de prestar el servicio.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        Queda prohibida la reproducción, distribución o uso comercial de cualquier elemento de la
+        Plataforma sin autorización escrita previa de SPACE CHEER.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 7. Limitación de responsabilidad ──────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-shield-exclamation me-2 sc-color-purple"></i>7. {% trans "Limitación de Responsabilidad" %}</h3>
+    <p>
+        {% blocktrans %}
+        En la medida permitida por la ley aplicable, SPACE CHEER no será responsable de:
+        {% endblocktrans %}
+    </p>
+    <ul>
+        <li>{% trans "Daños directos, indirectos, incidentales o consecuentes derivados del uso o imposibilidad de uso de la Plataforma." %}</li>
+        <li>{% trans "Interrupciones del servicio por mantenimiento, fallas técnicas o causas de fuerza mayor." %}</li>
+        <li>{% trans "Pérdida de datos causada por el usuario o por terceros no autorizados." %}</li>
+        <li>{% trans "Inexactitudes en medidas proporcionadas por el usuario que afecten la confección de uniformes." %}</li>
+        <li>{% trans "El contenido publicado por usuarios en el feed social de la Plataforma." %}</li>
+    </ul>
+    <p>
+        {% blocktrans %}
+        La responsabilidad máxima de SPACE CHEER ante el usuario, en cualquier caso, no excederá
+        el monto pagado por el usuario durante los tres (3) meses anteriores al evento que originó
+        la reclamación.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 8. Ley aplicable ───────────────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-flag me-2 sc-color-purple"></i>8. {% trans "Ley Aplicable y Jurisdicción" %}</h3>
+    <p>
+        {% blocktrans %}
+        Los presentes T&C se rigen e interpretan conforme a las leyes vigentes de los
+        <strong class="sc-color-light">Estados Unidos Mexicanos</strong>. Para la resolución de
+        cualquier controversia derivada de su interpretación o cumplimiento, las partes se someten
+        a la jurisdicción de los tribunales competentes del Estado de Guanajuato, México,
+        renunciando expresamente a cualquier otro fuero que pudiera corresponderles por razón de
+        su domicilio presente o futuro.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        En materia de protección de datos personales, el tratamiento se rige por la
+        <strong class="sc-color-light">Ley Federal de Protección de Datos Personales en Posesión
+        de los Particulares (LFPDPPP)</strong> y su Reglamento, y en lo relativo a menores,
+        por la <strong class="sc-color-light">Ley General de los Derechos de Niñas, Niños y
+        Adolescentes (LGDNNA)</strong>.
+        {% endblocktrans %}
+    </p>
+</div>
+
+{# ── 9. Contacto ────────────────────────────────────────────────────── #}
+<div class="tc-section">
+    <h3><i class="bi bi-envelope-at me-2 sc-color-purple"></i>9. {% trans "Contacto" %}</h3>
+    <p>
+        {% blocktrans %}
+        Para cualquier consulta, reclamación o ejercicio de derechos relacionados con estos
+        Términos y Condiciones, puedes comunicarte con nosotros a:
+        {% endblocktrans %}
+    </p>
+    <p>
+        <a href="mailto:space.cheer.space@gmail.com" class="sc-color-cyan text-decoration-none">
+            <i class="bi bi-envelope me-1"></i>space.cheer.space@gmail.com
+        </a>
+    </p>
+    <p class="small">
+        {% trans "Responderemos en un plazo máximo de 10 días hábiles." %}
+    </p>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url 'core:privacy' %}" class="btn btn-neon-outline">
+        <i class="bi bi-shield-check me-2"></i>{% trans "Política de Privacidad" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block footer_links %}
+<p>
+    <a class="sc-color-secondary" href="{% url 'core:privacy' %}">{% trans "Política de privacidad" %}</a> •
+    <a class="sc-color-secondary" href="{% url 'core:contact' %}">{% trans "Contacto" %}</a> •
+    <a class="sc-color-secondary" href="{% url 'account_login' %}">{% trans "Iniciar sesión" %}</a>
+</p>
+{% endblock %}

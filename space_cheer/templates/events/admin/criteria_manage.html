@@ -43,6 +43,7 @@
         </div>
         {% if categories %}
         <div class="card-body p-0">
+          <div class="table-responsive">
           <table class="table table-hover mb-0">
             <thead><tr>
               <th>{% trans "Nombre" %}</th><th>{% trans "Máx. equipos" %}</th><th></th>
@@ -64,6 +65,7 @@
               {% endfor %}
             </tbody>
           </table>
+          </div>
         </div>
         {% else %}
         <div class="card-body text-center text-secondary py-3">
@@ -101,6 +103,7 @@
         </div>
         {% if criteria %}
         <div class="card-body p-0">
+          <div class="table-responsive">
           <table class="table table-hover mb-0">
             <thead><tr>
               <th>{% trans "Nombre" %}</th><th>{% trans "Peso" %}</th><th>{% trans "Máx." %}</th><th></th>
@@ -123,6 +126,7 @@
               {% endfor %}
             </tbody>
           </table>
+          </div>
         </div>
         {% else %}
         <div class="card-body text-center text-secondary py-3">
