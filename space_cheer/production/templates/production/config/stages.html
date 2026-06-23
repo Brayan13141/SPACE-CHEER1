@@ -1,44 +1,237 @@
 {% extends "core/base.html" %}
 {% load static i18n %}
-{% block title %}Etapas de Producción{% endblock %}
+{% block title %}{% trans "Catálogo de Etapas" %}{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-  <h2 class="mb-4">Catálogo de Etapas</h2>
 
-  <div class="card bg-dark border-secondary mb-4">
-    <div class="card-header">Nueva etapa</div>
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>{% trans "Catálogo de Etapas" %}</h2>
+    <a href="{% url 'production:manage_roles' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-people me-1"></i>{% trans "Roles" %}
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {# ── CREAR NUEVA ETAPA ── #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>{% trans "Nueva etapa" %}</h5>
+    </div>
     <div class="card-body">
       <form method="post">
         {% csrf_token %}
-        <div class="row g-2">
-          <div class="col-md-3"><input name="name" class="form-control bg-dark text-light" placeholder="Nombre" required></div>
-          <div class="col-md-2"><input name="slug" class="form-control bg-dark text-light" placeholder="slug" required></div>
-          <div class="col-md-1"><input name="icon" class="form-control bg-dark text-light" placeholder="🎨" maxlength="10"></div>
-          <div class="col-md-1"><input name="display_order" type="number" class="form-control bg-dark text-light" placeholder="0" value="0"></div>
-          <div class="col-md-3"><input name="description" class="form-control bg-dark text-light" placeholder="Descripción (opcional)"></div>
-          <div class="col-md-2"><button class="btn btn-primary w-100">Crear</button></div>
+        <input type="hidden" name="action" value="save">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">{% trans "Nombre" %} <span class="text-danger">*</span></label>
+            <input name="name" class="form-control" placeholder="Ej: Sublimación" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold">{% trans "Slug" %} <span class="text-danger">*</span></label>
+            <input name="slug" class="form-control" placeholder="sublimacion" required>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label small fw-semibold">{% trans "Icono" %}</label>
+            <input name="icon" class="form-control text-center" placeholder="🎨" maxlength="10">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label small fw-semibold">{% trans "Orden" %}</label>
+            <input name="display_order" type="number" class="form-control" value="{{ stages|length|add:1 }}" min="0">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">{% trans "Descripción" %}</label>
+            <input name="description" class="form-control" placeholder="{% trans 'Opcional' %}">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100">
+              <i class="bi bi-plus-lg me-1"></i>{% trans "Crear" %}
+            </button>
+          </div>
         </div>
       </form>
     </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-dark table-bordered">
-      <thead><tr><th>#</th><th>Icono</th><th>Nombre</th><th>Slug</th><th>Orden</th></tr></thead>
-      <tbody>
-        {% for stage in stages %}
+  {# ── TABLA DE ETAPAS ── #}
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">{% trans "Etapas configuradas" %} <span class="badge bg-secondary ms-1">{{ stages|length }}</span></h5>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-dark">
           <tr>
-            <td>{{ stage.pk }}</td>
-            <td>{{ stage.icon }}</td>
-            <td>{{ stage.name }}</td>
-            <td><code>{{ stage.slug }}</code></td>
-            <td>{{ stage.display_order }}</td>
+            <th class="ps-3" style="width:48px">{% trans "Ord." %}</th>
+            <th style="width:56px">{% trans "Icono" %}</th>
+            <th>{% trans "Nombre" %}</th>
+            <th>{% trans "Slug" %}</th>
+            <th class="text-center" style="width:80px">{% trans "Prods." %}</th>
+            <th class="text-center" style="width:80px">{% trans "Plantillas" %}</th>
+            <th class="text-center" style="width:80px">{% trans "Tasks" %}</th>
+            <th style="width:96px"></th>
           </tr>
-        {% empty %}
-          <tr><td colspan="5" class="text-center text-muted">Sin etapas configuradas.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for stage in stages %}
+          <tr>
+            <td class="ps-3 text-muted small">{{ stage.display_order }}</td>
+            <td class="text-center fs-5">{{ stage.icon }}</td>
+            <td class="fw-semibold">{{ stage.name }}</td>
+            <td><code class="small">{{ stage.slug }}</code></td>
+            <td class="text-center">
+              {% if stage.products_count %}
+                <span class="badge bg-primary">{{ stage.products_count }}</span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if stage.templates_count %}
+                <span class="badge bg-info text-dark">{{ stage.templates_count }}</span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if stage.tasks_count %}
+                <span class="badge bg-secondary">{{ stage.tasks_count }}</span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-end pe-3">
+              <button class="btn btn-sm btn-outline-secondary me-1"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#editStage{{ stage.pk }}"
+                      title="{% trans 'Editar' %}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <form id="delStage{{ stage.pk }}" method="post" class="d-none">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="stage_id" value="{{ stage.pk }}">
+              </form>
+              <button type="button" class="btn btn-sm btn-outline-danger"
+                      data-confirm
+                      data-title="{% trans 'Eliminar etapa' %}"
+                      data-body="¿Eliminar <strong>{{ stage.name }}</strong>? Solo es posible si no está asignada a ningún producto, plantilla ni tarea activa."
+                      data-form="delStage{{ stage.pk }}"
+                      data-variant="danger"
+                      title="{% trans 'Eliminar' %}">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </td>
+          </tr>
+          {# ── Fila edición inline ── #}
+          <tr class="collapse" id="editStage{{ stage.pk }}">
+            <td colspan="8" class="bg-dark border-top-0 pt-0 pb-3 px-3">
+              <form method="post" class="row g-2 align-items-end mt-1">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="stage_id" value="{{ stage.pk }}">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold text-light">{% trans "Nombre" %} <span class="text-danger">*</span></label>
+                  <input name="name" class="form-control form-control-sm" value="{{ stage.name }}" required>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small fw-semibold text-light">{% trans "Slug" %} <span class="text-danger">*</span></label>
+                  <input name="slug" class="form-control form-control-sm" value="{{ stage.slug }}" required>
+                </div>
+                <div class="col-md-1">
+                  <label class="form-label small fw-semibold text-light">{% trans "Icono" %}</label>
+                  <input name="icon" class="form-control form-control-sm text-center" value="{{ stage.icon }}" maxlength="10">
+                </div>
+                <div class="col-md-1">
+                  <label class="form-label small fw-semibold text-light">{% trans "Orden" %}</label>
+                  <input name="display_order" type="number" class="form-control form-control-sm" value="{{ stage.display_order }}" min="0">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold text-light">{% trans "Descripción" %}</label>
+                  <input name="description" class="form-control form-control-sm" value="{{ stage.description }}">
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-success btn-sm w-100">
+                    <i class="bi bi-check-lg me-1"></i>{% trans "Guardar" %}
+                  </button>
+                </div>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-5">
+              <i class="bi bi-diagram-3 d-block fs-2 mb-2"></i>
+              {% trans "No hay etapas configuradas. Crea la primera arriba." %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="confirmModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2 pb-1">
+        <p class="text-muted mb-0" id="confirmModalBody"></p>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>{% trans "Cancelar" %}
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmModalBtn">
+          <i class="bi bi-trash3 me-1"></i>{% trans "Eliminar" %}
+        </button>
+      </div>
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl    = document.getElementById('confirmModal');
+  const modal      = new bootstrap.Modal(modalEl);
+  const titleEl    = document.getElementById('confirmModalTitle');
+  const bodyEl     = document.getElementById('confirmModalBody');
+  const confirmBtn = document.getElementById('confirmModalBtn');
+  let pendingFormId = null;
+
+  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      titleEl.textContent = this.dataset.title || 'Confirmar acción';
+      bodyEl.innerHTML = this.dataset.body || '¿Estás seguro?';
+      pendingFormId = this.dataset.form;
+      modal.show();
+    });
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    if (pendingFormId) {
+      const form = document.getElementById(pendingFormId);
+      if (form) form.submit();
+    }
+    modal.hide();
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', function () { pendingFormId = null; });
+});
+</script>
 {% endblock %}

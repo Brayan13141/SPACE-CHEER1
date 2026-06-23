@@ -26,6 +26,29 @@ User = get_user_model()
 @role_required("ADMIN")
 def manage_stages(request):
     if request.method == "POST":
+        action = request.POST.get("action", "save")
+
+        if action == "delete":
+            stage_id = request.POST.get("stage_id")
+            stage = get_object_or_404(ProductionStage, pk=stage_id)
+            # Protección: no eliminar si está en uso
+            blockers = []
+            if stage.stage_configs.exists():
+                blockers.append(f"{stage.stage_configs.count()} producto(s)")
+            if stage.productiontask_set.exists():
+                blockers.append(f"{stage.productiontask_set.count()} task(s) de producción")
+            if hasattr(stage, "responsibility"):
+                blockers.append("una responsabilidad asignada")
+            if stage.productiontemplatestage_set.exists():
+                blockers.append(f"{stage.productiontemplatestage_set.count()} plantilla(s)")
+            if blockers:
+                messages.error(request, f"No se puede eliminar «{stage.name}»: está en uso por {', '.join(blockers)}.")
+            else:
+                stage.delete()
+                messages.success(request, f"Etapa «{stage.name}» eliminada.")
+            return redirect("production:manage_stages")
+
+        # save (create or update)
         name = request.POST.get("name", "").strip()
         slug = request.POST.get("slug", "").strip()
         icon = request.POST.get("icon", "").strip()
@@ -58,7 +81,11 @@ def manage_stages(request):
             messages.error(request, "Nombre y slug son obligatorios.")
         return redirect("production:manage_stages")
 
-    stages = ProductionStage.objects.all()
+    stages = ProductionStage.objects.annotate(
+        products_count=Count("stage_configs", distinct=True),
+        tasks_count=Count("productiontask", distinct=True),
+        templates_count=Count("productiontemplatestage", distinct=True),
+    ).order_by("display_order")
     return render(request, "production/config/stages.html", {"stages": stages})
 
 
