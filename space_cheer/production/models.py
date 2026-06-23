@@ -57,7 +57,7 @@ class ProductStageConfig(models.Model):
     product = models.ForeignKey(
         "products.Product", on_delete=models.CASCADE, related_name="stage_configs"
     )
-    stage = models.ForeignKey(ProductionStage, on_delete=models.CASCADE)
+    stage = models.ForeignKey(ProductionStage, on_delete=models.CASCADE, related_name="stage_configs")
     display_order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
