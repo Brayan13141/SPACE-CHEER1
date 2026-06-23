@@ -334,6 +334,7 @@ def product_detail(request, product_id):
             "base_price": product.base_price,
             "min_price": product.base_price + (price_stats["min_additional"] or 0),
             "max_price": product.base_price + (price_stats["max_additional"] or 0),
+            "max_additional": price_stats["max_additional"] or 0,
             "has_variance": (price_stats["max_additional"] or 0) > 0,
         }
     else:

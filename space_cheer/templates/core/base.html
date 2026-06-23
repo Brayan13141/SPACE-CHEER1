@@ -713,6 +713,12 @@
                             <li><a class="dropdown-item" href="{% url 'production:manage_stages' %}">
                                 <i class="bi bi-sliders me-2"></i>{% trans "Configuración" %}
                             </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:manage_templates' %}">
+                                <i class="bi bi-copy me-2"></i>{% trans "Plantillas" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:product_stages_matrix' %}">
+                                <i class="bi bi-grid-3x3-gap me-2"></i>{% trans "Etapas por producto" %}
+                            </a></li>
                             {% endif %}
                             {% endif %}
 

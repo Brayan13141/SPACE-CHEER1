@@ -114,7 +114,7 @@
               </div>
               <div class="d-flex justify-content-between">
                 <span class="text-muted">{% trans "Con variantes:" %}</span>
-                <span class="text-success">+${{ pricing_info.max_price|floatformat:2|cut:pricing_info.base_price|cut:"$" }}</span>
+                <span class="text-success">+${{ pricing_info.max_additional|floatformat:2 }}</span>
               </div>
             </div>
           {% else %}
