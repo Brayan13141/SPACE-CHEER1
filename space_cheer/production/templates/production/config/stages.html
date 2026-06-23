@@ -122,7 +122,7 @@
               <button type="button" class="btn btn-sm btn-outline-danger"
                       data-confirm
                       data-title="{% trans 'Eliminar etapa' %}"
-                      data-body="¿Eliminar <strong>{{ stage.name }}</strong>? Solo es posible si no está asignada a ningún producto, plantilla ni tarea activa."
+                      data-body="¿Eliminar «{{ stage.name }}»? Solo es posible si no está asignada a ningún producto, plantilla ni tarea activa."
                       data-form="delStage{{ stage.pk }}"
                       data-variant="danger"
                       title="{% trans 'Eliminar' %}">
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('[data-confirm]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       titleEl.textContent = this.dataset.title || 'Confirmar acción';
-      bodyEl.innerHTML = this.dataset.body || '¿Estás seguro?';
+      bodyEl.textContent = this.dataset.body || '¿Estás seguro?';
       pendingFormId = this.dataset.form;
       modal.show();
     });
