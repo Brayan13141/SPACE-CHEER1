@@ -334,6 +334,24 @@
         @media (max-width: 575.98px) {
             .popover { max-width: 280px; }
         }
+
+        /* ─── HINT CAMPOS OBLIGATORIOS ──────────────────────── */
+        .sc-req-wrap { position: relative; display: block; }
+        .sc-req-hint {
+            position: absolute;
+            bottom: 7px;
+            right: 10px;
+            font-size: 0.6rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.18);
+            pointer-events: none;
+            user-select: none;
+            transition: color 0.25s ease;
+            letter-spacing: 0.2px;
+        }
+        .sc-req-wrap:focus-within .sc-req-hint { color: rgba(192, 132, 252, 0.6); }
+        .sc-req-wrap input:not(:placeholder-shown) ~ .sc-req-hint,
+        .sc-req-wrap textarea:not(:placeholder-shown) ~ .sc-req-hint { color: rgba(192, 132, 252, 0.4); }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -1078,6 +1096,21 @@
                 }
             });
         }
+
+        // Hint "• obligatorio" dentro del input, esquina inferior derecha
+        document.querySelectorAll('input[required], select[required], textarea[required]').forEach(function (field) {
+            var skip = ['checkbox', 'radio', 'hidden', 'file', 'submit', 'button'];
+            if (skip.includes(field.type)) return;
+            if (field.closest('.sc-req-wrap')) return;
+            var wrapper = document.createElement('div');
+            wrapper.className = 'sc-req-wrap';
+            field.parentNode.insertBefore(wrapper, field);
+            wrapper.appendChild(field);
+            var hint = document.createElement('span');
+            hint.className = 'sc-req-hint';
+            hint.textContent = '• obligatorio';
+            wrapper.appendChild(hint);
+        });
 
         // Spinner en submit de forms
         // Usa setTimeout(0) para que el spinner solo corra si ningún listener
