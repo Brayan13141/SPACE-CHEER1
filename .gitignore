@@ -226,4 +226,15 @@ space_cheer/media/
 space_cheer/staticfiles/
 KEY-GITHUB-BRAYAN
 KEY-GITHUB-BRAYAN.pub
-manual_usuario_spacecheer.pdf
+
+# Manuales PDF generados localmente
+manual_*.pdf
+manual_screenshots/
+manual_screenshots_staff/
+
+# Capturas temporales de Playwright
+space_cheer/*.png
+space_cheer/.playwright-cli/
+
+# Archivos temporales varios
+New Text Document.txt
