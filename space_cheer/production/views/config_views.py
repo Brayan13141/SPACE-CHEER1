@@ -446,7 +446,7 @@ def product_stages_matrix(request):
     )
 
 
-@role_required("ADMIN")
+@role_required("ADMIN", "STAFF")
 def manage_responsibilities(request):
     if request.method == "POST":
         stage_id = request.POST.get("stage_id")

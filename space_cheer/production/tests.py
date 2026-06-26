@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.core import mail
 from django.utils import timezone
 
 from orders.tests.factories import (
@@ -351,3 +352,85 @@ class OperarioServiceTests(TestCase):
         self.assertFalse(
             OperarioRoleAssignment.objects.filter(user=operario, role=prod_role).exists()
         )
+
+
+# ---------------------------------------------------------------------------
+# notify_task_assigned — Celery task
+# ---------------------------------------------------------------------------
+
+class NotifyTaskAssignedTests(TestCase):
+    """Tests for the notify_task_assigned Celery task."""
+
+    def _make_task_with_assignee(self, email=None):
+        """Helper: creates a fully wired ProductionTask with an assigned operario."""
+        from production.tasks import notify_task_assigned
+        from orders.tests.factories import UserFactory
+
+        operario = UserFactory(email=email or "operario@test.com")
+
+        order = OrderFactory()
+        item = OrderItemFactory(order=order)
+        job = ProductionJob.objects.create(order=order)
+        stage = ProductionStage.objects.create(
+            name="Costura", slug="costura-ntf", display_order=99
+        )
+        task = ProductionTask.objects.create(
+            job=job,
+            order_item=item,
+            stage=stage,
+            assigned_to=operario,
+        )
+        return task, operario
+
+    def test_creates_notification_in_db(self):
+        """Calling notify_task_assigned creates a Notification row for the operario."""
+        from production.tasks import notify_task_assigned
+        from accounts.models import Notification
+
+        with override_settings(
+            EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend"
+        ):
+            task, operario = self._make_task_with_assignee()
+            notify_task_assigned(task.id)
+
+        notif = Notification.objects.filter(
+            user=operario,
+            notification_type=Notification.NotificationType.TASK_ASSIGNED,
+        ).first()
+        self.assertIsNotNone(notif, "No se creó la Notification en BD")
+        self.assertIn("Costura", notif.title)
+        self.assertIn(str(task.job.order.id), notif.body)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_sends_email(self):
+        """Calling notify_task_assigned sends one email to the operario."""
+        from production.tasks import notify_task_assigned
+
+        task, operario = self._make_task_with_assignee(email="operario_email@test.com")
+        notify_task_assigned(task.id)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("operario_email@test.com", mail.outbox[0].to)
+        self.assertIn("Space Cheer", mail.outbox[0].subject)
+
+    def test_no_notification_if_no_assignee(self):
+        """If task has no assigned_to, no Notification is created."""
+        from production.tasks import notify_task_assigned
+        from accounts.models import Notification
+
+        order = OrderFactory()
+        item = OrderItemFactory(order=order)
+        job = ProductionJob.objects.create(order=order)
+        stage = ProductionStage.objects.create(
+            name="Sublimacion", slug="sublimacion-ntf", display_order=98
+        )
+        task = ProductionTask.objects.create(
+            job=job,
+            order_item=item,
+            stage=stage,
+            assigned_to=None,
+        )
+
+        initial_count = Notification.objects.count()
+        notify_task_assigned(task.id)
+        self.assertEqual(Notification.objects.count(), initial_count)

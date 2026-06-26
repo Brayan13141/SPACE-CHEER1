@@ -8,7 +8,7 @@
     <a href="{% url 'production:error_report_list' %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
     <div>
       <h2 class="mb-0">Reporte de Error #{{ report.pk }}</h2>
-      <small class="text-muted">{{ report.reported_at|date:"d/m/Y H:i" }} — Reportado por {{ report.reported_by.get_full_name|default:report.reported_by.username|default:"—" }}</small>
+      <small class="text-muted">{{ report.reported_at|date:"d/m/Y H:i" }} — Reportado por {% if report.reported_by %}{{ report.reported_by.get_full_name|default:report.reported_by.username }}{% else %}—{% endif %}</small>
     </div>
     {% if report.requires_reposition and not report.is_exception %}
       <span class="badge bg-danger ms-auto">⚠️ Reposición requerida</span>
@@ -75,7 +75,7 @@
     <div class="card-body small">
       <dl class="row mb-2">
         <dt class="col-sm-4">Nombre</dt>
-        <dd class="col-sm-8">{{ report.responsible.get_full_name|default:report.responsible.username|default:"—" }}</dd>
+        <dd class="col-sm-8">{% if report.responsible %}{{ report.responsible.get_full_name|default:report.responsible.username }}{% else %}—{% endif %}</dd>
         {% if report.responsible_area %}
           <dt class="col-sm-4">Área / Puesto</dt>
           <dd class="col-sm-8">{{ report.responsible_area }}</dd>
@@ -161,10 +161,6 @@
         </dl>
       {% else %}
         <p class="text-muted small mb-3">Pendiente de revisión por Dirección.</p>
-      {% endif %}
-
-      {% if request.user.roles.filter(name="ADMIN").exists or perms.production %}
-        {% comment %}Admin review form{% endcomment %}
       {% endif %}
 
       <!-- Formulario de revisión (solo ADMIN) -->

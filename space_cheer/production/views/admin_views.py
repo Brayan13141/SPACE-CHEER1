@@ -90,7 +90,7 @@ def toggle_urgent(request, pk):
     return redirect("production:admin_overview")
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN", "STAFF", "OPERARIO")
 def reglamento(request):
     from production.models import ProductionStage, ProductionRole
     stages = (

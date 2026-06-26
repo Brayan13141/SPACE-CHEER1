@@ -305,7 +305,7 @@ def assign_guardian(request, athlete_id):
 
             except Exception as e:
                 logger.error("Error enviando invitación: %s", str(e), exc_info=True)
-                messages.error(request, f"Error enviando invitación: {str(e)}")
+                messages.error(request, "Error al enviar la invitación. Contacta al administrador.")
 
             return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 

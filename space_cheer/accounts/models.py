@@ -529,3 +529,34 @@ class PrivacySettings(models.Model):
 
     def __str__(self):
         return f"Privacy — {self.user} ({self.profile_visibility})"
+
+
+# =============================================================================
+# NOTIFICATION
+# =============================================================================
+
+
+class Notification(models.Model):
+    class NotificationType(models.TextChoices):
+        TASK_ASSIGNED = "TASK_ASSIGNED", "Tarea asignada"
+        TASK_COMPLETE = "TASK_COMPLETE", "Tarea completada"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    title = models.CharField(max_length=200)
+    body = models.TextField(blank=True)
+    notification_type = models.CharField(
+        max_length=30,
+        choices=NotificationType.choices,
+    )
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.notification_type}] {self.title} → {self.user}"

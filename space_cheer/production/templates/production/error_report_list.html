@@ -61,8 +61,8 @@
                   <span class="badge bg-secondary">{{ label }}</span>
                 {% endfor %}
               </td>
-              <td class="small">{{ report.reported_by.get_full_name|default:report.reported_by.username|default:"—" }}</td>
-              <td class="small">{{ report.responsible.get_full_name|default:report.responsible.username|default:"—" }}</td>
+              <td class="small">{% if report.reported_by %}{{ report.reported_by.get_full_name|default:report.reported_by.username }}{% else %}—{% endif %}</td>
+              <td class="small">{% if report.responsible %}{{ report.responsible.get_full_name|default:report.responsible.username }}{% else %}—{% endif %}</td>
               <td>
                 {% if report.review_status == "PENDING" %}
                   <span class="badge bg-warning text-dark">{{ report.get_review_status_display }}</span>

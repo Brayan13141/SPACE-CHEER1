@@ -381,8 +381,31 @@
                         </ul>
                     </li>
 
-                    {# ── COMPETENCIAS — todos excepto guardian ── #}
-                    {% if not is_guardian %}
+                    {# ── PRODUCCIÓN — operarios (nav directo) ── #}
+                    {% if is_operario %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-tools me-1"></i>{% trans "Producción" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'production:dashboard' %}">
+                                <i class="bi bi-check2-square me-2"></i>{% trans "Mis Tareas" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:mi_area' %}">
+                                <i class="bi bi-person-workspace me-2"></i>{% trans "Mi Área" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:reglamento' %}">
+                                <i class="bi bi-book me-2"></i>{% trans "Reglamento" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:create_error_report' %}">
+                                <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Reportar Error" %}
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {# ── COMPETENCIAS — todos excepto guardian y operario puro ── #}
+                    {% if not is_guardian and not is_only_operario %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-trophy me-1"></i>{% trans "Competencias" %}
@@ -412,7 +435,8 @@
                     </li>
                     {% endif %}
 
-                    {# ── HOSPITALIDAD — todos los roles autenticados ── #}
+                    {# ── HOSPITALIDAD — todos excepto operario puro ── #}
+                    {% if not is_only_operario %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-building me-1"></i>{% trans "Hospitalidad" %}
@@ -435,6 +459,7 @@
                             {% endif %}
                         </ul>
                     </li>
+                    {% endif %}{# end if not is_only_operario (hospitalidad) #}
 
                     {# ── EQUIPOS — coaches y admin ── #}
                     {% if can_manage %}
@@ -500,7 +525,8 @@
                     </li>
                     {% endif %}
 
-                    {# ── TIENDA — todos, submenú según rol ── #}
+                    {# ── TIENDA — todos excepto operario puro ── #}
+                    {% if not is_only_operario %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-bag me-1"></i>{% trans "Tienda" %}
@@ -533,9 +559,10 @@
                             {% endif %}
                         </ul>
                     </li>
+                    {% endif %}{# end if not is_only_operario (tienda) #}
 
-                    {# ── COMUNIDAD — todos excepto guardian ── #}
-                    {% if not is_guardian %}
+                    {# ── COMUNIDAD — todos excepto guardian y operario puro ── #}
+                    {% if not is_guardian and not is_only_operario %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-people me-1"></i>{% trans "Comunidad" %}
@@ -566,13 +593,24 @@
                     {% if user.is_authenticated %}
 
 
-                    {# Carrito #}
+                    {# Carrito — oculto para operario puro #}
+                    {% if not is_only_operario %}
                     <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-outline-secondary position-relative">
                         <i class="bi bi-cart3"></i>
                         {% if cart_count %}
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill sc-nav-cart-badge">{{ cart_count }}</span>
                         {% endif %}
                     </a>
+                    {% endif %}{# end if not is_only_operario (carrito) #}
+
+                    {# Notificaciones — badge contador #}
+                    {% if unread_notifications_count %}
+                    <span class="badge bg-danger rounded-pill"
+                          title="{{ unread_notifications_count }} notificación{% if unread_notifications_count != 1 %}es{% endif %} sin leer"
+                          data-bs-toggle="tooltip">
+                        <i class="bi bi-bell-fill me-1" style="font-size:0.75rem;"></i>{{ unread_notifications_count }}
+                    </span>
+                    {% endif %}
 
 {# Avatar + menú de usuario #}
                     <div class="dropdown">
@@ -700,18 +738,38 @@
                             <li><a class="dropdown-item" href="{% url 'production:dashboard' %}">
                                 <i class="bi bi-check2-square me-2"></i>{% trans "Mis Tareas" %}
                             </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:mi_area' %}">
+                                <i class="bi bi-person-workspace me-2"></i>{% trans "Mi Área" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:create_error_report' %}">
+                                <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Reportar Error" %}
+                            </a></li>
                             {% endif %}
                             {% if is_admin or is_staff_role %}
                             <li><a class="dropdown-item" href="{% url 'production:admin_overview' %}">
                                 <i class="bi bi-diagram-3 me-2"></i>{% trans "Panel de Producción" %}
                             </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:reglamento' %}">
+                                <i class="bi bi-book me-2"></i>{% trans "Reglamento" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:error_report_list' %}">
+                                <i class="bi bi-bug me-2"></i>{% trans "Errores" %}
+                            </a></li>
                             {% endif %}
                             {% if is_admin %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">{% trans "Config. Producción" %}</h6></li>
                             <li><a class="dropdown-item" href="{% url 'production:manage_operarios' %}">
                                 <i class="bi bi-person-badge me-2"></i>{% trans "Operarios" %}
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'production:manage_stages' %}">
-                                <i class="bi bi-sliders me-2"></i>{% trans "Configuración" %}
+                                <i class="bi bi-sliders me-2"></i>{% trans "Etapas" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:manage_roles' %}">
+                                <i class="bi bi-shield-check me-2"></i>{% trans "Roles" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'production:manage_responsibilities' %}">
+                                <i class="bi bi-person-badge me-2"></i>{% trans "Responsabilidades" %}
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'production:manage_templates' %}">
                                 <i class="bi bi-copy me-2"></i>{% trans "Plantillas" %}

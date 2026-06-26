@@ -15,6 +15,7 @@ from production.models import (
     ProductionTask,
     ProductionRole,
     OperarioRoleAssignment,
+    StageResponsibility,
 )
 from production.services import ProductionJobService
 
@@ -292,14 +293,16 @@ class AssignTaskTests(TestCase):
             ProductionJobService.create_for_order(order)
         self.task = ProductionTask.objects.first()
 
-    def test_assign_task_sets_assigned_to(self):
+    @patch("production.tasks.notify_task_assigned")
+    def test_assign_task_sets_assigned_to(self, mock_notify):
         self.client.force_login(self.admin)
         url = reverse("production:assign_task", kwargs={"pk": self.task.pk})
         self.client.post(url, {"operario_id": self.operario.pk})
         self.task.refresh_from_db()
         self.assertEqual(self.task.assigned_to, self.operario)
 
-    def test_redirects_after_assign(self):
+    @patch("production.tasks.notify_task_assigned")
+    def test_redirects_after_assign(self, mock_notify):
         self.client.force_login(self.admin)
         url = reverse("production:assign_task", kwargs={"pk": self.task.pk})
         response = self.client.post(url, {"operario_id": self.operario.pk})
@@ -476,3 +479,54 @@ class OperarioDetailTests(TestCase):
         url = reverse("production:operario_detail", kwargs={"pk": self.operario.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+
+
+# ---------------------------------------------------------------------------
+# Config — manage_responsibilities (StageResponsibility)
+# ---------------------------------------------------------------------------
+
+class ManageResponsabilidadesTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.admin = make_superuser()
+        self.stage = make_stage(name="Costura", slug="costura", order=1)
+        self.role_primary = ProductionRole.objects.create(
+            name="Costurero", created_by=self.admin
+        )
+        self.role_aux = ProductionRole.objects.create(
+            name="Auxiliar Costura", created_by=self.admin
+        )
+        self.url = reverse("production:manage_responsibilities")
+
+    def test_admin_gets_200(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_unauthenticated_redirects(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_post_creates_stage_responsibility(self):
+        self.client.force_login(self.admin)
+        self.client.post(self.url, {
+            "stage_id": self.stage.pk,
+            "responsible_role_id": self.role_primary.pk,
+        })
+        self.assertTrue(
+            StageResponsibility.objects.filter(
+                stage=self.stage,
+                responsible_role=self.role_primary,
+            ).exists()
+        )
+
+    def test_post_with_auxiliary_roles(self):
+        self.client.force_login(self.admin)
+        self.client.post(self.url, {
+            "stage_id": self.stage.pk,
+            "responsible_role_id": self.role_primary.pk,
+            "auxiliary_role_ids": [self.role_aux.pk],
+        })
+        resp = StageResponsibility.objects.get(stage=self.stage)
+        self.assertIn(self.role_aux, resp.auxiliary_roles.all())

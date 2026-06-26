@@ -90,15 +90,21 @@ class ProductionJobService:
                 ]
             )
 
-        notify_production_stage_complete.delay(task.pk)
+        try:
+            notify_production_stage_complete.delay(task.pk)
+        except Exception:
+            logger.warning("Celery unavailable — skipping notify_production_stage_complete for task %s", task.pk)
 
     @staticmethod
     def assign_task(task, operario):
         task.assigned_to = operario
         task.save(update_fields=["assigned_to"])
         if operario is not None:
-            from production.tasks import notify_task_assigned
-            notify_task_assigned.delay(task.pk)
+            try:
+                from production.tasks import notify_task_assigned
+                notify_task_assigned.delay(task.pk)
+            except Exception:
+                logger.warning("Celery unavailable — skipping notify_task_assigned for task %s", task.pk)
 
     @staticmethod
     def toggle_urgent(job):

@@ -12,8 +12,13 @@ def user_roles(request):
     is_athlete = "ATHLETE" in roles
     is_guardian = "GUARDIAN" in roles
     is_operario = "OPERARIO" in roles
+    is_juez = "JUEZ" in roles
     # Puede gestionar equipos/atletas (tiene panel de coach)
     can_manage = is_admin or is_headcoach or is_coach
+    # Operario sin ningún otro rol: navbar simplificado solo con producción
+    is_only_operario = is_operario and len(roles) == 1
+
+    unread_notifications_count = user.notifications.filter(read=False).count()
 
     return {
         "is_admin": is_admin,
@@ -23,6 +28,9 @@ def user_roles(request):
         "is_athlete": is_athlete,
         "is_guardian": is_guardian,
         "is_operario": is_operario,
+        "is_juez": is_juez,
+        "is_only_operario": is_only_operario,
         "can_manage": can_manage,
         "user_roles_list": roles,
+        "unread_notifications_count": unread_notifications_count,
     }

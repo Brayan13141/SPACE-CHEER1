@@ -270,16 +270,17 @@ def manage_teams(request):
     )
 
 
-@role_required("ADMIN", "HEADCOACH")
+@role_required("ADMIN", "HEADCOACH", "COACH")
 def manage_team_members(request, team_id):
     team = get_object_or_404(Team, id=team_id, is_active=True)
 
-    if request.user.roles.filter(name="HEADCOACH").exists():
+    if request.user.roles.filter(name__in=["HEADCOACH", "COACH"]).exists():
         if team.coach != request.user:
             raise PermissionDenied
 
     is_admin = request.user.roles.filter(name="ADMIN").exists()
     is_headcoach = request.user.roles.filter(name="HEADCOACH").exists()
+    is_coach = request.user.roles.filter(name="COACH").exists()
 
     memberships = (
         UserTeamMembership.objects.filter(team=team)
@@ -308,6 +309,7 @@ def manage_team_members(request, team_id):
             "role_choices": UserTeamMembership.ROLE_CHOICES,
             "is_admin": is_admin,
             "is_headcoach": is_headcoach,
+            "is_coach": is_coach,
         },
     )
 
