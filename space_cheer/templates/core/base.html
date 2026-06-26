@@ -751,51 +751,71 @@
                             {# PRODUCCIÓN: operarios, staff y admin #}
                             {% if is_admin or is_staff_role or is_operario %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header"><i class="bi bi-tools me-1"></i>{% trans "Producción" %}</h6></li>
-                            {% if is_operario %}
-                            <li><a class="dropdown-item" href="{% url 'production:dashboard' %}">
-                                <i class="bi bi-check2-square me-2"></i>{% trans "Mis Tareas" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:mi_area' %}">
-                                <i class="bi bi-person-workspace me-2"></i>{% trans "Mi Área" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:create_error_report' %}">
-                                <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Reportar Error" %}
-                            </a></li>
-                            {% endif %}
-                            {% if is_admin or is_staff_role %}
-                            <li><a class="dropdown-item" href="{% url 'production:admin_overview' %}">
-                                <i class="bi bi-diagram-3 me-2"></i>{% trans "Panel de Producción" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:reglamento' %}">
-                                <i class="bi bi-book me-2"></i>{% trans "Reglamento" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:error_report_list' %}">
-                                <i class="bi bi-bug me-2"></i>{% trans "Errores" %}
-                            </a></li>
-                            {% endif %}
+
+                            {# Sub-dropdown Producción #}
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center justify-content-between"
+                                        id="scProdToggle" type="button">
+                                    <span><i class="bi bi-tools me-2"></i>{% trans "Producción" %}</span>
+                                    <i class="bi bi-chevron-down small" id="scProdChevron"></i>
+                                </button>
+                            </li>
+                            <li id="scProdSubmenu" class="d-none">
+                                {% if is_operario %}
+                                <a class="dropdown-item ps-4" href="{% url 'production:dashboard' %}">
+                                    <i class="bi bi-check2-square me-2"></i>{% trans "Mis Tareas" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:mi_area' %}">
+                                    <i class="bi bi-person-workspace me-2"></i>{% trans "Mi Área" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:create_error_report' %}">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Reportar Error" %}
+                                </a>
+                                {% endif %}
+                                {% if is_admin or is_staff_role %}
+                                <a class="dropdown-item ps-4" href="{% url 'production:admin_overview' %}">
+                                    <i class="bi bi-diagram-3 me-2"></i>{% trans "Panel de Producción" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:reglamento' %}">
+                                    <i class="bi bi-book me-2"></i>{% trans "Reglamento" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:error_report_list' %}">
+                                    <i class="bi bi-bug me-2"></i>{% trans "Errores" %}
+                                </a>
+                                {% endif %}
+                            </li>
+
+                            {# Sub-dropdown Config. Producción (solo admin) #}
                             {% if is_admin %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">{% trans "Config. Producción" %}</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'production:manage_operarios' %}">
-                                <i class="bi bi-person-badge me-2"></i>{% trans "Operarios" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:manage_stages' %}">
-                                <i class="bi bi-sliders me-2"></i>{% trans "Etapas" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:manage_roles' %}">
-                                <i class="bi bi-shield-check me-2"></i>{% trans "Roles" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:manage_responsibilities' %}">
-                                <i class="bi bi-person-badge me-2"></i>{% trans "Responsabilidades" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:manage_templates' %}">
-                                <i class="bi bi-copy me-2"></i>{% trans "Plantillas" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'production:product_stages_matrix' %}">
-                                <i class="bi bi-grid-3x3-gap me-2"></i>{% trans "Etapas por producto" %}
-                            </a></li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center justify-content-between"
+                                        id="scProdConfigToggle" type="button">
+                                    <span><i class="bi bi-sliders me-2"></i>{% trans "Config. Producción" %}</span>
+                                    <i class="bi bi-chevron-down small" id="scProdConfigChevron"></i>
+                                </button>
+                            </li>
+                            <li id="scProdConfigSubmenu" class="d-none">
+                                <a class="dropdown-item ps-4" href="{% url 'production:manage_operarios' %}">
+                                    <i class="bi bi-person-badge me-2"></i>{% trans "Operarios" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:manage_stages' %}">
+                                    <i class="bi bi-sliders me-2"></i>{% trans "Etapas" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:manage_roles' %}">
+                                    <i class="bi bi-shield-check me-2"></i>{% trans "Roles" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:manage_responsibilities' %}">
+                                    <i class="bi bi-person-badge me-2"></i>{% trans "Responsabilidades" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:manage_templates' %}">
+                                    <i class="bi bi-copy me-2"></i>{% trans "Plantillas" %}
+                                </a>
+                                <a class="dropdown-item ps-4" href="{% url 'production:product_stages_matrix' %}">
+                                    <i class="bi bi-grid-3x3-gap me-2"></i>{% trans "Etapas por producto" %}
+                                </a>
+                            </li>
                             {% endif %}
+
                             {% endif %}
 
                             {# ADMIN: acceso al panel de admin #}
@@ -1081,21 +1101,25 @@
             if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-left'); }
         }
 
-        // ── Sub-dropdown idioma ──────────────────────────────
-        var langToggle  = document.getElementById('scLangToggle');
-        var langSubmenu = document.getElementById('scLangSubmenu');
-        var langChevron = document.getElementById('scLangChevron');
-        if (langToggle && langSubmenu) {
-            langToggle.addEventListener('click', function (e) {
+        // ── Sub-dropdowns colapsables (idioma, producción, config. producción) ──
+        function initSubDropdown(toggleId, submenuId, chevronId) {
+            var toggle  = document.getElementById(toggleId);
+            var submenu = document.getElementById(submenuId);
+            var chevron = document.getElementById(chevronId);
+            if (!toggle || !submenu) return;
+            toggle.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var open = !langSubmenu.classList.contains('d-none');
-                langSubmenu.classList.toggle('d-none', open);
-                if (langChevron) {
-                    langChevron.classList.toggle('bi-chevron-down', open);
-                    langChevron.classList.toggle('bi-chevron-up', !open);
+                var open = !submenu.classList.contains('d-none');
+                submenu.classList.toggle('d-none', open);
+                if (chevron) {
+                    chevron.classList.toggle('bi-chevron-down', open);
+                    chevron.classList.toggle('bi-chevron-up', !open);
                 }
             });
         }
+        initSubDropdown('scLangToggle',      'scLangSubmenu',      'scLangChevron');
+        initSubDropdown('scProdToggle',      'scProdSubmenu',      'scProdChevron');
+        initSubDropdown('scProdConfigToggle','scProdConfigSubmenu','scProdConfigChevron');
 
         // Hint "• obligatorio" dentro del input, esquina inferior derecha
         document.querySelectorAll('input[required], select[required], textarea[required]').forEach(function (field) {
