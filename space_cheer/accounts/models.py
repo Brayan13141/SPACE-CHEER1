@@ -246,8 +246,23 @@ class UserAddress(models.Model):
         max_length=50, help_text="Etiqueta para identificar la dirección"
     )
     address = EncryptedCharField(max_length=255, help_text="Calle y número")
-    city = EncryptedCharField(max_length=100, help_text="Ciudad")
-    zip_code = EncryptedCharField(max_length=10, help_text="Código postal")
+    city = EncryptedCharField(
+        max_length=100,
+        help_text="Ciudad",
+        validators=[
+            RegexValidator(
+                r"^[A-Za-zÀ-ÿ\s.'-]+$",
+                "La ciudad solo puede contener letras, espacios y los símbolos . ' -",
+            )
+        ],
+    )
+    zip_code = EncryptedCharField(
+        max_length=10,
+        help_text="Código postal",
+        validators=[
+            RegexValidator(r"^\d{5}$", "El código postal debe tener exactamente 5 dígitos.")
+        ],
+    )
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):

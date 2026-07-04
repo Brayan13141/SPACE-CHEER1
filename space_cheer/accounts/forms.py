@@ -175,6 +175,8 @@ class UserAddressForm(forms.ModelForm):
             "label": forms.TextInput(attrs={"class": "form-control"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),
             "city": forms.TextInput(attrs={"class": "form-control"}),
-            "zip_code": forms.TextInput(attrs={"class": "form-control"}),
+            "zip_code": forms.TextInput(
+                attrs={"class": "form-control", "maxlength": "5", "pattern": r"\d{5}", "inputmode": "numeric"}
+            ),
             "is_default": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
