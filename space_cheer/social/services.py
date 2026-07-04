@@ -108,3 +108,41 @@ class FeedService:
         if not allowed:
             raise PermissionDenied
         comment.delete()
+
+
+class RankingService:
+    """Ranking de equipos con métricas calculadas en vivo (sin modelos nuevos)."""
+
+    SORT_FIELDS = {
+        "competitions": "-num_competitions",
+        "athletes": "-num_athletes",
+        "posts": "-num_posts",
+    }
+
+    @staticmethod
+    def team_ranking(sort_key="competitions"):
+        from django.db.models import Q
+        from teams.models import Team
+
+        order = RankingService.SORT_FIELDS.get(sort_key, "-num_competitions")
+        return (
+            Team.objects.filter(is_active=True)
+            .annotate(
+                num_competitions=Count(
+                    "event_registrations",
+                    filter=Q(event_registrations__status="ACCEPTED"),
+                    distinct=True,
+                ),
+                num_athletes=Count(
+                    "memberships",
+                    filter=Q(memberships__is_active=True),
+                    distinct=True,
+                ),
+                num_posts=Count(
+                    "memberships__user__social_posts",
+                    filter=Q(memberships__is_active=True),
+                    distinct=True,
+                ),
+            )
+            .order_by(order, "name")
+        )

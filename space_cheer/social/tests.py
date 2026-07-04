@@ -176,3 +176,42 @@ class FeedServiceTests(SocialBaseTestCase):
         media_social = Path(default_storage.location) / "social"
         leftover = list(media_social.rglob("ok*.png")) if media_social.exists() else []
         self.assertEqual(leftover, [])
+
+
+class RankingServiceTests(SocialBaseTestCase):
+    def test_ranking_counts_and_sort(self):
+        from teams.models import Team, UserTeamMembership
+        from social.models import Post
+        from social.services import RankingService
+
+        # Create a coach for teams
+        coach = User.objects.create_user(username="coach_test", email="coach@test.com", password="Test1234!")
+
+        team_a = Team.objects.create(name="Stars A", coach=coach, city="CDMX", phone="5555551234")
+        team_b = Team.objects.create(name="Stars B", coach=coach, city="CDMX", phone="5555551235")
+        UserTeamMembership.objects.create(
+            user=self.user, team=team_a, status="accepted", is_active=True
+        )
+        UserTeamMembership.objects.create(
+            user=self.other, team=team_a, status="accepted", is_active=True
+        )
+        UserTeamMembership.objects.create(
+            user=self.user, team=team_b, status="inactive", is_active=False
+        )
+        Post.objects.create(author=self.user, text="post de miembro activo")
+
+        ranking = list(RankingService.team_ranking(sort_key="athletes"))
+        self.assertEqual(ranking[0].pk, team_a.pk)
+        self.assertEqual(ranking[0].num_athletes, 2)
+        self.assertEqual(ranking[0].num_posts, 1)
+        self.assertEqual(ranking[0].num_competitions, 0)
+        # team_b no cuenta la membresía inactiva
+        row_b = next(t for t in ranking if t.pk == team_b.pk)
+        self.assertEqual(row_b.num_athletes, 0)
+        self.assertEqual(row_b.num_posts, 0)
+
+    def test_ranking_invalid_sort_falls_back(self):
+        from social.services import RankingService
+
+        # No debe lanzar error con sort_key basura
+        list(RankingService.team_ranking(sort_key="'; DROP TABLE--"))
