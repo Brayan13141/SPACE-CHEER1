@@ -1,0 +1,7 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container py-4">
+  {% for post in page_obj %}{% include "social/partials/post_card.html" %}{% endfor %}
+</div>
+{% endblock %}

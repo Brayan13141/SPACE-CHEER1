@@ -215,3 +215,92 @@ class RankingServiceTests(SocialBaseTestCase):
 
         # No debe lanzar error con sort_key basura
         list(RankingService.team_ranking(sort_key="'; DROP TABLE--"))
+
+
+class FeedViewTests(SocialBaseTestCase):
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_feed_requires_login(self):
+        self.client.logout()
+        resp = self.client.get("/social/")
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/accounts/login/", resp["Location"])
+
+    def test_feed_renders(self):
+        from social.models import Post
+
+        Post.objects.create(author=self.user, text="hola feed")
+        resp = self.client.get("/social/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "hola feed")
+
+    def test_post_create_prg(self):
+        resp = self.client.post("/social/post/nuevo/", {"text": "nuevo post"})
+        self.assertRedirects(resp, "/social/")
+        from social.models import Post
+
+        self.assertTrue(Post.objects.filter(text="nuevo post").exists())
+
+    def test_post_create_empty_shows_error(self):
+        resp = self.client.post("/social/post/nuevo/", {"text": "  "}, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        from social.models import Post
+
+        self.assertEqual(Post.objects.count(), 0)
+
+    def test_like_toggle_json(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="likeame")
+        resp = self.client.post(f"/social/post/{post.pk}/like/")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data["liked"])
+        self.assertEqual(data["like_count"], 1)
+
+    def test_comment_create_redirects_back(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="comenta")
+        resp = self.client.post(
+            f"/social/post/{post.pk}/comentar/",
+            {"text": "buen post", "next": f"/social/post/{post.pk}/"},
+        )
+        self.assertRedirects(resp, f"/social/post/{post.pk}/")
+        self.assertEqual(post.comments.count(), 1)
+
+    def test_comment_next_open_redirect_blocked(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="x")
+        resp = self.client.post(
+            f"/social/post/{post.pk}/comentar/",
+            {"text": "hola", "next": "https://evil.com/"},
+        )
+        self.assertRedirects(resp, "/social/")
+
+    def test_repost_create(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="original")
+        resp = self.client.post(
+            f"/social/post/{post.pk}/compartir/", {"text": "míralo"}
+        )
+        self.assertRedirects(resp, "/social/")
+        self.assertTrue(
+            Post.objects.filter(author=self.user, shared_post=post).exists()
+        )
+
+    def test_post_delete_forbidden_for_stranger(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="ajeno")
+        resp = self.client.post(f"/social/post/{post.pk}/eliminar/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_ranking_renders(self):
+        resp = self.client.get("/social/ranking/")
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.get("/social/ranking/?sort=posts")
+        self.assertEqual(resp.status_code, 200)
