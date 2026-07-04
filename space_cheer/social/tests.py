@@ -147,9 +147,32 @@ class FeedServiceTests(SocialBaseTestCase):
         post = Post.objects.create(author=self.user, text="hola")
         FeedService.toggle_like(self.other, post)
         FeedService.add_comment(self.other, post, "buen post")
+        FeedService.add_comment(self.other, post, "excelente post")
 
         row = FeedService.feed_queryset(self.other).get(pk=post.pk)
         self.assertEqual(row.like_count, 1)
-        self.assertEqual(row.comment_count, 1)
+        self.assertEqual(row.comment_count, 2)
         self.assertTrue(row.liked_by_me)
-        self.assertEqual(len(row.recent_comments), 1)
+        self.assertEqual(len(row.recent_comments), 2)
+        # Verificar que los comentarios están ordenados por más reciente primero
+        self.assertEqual(row.recent_comments[0].text, "excelente post")
+        self.assertEqual(row.recent_comments[1].text, "buen post")
+
+    def test_create_post_invalid_second_image_leaves_no_orphans(self):
+        from django.core.exceptions import ValidationError
+        from pathlib import Path
+        from django.core.files.storage import default_storage
+        from social.models import Post, PostImage
+        from social.services import FeedService
+
+        fake = SimpleUploadedFile("falsa.png", b"no soy una imagen")
+        with self.assertRaises(ValidationError):
+            FeedService.create_post(
+                self.user, text="", images=[make_png("ok.png"), fake]
+            )
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertEqual(PostImage.objects.count(), 0)
+        # Ningún archivo huérfano escrito en storage
+        media_social = Path(default_storage.location) / "social"
+        leftover = list(media_social.rglob("ok*.png")) if media_social.exists() else []
+        self.assertEqual(leftover, [])

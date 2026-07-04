@@ -58,9 +58,12 @@ class FeedService:
                 _("Máximo %(n)s imágenes por publicación.") % {"n": FeedService.MAX_IMAGES}
             )
         post = Post.objects.create(author=user, text=text)
-        for i, img in enumerate(images):
-            post_image = PostImage(post=post, image=img, order=i)
-            post_image.full_clean()  # corre validate_image_magic + tamaño
+        post_images = [
+            PostImage(post=post, image=img, order=i) for i, img in enumerate(images)
+        ]
+        for post_image in post_images:
+            post_image.full_clean()  # valida TODAS antes de escribir archivos
+        for post_image in post_images:
             post_image.save()
         return post
 
