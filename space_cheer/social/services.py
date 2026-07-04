@@ -29,7 +29,7 @@ class FeedService:
         recent_comments = Prefetch(
             "comments",
             queryset=PostComment.objects.select_related("author").order_by(
-                "-created_at"
+                "-created_at", "-id"
             ),
             to_attr="recent_comments",
         )
@@ -43,7 +43,7 @@ class FeedService:
                     PostLike.objects.filter(post=OuterRef("pk"), user=user)
                 ),
             )
-            .order_by("-created_at")
+            .order_by("-created_at", "-id")
         )
 
     # ── Escritura ────────────────────────────────────────────────────────
