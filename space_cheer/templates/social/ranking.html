@@ -1,2 +1,61 @@
 {% extends "core/base.html" %}
-{% block content %}<div class="container py-4">{% for team in teams %}{{ team.name }}{% endfor %}</div>{% endblock %}
+{% load i18n %}
+
+{% block content %}
+<div class="container py-3 py-md-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0"><i class="bi bi-trophy me-2"></i>{% trans "Ranking de equipos" %}</h1>
+    <a href="{% url 'social:feed' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Feed" %}
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="ps-4">#</th>
+              <th>{% trans "Equipo" %}</th>
+              <th class="text-center">
+                <a href="?sort=competitions" class="text-decoration-none {% if sort == 'competitions' %}text-primary{% else %}text-reset{% endif %}">
+                  {% trans "Concursos" %} {% if sort == 'competitions' %}<i class="bi bi-caret-down-fill"></i>{% endif %}
+                </a>
+              </th>
+              <th class="text-center">
+                <a href="?sort=athletes" class="text-decoration-none {% if sort == 'athletes' %}text-primary{% else %}text-reset{% endif %}">
+                  {% trans "Atletas" %} {% if sort == 'athletes' %}<i class="bi bi-caret-down-fill"></i>{% endif %}
+                </a>
+              </th>
+              <th class="text-center">
+                <a href="?sort=posts" class="text-decoration-none {% if sort == 'posts' %}text-primary{% else %}text-reset{% endif %}">
+                  {% trans "Publicaciones" %} {% if sort == 'posts' %}<i class="bi bi-caret-down-fill"></i>{% endif %}
+                </a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+            <tr>
+              <td class="ps-4 fw-bold">
+                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
+              </td>
+              <td>
+                {% if team.logo %}<img src="{{ team.logo.url }}" alt="" class="sc-avatar-40 rounded-circle me-2" loading="lazy">{% endif %}
+                <span class="fw-semibold">{{ team.name }}</span>
+              </td>
+              <td class="text-center">{{ team.num_competitions }}</td>
+              <td class="text-center">{{ team.num_athletes }}</td>
+              <td class="text-center">{{ team.num_posts }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">{% trans "No hay equipos activos." %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
