@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <form method="post" novalidate>
+          <form method="post" id="crew-member-form" novalidate>
             {% csrf_token %}
 
             <!-- Datos personales -->
@@ -150,4 +150,22 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.getElementById('crew-member-form'), {
+        first_name: [ScValidation.rules.required('{% trans "El nombre es obligatorio" %}')],
+        last_name: [ScValidation.rules.required('{% trans "El apellido es obligatorio" %}')],
+        email: [
+            ScValidation.rules.required('{% trans "El email es obligatorio" %}'),
+            ScValidation.rules.email('{% trans "Ingresa un email válido" %}'),
+        ],
+        global_role: [ScValidation.rules.required('{% trans "Selecciona un rol global" %}')],
+        team_role: [ScValidation.rules.required('{% trans "Selecciona un rol en el equipo" %}')],
+    });
+});
+</script>
 {% endblock %}

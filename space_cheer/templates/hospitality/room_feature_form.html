@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Característica{% endblock %}
 
@@ -22,7 +22,7 @@
       </h1>
     </div>
     <div class="card-body">
-      <form method="post" novalidate>
+      <form method="post" novalidate id="room-feature-form">
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
@@ -59,7 +59,10 @@
   </div>
 
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
 <script nonce="{{ request.csp_nonce }}">
   // Preview del ícono en tiempo real
   const iconInput = document.getElementById('{{ form.icon.id_for_label }}');
@@ -69,5 +72,18 @@
       preview.className = this.value.trim() || 'bi-question';
     });
   }
+
+  document.addEventListener('DOMContentLoaded', function () {
+      ScValidation.init(document.getElementById('room-feature-form'), {
+          name: [
+              ScValidation.rules.required('{% trans "El nombre de la característica es obligatorio" %}'),
+              ScValidation.rules.maxLen(50, '{% trans "Máximo 50 caracteres" %}'),
+          ],
+          icon: [
+              ScValidation.rules.required('{% trans "El icono es obligatorio" %}'),
+              ScValidation.rules.pattern(/^bi-[a-z0-9-]+$/, '{% trans "Formato inválido. Usa clase Bootstrap Icons, ej: bi-wifi" %}'),
+          ],
+      });
+  });
 </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Habitación — {{ hotel.name }}{% endblock %}
 
@@ -22,7 +22,7 @@
       </h1>
     </div>
     <div class="card-body">
-      <form method="post" novalidate>
+      <form method="post" novalidate id="room-form">
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
@@ -64,4 +64,23 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.getElementById('room-form'), {
+        room_number: [
+            ScValidation.rules.required('{% trans "El número de habitación es obligatorio" %}'),
+        ],
+        floor: [
+            ScValidation.rules.required('{% trans "El piso es obligatorio" %}'),
+        ],
+        room_type: [
+            ScValidation.rules.required('{% trans "Selecciona un tipo de habitación" %}'),
+        ],
+    });
+});
+</script>
 {% endblock %}

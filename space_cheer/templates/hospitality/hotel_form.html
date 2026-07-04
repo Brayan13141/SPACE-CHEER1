@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{% if is_edit %}Editar{{ else }}Nuevo{% endif %} Hotel — {{ event.name }}{% endblock %}
+{% block title %}{% if is_edit %}Editar{% else %}Nuevo{% endif %} Hotel — {{ event.name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4 sc-max-w-680" >
@@ -25,7 +25,7 @@
       </h1>
     </div>
     <div class="card-body">
-      <form method="post" enctype="multipart/form-data" novalidate>
+      <form method="post" enctype="multipart/form-data" novalidate id="hotel-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -90,4 +90,32 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.getElementById('hotel-form'), {
+        name: [
+            ScValidation.rules.required('{% trans "El nombre del hotel es obligatorio" %}'),
+            ScValidation.rules.maxLen(100, '{% trans "El nombre no puede exceder 100 caracteres" %}'),
+        ],
+        address: [
+            ScValidation.rules.required('{% trans "La dirección es obligatoria" %}'),
+            ScValidation.rules.maxLen(200, '{% trans "La dirección no puede exceder 200 caracteres" %}'),
+        ],
+        city: [
+            ScValidation.rules.required('{% trans "La ciudad es obligatoria" %}'),
+            ScValidation.rules.maxLen(100, '{% trans "La ciudad no puede exceder 100 caracteres" %}'),
+        ],
+        phone: [
+            ScValidation.rules.phoneMx('{% trans "Ingresa un teléfono válido" %}'),
+        ],
+        website: [
+            ScValidation.rules.pattern(/^https?:\/\/.+/, '{% trans "La URL debe comenzar con http:// o https://" %}'),
+        ],
+    });
+});
+</script>
 {% endblock %}

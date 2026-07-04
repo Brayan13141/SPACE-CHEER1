@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% if is_edit %}{% blocktrans with name=event.name %}Editar {{ name }}{% endblocktrans %}{% else %}{% trans "Crear Evento" %}{% endif %} — SPACE CHEER{% endblock %}
+{% block title %}{% if is_edit %}{% blocktrans with name=event.name %}Editar {{ name }}{% endblocktrans %}{% else %}<i class="bi bi-plus-circle me-2"></i>{% trans "Crear Evento" %}{% endif %} — SPACE CHEER{% endblock %}
 
 {% block content %}
 <div class="container py-4 sc-max-w-760" >
@@ -15,7 +15,7 @@
     </h1>
   </div>
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" id="event-form">
     {% csrf_token %}
 
     <div class="card mb-3">
@@ -113,4 +113,44 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.getElementById('event-form'), {
+        name: [
+            ScValidation.rules.required('{% trans "El nombre del evento es obligatorio" %}'),
+            ScValidation.rules.maxLen(100, '{% trans "Máximo 100 caracteres" %}'),
+        ],
+        event_type: [
+            ScValidation.rules.required('{% trans "Selecciona un tipo de evento" %}'),
+        ],
+        start_date: [
+            ScValidation.rules.required('{% trans "La fecha de inicio es obligatoria" %}'),
+            ScValidation.rules.notFuture('{% trans "La fecha de inicio no puede ser futura" %}'),
+        ],
+        end_date: [
+            ScValidation.rules.required('{% trans "La fecha de fin es obligatoria" %}'),
+            ScValidation.rules.dateAfter('start_date', '{% trans "La fecha de fin debe ser posterior a la de inicio" %}'),
+        ],
+        registration_open: [
+            ScValidation.rules.dateAfter('start_date', '{% trans "La apertura de inscripciones no puede ser antes del inicio del evento" %}'),
+        ],
+        registration_close: [
+            ScValidation.rules.dateAfter('registration_open', '{% trans "El cierre debe ser posterior a la apertura" %}'),
+            ScValidation.rules.dateAfter('start_date', '{% trans "El cierre debe ser posterior al inicio del evento" %}'),
+        ],
+        venue_name: [
+            ScValidation.rules.required('{% trans "El nombre de la sede es obligatorio" %}'),
+            ScValidation.rules.maxLen(150, '{% trans "Máximo 150 caracteres" %}'),
+        ],
+        venue_city: [
+            ScValidation.rules.required('{% trans "La ciudad es obligatoria" %}'),
+            ScValidation.rules.maxLen(100, '{% trans "Máximo 100 caracteres" %}'),
+        ],
+    });
+});
+</script>
 {% endblock %}

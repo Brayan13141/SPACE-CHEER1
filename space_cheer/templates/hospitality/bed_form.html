@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Agregar Cama — Hab. #{{ room.room_number }}{% endblock %}
 
@@ -22,7 +22,7 @@
       <p class="text-secondary small mt-1 mb-0">Habitación #{{ room.room_number }} · {{ room.room_type.name }}</p>
     </div>
     <div class="card-body">
-      <form method="post" novalidate>
+      <form method="post" novalidate id="bed-form">
         {% csrf_token %}
         {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
@@ -53,4 +53,21 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+    ScValidation.init(document.getElementById('bed-form'), {
+        bed_type: [
+            ScValidation.rules.required('{% trans "El tipo de cama es obligatorio" %}'),
+        ],
+        label: [
+            ScValidation.rules.required('{% trans "La etiqueta es obligatoria" %}'),
+            ScValidation.rules.maxLen(20, '{% trans "Máximo 20 caracteres" %}'),
+        ],
+    });
+});
+</script>
 {% endblock %}

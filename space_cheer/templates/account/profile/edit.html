@@ -109,7 +109,7 @@
         </div>
 
         <div class="card-body p-4">
-          <form method="post" action="{% url 'accounts:profile_edit' %}" novalidate>
+          <form method="post" action="{% url 'accounts:profile_edit' %}" id="profile-edit-form" novalidate>
             {% csrf_token %}
 
             <div class="row g-3">
@@ -207,7 +207,7 @@
           </h5>
         </div>
         <div class="card-body p-4">
-          <form method="post" action="{% url 'accounts:profile_edit' %}">
+          <form method="post" action="{% url 'accounts:profile_edit' %}" id="password-change-form" novalidate>
             {% csrf_token %}
             <input type="hidden" name="action" value="change_password">
             
@@ -264,10 +264,37 @@
 .sc-btn-gradient-purple    { background:linear-gradient(45deg,#7f5af0,#6b49d1); border:none; color:white; }
 .sc-card-danger            { border:1px solid rgba(220,53,69,0.2) !important; background:rgba(220,53,69,0.05); }
 </style>
+<script src="{% static 'JS/sc-validation.js' %}?v=2"></script>
 <script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('photo-input').addEventListener('change', function () {
         document.getElementById('photo-form').submit();
+    });
+
+    ScValidation.init(document.getElementById('profile-edit-form'), {
+        first_name: [
+            ScValidation.rules.required('El nombre es obligatorio'),
+        ],
+        last_name: [
+            ScValidation.rules.required('El apellido es obligatorio'),
+        ],
+        phone: [
+            ScValidation.rules.phoneMx('Ingresa un teléfono válido (10 dígitos)'),
+        ],
+    });
+
+    ScValidation.init(document.getElementById('password-change-form'), {
+        old_password: [
+            ScValidation.rules.required('Ingresa tu contraseña actual'),
+        ],
+        new_password1: [
+            ScValidation.rules.required('La nueva contraseña es obligatoria'),
+            ScValidation.rules.minLen(8, 'Debe tener al menos 8 caracteres'),
+        ],
+        new_password2: [
+            ScValidation.rules.required('Confirma la nueva contraseña'),
+            ScValidation.rules.matchField('id_new_password1', 'Las contraseñas no coinciden'),
+        ],
     });
 });
 </script>
