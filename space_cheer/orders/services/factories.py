@@ -4,10 +4,13 @@ from django.core.exceptions import ValidationError
 
 
 class OrderContactInfoFactory:
+    """Construye OrderContactInfo prellenado a partir de los datos del usuario."""
 
     @staticmethod
     def from_user(order, user):
-
+        """Prellena nombre/teléfono/email del user y dirección desde su UserAddress
+        marcada is_default (vacío si el usuario no tiene ninguna dirección default).
+        Raises ValidationError si el usuario no tiene email."""
         if not user.email:
             raise ValidationError("El usuario no tiene email registrado")
 

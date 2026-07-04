@@ -9,6 +9,7 @@ from teams.models import Team
 
 
 class CartService:
+    """Manejo del carrito/DRAFT order y del catálogo visible por usuario."""
 
     @staticmethod
     @transaction.atomic

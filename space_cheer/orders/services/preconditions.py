@@ -12,6 +12,9 @@ class OrderBlockingIssue:
 
 
 def can_submit_order(order: Order) -> list[OrderBlockingIssue]:
+    """Colecciona todos los bloqueos (no solo el primero) que impiden enviar un
+    Order a producción: falta info de contacto, sin items, o items CUSTOM sin
+    atletas asignados. Lista vacía = el pedido puede transicionar."""
     issues = []
 
     if not order.has_contact_info():

@@ -12,6 +12,7 @@ User = get_user_model()
 
 
 class AthleteService:
+    """Alta rápida de atletas desde el panel de coach (sin flujo de registro completo)."""
 
     @staticmethod
     @transaction.atomic

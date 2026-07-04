@@ -14,6 +14,7 @@ class CoachApprovalService:
 
     @staticmethod
     def submit_headcoach(user):
+        """Desactiva al usuario recién registrado como HEADCOACH (superusers exentos)."""
         if user.is_superuser:
             logger.info("HEADCOACH %s es superusuario, omitiendo aprobación", user.id)
             return user
@@ -25,6 +26,7 @@ class CoachApprovalService:
     @staticmethod
     @transaction.atomic
     def approve_headcoach(coachprofile, by):
+        """Activa al usuario, marca el CoachProfile APPROVED y dispara el email de aviso."""
         from accounts.tasks import notify_headcoach_approved
 
         user = coachprofile.user
@@ -43,6 +45,7 @@ class CoachApprovalService:
     @staticmethod
     @transaction.atomic
     def reject_headcoach(coachprofile, by, reason=""):
+        """Marca el CoachProfile REJECTED con el motivo dado; el usuario queda inactivo."""
         user = coachprofile.user
         coachprofile.approval_status = coachprofile.REJECTED
         coachprofile.rejection_reason = reason

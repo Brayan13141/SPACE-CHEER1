@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError
 
 
 class OrderContactValidator:
+    """Valida que un Order tenga toda la información de contacto/envío requerida
+    para pasar de DRAFT a PENDING (ver OrderStateService.transition)."""
 
     REQUIRED_FIELDS = [
         "contact_name",
@@ -23,7 +25,7 @@ class OrderContactValidator:
 
     @classmethod
     def validate_complete(cls, order):
-
+        """Raise ValidationError si falta OrderContactInfo o si le faltan campos requeridos."""
         if not order.has_contact_info():
             raise ValidationError("La orden debe tener información de contacto.")
 
