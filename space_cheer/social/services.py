@@ -1,0 +1,107 @@
+"""Service layer del feed social. Toda la lógica de negocio vive aquí,
+siguiendo el patrón del proyecto (vistas delgadas)."""
+
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
+from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.utils.translation import gettext_lazy as _
+
+from social.models import Post, PostComment, PostImage, PostLike
+
+
+class FeedService:
+    MAX_IMAGES = 4
+
+    # ── Helpers ──────────────────────────────────────────────────────────
+    @staticmethod
+    def _is_admin(user):
+        return user.is_superuser or user.roles.filter(name="ADMIN").exists()
+
+    @staticmethod
+    def _can_moderate(user, author_id):
+        return user.pk == author_id or FeedService._is_admin(user)
+
+    # ── Lectura ──────────────────────────────────────────────────────────
+    @staticmethod
+    def feed_queryset(user):
+        """Feed completo optimizado: autor, repost embebido, imágenes,
+        contadores y 'yo di like', sin N+1."""
+        recent_comments = Prefetch(
+            "comments",
+            queryset=PostComment.objects.select_related("author").order_by(
+                "-created_at"
+            ),
+            to_attr="recent_comments",
+        )
+        return (
+            Post.objects.select_related("author", "shared_post", "shared_post__author")
+            .prefetch_related("images", "shared_post__images", recent_comments)
+            .annotate(
+                like_count=Count("likes", distinct=True),
+                comment_count=Count("comments", distinct=True),
+                liked_by_me=Exists(
+                    PostLike.objects.filter(post=OuterRef("pk"), user=user)
+                ),
+            )
+        )
+
+    # ── Escritura ────────────────────────────────────────────────────────
+    @staticmethod
+    @transaction.atomic
+    def create_post(user, text, images=None):
+        images = images or []
+        text = (text or "").strip()
+        if not text and not images:
+            raise ValidationError(_("La publicación necesita texto o al menos una imagen."))
+        if len(images) > FeedService.MAX_IMAGES:
+            raise ValidationError(
+                _("Máximo %(n)s imágenes por publicación.") % {"n": FeedService.MAX_IMAGES}
+            )
+        post = Post.objects.create(author=user, text=text)
+        for i, img in enumerate(images):
+            post_image = PostImage(post=post, image=img, order=i)
+            post_image.full_clean()  # corre validate_image_magic + tamaño
+            post_image.save()
+        return post
+
+    @staticmethod
+    def create_repost(user, original, text=""):
+        # Compartir un repost comparte el post original (como Facebook)
+        if original.shared_post_id:
+            original = original.shared_post
+        return Post.objects.create(
+            author=user, text=(text or "").strip(), shared_post=original
+        )
+
+    @staticmethod
+    def toggle_like(user, post):
+        like, created = PostLike.objects.get_or_create(post=post, user=user)
+        if not created:
+            like.delete()
+        return created, post.likes.count()
+
+    @staticmethod
+    def add_comment(user, post, text):
+        text = (text or "").strip()
+        if not text:
+            raise ValidationError(_("El comentario no puede estar vacío."))
+        return PostComment.objects.create(post=post, author=user, text=text)
+
+    @staticmethod
+    @transaction.atomic
+    def delete_post(user, post):
+        if not FeedService._can_moderate(user, post.author_id):
+            raise PermissionDenied
+        # Borrar archivos físicos antes del CASCADE (incluye los de reposts propios: no tienen imágenes)
+        for img in post.images.all():
+            img.image.delete(save=False)
+        post.delete()
+
+    @staticmethod
+    def delete_comment(user, comment):
+        allowed = FeedService._can_moderate(
+            user, comment.author_id
+        ) or user.pk == comment.post.author_id
+        if not allowed:
+            raise PermissionDenied
+        comment.delete()

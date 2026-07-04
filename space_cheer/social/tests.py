@@ -58,3 +58,98 @@ class PostModelTests(SocialBaseTestCase):
         repost = Post.objects.create(author=self.other, text="", shared_post=original)
         original.delete()
         self.assertFalse(Post.objects.filter(pk=repost.pk).exists())
+
+
+class FeedServiceTests(SocialBaseTestCase):
+    def test_create_post_requires_text_or_image(self):
+        from django.core.exceptions import ValidationError
+        from social.services import FeedService
+
+        with self.assertRaises(ValidationError):
+            FeedService.create_post(self.user, text="   ", images=[])
+
+    def test_create_post_with_images(self):
+        from social.services import FeedService
+
+        post = FeedService.create_post(
+            self.user, text="con fotos", images=[make_png("a.png"), make_png("b.png")]
+        )
+        self.assertEqual(post.images.count(), 2)
+        self.assertEqual(post.images.first().order, 0)
+
+    def test_create_post_max_4_images(self):
+        from django.core.exceptions import ValidationError
+        from social.services import FeedService
+
+        images = [make_png(f"{i}.png") for i in range(5)]
+        with self.assertRaises(ValidationError):
+            FeedService.create_post(self.user, text="", images=images)
+
+    def test_toggle_like(self):
+        from social.models import Post
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        liked, count = FeedService.toggle_like(self.other, post)
+        self.assertTrue(liked)
+        self.assertEqual(count, 1)
+        liked, count = FeedService.toggle_like(self.other, post)
+        self.assertFalse(liked)
+        self.assertEqual(count, 0)
+
+    def test_repost_of_repost_points_to_original(self):
+        from social.models import Post
+        from social.services import FeedService
+
+        original = Post.objects.create(author=self.user, text="original")
+        repost1 = FeedService.create_repost(self.other, original, text="mira")
+        repost2 = FeedService.create_repost(self.user, repost1, text="yo también")
+        self.assertEqual(repost2.shared_post_id, original.pk)
+
+    def test_delete_post_permissions(self):
+        from django.core.exceptions import PermissionDenied
+        from accounts.models import Role
+        from social.models import Post
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="mío")
+        with self.assertRaises(PermissionDenied):
+            FeedService.delete_post(self.other, post)
+
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.other.roles.add(admin_role)
+        FeedService.delete_post(self.other, post)  # ADMIN sí puede
+        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+
+    def test_delete_own_post_removes_image_files(self):
+        from social.services import FeedService
+
+        post = FeedService.create_post(self.user, text="", images=[make_png("c.png")])
+        storage = post.images.first().image.storage
+        path = post.images.first().image.name
+        self.assertTrue(storage.exists(path))
+        FeedService.delete_post(self.user, post)
+        self.assertFalse(storage.exists(path))
+
+    def test_add_comment_empty_rejected(self):
+        from django.core.exceptions import ValidationError
+        from social.models import Post
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        with self.assertRaises(ValidationError):
+            FeedService.add_comment(self.other, post, "  ")
+
+    def test_feed_queryset_annotates(self):
+        from social.models import Post
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        FeedService.toggle_like(self.other, post)
+        FeedService.add_comment(self.other, post, "buen post")
+
+        row = FeedService.feed_queryset(self.other).get(pk=post.pk)
+        self.assertEqual(row.like_count, 1)
+        self.assertEqual(row.comment_count, 1)
+        self.assertTrue(row.liked_by_me)
+        self.assertEqual(len(row.recent_comments), 1)
