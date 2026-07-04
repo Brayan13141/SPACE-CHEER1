@@ -14,4 +14,6 @@ urlpatterns = [
     path("create/new/", views.product_create, name="create_product"),
     # Detalle: editar, toggle activo, tallas, medidas — todo aquí
     path("<int:product_id>/", views.product_detail, name="product_detail"),
+    # ─── DEV/TEST ONLY: Previsualización 3D scaffold (no integrar en prod) ───
+    path("dev/preview3d-test/", views.preview3d_test_view, name="preview3d_test"),
 ]

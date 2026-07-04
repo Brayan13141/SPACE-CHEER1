@@ -1,0 +1,75 @@
+{# 
+  PARTIAL: Previsualización 3D del uniforme (Three.js) — SCAFFOLD / PLACEHOLDER
+  ─────────────────────────────────────────────────────────────────────────────
+  ⚠️ ESTE ES UN SCAFFOLD BASE, NO UN FEATURE COMPLETO DE PRODUCCIÓN.
+  
+  ESTADO ACTUAL (placeholder):
+  - Escena Three.js mínima: renderer, cámara, luz básica, cubo/plano rotando
+  - Representa "uniforme placeholder" (cubo simple) — NO hay modelo GLTF real
+  - JS cargado desde static/js/preview3d.js + three.min.js local (vendor)
+  - NO integrado en página de producto real (feature flag/comentado abajo)
+  
+  PENDIENTE PARA PRODUCCIÓN REAL (backlog item futuro):
+  1. Cargar modelo GLTF/GLB real del uniforme (loader GLTFLoader)
+  2. Aplicar texturas/materiales reales del uniforme (colores, logos, tejidos)
+  3. Controles OrbitControls para rotar/zoom/pan con mouse/touch
+  4. Configurar iluminación PBR realista (HDRI, luces de área)
+  5. Responsive: resize del canvas en resize de ventana/contenedor
+  6. Lazy-load: cargar Three.js y modelo solo cuando el tab/preview sea visible
+  7. Fallback graceful para dispositivos sin WebGL / WebGPU
+  8. Feature flag real (wagtail-flags, django-waffle, o setting) en vez de comentado
+  9. CSP: si se usa CDN three.js (unpkg, cdnjs), agregar dominio a CSP script-src
+     - Actualmente usa three.min.js LOCAL en static/js/vendor/three.min.js
+     - Si se migra a CDN: agregar 'https://cdn.jsdelivr.net' o 'https://unpkg.com' a CSP script-src
+  10. Integrar en product_detail.html condicionalmente (feature flag por usuario/rol/feature)
+  11. Cargar modelo GLTF específico por producto/variante (Product.glb_url o similar)
+  12. Controles UI: selector de color/talla que actualice modelo/textura en vivo
+  13. Performance: DRACOLoader para GLTF comprimido, texture compression (KTX2/BasisU)
+  14. Accesibilidad: fallback a imagen estática, prefers-reduced-motion
+  16. Testing: visual regression, performance budgets, mobile testing
+  ─────────────────────────────────────────────────────────────────────────────
+  PARA ACTIVAR EN PÁGINA DE PRODUCTO (futuro):
+  1. Descomentar el bloque {% include %} abajo o usar feature flag real
+  2. En product_detail.html, agregar contenedor <div id="preview3d-container"> donde quieras el canvas
+  3. Asegurar que static/js/vendor/three.min.js y static/js/preview3d.js estén en {% block extra_js %}
+  4. Configurar CSP script-src si usas CDN (ver comentario arriba)
+#}
+
+{# {% if request.user|has_feature_flag:"preview_3d_uniform" %}  ← feature flag futuro #}
+{#   <div id="preview3d-container" class="preview3d-container" style="width: 100%; height: 400px; background: #f5f5f5; border-radius: 8px; overflow: hidden;">#}
+{#     <!-- Canvas Three.js se inyecta aquí por preview3d.js -->#}
+{#   </div>#}
+{#   <script src="{% static 'js/vendor/three.min.js' %}"></script>#}
+{#   <script src="{% static 'js/preview3d.js' %}"></script>#}
+{#   <script>#}
+{#     document.addEventListener('DOMContentLoaded', () => {#}
+{#       if (typeof Preview3D !== 'undefined') {#}
+{#         Preview3D.init('#preview3d-container');#}
+{#       }#}
+{#     });#}
+{#   </script>#}
+{# {% endif %} #}
+
+{# 
+  NOTA DE INTEGRACIÓN FUTURA EN product_detail.html:
+  
+  {% block extra_js %}
+    {{ block.super }}
+    {% comment %} Solo cargar si feature flag activo para este usuario/producto {% endcomment %}
+    {% if product.has_3d_preview and request.user|has_feature_flag:"preview_3d_uniform" %}
+      <script src="{% static 'js/vendor/three.min.js' %}"></script>
+      <script src="{% static 'js/preview3d.js' %}"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          if (typeof Preview3D !== 'undefined') {
+            Preview3D.init('#preview3d-container', {
+              // Futuro: pasar URL del modelo GLTF del producto
+              // modelUrl: "{{ product.glb_url|default:'' }}",
+              // variantColor: "{{ selected_color|default:'#ffffff' }}",
+            });
+          }
+        });
+      </script>
+    {% endif %}
+  {% endblock %}
+#}
