@@ -43,6 +43,7 @@ class FeedService:
                     PostLike.objects.filter(post=OuterRef("pk"), user=user)
                 ),
             )
+            .order_by("-created_at")
         )
 
     # ── Escritura ────────────────────────────────────────────────────────
