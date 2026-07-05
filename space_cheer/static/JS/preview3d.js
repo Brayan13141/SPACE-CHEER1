@@ -220,8 +220,9 @@
     state.animationId = requestAnimationFrame(animate);
     var delta = state.clock.getDelta();
 
-    if (state.options.autoRotate && state.mesh) {
-      state.mesh.rotation.y += state.options.autoRotateSpeed;
+    if (state.options.autoRotate) {
+      var target = state.modelRoot || state.mesh;
+      if (target) target.rotation.y += state.options.autoRotateSpeed;
     }
 
     if (state.modelRoot && state.mixer) {
