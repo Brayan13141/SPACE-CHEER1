@@ -753,7 +753,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Lazy-init: Three.js solo arranca la primera vez que se abre el collapse
   collapseEl.addEventListener('shown.bs.collapse', function () {
-    if (initialized) { Preview3D.resize(); return; }
+    if (initialized) {
+      try { Preview3D.resize(); } catch (e) { /* init falló: fallback ya visible */ }
+      return;
+    }
     initialized = true;
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
