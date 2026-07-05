@@ -48,6 +48,7 @@ class ProductForm(forms.ModelForm):
             "owner_team",
             "season",
             "image",
+            "model_3d",
             "base_price",
             "is_active",
         ]
@@ -61,6 +62,9 @@ class ProductForm(forms.ModelForm):
             "season": forms.Select(attrs={"class": "form-select"}),
             "image": forms.ClearableFileInput(
                 attrs={"class": "form-control", "accept": "image/*"}
+            ),
+            "model_3d": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": ".glb"}
             ),
             "base_price": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01"}

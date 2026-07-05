@@ -60,3 +60,43 @@ class GlbValidatorTests(TestCase):
             model_3d=make_glb(),
         )
         self.assertTrue(product.model_3d.name.startswith("products/models3d/"))
+
+
+@override_settings(MEDIA_ROOT=TEST_MEDIA)
+class ProductFormModel3DTests(TestCase):
+    def _form_data(self):
+        from products.models import Season
+
+        season = Season.objects.create(name="Form 2026")
+        return {
+            "name": "Producto Form",
+            "product_type": "UNIFORM",
+            "usage_type": "GLOBAL",
+            "size_strategy": "NONE",
+            "scope": "CATALOG",
+            "season": season.pk,
+            "base_price": "50.00",
+            "is_active": True,
+        }
+
+    def test_form_accepts_valid_glb(self):
+        from products.forms import ProductForm
+
+        form = ProductForm(self._form_data(), {"model_3d": make_glb()})
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_form_rejects_fake_glb(self):
+        from products.forms import ProductForm
+
+        fake = SimpleUploadedFile("falso.glb", b"no soy un glb")
+        form = ProductForm(self._form_data(), {"model_3d": fake})
+        self.assertFalse(form.is_valid())
+        self.assertIn("model_3d", form.errors)
+
+
+class FeatureFlagTests(TestCase):
+    def test_flag_in_template_context(self):
+        user = User.objects.create_user(username="flag_test", password="Test1234!")
+        self.client.force_login(user)
+        resp = self.client.get("/")
+        self.assertIn("preview_3d_enabled", resp.context)
