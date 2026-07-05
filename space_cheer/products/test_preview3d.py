@@ -100,3 +100,44 @@ class FeatureFlagTests(TestCase):
         self.client.force_login(user)
         resp = self.client.get("/")
         self.assertIn("preview_3d_enabled", resp.context)
+
+
+@override_settings(MEDIA_ROOT=TEST_MEDIA)
+class ProductDetail3DRenderTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from django.contrib.auth.models import Permission
+        from products.models import Product, Season
+
+        cls.user = User.objects.create_user(username="render_test", password="Test1234!")
+        cls.user.user_permissions.add(
+            Permission.objects.get(codename="change_product")
+        )
+        season = Season.objects.create(name="Render 2026")
+        cls.product = Product.objects.create(
+            name="Producto Render",
+            product_type="UNIFORM",
+            usage_type="GLOBAL",
+            size_strategy="NONE",
+            season=season,
+            base_price="10.00",
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_section_renders_when_flag_on(self):
+        resp = self.client.get(f"/products/{self.product.pk}/")
+        self.assertContains(resp, "preview3d-container")
+        self.assertContains(resp, "JS/vendor/three.min.js")
+
+    @override_settings(PREVIEW_3D_ENABLED=False)
+    def test_section_hidden_when_flag_off(self):
+        resp = self.client.get(f"/products/{self.product.pk}/")
+        self.assertNotContains(resp, "preview3d-container")
+
+    def test_model_url_present_when_product_has_glb(self):
+        self.product.model_3d = make_glb()
+        self.product.save()
+        resp = self.client.get(f"/products/{self.product.pk}/")
+        self.assertContains(resp, self.product.model_3d.url)
