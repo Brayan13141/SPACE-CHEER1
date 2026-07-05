@@ -278,10 +278,12 @@
 
 {% block extra_js %}
 {{ block.super }}
-<!-- Three.js (stub placeholder local) -->
-<script src="{% static 'js/vendor/three.min.js' %}"></script>
-<!-- Preview3D scaffold -->
-<script src="{% static 'js/preview3d.js' %}"></script>
+<!-- Three.js r128 (vendorizado, sin CDN) -->
+<script src="{% static 'JS/vendor/three.min.js' %}"></script>
+<script src="{% static 'JS/vendor/GLTFLoader.js' %}"></script>
+<script src="{% static 'JS/vendor/OrbitControls.js' %}"></script>
+<!-- Preview3D -->
+<script src="{% static 'JS/preview3d.js' %}"></script>
 <!-- Test page controller -->
 <script>
 (function() {
@@ -319,11 +321,12 @@
     
     try {
       preview3d = Preview3D.init('#preview3d-container', {
-        modelUrl: null,  // null = usa placeholder cubo
+        modelUrl: null,  // null = usa el uniforme genérico procedural
         defaultColor: currentColor,
         autoRotate: true,
         autoRotateSpeed: rotateSpeed,
         transparentBackground: true,
+        enableControls: true,
         onReady: function() {
           updateThreeInfo();
           console.log('Preview3D inicializado correctamente');
