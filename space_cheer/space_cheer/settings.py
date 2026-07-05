@@ -179,6 +179,7 @@ TEMPLATES = [
                 "accounts.context_processors.user_roles",
                 "orders.context_processors.cart_context",
                 "core.context_processors.page_help",
+                "core.context_processors.feature_flags",
                 "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -328,6 +329,12 @@ PERMISSIONS_POLICY = {
 # A5 — Límite de tamaño para uploads (protege contra DoS por archivos grandes)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024    # 5MB
+
+# =================================================================
+# FEATURE FLAGS
+# =================================================================
+# Previsualización 3D de productos (Three.js). Apagable sin deploy.
+PREVIEW_3D_ENABLED = config("PREVIEW_3D_ENABLED", default=True, cast=bool)
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [

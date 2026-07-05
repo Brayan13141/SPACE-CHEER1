@@ -93,6 +93,10 @@
         </div>
       </div>
 
+      {% if preview_3d_enabled %}
+        {% include "products/partials/preview_3d.html" %}
+      {% endif %}
+
       <!-- ═══ PRICING INFO ═══ -->
       <div class="card shadow-sm mb-4">
         <div class="card-header">
@@ -369,6 +373,14 @@
                     <i class="bi bi-info-circle me-1"></i>{% trans "Sube una nueva para reemplazar la actual." %}
                   </small>
                 {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">{% trans "Modelo 3D (.glb)" %}</label>
+                {{ form.model_3d }}
+                <small class="text-muted d-block mt-1">
+                  <i class="bi bi-box me-1"></i>{% trans "Opcional, máx 15 MB. Genéralo con Tripo AI o Meshy a partir de fotos del producto." %}
+                </small>
               </div>
 
               <button type="submit" class="btn btn-primary btn-sm w-100">
@@ -728,4 +740,52 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+{% if preview_3d_enabled %}
+<script src="{% static 'JS/vendor/three.min.js' %}" defer></script>
+<script src="{% static 'JS/vendor/GLTFLoader.js' %}" defer></script>
+<script src="{% static 'JS/vendor/OrbitControls.js' %}" defer></script>
+<script src="{% static 'JS/preview3d.js' %}?v=2" defer></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+  var collapseEl = document.getElementById('preview3dCollapse');
+  if (!collapseEl) return;
+  var initialized = false;
+
+  // Lazy-init: Three.js solo arranca la primera vez que se abre el collapse
+  collapseEl.addEventListener('shown.bs.collapse', function () {
+    if (initialized) {
+      try { Preview3D.resize(); } catch (e) { /* init falló: fallback ya visible */ }
+      return;
+    }
+    initialized = true;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var modelUrl = collapseEl.dataset.modelUrl || null;
+
+    try {
+      Preview3D.init('#preview3d-container', {
+        modelUrl: modelUrl,
+        enableControls: true,
+        autoRotate: !reducedMotion,
+        onError: function () {
+          document.getElementById('preview3d-container').classList.add('d-none');
+          document.getElementById('preview3dFallback').classList.remove('d-none');
+        },
+      });
+    } catch (e) {
+      document.getElementById('preview3d-container').classList.add('d-none');
+      document.getElementById('preview3dFallback').classList.remove('d-none');
+      return;
+    }
+
+    // Swatches de color (solo existen en modo genérico)
+    document.querySelectorAll('#preview3dSwatches [data-color]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        Preview3D.setColor(btn.dataset.color);
+      });
+    });
+  });
+});
+</script>
+{% endif %}
 {% endblock %}

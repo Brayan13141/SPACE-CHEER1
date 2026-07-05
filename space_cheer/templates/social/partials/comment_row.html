@@ -1,0 +1,22 @@
+{% load i18n %}
+<div class="d-flex align-items-start mb-2">
+  <span class="sc-avatar-40 rounded-circle bg-secondary text-white fw-bold d-inline-flex align-items-center justify-content-center me-2" >
+    {{ comment.author.username|first|upper }}
+  </span>
+  <div class="flex-grow-1 bg-body-secondary rounded px-3 py-2">
+    <div class="d-flex justify-content-between">
+      <strong class="small">{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+      <small class="text-muted">{{ comment.created_at|timesince }}</small>
+    </div>
+    <div class="small">{{ comment.text|linebreaksbr }}</div>
+  </div>
+  {% if request.user == comment.author or request.user == comment.post.author or feed_is_admin %}
+  <form method="post" action="{% url 'social:comment_delete' comment.pk %}" class="ms-1">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button type="submit" class="btn btn-sm btn-link text-muted p-0" title="{% trans 'Eliminar' %}">
+      <i class="bi bi-x"></i>
+    </button>
+  </form>
+  {% endif %}
+</div>

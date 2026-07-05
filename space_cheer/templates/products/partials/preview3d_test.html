@@ -1,11 +1,11 @@
 {% extends "core/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Prueba Preview3D (Scaffold)" %} — Space Cheer{% endblock %}
+{% block title %}{% trans "Vista 3D - QA" %} — Space Cheer{% endblock %}
 
 {% block extra_css %}
 {{ block.super }}
-<style>
+<style nonce="{{ request.csp_nonce }}">
   .preview3d-container {
     width: 100%;
     height: 500px;
@@ -70,8 +70,8 @@
   <!-- ═══════════════════════════════════ HEADER ═══════════════════════════════════ -->
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3">
     <div>
-      <h1 class="h3 mb-1"><i class="bi bi-cube text-primary me-2"></i>{% trans "Prueba Preview3D (Scaffold)" %}</h1>
-      <p class="text-muted mb-0">{% trans "Vista de desarrollo para probar el scaffold Three.js de previsualización 3D" %}</p>
+      <h1 class="h3 mb-1"><i class="bi bi-cube text-primary me-2"></i>{% trans "Vista 3D - QA" %}</h1>
+      <p class="text-muted mb-0">{% trans "Página de QA manual del módulo Preview3D" %}</p>
     </div>
     <a href="{% url 'products:list_products' %}" class="btn btn-outline-secondary">
       <i class="bi bi-arrow-left me-1"></i>{% trans "Volver a productos" %}
@@ -80,14 +80,13 @@
 
   <!-- ═══════════════════════════════════ DEV NOTICE ═══════════════════════════════════ -->
   <div class="dev-notice">
-    <h5><i class="bi bi-exclamation-triangle me-2"></i>{% trans "⚠️ ENTORNO DE DESARROLLO — NO PARA PRODUCCIÓN" %}</h5>
-    <p class="mb-2">{% trans "Esta página es un <strong>scaffold/base</strong> para la futura feature \"Previsualización 3D de uniformes\" (backlog item). No está integrada en el flujo real de productos/checkout." %}</p>
+    <h5><i class="bi bi-exclamation-triangle me-2"></i>{% trans "⚠️ PÁGINA DE QA — USO INTERNO" %}</h5>
+    <p class="mb-2">{% trans "Página de prueba manual del módulo Preview3D. El feature real está integrado en product_detail.html y gateado por PREVIEW_3D_ENABLED." %}</p>
     <ul class="small">
-      <li>{% trans "Escena Three.js mínima: renderer, cámara, luces, cubo placeholder rotando" %}</li>
-      <li>{% trans "Usa <code>three.min.js</code> LOCAL (static/js/vendor/three.min.js) — stub placeholder" %}</li>
-      <li>{% trans "JS: <code>static/js/preview3d.js</code> con API Preview3D.init()/destroy()/loadModel()" %}</li>
-      <li>{% trans "PENDIENTE para producción: modelo GLTF real, OrbitControls, iluminación PBR, feature flags, lazy-load, CSP, etc." %}</li>
-      <li>{% trans "Ver comentarios en <code>templates/products/partials/preview_3d.html</code> y <code>static/js/preview3d.js</code> para checklist completo" %}</li>
+      <li>{% trans "Carga un uniforme genérico procedural con Three.js" %}</li>
+      <li>{% trans "Usa <code>three.min.js</code> LOCAL (static/JS/vendor/three.min.js) + OrbitControls" %}</li>
+      <li>{% trans "JS: <code>static/JS/preview3d.js</code> con API Preview3D.init()/destroy()/loadModel()" %}</li>
+      <li>{% trans "Prueba controles interactivos, rotación automática, selector de color" %}</li>
     </ul>
   </div>
 
@@ -96,14 +95,14 @@
     <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>{% trans "Estado del Scaffold" %}</h6>
+          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>{% trans "Estado del Módulo" %}</h6>
         </div>
         <div class="card-body">
           <div class="d-flex flex-wrap gap-2">
-            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "Template partial creado" %}</span>
-            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "JS scaffold (preview3d.js) creado" %}</span>
-            <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> {% trans "three.min.js = stub placeholder" %}</span>
-            <span class="status-badge status-info"><i class="bi bi-info-circle"></i> {% trans "Vista de prueba registrada" %}</span>
+            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "Módulo Preview3D operativo" %}</span>
+            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "Uniforme genérico procedural" %}</span>
+            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "OrbitControls integrado" %}</span>
+            <span class="status-badge status-success"><i class="bi bi-check-circle"></i> {% trans "Página de QA registrada" %}</span>
             <span class="status-badge status-info"><i class="bi bi-info-circle"></i> {% trans "URL: /products/dev/preview3d-test/" %}</span>
           </div>
         </div>
@@ -116,7 +115,7 @@
     <div class="col-12 col-lg-8">
       <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h6 class="mb-0"><i class="bi bi-cube me-2"></i>{% trans "Escena Three.js (Placeholder)" %}</h6>
+          <h6 class="mb-0"><i class="bi bi-cube me-2"></i>{% trans "Modelo genérico" %}</h6>
           <div class="btn-group btn-group-sm" role="group" id="preview3d-controls">
             <button type="button" class="btn btn-outline-primary" id="btn-rotate-toggle" title="Toggle auto-rotate">
               <i class="bi bi-arrow-repeat"></i> <span id="rotate-text">{% trans "Auto-rotar: ON" %}</span>
@@ -177,113 +176,22 @@
         </div>
       </div>
 
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>{% trans "Checklist Producción (Pendiente)" %}</h6>
-        </div>
-        <div class="card-body p-0">
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Cargar modelo GLTF/GLB real (GLTFLoader + DRACOLoader)" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "OrbitControls para interacción mouse/touch" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Iluminación PBR realista (HDRI, AreaLights)" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Texturas/materiales reales (colores equipo, logos)" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Lazy-load con IntersectionObserver" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Feature flag real (django-waffle/setting)" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "CSP: dominios CDN si no local" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Fallback WebGL + prefers-reduced-motion" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Selector color/talla → actualiza modelo en vivo" %}
-            </li>
-            <li class="list-group-item d-flex align-items-center">
-              <i class="bi bi-circle text-warning me-2"></i> {% trans "Testing: visual regression, performance, mobile" %}
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════ INSTRUCCIONES INTEGRACIÓN ═══════════════════════════════════ -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header">
-      <h6 class="mb-0"><i class="bi bi-code-slash me-2"></i>{% trans "Integración Futura en product_detail.html" %}</h6>
-    </div>
-    <div class="card-body">
-      <p class="small text-muted mb-3">{% trans "Cuando la feature esté lista para producción, integra así:" %}</p>
-      <pre class="bg-dark text-light p-3 rounded small overflow-auto"><code>{% raw %}{% block extra_js %}
-  {{ block.super }}
-  {% comment %} Solo cargar si feature flag activo para este usuario/producto {% endcomment %}
-  {% if product.has_3d_preview and request.user|has_feature_flag:"preview_3d_uniform" %}
-    <script src="{% static 'js/vendor/three.min.js' %}"></script>
-    <script src="{% static 'js/preview3d.js' %}"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        if (typeof Preview3D !== 'undefined') {
-          Preview3D.init('#preview3d-container', {
-            modelUrl: "{{ product.glb_url|default:'' }}",
-            defaultColor: "#{{ team.primary_color|default:'2563eb' }}",
-            enableControls: true,
-            autoRotate: true,
-            onReady: () => console.log('Preview3D ready'),
-            onError: (err) => console.error('Preview3D error:', err),
-          });
-        }
-      });
-    </script>
-  {% endif %}
-{% endblock %}{% endraw %}</code></pre>
-      <p class="small text-muted mt-2 mb-0">{% trans "Y en el template principal, agregar el contenedor donde quieras el canvas:" %}</p>
-      <pre class="bg-dark text-light p-3 rounded small overflow-auto"><code><div id="preview3d-container" class="preview3d-container" style="width: 100%; height: 400px;"></div></code></pre>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════ CSP INFO ═══════════════════════════════════ -->
-  <div class="card shadow-sm">
-    <div class="card-header">
-      <h6 class="mb-0"><i class="bi bi-shield-lock me-2"></i>{% trans "Content Security Policy (CSP)" %}</h6>
-    </div>
-    <div class="card-body">
-      <p class="small text-muted mb-2">{% trans "Actualmente usa three.min.js LOCAL (static/js/vendor/three.min.js) — no requiere cambios en CSP." %}</p>
-      <p class="small mb-2"><strong>{% trans "Si se migra a CDN en el futuro:" %}</strong></p>
-      <pre class="bg-dark text-light p-3 rounded small overflow-auto"><code># En settings.py → CONTENT_SECURITY_POLICY → DIRECTIVES → script-src:
-"script-src": [
-    "'self'",
-    "https://code.jquery.com",
-    "https://cdn.datatables.net",
-    "https://cdn.jsdelivr.net",      {# ← AGREGAR para three.js CDN #}
-    "https://unpkg.com",            {# ← ALTERNATIVA: unpkg #}
-    CSP_NONCE,
-],</code></pre>
-      <p class="small text-muted mb-0">{% trans "Recomendación: mantener three.min.js local (vendorizado) para evitar dependencias externas y simplificar CSP." %}</p>
-    </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
-<!-- Three.js (stub placeholder local) -->
-<script src="{% static 'js/vendor/three.min.js' %}"></script>
-<!-- Preview3D scaffold -->
-<script src="{% static 'js/preview3d.js' %}"></script>
+<!-- Three.js r128 (vendorizado, sin CDN) -->
+<script src="{% static 'JS/vendor/three.min.js' %}"></script>
+<script src="{% static 'JS/vendor/GLTFLoader.js' %}"></script>
+<script src="{% static 'JS/vendor/OrbitControls.js' %}"></script>
+<!-- Preview3D -->
+<script src="{% static 'JS/preview3d.js' %}"></script>
 <!-- Test page controller -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function() {
   'use strict';
   
@@ -319,11 +227,12 @@
     
     try {
       preview3d = Preview3D.init('#preview3d-container', {
-        modelUrl: null,  // null = usa placeholder cubo
+        modelUrl: null,  // null = usa el uniforme genérico procedural
         defaultColor: currentColor,
         autoRotate: true,
         autoRotateSpeed: rotateSpeed,
         transparentBackground: true,
+        enableControls: true,
         onReady: function() {
           updateThreeInfo();
           console.log('Preview3D inicializado correctamente');

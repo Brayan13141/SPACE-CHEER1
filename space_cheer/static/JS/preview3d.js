@@ -32,6 +32,7 @@
     isInitialized: false,
     isDestroyed: false,
     resizeHandler: null,
+    controls: null,
   };
 
   // Utilidades
@@ -49,17 +50,76 @@
   function warn() { if (console && console.warn) console.warn('[Preview3D]', Array.prototype.slice.call(arguments).join(' ')); }
   function error() { if (console && console.error) console.error('[Preview3D]', Array.prototype.slice.call(arguments).join(' ')); }
 
-  // Geometría placeholder
-  function createPlaceholderGeometry() {
-    return new THREE.BoxGeometry(1, 1.5, 0.3);
-  }
-  function createPlaceholderMaterial(color) {
+  // Uniforme de porrista estilizado low-poly, construido con primitivas.
+  // Tintable via setColor(). Se usa cuando el producto no tiene GLB propio.
+  function createTintableMaterial(color) {
     return new THREE.MeshStandardMaterial({
       color: color || state.options.defaultColor,
       roughness: 0.7,
       metalness: 0.1,
       side: THREE.DoubleSide,
     });
+  }
+
+  function createAccentMaterial() {
+    return new THREE.MeshStandardMaterial({
+      color: state.options.accentColor,
+      roughness: 0.8,
+      metalness: 0.0,
+      side: THREE.DoubleSide,
+    });
+  }
+
+  function createGenericUniform(color) {
+    var group = new THREE.Group();
+    var main = createTintableMaterial(color);
+    var accent = createAccentMaterial();
+
+    // Torso / top (caja achatada)
+    var top = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.55, 0.3), main);
+    top.position.y = 0.55;
+    group.add(top);
+
+    // Franja del top (accent, no se tiñe)
+    var stripe = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.12, 0.32), accent);
+    stripe.position.y = 0.72;
+    group.add(stripe);
+
+    // Hombros (esferas achatadas)
+    var shoulderGeo = new THREE.SphereGeometry(0.14, 12, 8);
+    var shoulderL = new THREE.Mesh(shoulderGeo, main);
+    shoulderL.position.set(-0.42, 0.76, 0);
+    shoulderL.scale.y = 0.7;
+    group.add(shoulderL);
+    var shoulderR = shoulderL.clone();
+    shoulderR.position.x = 0.42;
+    group.add(shoulderR);
+
+    // Falda (cono truncado abierto)
+    var skirt = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.38, 0.62, 0.45, 16, 1, true),
+      main
+    );
+    skirt.position.y = 0.02;
+    group.add(skirt);
+
+    // Ribete de la falda (accent)
+    var hem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.62, 0.64, 0.06, 16, 1, true),
+      accent
+    );
+    hem.position.y = -0.2;
+    group.add(hem);
+
+    group.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        // Marca para que setColor() sepa qué mallas teñir
+        child.userData.tintable = child.material === main;
+      }
+    });
+    return group;
   }
 
   // Luces
@@ -123,12 +183,23 @@
 
     setupLights();
 
-    var geometry = createPlaceholderGeometry();
-    var material = createPlaceholderMaterial(state.options.defaultColor);
-    state.mesh = new THREE.Mesh(geometry, material);
-    state.mesh.castShadow = true;
-    state.mesh.receiveShadow = true;
-    state.mesh.position.y = 0;
+    if (state.options.enableControls && THREE.OrbitControls) {
+      state.controls = new THREE.OrbitControls(state.camera, state.renderer.domElement);
+      state.controls.enableDamping = true;
+      state.controls.dampingFactor = 0.08;
+      state.controls.enableZoom = state.options.enableZoom;
+      state.controls.enablePan = state.options.enablePan;
+      state.controls.minDistance = 1.2;
+      state.controls.maxDistance = 8;
+      state.controls.target.set(0, 0.2, 0);
+      // La primera interacción pausa la rotación automática
+      state.controls.addEventListener('start', function () {
+        state.options.autoRotate = false;
+      });
+    }
+
+    state.mesh = createGenericUniform(state.options.defaultColor);
+    state.mesh.position.y = -0.3;
     state.scene.add(state.mesh);
 
     var groundGeo = new THREE.PlaneGeometry(10, 10);
@@ -149,13 +220,16 @@
     state.animationId = requestAnimationFrame(animate);
     var delta = state.clock.getDelta();
 
-    if (state.options.autoRotate && state.mesh) {
-      state.mesh.rotation.y += state.options.autoRotateSpeed;
+    if (state.options.autoRotate) {
+      var target = state.modelRoot || state.mesh;
+      if (target) target.rotation.y += state.options.autoRotateSpeed;
     }
 
     if (state.modelRoot && state.mixer) {
       state.mixer.update(delta);
     }
+
+    if (state.controls) state.controls.update();
 
     if (state.renderer && state.scene && state.camera) {
       state.renderer.render(state.scene, state.camera);
@@ -185,21 +259,18 @@
     }
     log('Cargando modelo GLTF:', url);
     var loader = new THREE.GLTFLoader();
-    if (THREE.DRACOLoader) {
-      var draco = new THREE.DRACOLoader();
-      draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-      loader.setDRACOLoader(draco);
-    }
     return new Promise(function(resolve, reject) {
       loader.load(url, function(gltf) {
         log('Modelo GLTF cargado');
         if (state.mesh && state.mesh.parent) {
           state.scene.remove(state.mesh);
-          state.mesh.geometry.dispose();
-          if (state.mesh.material) {
-            if (Array.isArray(state.mesh.material)) state.mesh.material.forEach(function(m){m.dispose();});
-            else state.mesh.material.dispose();
-          }
+          state.mesh.traverse(function (child) {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+              if (Array.isArray(child.material)) child.material.forEach(function (m) { m.dispose(); });
+              else child.material.dispose();
+            }
+          });
           state.mesh = null;
         }
         state.modelRoot = gltf.scene;
@@ -261,15 +332,22 @@
       state.isDestroyed = true;
       if (state.animationId) { cancelAnimationFrame(state.animationId); state.animationId = null; }
       if (state.resizeHandler) { window.removeEventListener('resize', state.resizeHandler); state.resizeHandler = null; }
+      if (state.controls) { state.controls.dispose(); state.controls = null; }
       if (state.renderer) { state.renderer.dispose(); state.renderer.forceContextLoss(); state.renderer.domElement.remove(); state.renderer = null; }
       if (state.scene) { state.scene.traverse(function(obj){ if(obj.geometry) obj.geometry.dispose(); if(obj.material){ if(Array.isArray(obj.material)) obj.material.forEach(function(m){m.dispose();}); else obj.material.dispose(); } }); state.scene = null; }
       state.camera = null; state.mesh = null; state.modelRoot = null; state.mixer = null; state.clock = null; state.container = null; state.options = {}; state.isInitialized = false;
       log('Preview3D destruido');
     },
     loadModel: function(url, options) { return loadModel(url, options); },
-    setColor: function(hexColor) {
-      if (state.mesh && state.mesh.material && state.mesh.material.color && state.mesh.material.color.set) { state.mesh.material.color.set(hexColor); }
-      if (state.modelRoot) { state.modelRoot.traverse(function(child){ if(child.isMesh && child.material && child.material.color && child.material.color.set){ child.material.color.set(hexColor); } }); }
+    setColor: function (hexColor) {
+      // Solo tiñe el uniforme genérico. Los GLB reales conservan sus texturas.
+      if (state.modelRoot) return;
+      if (!state.mesh) return;
+      state.mesh.traverse(function (child) {
+        if (child.isMesh && child.userData.tintable && child.material.color) {
+          child.material.color.set(hexColor);
+        }
+      });
     },
     resize: function() { onResize(); },
     getState: function() { return { isInitialized: state.isInitialized, isDestroyed: state.isDestroyed, hasModel: !!state.modelRoot, container: state.container }; },
