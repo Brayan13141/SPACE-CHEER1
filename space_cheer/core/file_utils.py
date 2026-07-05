@@ -53,6 +53,28 @@ def validate_min_size_35mb(file):
             f'Archivo actual: {file.size / (1024 * 1024):.2f} MB.'
         )
 
+def validate_glb_magic(file):
+    """
+    Valida que el archivo sea un binario glTF real (GLB).
+    Todo GLB empieza con los magic bytes 'glTF' (4 bytes ASCII).
+    """
+    header = file.read(4)
+    file.seek(0)
+    if header != b'glTF':
+        raise ValidationError(
+            'El archivo no es un modelo GLB válido. Exporta como .glb (binario glTF).'
+        )
+
+def validate_glb_max_15mb(file):
+    """Rechaza modelos 3D de más de 15 MB."""
+    limit = 15 * 1024 * 1024
+    if file.size > limit:
+        raise ValidationError(
+            f'El modelo 3D no puede pesar más de 15 MB. '
+            f'Actual: {file.size / (1024 * 1024):.1f} MB. '
+            f'Optimízalo con: npx @gltf-transform/cli optimize modelo.glb salida.glb'
+        )
+
 # =============================================================================
 # GENERADORES DE RUTAS DINÁMICAS (upload_to)
 # =============================================================================
@@ -98,6 +120,14 @@ def product_image_path(instance, filename):
     safe_filename = os.path.basename(filename)
     safe_name = _sanitize_path_component(instance.name.replace(" ", "_").lower())
     return f'products/{safe_name}/{safe_filename}'
+
+def product_model3d_path(instance, filename):
+    """
+    Genera: media/products/models3d/<nombre_sanitizado>/<filename>
+    """
+    safe_filename = os.path.basename(filename)
+    safe_name = _sanitize_path_component(instance.name.replace(" ", "_").lower())
+    return f'products/models3d/{safe_name}/{safe_filename}'
 
 def design_upload_path(instance, filename):
     """

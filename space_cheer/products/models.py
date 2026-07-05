@@ -7,7 +7,13 @@ from django.core.exceptions import ValidationError
 from measures.models import MeasurementField
 from teams.models import Team
 from django.core.validators import MinValueValidator
-from core.file_utils import product_image_path, validate_image_magic
+from core.file_utils import (
+    product_image_path,
+    product_model3d_path,
+    validate_glb_magic,
+    validate_glb_max_15mb,
+    validate_image_magic,
+)
 
 
 class Season(models.Model):
@@ -95,6 +101,15 @@ class Product(models.Model):
         blank=True,
         null=True,
         validators=[validate_image_magic]
+    )
+    # Modelo 3D del producto (GLB binario, para previsualización Three.js).
+    # Opcional: sin él se muestra el uniforme genérico procedural.
+    model_3d = models.FileField(
+        upload_to=product_model3d_path,
+        blank=True,
+        null=True,
+        validators=[validate_glb_magic, validate_glb_max_15mb],
+        help_text="Modelo 3D en formato .glb (máx 15 MB). Genéralo con Tripo AI o Meshy desde fotos del producto.",
     )
     season = models.ForeignKey(
         Season, on_delete=models.PROTECT
