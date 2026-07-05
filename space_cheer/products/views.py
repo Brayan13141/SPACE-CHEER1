@@ -425,10 +425,8 @@ def product_detail(request, product_id):
     return render(request, "products/product_detail.html", context)
 
 
-# ─── DEV/TEST ONLY: Vista de prueba para Preview3D scaffold ─────────────────
-# NO INTEGRAR EN PRODUCCIÓN — Solo para desarrollo/pruebas aisladas
-# URL: /products/dev/preview3d-test/ (ver products/urls.py)
-# Requiere: three.min.js en static/js/vendor/ y preview3d.js en static/js/
+# ─── DEV/TEST ONLY: página de QA manual del módulo Preview3D ───
+# Scripts: static/JS/vendor/ (three.min.js, GLTFLoader, OrbitControls) + static/JS/preview3d.js
 @login_required
 @permission_required("products.view_product", raise_exception=True)
 def preview3d_test_view(request):
