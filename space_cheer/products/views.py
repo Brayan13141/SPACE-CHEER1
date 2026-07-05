@@ -432,20 +432,5 @@ def product_detail(request, product_id):
 @login_required
 @permission_required("products.view_product", raise_exception=True)
 def preview3d_test_view(request):
-    """
-    Vista de prueba aislada para la previsualización 3D (Three.js scaffold).
-    
-    Esta vista SOLO sirve para probar el scaffold de preview3d.js de forma aislada.
-    NO está integrada en el flujo real de productos/checkout.
-    
-    Para producción futura (backlog item "Three.js para vista previa de uniformes"):
-    1. Reemplazar esta vista por feature flag real (django-waffle, wagtail-flags, etc.)
-    2. Integrar en product_detail.html condicionalmente
-    3. Cargar modelo GLTF real por producto (Product.glb_url campo futuro)
-    4. Agregar OrbitControls, iluminación PBR, lazy-load, etc.
-    
-    CSP: Actualmente usa three.min.js LOCAL (static/js/vendor/three.min.js).
-    Si se migra a CDN, agregar 'https://cdn.jsdelivr.net' o 'https://unpkg.com' 
-    a CSP script-src en settings.py
-    """
+    """Página de QA manual del módulo Preview3D. El feature real vive en product_detail.html gateado por PREVIEW_3D_ENABLED."""
     return render(request, "products/partials/preview3d_test.html")

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 17:40-0600\n"
+"POT-Creation-Date: 2026-07-05 00:02-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -605,7 +605,7 @@ msgstr "Friendly"
 #: .\templates\events\admin\criteria_manage.html:49
 #: .\templates\events\admin\criteria_manage.html:109
 #: .\templates\measures\manage_fields.html:20
-#: .\templates\products\product_detail.html:262
+#: .\templates\products\product_detail.html:266
 #: .\templates\products\product_form.html:69
 #: .\templates\products\product_list.html:75
 #: .\templates\teams\manage_categories.html:26
@@ -617,7 +617,7 @@ msgstr "Name"
 #: .\production\templates\production\config\plantillas.html:40
 #: .\production\templates\production\config\stages.html:50
 #: .\production\templates\production\config\stages.html:157
-#: .\templates\products\product_detail.html:267
+#: .\templates\products\product_detail.html:271
 #: .\templates\products\product_form.html:74
 msgid "Descripción"
 msgstr "Description"
@@ -718,8 +718,8 @@ msgstr "Team category"
 #: .\production\templates\production\config\stages.html:46
 #: .\production\templates\production\config\stages.html:153
 #: .\templates\measures\manage_fields.html:19
-#: .\templates\products\product_detail.html:606
-#: .\templates\products\product_detail.html:625
+#: .\templates\products\product_detail.html:618
+#: .\templates\products\product_detail.html:637
 msgid "Orden"
 msgstr "Order"
 
@@ -1140,7 +1140,7 @@ msgstr "Email"
 #: .\templates\events\event_form.html:107
 #: .\templates\measures\manage_fields.html:98
 #: .\templates\orders\users\order_edit.html:32
-#: .\templates\products\product_detail.html:375
+#: .\templates\products\product_detail.html:387
 msgid "Guardar cambios"
 msgstr "Save changes"
 
@@ -1205,8 +1205,8 @@ msgstr "Last 10 completed tasks"
 #: .\production\templates\production\config\operario_detail.html:231
 #: .\production\templates\production\config\plantillas.html:118
 #: .\production\templates\production\config\product_stages_matrix.html:151
-#: .\templates\products\product_detail.html:598
-#: .\templates\products\product_detail.html:624
+#: .\templates\products\product_detail.html:610
+#: .\templates\products\product_detail.html:636
 msgid "Etapa"
 msgstr "Stage"
 
@@ -1386,10 +1386,10 @@ msgstr "Select size"
 #: .\templates\events\admin\criteria_manage.html:39
 #: .\templates\events\admin\criteria_manage.html:99
 #: .\templates\orders\products\add_product.html:296
-#: .\templates\products\product_detail.html:390
-#: .\templates\products\product_detail.html:484
-#: .\templates\products\product_detail.html:586
-#: .\templates\products\product_detail.html:611
+#: .\templates\products\product_detail.html:402
+#: .\templates\products\product_detail.html:496
+#: .\templates\products\product_detail.html:598
+#: .\templates\products\product_detail.html:623
 msgid "Agregar"
 msgstr "Add"
 
@@ -1566,7 +1566,7 @@ msgid "Guardar"
 msgstr "Save"
 
 #: .\production\templates\production\config\responsabilidades.html:93
-#: .\templates\products\product_detail.html:654
+#: .\templates\products\product_detail.html:666
 msgid "No hay etapas configuradas."
 msgstr "No stages configured."
 
@@ -1634,7 +1634,7 @@ msgid "Tasks"
 msgstr ""
 
 #: .\production\templates\production\config\stages.html:124
-#: .\templates\products\product_detail.html:642
+#: .\templates\products\product_detail.html:654
 msgid "Eliminar etapa"
 msgstr "Delete stage"
 
@@ -1665,8 +1665,8 @@ msgstr "No stages configured."
 #: .\templates\orders\users\order_detail.html:815
 #: .\templates\orders\users\order_edit.html:14
 #: .\templates\orders\users\order_edit.html:35
-#: .\templates\products\product_detail.html:681
-#: .\templates\products\product_form.html:165 .\templates\social\feed.html:83
+#: .\templates\products\product_detail.html:693
+#: .\templates\products\product_form.html:183 .\templates\social\feed.html:83
 #: .\templates\social\post_detail.html:31
 #: .\templates\teams\manage_categories.html:93
 #: .\templates\teams\manage_categories.html:141
@@ -1904,7 +1904,7 @@ msgstr "Column"
 
 #: .\templates\account\bulk_import\form.html:75
 #: .\templates\measures\manage_fields.html:24
-#: .\templates\products\product_detail.html:530
+#: .\templates\products\product_detail.html:542
 msgid "Requerido"
 msgstr "Required"
 
@@ -1914,7 +1914,7 @@ msgstr "Example"
 
 #: .\templates\account\bulk_import\form.html:82
 #: .\templates\account\bulk_import\form.html:87
-#: .\templates\products\product_detail.html:541
+#: .\templates\products\product_detail.html:553
 msgid "Sí"
 msgstr "Yes"
 
@@ -1922,7 +1922,7 @@ msgstr "Yes"
 #: .\templates\account\bulk_import\form.html:97
 #: .\templates\account\bulk_import\form.html:102
 #: .\templates\account\bulk_import\form.html:107
-#: .\templates\products\product_detail.html:543
+#: .\templates\products\product_detail.html:555
 msgid "No"
 msgstr "No"
 
@@ -2114,7 +2114,7 @@ msgstr ""
 
 #: .\templates\account\email_confirm.html:31
 #: .\templates\events\event_detail.html:109
-#: .\templates\products\product_detail.html:684
+#: .\templates\products\product_detail.html:696
 msgid "Confirmar"
 msgstr "Confirm"
 
@@ -4827,7 +4827,7 @@ msgid "Tipo"
 msgstr "Type"
 
 #: .\templates\measures\manage_fields.html:23
-#: .\templates\products\product_detail.html:529
+#: .\templates\products\product_detail.html:541
 msgid "Unidad"
 msgstr "Unit"
 
@@ -4923,8 +4923,8 @@ msgid "Productos"
 msgstr "Products"
 
 #: .\templates\orders\admin\order_detail.html:235
-#: .\templates\products\product_detail.html:400
-#: .\templates\products\product_detail.html:424
+#: .\templates\products\product_detail.html:412
+#: .\templates\products\product_detail.html:436
 msgid "Talla"
 msgstr "Size"
 
@@ -5224,7 +5224,7 @@ msgstr "Unit price"
 
 #: .\templates\orders\items\item_detail.html:96
 #: .\templates\orders\products\add_product.html:78
-#: .\templates\products\product_detail.html:359
+#: .\templates\products\product_detail.html:363
 #: .\templates\products\product_form.html:84
 #: .\templates\products\product_list.html:77
 msgid "Temporada"
@@ -5339,7 +5339,7 @@ msgid "Filtros"
 msgstr "Filters"
 
 #: .\templates\orders\products\add_product.html:36
-#: .\templates\products\product_detail.html:273
+#: .\templates\products\product_detail.html:277
 #: .\templates\products\product_form.html:90
 msgid "Tipo de producto"
 msgstr "Product type"
@@ -5349,7 +5349,7 @@ msgid "Todos los tipos"
 msgstr "All types"
 
 #: .\templates\orders\products\add_product.html:57
-#: .\templates\products\product_detail.html:287
+#: .\templates\products\product_detail.html:291
 #: .\templates\products\product_form.html:94
 msgid "Tipo de uso"
 msgstr "Usage type"
@@ -5363,7 +5363,7 @@ msgid "Todas las temporadas"
 msgstr "All seasons"
 
 #: .\templates\orders\products\add_product.html:91
-#: .\templates\products\product_detail.html:104
+#: .\templates\products\product_detail.html:108
 msgid "Rango de precio"
 msgstr "Price range"
 
@@ -5411,7 +5411,7 @@ msgid "Tallas disponibles:"
 msgstr "Available sizes:"
 
 #: .\templates\orders\products\add_product.html:270
-#: .\templates\products\product_detail.html:355
+#: .\templates\products\product_detail.html:359
 #: .\templates\products\product_form.html:79
 msgid "Precio base"
 msgstr "Base price"
@@ -5902,13 +5902,12 @@ msgstr "Change language"
 
 #: .\templates\products\partials\preview3d_test.html:4
 #: .\templates\products\partials\preview3d_test.html:73
-msgid "Prueba Preview3D (Scaffold)"
-msgstr ""
+msgid "Vista 3D - QA"
+msgstr "3D view - QA"
 
 #: .\templates\products\partials\preview3d_test.html:74
-msgid ""
-"Vista de desarrollo para probar el scaffold Three.js de previsualización 3D"
-msgstr ""
+msgid "Página de QA manual del módulo Preview3D"
+msgstr "Manual QA page for the Preview3D module"
 
 #: .\templates\products\partials\preview3d_test.html:77
 #: .\templates\products\product_template_select.html:16
@@ -5916,195 +5915,145 @@ msgid "Volver a productos"
 msgstr "Back to products"
 
 #: .\templates\products\partials\preview3d_test.html:83
-msgid "⚠️ ENTORNO DE DESARROLLO — NO PARA PRODUCCIÓN"
-msgstr ""
+msgid "⚠️ PÁGINA DE QA — USO INTERNO"
+msgstr "⚠️ QA PAGE — INTERNAL USE"
 
 #: .\templates\products\partials\preview3d_test.html:84
 msgid ""
-"Esta página es un <strong>scaffold/base</strong> para la futura feature \\"
+"Página de prueba manual del módulo Preview3D. El feature real está integrado "
+"en product_detail.html y gateado por PREVIEW_3D_ENABLED."
 msgstr ""
+"Manual test page for the Preview3D module. The real feature is integrated in "
+"product_detail.html and gated by PREVIEW_3D_ENABLED."
 
 #: .\templates\products\partials\preview3d_test.html:86
-msgid ""
-"Escena Three.js mínima: renderer, cámara, luces, cubo placeholder rotando"
-msgstr ""
+msgid "Carga un uniforme genérico procedural con Three.js"
+msgstr "Loads a procedural generic uniform with Three.js"
 
 #: .\templates\products\partials\preview3d_test.html:87
 msgid ""
-"Usa <code>three.min.js</code> LOCAL (static/js/vendor/three.min.js) — stub "
-"placeholder"
+"Usa <code>three.min.js</code> LOCAL (static/JS/vendor/three.min.js) + "
+"OrbitControls"
 msgstr ""
+"Uses LOCAL <code>three.min.js</code> (static/JS/vendor/three.min.js) + "
+"OrbitControls"
 
 #: .\templates\products\partials\preview3d_test.html:88
 msgid ""
-"JS: <code>static/js/preview3d.js</code> con API Preview3D.init()/destroy()/"
+"JS: <code>static/JS/preview3d.js</code> con API Preview3D.init()/destroy()/"
 "loadModel()"
 msgstr ""
+"JS: <code>static/JS/preview3d.js</code> with Preview3D.init()/destroy()/"
+"loadModel() API"
 
 #: .\templates\products\partials\preview3d_test.html:89
-msgid ""
-"PENDIENTE para producción: modelo GLTF real, OrbitControls, iluminación PBR, "
-"feature flags, lazy-load, CSP, etc."
-msgstr ""
+msgid "Prueba controles interactivos, rotación automática, selector de color"
+msgstr "Test interactive controls, auto-rotation, color picker"
 
-#: .\templates\products\partials\preview3d_test.html:90
-msgid ""
-"Ver comentarios en <code>templates/products/partials/preview_3d.html</code> "
-"y <code>static/js/preview3d.js</code> para checklist completo"
-msgstr ""
+#: .\templates\products\partials\preview3d_test.html:98
+msgid "Estado del Módulo"
+msgstr "Module Status"
 
-#: .\templates\products\partials\preview3d_test.html:99
-#, fuzzy
-#| msgid "Estado de la orden"
-msgid "Estado del Scaffold"
-msgstr "Order status"
+#: .\templates\products\partials\preview3d_test.html:102
+msgid "Módulo Preview3D operativo"
+msgstr "Preview3D module operational"
 
 #: .\templates\products\partials\preview3d_test.html:103
-msgid "Template partial creado"
-msgstr ""
+msgid "Uniforme genérico procedural"
+msgstr "Procedural generic uniform"
 
 #: .\templates\products\partials\preview3d_test.html:104
-msgid "JS scaffold (preview3d.js) creado"
-msgstr ""
+msgid "OrbitControls integrado"
+msgstr "OrbitControls integrated"
 
 #: .\templates\products\partials\preview3d_test.html:105
-msgid "three.min.js = stub placeholder"
-msgstr ""
+msgid "Página de QA registrada"
+msgstr "QA page registered"
 
 #: .\templates\products\partials\preview3d_test.html:106
-#, fuzzy
-#| msgid "Medidas registradas"
-msgid "Vista de prueba registrada"
-msgstr "Registered measurements"
-
-#: .\templates\products\partials\preview3d_test.html:107
 msgid "URL: /products/dev/preview3d-test/"
-msgstr ""
+msgstr "URL: /products/dev/preview3d-test/"
 
-#: .\templates\products\partials\preview3d_test.html:119
-msgid "Escena Three.js (Placeholder)"
-msgstr ""
+#: .\templates\products\partials\preview3d_test.html:118
+#: .\templates\products\partials\preview_3d.html:16
+msgid "Modelo genérico"
+msgstr "Generic model"
 
-#: .\templates\products\partials\preview3d_test.html:122
+#: .\templates\products\partials\preview3d_test.html:121
 msgid "Auto-rotar: ON"
-msgstr ""
+msgstr "Auto-rotate: ON"
 
-#: .\templates\products\partials\preview3d_test.html:125
-#, fuzzy
-#| msgid "Cambiar foto"
+#: .\templates\products\partials\preview3d_test.html:124
 msgid "Cambiar color"
-msgstr "Change photo"
+msgstr "Change color"
 
-#: .\templates\products\partials\preview3d_test.html:128
+#: .\templates\products\partials\preview3d_test.html:127
 msgid "Resize"
-msgstr ""
+msgstr "Resize"
 
-#: .\templates\products\partials\preview3d_test.html:143
+#: .\templates\products\partials\preview3d_test.html:142
 msgid "Controles y Estado"
-msgstr ""
+msgstr "Controls and Status"
 
-#: .\templates\products\partials\preview3d_test.html:147
-#, fuzzy
-#| msgid "Nueva orden de uniformes"
+#: .\templates\products\partials\preview3d_test.html:146
 msgid "Color del uniforme"
-msgstr "New uniform order"
+msgstr "Uniform color"
 
-#: .\templates\products\partials\preview3d_test.html:152
+#: .\templates\products\partials\preview3d_test.html:151
 msgid "Velocidad rotación"
-msgstr ""
+msgstr "Rotation speed"
 
-#: .\templates\products\partials\preview3d_test.html:159
+#: .\templates\products\partials\preview3d_test.html:158
 msgid "Wireframe (debug)"
-msgstr ""
+msgstr "Wireframe (debug)"
 
-#: .\templates\products\partials\preview3d_test.html:165
+#: .\templates\products\partials\preview3d_test.html:164
 msgid "Three.js version:"
-msgstr ""
+msgstr "Three.js version:"
 
-#: .\templates\products\partials\preview3d_test.html:169
+#: .\templates\products\partials\preview3d_test.html:168
 msgid "Renderer:"
-msgstr ""
+msgstr "Renderer:"
 
-#: .\templates\products\partials\preview3d_test.html:173
+#: .\templates\products\partials\preview3d_test.html:172
 msgid "FPS (aprox):"
-msgstr ""
+msgstr "FPS (approx):"
 
-#: .\templates\products\partials\preview3d_test.html:182
-msgid "Checklist Producción (Pendiente)"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:14
+msgid "Vista 3D"
+msgstr "3D view"
 
-#: .\templates\products\partials\preview3d_test.html:187
-msgid "Cargar modelo GLTF/GLB real (GLTFLoader + DRACOLoader)"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:30
+msgid "Tu dispositivo no soporta la vista 3D."
+msgstr "Your device does not support the 3D view."
 
-#: .\templates\products\partials\preview3d_test.html:190
-msgid "OrbitControls para interacción mouse/touch"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:37
+msgid "Azul"
+msgstr "Blue"
 
-#: .\templates\products\partials\preview3d_test.html:193
-msgid "Iluminación PBR realista (HDRI, AreaLights)"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:38
+msgid "Rojo"
+msgstr "Red"
 
-#: .\templates\products\partials\preview3d_test.html:196
-msgid "Texturas/materiales reales (colores equipo, logos)"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:39
+msgid "Verde"
+msgstr "Green"
 
-#: .\templates\products\partials\preview3d_test.html:199
-msgid "Lazy-load con IntersectionObserver"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:40
+msgid "Amarillo"
+msgstr "Yellow"
 
-#: .\templates\products\partials\preview3d_test.html:202
-msgid "Feature flag real (django-waffle/setting)"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:41
+msgid "Negro"
+msgstr "Black"
 
-#: .\templates\products\partials\preview3d_test.html:205
-msgid "CSP: dominios CDN si no local"
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:42
+msgid "Púrpura"
+msgstr "Purple"
 
-#: .\templates\products\partials\preview3d_test.html:208
-msgid "Fallback WebGL + prefers-reduced-motion"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:211
-msgid "Selector color/talla → actualiza modelo en vivo"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:214
-msgid "Testing: visual regression, performance, mobile"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:225
-msgid "Integración Futura en product_detail.html"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:228
-msgid "Cuando la feature esté lista para producción, integra así:"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:252
-msgid ""
-"Y en el template principal, agregar el contenedor donde quieras el canvas:"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:260
-msgid "Content Security Policy (CSP)"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:263
-msgid ""
-"Actualmente usa three.min.js LOCAL (static/js/vendor/three.min.js) — no "
-"requiere cambios en CSP."
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:264
-msgid "Si se migra a CDN en el futuro:"
-msgstr ""
-
-#: .\templates\products\partials\preview3d_test.html:274
-msgid ""
-"Recomendación: mantener three.min.js local (vendorizado) para evitar "
-"dependencias externas y simplificar CSP."
-msgstr ""
+#: .\templates\products\partials\preview_3d.html:45
+msgid "Modelo ilustrativo. Sube un .glb al producto para ver el modelo real."
+msgstr "Illustrative model. Upload a .glb to the product to see the real model."
 
 #: .\templates\products\product_detail.html:26
 #: .\templates\products\product_list.html:141
@@ -6133,59 +6082,59 @@ msgstr "Used in %(count)s order"
 msgid "Sin imagen"
 msgstr "No image"
 
-#: .\templates\products\product_detail.html:99
+#: .\templates\products\product_detail.html:103
 msgid "Precios"
 msgstr "Prices"
 
-#: .\templates\products\product_detail.html:112
+#: .\templates\products\product_detail.html:116
 msgid "Base:"
 msgstr "Base:"
 
-#: .\templates\products\product_detail.html:116
+#: .\templates\products\product_detail.html:120
 msgid "Con variantes:"
 msgstr "With variants:"
 
-#: .\templates\products\product_detail.html:125
+#: .\templates\products\product_detail.html:129
 msgid "Precio único"
 msgstr "Single price"
 
-#: .\templates\products\product_detail.html:135
+#: .\templates\products\product_detail.html:139
 msgid "Configuración pendiente"
 msgstr "Pending configuration"
 
-#: .\templates\products\product_detail.html:138
+#: .\templates\products\product_detail.html:142
 msgid "Este producto requiere configuración antes de poder usarse en órdenes:"
 msgstr "This product requires configuration before it can be used in orders:"
 
-#: .\templates\products\product_detail.html:163
+#: .\templates\products\product_detail.html:167
 msgid "Requisitos del producto"
 msgstr "Product requirements"
 
-#: .\templates\products\product_detail.html:168
+#: .\templates\products\product_detail.html:172
 msgid "Diseño personalizado"
 msgstr "Custom design"
 
-#: .\templates\products\product_detail.html:174
+#: .\templates\products\product_detail.html:178
 msgid "Asignación de atletas"
 msgstr "Athlete assignment"
 
-#: .\templates\products\product_detail.html:180
+#: .\templates\products\product_detail.html:184
 msgid "Medidas personalizadas"
 msgstr "Custom measurements"
 
-#: .\templates\products\product_detail.html:186
+#: .\templates\products\product_detail.html:190
 msgid "Selección de talla"
 msgstr "Size selection"
 
-#: .\templates\products\product_detail.html:192
+#: .\templates\products\product_detail.html:196
 msgid "Equipo específico"
 msgstr "Specific team"
 
-#: .\templates\products\product_detail.html:208
+#: .\templates\products\product_detail.html:212
 msgid "Producto protegido"
 msgstr "Protected product"
 
-#: .\templates\products\product_detail.html:210
+#: .\templates\products\product_detail.html:214
 #, python-format
 msgid ""
 "\n"
@@ -6194,125 +6143,138 @@ msgid ""
 "                "
 msgstr ""
 
-#: .\templates\products\product_detail.html:214
+#: .\templates\products\product_detail.html:218
 msgid "activa"
 msgstr "active"
 
-#: .\templates\products\product_detail.html:219
+#: .\templates\products\product_detail.html:223
 msgid ""
 "No puedes modificar su estructura (scope, usage_type, size_strategy) ni "
 "eliminarlo."
 msgstr ""
 
-#: .\templates\products\product_detail.html:231
+#: .\templates\products\product_detail.html:235
 msgid "Editar información"
 msgstr "Edit information"
 
-#: .\templates\products\product_detail.html:242
+#: .\templates\products\product_detail.html:246
 msgid "Campos bloqueados"
 msgstr "Locked fields"
 
-#: .\templates\products\product_detail.html:243
+#: .\templates\products\product_detail.html:247
 msgid ""
 "Tipo de producto, Tipo de uso, Estrategia de tallas, Alcance y Equipo "
 "propietario no pueden modificarse porque este producto ya está en órdenes."
 msgstr ""
 
-#: .\templates\products\product_detail.html:280
-#: .\templates\products\product_detail.html:294
-#: .\templates\products\product_detail.html:311
-#: .\templates\products\product_detail.html:325
-#: .\templates\products\product_detail.html:343
+#: .\templates\products\product_detail.html:284
+#: .\templates\products\product_detail.html:298
+#: .\templates\products\product_detail.html:315
+#: .\templates\products\product_detail.html:329
+#: .\templates\products\product_detail.html:347
 msgid "No puede ser modificado o afectaría a órdenes actuales"
 msgstr "Cannot be modified as it would affect current orders"
 
-#: .\templates\products\product_detail.html:304
+#: .\templates\products\product_detail.html:308
 msgid "Estrategia de tallas"
 msgstr "Size strategy"
 
-#: .\templates\products\product_detail.html:318
+#: .\templates\products\product_detail.html:322
 #: .\templates\products\product_form.html:102
 msgid "Alcance"
 msgstr "Scope"
 
-#: .\templates\products\product_detail.html:334
+#: .\templates\products\product_detail.html:338
 msgid "Equipo propietario"
 msgstr "Owner team"
 
-#: .\templates\products\product_detail.html:365
+#: .\templates\products\product_detail.html:369
 msgid "Nueva imagen"
 msgstr "New image"
 
-#: .\templates\products\product_detail.html:369
+#: .\templates\products\product_detail.html:373
 msgid "Sube una nueva para reemplazar la actual."
 msgstr "Upload a new one to replace the current."
 
-#: .\templates\products\product_detail.html:386
+#: .\templates\products\product_detail.html:379
+#: .\templates\products\product_form.html:165
+msgid "Modelo 3D (.glb)"
+msgstr "3D model (.glb)"
+
+#: .\templates\products\product_detail.html:382
+#: .\templates\products\product_form.html:168
+msgid ""
+"Opcional, máx 15 MB. Genéralo con Tripo AI o Meshy a partir de fotos del "
+"producto."
+msgstr ""
+"Optional, max 15 MB. Generate it with Tripo AI or Meshy from product photos."
+
+#: .\templates\products\product_detail.html:398
 msgid "Tallas"
 msgstr "Sizes"
 
-#: .\templates\products\product_detail.html:401
+#: .\templates\products\product_detail.html:413
 msgid "XS, S, M..."
 msgstr "XS, S, M..."
 
-#: .\templates\products\product_detail.html:404
-#: .\templates\products\product_detail.html:425
+#: .\templates\products\product_detail.html:416
+#: .\templates\products\product_detail.html:437
 msgid "Precio adicional"
 msgstr "Additional price"
 
-#: .\templates\products\product_detail.html:412
+#: .\templates\products\product_detail.html:424
 msgid "Agregar talla"
 msgstr "Add size"
 
-#: .\templates\products\product_detail.html:426
+#: .\templates\products\product_detail.html:438
 msgid "Precio final"
 msgstr "Final price"
 
-#: .\templates\products\product_detail.html:452
+#: .\templates\products\product_detail.html:464
 msgid "Eliminar talla"
 msgstr "Delete size"
 
-#: .\templates\products\product_detail.html:464
+#: .\templates\products\product_detail.html:476
 msgid "No hay tallas configuradas."
 msgstr "No sizes configured."
 
-#: .\templates\products\product_detail.html:480
+#: .\templates\products\product_detail.html:492
 msgid "Campos de medida"
 msgstr "Measurement fields"
 
-#: .\templates\products\product_detail.html:495
+#: .\templates\products\product_detail.html:507
 msgid "Campo de medida"
 msgstr "Measurement field"
 
-#: .\templates\products\product_detail.html:505
+#: .\templates\products\product_detail.html:517
 msgid "Obligatorio"
 msgstr "Required"
 
-#: .\templates\products\product_detail.html:510
+#: .\templates\products\product_detail.html:522
 msgid "Agregar campo"
 msgstr "Add field"
 
-#: .\templates\products\product_detail.html:516
+#: .\templates\products\product_detail.html:528
 msgid "No quedan campos disponibles."
 msgstr "No fields available."
 
-#: .\templates\products\product_detail.html:517
+#: .\templates\products\product_detail.html:529
 msgid "Crear nuevos campos"
 msgstr "Create new fields"
 
-#: .\templates\products\product_detail.html:528
+#: .\templates\products\product_detail.html:540
 msgid "Campo"
 msgstr "Field"
 
-#: .\templates\products\product_detail.html:554
+#: .\templates\products\product_detail.html:566
 msgid "Eliminar campo de medida"
 msgstr "Delete measurement field"
 
-#: .\templates\products\product_detail.html:566
+#: .\templates\products\product_detail.html:578
 msgid "No hay campos configurados."
 msgstr "No fields configured."
 
-#: .\templates\products\product_detail.html:581
+#: .\templates\products\product_detail.html:593
 msgid "Etapas de producción"
 msgstr "Production stages"
 
@@ -6369,7 +6331,11 @@ msgstr "Image"
 msgid "JPG, PNG. Máx 5MB."
 msgstr "JPG, PNG. Max 5MB."
 
-#: .\templates\products\product_form.html:162
+#: .\templates\products\product_form.html:160
+msgid "Modelo 3D"
+msgstr "3D Model"
+
+#: .\templates\products\product_form.html:180
 msgid "Crear producto"
 msgstr "Create product"
 
