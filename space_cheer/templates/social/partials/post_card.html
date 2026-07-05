@@ -11,7 +11,7 @@
         <div class="fw-semibold">{{ post.author.get_full_name|default:post.author.username }}</div>
         <small class="text-muted">{{ post.created_at|timesince }} {% trans "atrás" %}</small>
       </div>
-      {% if request.user == post.author or request.user.is_superuser %}
+      {% if request.user == post.author or feed_is_admin %}
       <div class="dropdown">
         <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
         <ul class="dropdown-menu dropdown-menu-end">

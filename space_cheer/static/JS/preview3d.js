@@ -335,7 +335,7 @@
       if (state.controls) { state.controls.dispose(); state.controls = null; }
       if (state.renderer) { state.renderer.dispose(); state.renderer.forceContextLoss(); state.renderer.domElement.remove(); state.renderer = null; }
       if (state.scene) { state.scene.traverse(function(obj){ if(obj.geometry) obj.geometry.dispose(); if(obj.material){ if(Array.isArray(obj.material)) obj.material.forEach(function(m){m.dispose();}); else obj.material.dispose(); } }); state.scene = null; }
-      state.camera = null; state.mesh = null; state.modelRoot = null; state.mixer = null; state.clock = null; state.container = null; state.options = {}; state.isInitialized = false; state.controls = null;
+      state.camera = null; state.mesh = null; state.modelRoot = null; state.mixer = null; state.clock = null; state.container = null; state.options = {}; state.isInitialized = false;
       log('Preview3D destruido');
     },
     loadModel: function(url, options) { return loadModel(url, options); },

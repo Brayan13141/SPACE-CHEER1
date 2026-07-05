@@ -14,12 +14,12 @@ class FeedService:
 
     # ── Helpers ──────────────────────────────────────────────────────────
     @staticmethod
-    def _is_admin(user):
+    def is_admin(user):
         return user.is_superuser or user.roles.filter(name="ADMIN").exists()
 
     @staticmethod
     def _can_moderate(user, author_id):
-        return user.pk == author_id or FeedService._is_admin(user)
+        return user.pk == author_id or FeedService.is_admin(user)
 
     # ── Lectura ──────────────────────────────────────────────────────────
     @staticmethod

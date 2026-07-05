@@ -17,7 +17,8 @@
       {% endif %}
     </h5>
     <button class="btn btn-sm btn-outline-primary" type="button"
-            data-bs-toggle="collapse" data-bs-target="#preview3dCollapse">
+            data-bs-toggle="collapse" data-bs-target="#preview3dCollapse"
+            aria-expanded="false" aria-controls="preview3dCollapse">
       <i class="bi bi-chevron-down"></i>
     </button>
   </div>
@@ -39,7 +40,7 @@
         <button type="button" class="sc-swatch bg-success" data-color="#16a34a" aria-label="{% trans 'Verde' %}"></button>
         <button type="button" class="sc-swatch bg-warning" data-color="#eab308" aria-label="{% trans 'Amarillo' %}"></button>
         <button type="button" class="sc-swatch bg-dark" data-color="#1f2937" aria-label="{% trans 'Negro' %}"></button>
-        <button type="button" class="sc-swatch bg-info" data-color="#7c3aed" aria-label="{% trans 'Púrpura' %}"></button>
+        <button type="button" class="sc-swatch sc-swatch-purple" data-color="#7c3aed" aria-label="{% trans 'Púrpura' %}"></button>
       </div>
       <p class="text-center text-muted small mt-2 mb-0">
         {% trans "Modelo ilustrativo. Sube un .glb al producto para ver el modelo real." %}

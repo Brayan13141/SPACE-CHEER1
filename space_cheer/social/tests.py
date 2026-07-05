@@ -304,3 +304,13 @@ class FeedViewTests(SocialBaseTestCase):
         self.assertEqual(resp.status_code, 200)
         resp = self.client.get("/social/ranking/?sort=posts")
         self.assertEqual(resp.status_code, 200)
+
+    def test_admin_role_sees_delete_button(self):
+        from accounts.models import Role
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="post ajeno")
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.user.roles.add(admin_role)
+        resp = self.client.get("/social/")
+        self.assertContains(resp, f"/social/post/{post.pk}/eliminar/")

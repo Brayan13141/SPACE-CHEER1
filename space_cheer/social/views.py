@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -71,7 +70,11 @@ def _safe_next(request, fallback="social:feed"):
 def feed(request):
     paginator = Paginator(FeedService.feed_queryset(request.user), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
-    return render(request, "social/feed.html", {"page_obj": page_obj})
+    return render(
+        request,
+        "social/feed.html",
+        {"page_obj": page_obj, "feed_is_admin": FeedService.is_admin(request.user)},
+    )
 
 
 @login_required
@@ -93,7 +96,11 @@ def post_create(request):
 @login_required
 def post_detail(request, pk):
     post = get_object_or_404(FeedService.feed_queryset(request.user), pk=pk)
-    return render(request, "social/post_detail.html", {"post": post})
+    return render(
+        request,
+        "social/post_detail.html",
+        {"post": post, "feed_is_admin": FeedService.is_admin(request.user)},
+    )
 
 
 @login_required
