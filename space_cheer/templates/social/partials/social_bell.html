@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="dropdown">
+    <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" title="{% trans 'Notificaciones' %}">
+        <i class="bi bi-bell"></i>
+        {% if unread_social_count %}<span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">{{ unread_social_count }}</span>{% endif %}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px;">
+        {% for n in social_bell_items %}
+        <li>
+            <form method="post" action="{% url 'social:notification_read' n.pk %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-wrap">
+                    <small>{{ n.title }}</small>
+                    <br><small class="text-secondary">{{ n.created_at|timesince }}</small>
+                </button>
+            </form>
+        </li>
+        {% empty %}
+        <li><span class="dropdown-item-text text-secondary">{% trans "Sin notificaciones nuevas" %}</span></li>
+        {% endfor %}
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-center" href="{% url 'social:notifications' %}">{% trans "Ver todas" %}</a></li>
+    </ul>
+</div>

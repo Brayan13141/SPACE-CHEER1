@@ -555,6 +555,13 @@ class Notification(models.Model):
     class NotificationType(models.TextChoices):
         TASK_ASSIGNED = "TASK_ASSIGNED", "Tarea asignada"
         TASK_COMPLETE = "TASK_COMPLETE", "Tarea completada"
+        JOB_READY = "JOB_READY", "Job listo para entrega"
+        ERROR_REPORTED = "ERROR_REPORTED", "Error reportado"
+        # Portal social — el prefijo "SOCIAL_" es contract: los context
+        # processors separan campanas filtrando por startswith("SOCIAL_").
+        SOCIAL_LIKE = "SOCIAL_LIKE", "Like a tu publicación"
+        SOCIAL_COMMENT = "SOCIAL_COMMENT", "Comentario en tu publicación"
+        SOCIAL_REPOST = "SOCIAL_REPOST", "Compartieron tu publicación"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -569,6 +576,8 @@ class Notification(models.Model):
     )
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Destino al hacer click (p.ej. /social/post/5/). Vacío = no navegable.
+    url = models.CharField(max_length=300, blank=True, default="")
 
     class Meta:
         ordering = ["-created_at"]

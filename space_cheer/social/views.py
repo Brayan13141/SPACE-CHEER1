@@ -1,9 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
@@ -14,7 +15,9 @@ from invitations.utils import get_invitation_model
 from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
-from social.models import Post, PostComment
+from social.models import Post, PostComment, PostLike
+from social.notification_services import SocialNotificationService
+from social.profile_services import SocialProfileService, SocialVisibilityService
 from social.services import FeedService, RankingService
 
 Invitation = get_invitation_model()
@@ -70,10 +73,15 @@ def _safe_next(request, fallback="social:feed"):
 def feed(request):
     paginator = Paginator(FeedService.feed_queryset(request.user), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
+    profile = SocialProfileService.for_user(request.user)
     return render(
         request,
         "social/feed.html",
-        {"page_obj": page_obj, "feed_is_admin": FeedService.is_admin(request.user)},
+        {
+            "page_obj": page_obj,
+            "feed_is_admin": FeedService.is_admin(request.user),
+            "social_feed_density": profile.feed_density,
+        },
     )
 
 
@@ -160,3 +168,153 @@ def team_ranking(request):
         "social/ranking.html",
         {"teams": RankingService.team_ranking(sort), "sort": sort},
     )
+
+
+@login_required
+def profile_me(request):
+    return redirect("social:profile_detail", username=request.user.username)
+
+
+@login_required
+def profile_detail(request, username):
+    User = get_user_model()
+    try:
+        profile_user = User.objects.get(username=username, is_active=True)
+    except User.DoesNotExist:
+        raise Http404
+    if not SocialVisibilityService.can_view_profile(request.user, profile_user):
+        raise Http404  # mismo 404 que inexistente: no filtrar perfiles privados
+    profile = SocialProfileService.for_user(profile_user)
+    posts = FeedService.feed_queryset(request.user).filter(author=profile_user)
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    stats = {
+        "posts": Post.objects.filter(author=profile_user).count(),
+        "likes_received": PostLike.objects.filter(post__author=profile_user).count(),
+        "teams": profile_user.team_memberships.filter(is_active=True).count(),
+    }
+    recent_comments = None
+    if not profile.hide_activity:
+        recent_comments = (
+            PostComment.objects.filter(author=profile_user)
+            .filter(post__in=Post.objects.visible_for_viewer(request.user))
+            .select_related("post")
+            .order_by("-created_at")[:5]
+        )
+    return render(
+        request,
+        "social/profile.html",
+        {
+            "profile_user": profile_user,
+            "profile": profile,
+            "page_obj": page_obj,
+            "stats": stats,
+            "recent_comments": recent_comments,
+            "feed_is_admin": FeedService.is_admin(request.user),
+        },
+    )
+
+
+@login_required
+def team_directory(request):
+    from teams.models import Team
+
+    teams = Team.objects.filter(is_active=True).order_by("name")
+    query = request.GET.get("q", "").strip()
+    if query:
+        teams = teams.filter(name__icontains=query)
+    paginator = Paginator(teams, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(
+        request, "social/team_directory.html", {"page_obj": page_obj, "q": query}
+    )
+
+
+@login_required
+def team_page(request, pk):
+    from teams.models import Team
+
+    team = get_object_or_404(Team, pk=pk, is_active=True)
+    members = (
+        team.memberships.filter(is_active=True)
+        .select_related("user")
+        .order_by("user__username")
+    )
+    member_ids = [m.user_id for m in members]
+    posts = FeedService.feed_queryset(request.user).filter(author_id__in=member_ids)
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(
+        request,
+        "social/team_page.html",
+        {
+            "team": team,
+            "members": members,
+            "page_obj": page_obj,
+            "stats": RankingService.team_stats(team),
+            "feed_is_admin": FeedService.is_admin(request.user),
+        },
+    )
+
+
+@login_required
+def notifications(request):
+    qs = SocialNotificationService.social_qs(request.user)
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(request, "social/notifications.html", {"page_obj": page_obj})
+
+
+@login_required
+@require_POST
+def notification_read(request, pk):
+    notification = SocialNotificationService.mark_read(request.user, pk)
+    if notification.url:
+        return redirect(notification.url)
+    return redirect("social:notifications")
+
+
+@login_required
+@require_POST
+def notifications_read_all(request):
+    SocialNotificationService.mark_all_read(request.user)
+    return _safe_next(request, fallback="social:notifications")
+
+
+@login_required
+def social_settings(request):
+    from social.forms import (
+        SocialAppearanceForm,
+        SocialNotificationsForm,
+        SocialPrivacyForm,
+        SocialProfileForm,
+    )
+
+    profile = SocialProfileService.for_user(request.user)
+    form_classes = {
+        "profile": SocialProfileForm,
+        "privacy": SocialPrivacyForm,
+        "notifications": SocialNotificationsForm,
+        "appearance": SocialAppearanceForm,
+    }
+    forms_ctx = {f"{key}_form": cls(instance=profile) for key, cls in form_classes.items()}
+
+    if request.method == "POST":
+        form_id = request.POST.get("form_id")
+        if form_id in form_classes:
+            form = form_classes[form_id](
+                request.POST, request.FILES, instance=profile
+            )
+            if form.is_valid():
+                form.save()
+                messages.success(request, _("Configuración guardada."))
+                return redirect("social:settings")
+            forms_ctx[f"{form_id}_form"] = form  # re-render con errores
+
+    # Hint del caso borde: visibilidad TEAM sin equipo activo
+    sin_equipo = (
+        (profile.profile_visibility == "TEAM" or profile.posts_visibility == "TEAM")
+        and not request.user.team_memberships.filter(is_active=True).exists()
+    )
+    forms_ctx["sin_equipo_warning"] = sin_equipo
+    return render(request, "social/settings.html", forms_ctx)

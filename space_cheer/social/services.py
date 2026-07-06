@@ -7,6 +7,7 @@ from django.db.models import Count, Exists, OuterRef, Prefetch
 from django.utils.translation import gettext_lazy as _
 
 from social.models import Post, PostComment, PostImage, PostLike
+from social.notification_services import SocialNotificationService
 
 
 class FeedService:
@@ -34,13 +35,19 @@ class FeedService:
             to_attr="recent_comments",
         )
         return (
-            Post.objects.select_related("author", "shared_post", "shared_post__author")
+            Post.objects.visible_for_viewer(user)
+            .select_related("author", "shared_post", "shared_post__author")
             .prefetch_related("images", "shared_post__images", recent_comments)
             .annotate(
                 like_count=Count("likes", distinct=True),
                 comment_count=Count("comments", distinct=True),
                 liked_by_me=Exists(
                     PostLike.objects.filter(post=OuterRef("pk"), user=user)
+                ),
+                shared_visible=Exists(
+                    Post.objects.visible_for_viewer(user).filter(
+                        pk=OuterRef("shared_post_id")
+                    )
                 ),
             )
             .order_by("-created_at", "-id")
@@ -73,14 +80,18 @@ class FeedService:
         # Compartir un repost comparte el post original (como Facebook)
         if original.shared_post_id:
             original = original.shared_post
-        return Post.objects.create(
+        repost = Post.objects.create(
             author=user, text=(text or "").strip(), shared_post=original
         )
+        SocialNotificationService.notify_repost(user, repost)
+        return repost
 
     @staticmethod
     def toggle_like(user, post):
         like, created = PostLike.objects.get_or_create(post=post, user=user)
-        if not created:
+        if created:
+            SocialNotificationService.notify_like(user, post)
+        else:
             like.delete()
         return created, post.likes.count()
 
@@ -89,7 +100,9 @@ class FeedService:
         text = (text or "").strip()
         if not text:
             raise ValidationError(_("El comentario no puede estar vacío."))
-        return PostComment.objects.create(post=post, author=user, text=text)
+        comment = PostComment.objects.create(post=post, author=user, text=text)
+        SocialNotificationService.notify_comment(user, comment)
+        return comment
 
     @staticmethod
     @transaction.atomic
@@ -147,3 +160,22 @@ class RankingService:
             )
             .order_by(order, "name")
         )
+
+    @staticmethod
+    def team_stats(team):
+        """Métricas + posición de un equipo en el ranking por competencias."""
+        ranking = list(RankingService.team_ranking("competitions"))
+        position = None
+        stats = {"num_competitions": 0, "num_athletes": 0, "num_posts": 0}
+        for i, t in enumerate(ranking, start=1):
+            if t.pk == team.pk:
+                position = i
+                stats = {
+                    "num_competitions": t.num_competitions,
+                    "num_athletes": t.num_athletes,
+                    "num_posts": t.num_posts,
+                }
+                break
+        stats["rank_position"] = position
+        stats["total_teams"] = len(ranking)
+        return stats

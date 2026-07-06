@@ -16,6 +16,40 @@ def validate_image_max_5mb(file):
         )
 
 
+class PostQuerySet(models.QuerySet):
+    def visible_for_viewer(self, viewer):
+        """Punto único de verdad de visibilidad de posts.
+
+        Reglas (spec 2026-07-05-social-portal):
+        - Autores inactivos: fuera para todos (incluido ADMIN).
+        - ADMIN/superuser: bypass de privacidad.
+        - Sin SocialProfile o PLATFORM: visible para toda la plataforma.
+        - TEAM: visible solo si autor y viewer comparten equipo con
+          membresía activa (evaluado en vivo, cada request).
+        - El autor siempre ve lo propio.
+        """
+        from teams.models import UserTeamMembership
+
+        qs = self.filter(author__is_active=True)
+        if viewer.is_superuser or viewer.roles.filter(name="ADMIN").exists():
+            return qs
+        viewer_team_ids = UserTeamMembership.objects.filter(
+            user=viewer, is_active=True
+        ).values("team_id")
+        teammate_ids = UserTeamMembership.objects.filter(
+            team_id__in=viewer_team_ids, is_active=True
+        ).values("user_id")
+        return qs.filter(
+            models.Q(author=viewer)
+            | models.Q(author__social_profile__isnull=True)
+            | models.Q(author__social_profile__posts_visibility="PLATFORM")
+            | models.Q(
+                author__social_profile__posts_visibility="TEAM",
+                author_id__in=teammate_ids,
+            )
+        )
+
+
 class Post(models.Model):
     """Publicación del feed. Si shared_post no es nulo, es un repost."""
 
@@ -36,6 +70,8 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = PostQuerySet.as_manager()
 
     class Meta:
         ordering = ["-created_at", "-id"]
@@ -93,3 +129,55 @@ class PostComment(models.Model):
 
     def __str__(self):
         return f"Comentario de {self.author.username} en post #{self.post_id}"
+
+
+class SocialProfile(models.Model):
+    """Perfil del portal social: identidad, privacidad, preferencias y apariencia.
+
+    Separado del perfil operativo de accounts: estos campos solo aplican
+    dentro del espacio social. NO confundir con accounts.PrivacySettings
+    (perfil operativo) ni accounts.NotificationPreferences (canal email).
+    """
+
+    class Visibility(models.TextChoices):
+        PLATFORM = "PLATFORM", _("Toda la plataforma")
+        TEAM = "TEAM", _("Solo mi equipo")
+
+    class FeedDensity(models.TextChoices):
+        COMFORTABLE = "COMFORTABLE", _("Cómoda")
+        COMPACT = "COMPACT", _("Compacta")
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="social_profile",
+    )
+    bio = models.TextField(max_length=300, blank=True)
+    avatar = models.ImageField(
+        upload_to="social/profiles/avatars/%Y/%m/",
+        blank=True,
+        validators=[validate_image_magic, validate_image_max_5mb],
+    )
+    cover = models.ImageField(
+        upload_to="social/profiles/covers/%Y/%m/",
+        blank=True,
+        validators=[validate_image_magic, validate_image_max_5mb],
+    )
+    profile_visibility = models.CharField(
+        max_length=10, choices=Visibility.choices, default=Visibility.PLATFORM
+    )
+    posts_visibility = models.CharField(
+        max_length=10, choices=Visibility.choices, default=Visibility.PLATFORM
+    )
+    hide_activity = models.BooleanField(default=False)
+    feed_density = models.CharField(
+        max_length=12, choices=FeedDensity.choices, default=FeedDensity.COMFORTABLE
+    )
+    notify_likes = models.BooleanField(default=True)
+    notify_comments = models.BooleanField(default=True)
+    notify_reposts = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SocialProfile de {self.user.username}"

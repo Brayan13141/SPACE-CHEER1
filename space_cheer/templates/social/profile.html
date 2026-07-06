@@ -1,0 +1,49 @@
+{% extends "social/base_social.html" %}
+{% load i18n %}
+{% block title %}{{ profile_user.username }} · SPACE CHEER{% endblock %}
+{% block social_content %}
+<div class="card mb-4">
+    {% if profile.cover %}<img src="{{ profile.cover.url }}" class="sc-social-cover" alt="">{% else %}<div class="sc-social-cover" style="background: linear-gradient(120deg, #1a1a2e, #251a3a);"></div>{% endif %}
+    <div class="card-body">
+        <div class="d-flex align-items-end gap-3">
+            {% if profile.avatar %}<img src="{{ profile.avatar.url }}" class="sc-social-avatar" alt="">{% else %}<div class="sc-social-avatar d-flex align-items-center justify-content-center"><i class="bi bi-person fs-1"></i></div>{% endif %}
+            <div>
+                <h1 class="h4 mb-0">{% if profile_user.get_full_name %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.username }}{% endif %}</h1>
+                <span class="text-secondary">@{{ profile_user.username }}</span>
+            </div>
+            {% if profile_user == request.user %}
+            <a href="{% url 'social:settings' %}" class="btn btn-sm btn-outline-light ms-auto"><i class="bi bi-pencil me-1"></i>{% trans "Editar perfil" %}</a>
+            {% endif %}
+        </div>
+        {% if profile.bio %}<p class="mt-3 mb-1">{{ profile.bio }}</p>{% endif %}
+        <div class="d-flex gap-4 mt-2 text-secondary small">
+            <span><strong class="text-light">{{ stats.posts }}</strong> {% trans "publicaciones" %}</span>
+            <span><strong class="text-light">{{ stats.likes_received }}</strong> {% trans "me gusta recibidos" %}</span>
+            <span><strong class="text-light">{{ stats.teams }}</strong> {% trans "equipos" %}</span>
+        </div>
+    </div>
+</div>
+
+{% if recent_comments %}
+<h2 class="h6 text-secondary">{% trans "Actividad reciente" %}</h2>
+<ul class="list-group mb-4">
+    {% for c in recent_comments %}
+    <li class="list-group-item"><small>{% trans "Comentó en" %} <a href="{% url 'social:post_detail' c.post_id %}">#{{ c.post_id }}</a>: "{{ c.text|truncatechars:80 }}"</small></li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h2 class="h6 text-secondary">{% trans "Publicaciones" %}</h2>
+{% for post in page_obj %}
+    {% include "social/partials/post_card.html" %}
+{% empty %}
+<p class="text-secondary">{% trans "Sin publicaciones aún." %}</p>
+{% endfor %}
+{% if page_obj.has_other_pages %}
+<nav><ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

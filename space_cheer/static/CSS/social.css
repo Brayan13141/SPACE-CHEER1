@@ -1,0 +1,42 @@
+/* Portal Social — estilos propios. Paleta espacial, dark, mobile-first. */
+.sc-social-navbar {
+    background: linear-gradient(90deg, #0d0d1a 0%, #1a1a2e 60%, #251a3a 100%);
+    border-bottom: 1px solid rgba(127, 90, 240, 0.35);
+}
+.sc-social-brand {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    background: linear-gradient(90deg, #7f5af0, #2cb1ff, #ff4f9a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.sc-social-navbar .nav-link.active {
+    color: #fff;
+    border-bottom: 2px solid #7f5af0;
+}
+.sc-back-to-app {
+    border: 1px solid rgba(44, 177, 255, 0.5);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+}
+.sc-social-cover {
+    height: 180px;
+    object-fit: cover;
+    width: 100%;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+.sc-social-avatar {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #7f5af0;
+    margin-top: -48px;
+    background: #1a1a2e;
+}
+/* Densidad compacta: se activa con body.sc-feed-compact */
+.sc-feed-compact .card { margin-bottom: 0.5rem !important; }
+.sc-feed-compact .card-body { padding: 0.6rem 0.75rem !important; }
+.sc-feed-compact .sc-post-text { font-size: 0.9rem; }

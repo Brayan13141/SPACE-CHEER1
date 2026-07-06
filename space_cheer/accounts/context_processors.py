@@ -18,7 +18,14 @@ def user_roles(request):
     # Operario sin ningún otro rol: navbar simplificado solo con producción
     is_only_operario = is_operario and len(roles) == 1
 
-    unread_notifications_count = user.notifications.filter(read=False).count()
+    unread = user.notifications.filter(read=False)
+    # Campanas separadas: gestión excluye sociales, la social solo cuenta SOCIAL_*
+    unread_notifications_count = unread.exclude(
+        notification_type__startswith="SOCIAL_"
+    ).count()
+    unread_social_count = unread.filter(
+        notification_type__startswith="SOCIAL_"
+    ).count()
 
     return {
         "is_admin": is_admin,
@@ -33,4 +40,5 @@ def user_roles(request):
         "can_manage": can_manage,
         "user_roles_list": roles,
         "unread_notifications_count": unread_notifications_count,
+        "unread_social_count": unread_social_count,
     }
