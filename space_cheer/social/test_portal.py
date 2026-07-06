@@ -188,3 +188,54 @@ class TestSocialVisibilityService:
         owner.is_active = False
         owner.save()
         assert SocialVisibilityService.can_view_profile(make_user("v2"), owner) is False
+
+
+from social.services import FeedService as FS
+
+
+@pytest.mark.django_db
+class TestSocialNotifications:
+    def _pair(self):
+        author = make_user("author")
+        fan = make_user("fan")
+        post = Post.objects.create(author=author, text="post con fans")
+        return author, fan, post
+
+    def test_like_crea_notificacion(self):
+        author, fan, post = self._pair()
+        FS.toggle_like(fan, post)
+        n = Notification.objects.get(user=author)
+        assert n.notification_type == Notification.NotificationType.SOCIAL_LIKE
+        assert n.url == f"/social/post/{post.pk}/"
+        assert n.read is False
+
+    def test_unlike_no_crea_segunda_notificacion(self):
+        author, fan, post = self._pair()
+        FS.toggle_like(fan, post)   # like
+        FS.toggle_like(fan, post)   # unlike
+        assert Notification.objects.filter(user=author).count() == 1
+
+    def test_no_autonotificacion(self):
+        author, _, post = self._pair()
+        FS.toggle_like(author, post)
+        FS.add_comment(author, post, "mi propio comentario")
+        assert Notification.objects.filter(user=author).count() == 0
+
+    def test_toggle_apagado_no_crea(self):
+        author, fan, post = self._pair()
+        profile = SocialProfileService.for_user(author)
+        profile.notify_likes = False
+        profile.save()
+        FS.toggle_like(fan, post)
+        assert Notification.objects.filter(user=author).count() == 0
+
+    def test_comentario_y_repost_notifican(self):
+        author, fan, post = self._pair()
+        FS.add_comment(fan, post, "buen post")
+        FS.create_repost(fan, post, "")
+        tipos = set(
+            Notification.objects.filter(user=author).values_list(
+                "notification_type", flat=True
+            )
+        )
+        assert tipos == {"SOCIAL_COMMENT", "SOCIAL_REPOST"}

@@ -7,6 +7,7 @@ from django.db.models import Count, Exists, OuterRef, Prefetch
 from django.utils.translation import gettext_lazy as _
 
 from social.models import Post, PostComment, PostImage, PostLike
+from social.notification_services import SocialNotificationService
 
 
 class FeedService:
@@ -79,14 +80,18 @@ class FeedService:
         # Compartir un repost comparte el post original (como Facebook)
         if original.shared_post_id:
             original = original.shared_post
-        return Post.objects.create(
+        repost = Post.objects.create(
             author=user, text=(text or "").strip(), shared_post=original
         )
+        SocialNotificationService.notify_repost(user, repost)
+        return repost
 
     @staticmethod
     def toggle_like(user, post):
         like, created = PostLike.objects.get_or_create(post=post, user=user)
-        if not created:
+        if created:
+            SocialNotificationService.notify_like(user, post)
+        else:
             like.delete()
         return created, post.likes.count()
 
@@ -95,7 +100,9 @@ class FeedService:
         text = (text or "").strip()
         if not text:
             raise ValidationError(_("El comentario no puede estar vacío."))
-        return PostComment.objects.create(post=post, author=user, text=text)
+        comment = PostComment.objects.create(post=post, author=user, text=text)
+        SocialNotificationService.notify_comment(user, comment)
+        return comment
 
     @staticmethod
     @transaction.atomic
