@@ -302,3 +302,46 @@ class TestNotificationViews:
         ).exists()
         # La de gestión NO se toca
         assert Notification.objects.filter(user=user, read=False).count() == 1
+
+
+@pytest.mark.django_db
+class TestProfileViews:
+    def test_perfil_platform_visible(self, client):
+        owner = make_user("owner")
+        Post.objects.create(author=owner, text="post público")
+        viewer = make_user("viewer")
+        client.force_login(viewer)
+        response = client.get("/social/perfil/owner/")
+        assert response.status_code == 200
+        assert response.context["profile_user"] == owner
+
+    def test_perfil_team_da_404_a_externos(self, client):
+        owner = make_user("owner")
+        profile = SocialProfileService.for_user(owner)
+        profile.profile_visibility = SocialProfile.Visibility.TEAM
+        profile.save()
+        client.force_login(make_user("extraño"))
+        assert client.get("/social/perfil/owner/").status_code == 404
+
+    def test_perfil_inexistente_mismo_404(self, client):
+        client.force_login(make_user("viewer"))
+        assert client.get("/social/perfil/nadie/").status_code == 404
+
+    def test_perfil_propio_redirect(self, client):
+        user = make_user("bryan")
+        client.force_login(user)
+        response = client.get("/social/perfil/")
+        assert response.status_code == 302
+        assert response.url == "/social/perfil/bryan/"
+
+    def test_hide_activity_oculta_comentarios_recientes(self, client):
+        owner = make_user("owner")
+        other = make_user("other")
+        post = Post.objects.create(author=other, text="post de otro")
+        FS.add_comment(owner, post, "comentario visible?")
+        profile = SocialProfileService.for_user(owner)
+        profile.hide_activity = True
+        profile.save()
+        client.force_login(make_user("viewer"))
+        response = client.get("/social/perfil/owner/")
+        assert response.context["recent_comments"] is None

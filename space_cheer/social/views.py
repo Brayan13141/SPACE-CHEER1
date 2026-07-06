@@ -1,9 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
@@ -14,9 +15,9 @@ from invitations.utils import get_invitation_model
 from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
-from social.models import Post, PostComment
+from social.models import Post, PostComment, PostLike
 from social.notification_services import SocialNotificationService
-from social.profile_services import SocialProfileService
+from social.profile_services import SocialProfileService, SocialVisibilityService
 from social.services import FeedService, RankingService
 
 Invitation = get_invitation_model()
@@ -176,8 +177,42 @@ def profile_me(request):
 
 @login_required
 def profile_detail(request, username):
-    from django.http import Http404
-    raise Http404  # Task 7 la implementa
+    User = get_user_model()
+    try:
+        profile_user = User.objects.get(username=username, is_active=True)
+    except User.DoesNotExist:
+        raise Http404
+    if not SocialVisibilityService.can_view_profile(request.user, profile_user):
+        raise Http404  # mismo 404 que inexistente: no filtrar perfiles privados
+    profile = SocialProfileService.for_user(profile_user)
+    posts = FeedService.feed_queryset(request.user).filter(author=profile_user)
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    stats = {
+        "posts": Post.objects.filter(author=profile_user).count(),
+        "likes_received": PostLike.objects.filter(post__author=profile_user).count(),
+        "teams": profile_user.team_memberships.filter(is_active=True).count(),
+    }
+    recent_comments = None
+    if not profile.hide_activity:
+        recent_comments = (
+            PostComment.objects.filter(author=profile_user)
+            .filter(post__in=Post.objects.visible_for_viewer(request.user))
+            .select_related("post")
+            .order_by("-created_at")[:5]
+        )
+    return render(
+        request,
+        "social/profile.html",
+        {
+            "profile_user": profile_user,
+            "profile": profile,
+            "page_obj": page_obj,
+            "stats": stats,
+            "recent_comments": recent_comments,
+            "feed_is_admin": FeedService.is_admin(request.user),
+        },
+    )
 
 
 @login_required
