@@ -93,3 +93,55 @@ class PostComment(models.Model):
 
     def __str__(self):
         return f"Comentario de {self.author.username} en post #{self.post_id}"
+
+
+class SocialProfile(models.Model):
+    """Perfil del portal social: identidad, privacidad, preferencias y apariencia.
+
+    Separado del perfil operativo de accounts: estos campos solo aplican
+    dentro del espacio social. NO confundir con accounts.PrivacySettings
+    (perfil operativo) ni accounts.NotificationPreferences (canal email).
+    """
+
+    class Visibility(models.TextChoices):
+        PLATFORM = "PLATFORM", _("Toda la plataforma")
+        TEAM = "TEAM", _("Solo mi equipo")
+
+    class FeedDensity(models.TextChoices):
+        COMFORTABLE = "COMFORTABLE", _("Cómoda")
+        COMPACT = "COMPACT", _("Compacta")
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="social_profile",
+    )
+    bio = models.TextField(max_length=300, blank=True)
+    avatar = models.ImageField(
+        upload_to="social/profiles/avatars/%Y/%m/",
+        blank=True,
+        validators=[validate_image_magic, validate_image_max_5mb],
+    )
+    cover = models.ImageField(
+        upload_to="social/profiles/covers/%Y/%m/",
+        blank=True,
+        validators=[validate_image_magic, validate_image_max_5mb],
+    )
+    profile_visibility = models.CharField(
+        max_length=10, choices=Visibility.choices, default=Visibility.PLATFORM
+    )
+    posts_visibility = models.CharField(
+        max_length=10, choices=Visibility.choices, default=Visibility.PLATFORM
+    )
+    hide_activity = models.BooleanField(default=False)
+    feed_density = models.CharField(
+        max_length=12, choices=FeedDensity.choices, default=FeedDensity.COMFORTABLE
+    )
+    notify_likes = models.BooleanField(default=True)
+    notify_comments = models.BooleanField(default=True)
+    notify_reposts = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"SocialProfile de {self.user.username}"
