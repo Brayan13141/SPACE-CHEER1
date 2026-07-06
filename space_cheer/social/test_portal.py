@@ -2,6 +2,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
+from accounts.models import Notification
 from social.models import SocialProfile
 from social.profile_services import SocialProfileService
 
@@ -32,3 +33,19 @@ class TestSocialProfile:
         p2 = SocialProfileService.for_user(user)
         assert p1.pk == p2.pk
         assert SocialProfile.objects.filter(user=user).count() == 1
+
+
+@pytest.mark.django_db
+class TestNotificationModel:
+    def test_tipos_sociales_y_url(self):
+        user = make_user("bryan")
+        n = Notification.objects.create(
+            user=user,
+            title="A coach_test le gustó tu publicación",
+            notification_type=Notification.NotificationType.SOCIAL_LIKE,
+            url="/social/post/1/",
+        )
+        assert n.url == "/social/post/1/"
+        assert n.notification_type.startswith("SOCIAL_")
+        assert Notification.NotificationType.SOCIAL_COMMENT in Notification.NotificationType.values
+        assert Notification.NotificationType.SOCIAL_REPOST in Notification.NotificationType.values
