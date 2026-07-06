@@ -33,6 +33,7 @@
 
     <!-- Post compartido embebido -->
     {% if post.shared_post %}
+    {% if post.shared_visible %}
     <div class="sc-shared-embed p-3 mb-2">
       <div class="d-flex align-items-center mb-1">
         <i class="bi bi-arrow-repeat text-muted me-2"></i>
@@ -49,6 +50,11 @@
       {% endwith %}
       <a href="{% url 'social:post_detail' post.shared_post.pk %}" class="small">{% trans "Ver original" %}</a>
     </div>
+    {% else %}
+    <div class="card bg-dark border-secondary p-3 text-secondary">
+        <i class="bi bi-eye-slash me-1"></i>{% trans "Contenido no disponible" %}
+    </div>
+    {% endif %}
     {% endif %}
 
     <!-- Imágenes propias -->

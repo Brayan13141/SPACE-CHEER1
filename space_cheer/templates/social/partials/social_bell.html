@@ -1,0 +1,5 @@
+{% load i18n %}
+<a class="nav-link position-relative" href="{% url 'social:notifications' %}" title="{% trans 'Notificaciones' %}">
+    <i class="bi bi-bell"></i>
+    {% if unread_social_count %}<span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">{{ unread_social_count }}</span>{% endif %}
+</a>

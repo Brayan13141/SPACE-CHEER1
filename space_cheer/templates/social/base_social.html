@@ -1,0 +1,61 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SPACE CHEER · {% trans "Comunidad" %}{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/sc-utils.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/social.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if social_feed_density == 'COMPACT' %}sc-feed-compact{% endif %}">
+
+<nav class="navbar navbar-expand-lg sc-social-navbar sticky-top" data-bs-theme="dark">
+    <div class="container">
+        <a class="navbar-brand sc-social-brand" href="{% url 'social:feed' %}">SPACE CHEER · {% trans "Comunidad" %}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#socialNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="socialNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" href="{% url 'social:feed' %}"><i class="bi bi-chat-dots me-1"></i>{% trans "Feed" %}</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'team_ranking' %}active{% endif %}" href="{% url 'social:team_ranking' %}"><i class="bi bi-trophy me-1"></i>{% trans "Ranking" %}</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'team_directory' %}active{% endif %}" href="{% url 'social:team_directory' %}"><i class="bi bi-people me-1"></i>{% trans "Equipos" %}</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'profile_me' %}active{% endif %}" href="{% url 'social:profile_me' %}"><i class="bi bi-person-circle me-1"></i>{% trans "Mi perfil" %}</a></li>
+                {% if can_manage %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'social:send_invite' %}"><i class="bi bi-person-plus me-1"></i>{% trans "Invitar" %}</a></li>
+                {% endif %}
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                {% include "social/partials/social_bell.html" %}
+                <a class="nav-link" href="{% url 'social:settings' %}" title="{% trans 'Configuración' %}"><i class="bi bi-gear"></i></a>
+                <a class="nav-link sc-back-to-app" href="/"><i class="bi bi-arrow-left me-1"></i>Space Cheer</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% block social_content %}{% endblock %}
+</main>
+
+<script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

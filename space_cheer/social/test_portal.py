@@ -239,3 +239,22 @@ class TestSocialNotifications:
             )
         )
         assert tipos == {"SOCIAL_COMMENT", "SOCIAL_REPOST"}
+
+
+@pytest.mark.django_db
+class TestContadoresCampana:
+    def test_contadores_separados(self, client):
+        user = make_user("bryan")
+        Notification.objects.create(
+            user=user, title="tarea", notification_type="TASK_ASSIGNED"
+        )
+        Notification.objects.create(
+            user=user, title="like", notification_type="SOCIAL_LIKE"
+        )
+        Notification.objects.create(
+            user=user, title="like leído", notification_type="SOCIAL_LIKE", read=True
+        )
+        client.force_login(user)
+        response = client.get("/social/")
+        assert response.context["unread_notifications_count"] == 1
+        assert response.context["unread_social_count"] == 1

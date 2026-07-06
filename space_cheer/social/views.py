@@ -15,6 +15,7 @@ from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
 from social.models import Post, PostComment
+from social.profile_services import SocialProfileService
 from social.services import FeedService, RankingService
 
 Invitation = get_invitation_model()
@@ -70,10 +71,15 @@ def _safe_next(request, fallback="social:feed"):
 def feed(request):
     paginator = Paginator(FeedService.feed_queryset(request.user), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
+    profile = SocialProfileService.for_user(request.user)
     return render(
         request,
         "social/feed.html",
-        {"page_obj": page_obj, "feed_is_admin": FeedService.is_admin(request.user)},
+        {
+            "page_obj": page_obj,
+            "feed_is_admin": FeedService.is_admin(request.user),
+            "social_feed_density": profile.feed_density,
+        },
     )
 
 
@@ -160,3 +166,52 @@ def team_ranking(request):
         "social/ranking.html",
         {"teams": RankingService.team_ranking(sort), "sort": sort},
     )
+
+
+@login_required
+def profile_me(request):
+    return redirect("social:profile_detail", username=request.user.username)
+
+
+@login_required
+def profile_detail(request, username):
+    from django.http import Http404
+    raise Http404  # Task 7 la implementa
+
+
+@login_required
+def team_directory(request):
+    from django.http import Http404
+    raise Http404  # Task 8
+
+
+@login_required
+def team_page(request, pk):
+    from django.http import Http404
+    raise Http404  # Task 8
+
+
+@login_required
+def notifications(request):
+    from django.http import Http404
+    raise Http404  # Task 6
+
+
+@login_required
+@require_POST
+def notification_read(request, pk):
+    from django.http import Http404
+    raise Http404  # Task 6
+
+
+@login_required
+@require_POST
+def notifications_read_all(request):
+    from django.http import Http404
+    raise Http404  # Task 6
+
+
+@login_required
+def social_settings(request):
+    from django.http import Http404
+    raise Http404  # Task 9
