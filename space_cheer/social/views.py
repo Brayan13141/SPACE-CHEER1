@@ -283,5 +283,38 @@ def notifications_read_all(request):
 
 @login_required
 def social_settings(request):
-    from django.http import Http404
-    raise Http404  # Task 9
+    from social.forms import (
+        SocialAppearanceForm,
+        SocialNotificationsForm,
+        SocialPrivacyForm,
+        SocialProfileForm,
+    )
+
+    profile = SocialProfileService.for_user(request.user)
+    form_classes = {
+        "profile": SocialProfileForm,
+        "privacy": SocialPrivacyForm,
+        "notifications": SocialNotificationsForm,
+        "appearance": SocialAppearanceForm,
+    }
+    forms_ctx = {f"{key}_form": cls(instance=profile) for key, cls in form_classes.items()}
+
+    if request.method == "POST":
+        form_id = request.POST.get("form_id")
+        if form_id in form_classes:
+            form = form_classes[form_id](
+                request.POST, request.FILES, instance=profile
+            )
+            if form.is_valid():
+                form.save()
+                messages.success(request, _("Configuración guardada."))
+                return redirect("social:settings")
+            forms_ctx[f"{form_id}_form"] = form  # re-render con errores
+
+    # Hint del caso borde: visibilidad TEAM sin equipo activo
+    sin_equipo = (
+        (profile.profile_visibility == "TEAM" or profile.posts_visibility == "TEAM")
+        and not request.user.team_memberships.filter(is_active=True).exists()
+    )
+    forms_ctx["sin_equipo_warning"] = sin_equipo
+    return render(request, "social/settings.html", forms_ctx)

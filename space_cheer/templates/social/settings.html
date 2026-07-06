@@ -1,0 +1,82 @@
+{% extends "social/base_social.html" %}
+{% load i18n %}
+{% block title %}{% trans "Configuración" %} · SPACE CHEER{% endblock %}
+{% block social_content %}
+<h1 class="h4 mb-3"><i class="bi bi-gear me-2"></i>{% trans "Configuración del espacio social" %}</h1>
+{% if sin_equipo_warning %}
+<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-1"></i>{% trans "Tu visibilidad está en 'Solo mi equipo' pero no perteneces a ningún equipo activo: solo tú y los administradores verán tu contenido." %}</div>
+{% endif %}
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-person me-1"></i>{% trans "Perfil social" %}</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="profile">
+                    <label class="form-label">{% trans "Bio" %}</label>
+                    {{ profile_form.bio }}
+                    {% if profile_form.bio.errors %}<div class="text-danger small">{{ profile_form.bio.errors }}</div>{% endif %}
+                    <label class="form-label mt-2">{% trans "Avatar" %} <small class="text-secondary">(JPG/PNG/WEBP, máx 5MB)</small></label>
+                    {{ profile_form.avatar }}
+                    {% if profile_form.avatar.errors %}<div class="text-danger small">{{ profile_form.avatar.errors }}</div>{% endif %}
+                    <label class="form-label mt-2">{% trans "Portada" %} <small class="text-secondary">(JPG/PNG/WEBP, máx 5MB)</small></label>
+                    {{ profile_form.cover }}
+                    {% if profile_form.cover.errors %}<div class="text-danger small">{{ profile_form.cover.errors }}</div>{% endif %}
+                    <button class="btn btn-primary btn-sm mt-3">{% trans "Guardar" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-shield-lock me-1"></i>{% trans "Privacidad" %}</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="privacy">
+                    <label class="form-label">{% trans "¿Quién puede ver tu perfil?" %}</label>
+                    {{ privacy_form.profile_visibility }}
+                    <label class="form-label mt-2">{% trans "¿Quién ve tus publicaciones?" %}</label>
+                    {{ privacy_form.posts_visibility }}
+                    <div class="form-check mt-3">
+                        {{ privacy_form.hide_activity }}
+                        <label class="form-check-label">{% trans "Ocultar mi actividad (likes y comentarios recientes)" %}</label>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-3">{% trans "Guardar" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-bell me-1"></i>{% trans "Notificaciones" %}</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="notifications">
+                    <div class="form-check">{{ notifications_form.notify_likes }}<label class="form-check-label ms-1">{% trans "Me gusta" %}</label></div>
+                    <div class="form-check">{{ notifications_form.notify_comments }}<label class="form-check-label ms-1">{% trans "Comentarios" %}</label></div>
+                    <div class="form-check">{{ notifications_form.notify_reposts }}<label class="form-check-label ms-1">{% trans "Compartidos" %}</label></div>
+                    <small class="text-secondary d-block mt-2">{% trans "Las notificaciones llegan solo a la campana del espacio social." %}</small>
+                    <button class="btn btn-primary btn-sm mt-3">{% trans "Guardar" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-sliders me-1"></i>{% trans "Apariencia" %}</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="appearance">
+                    <label class="form-label">{% trans "Densidad del feed" %}</label>
+                    {{ appearance_form.feed_density }}
+                    <button class="btn btn-primary btn-sm mt-3">{% trans "Guardar" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

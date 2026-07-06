@@ -401,3 +401,54 @@ class TestTeamPages:
         team.save()
         client.force_login(make_user("viewer"))
         assert client.get(f"/social/equipo/{team.pk}/").status_code == 404
+
+
+@pytest.mark.django_db
+class TestSocialSettings:
+    def test_get_renderiza_4_forms(self, client):
+        client.force_login(make_user("bryan"))
+        response = client.get("/social/configuracion/")
+        assert response.status_code == 200
+        for key in ("profile_form", "privacy_form", "notifications_form", "appearance_form"):
+            assert key in response.context
+
+    def test_post_privacidad(self, client):
+        user = make_user("bryan")
+        client.force_login(user)
+        response = client.post(
+            "/social/configuracion/",
+            {
+                "form_id": "privacy",
+                "profile_visibility": "TEAM",
+                "posts_visibility": "TEAM",
+                "hide_activity": "on",
+            },
+        )
+        assert response.status_code == 302  # PRG
+        profile = SocialProfile.objects.get(user=user)
+        assert profile.profile_visibility == "TEAM"
+        assert profile.posts_visibility == "TEAM"
+        assert profile.hide_activity is True
+
+    def test_post_notificaciones(self, client):
+        user = make_user("bryan")
+        client.force_login(user)
+        client.post("/social/configuracion/", {"form_id": "notifications"})  # todos off
+        profile = SocialProfile.objects.get(user=user)
+        assert not profile.notify_likes
+        assert not profile.notify_comments
+        assert not profile.notify_reposts
+
+    def test_post_apariencia(self, client):
+        user = make_user("bryan")
+        client.force_login(user)
+        client.post(
+            "/social/configuracion/", {"form_id": "appearance", "feed_density": "COMPACT"}
+        )
+        assert SocialProfile.objects.get(user=user).feed_density == "COMPACT"
+
+    def test_post_bio(self, client):
+        user = make_user("bryan")
+        client.force_login(user)
+        client.post("/social/configuracion/", {"form_id": "profile", "bio": "Coach de Galaxy 🚀"})
+        assert SocialProfile.objects.get(user=user).bio == "Coach de Galaxy 🚀"
