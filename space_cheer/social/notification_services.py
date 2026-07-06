@@ -65,3 +65,28 @@ class SocialNotificationService:
             % {"name": SocialNotificationService._actor_name(actor)},
             repost.shared_post_id,
         )
+
+    @staticmethod
+    def social_qs(user):
+        return user.notifications.filter(notification_type__startswith="SOCIAL_")
+
+    @staticmethod
+    def unread_for(user, limit=10):
+        return SocialNotificationService.social_qs(user).filter(read=False)[:limit]
+
+    @staticmethod
+    def mark_read(user, pk):
+        from django.shortcuts import get_object_or_404
+
+        notification = get_object_or_404(
+            SocialNotificationService.social_qs(user), pk=pk
+        )
+        notification.read = True
+        notification.save(update_fields=["read"])
+        return notification
+
+    @staticmethod
+    def mark_all_read(user):
+        return SocialNotificationService.social_qs(user).filter(read=False).update(
+            read=True
+        )

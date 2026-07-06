@@ -258,3 +258,47 @@ class TestContadoresCampana:
         response = client.get("/social/")
         assert response.context["unread_notifications_count"] == 1
         assert response.context["unread_social_count"] == 1
+
+
+@pytest.mark.django_db
+class TestNotificationViews:
+    def _login_with_notifications(self, client):
+        user = make_user("bryan")
+        other = make_user("fan2")
+        n1 = Notification.objects.create(
+            user=user, title="like 1", notification_type="SOCIAL_LIKE", url="/social/post/1/"
+        )
+        Notification.objects.create(
+            user=user, title="tarea", notification_type="TASK_ASSIGNED"
+        )
+        Notification.objects.create(
+            user=other, title="ajeno", notification_type="SOCIAL_LIKE"
+        )
+        client.force_login(user)
+        return user, n1
+
+    def test_lista_solo_sociales_propias(self, client):
+        user, _ = self._login_with_notifications(client)
+        response = client.get("/social/notificaciones/")
+        assert response.status_code == 200
+        titles = [n.title for n in response.context["page_obj"]]
+        assert titles == ["like 1"]
+
+    def test_marcar_leida_solo_propia(self, client):
+        user, n1 = self._login_with_notifications(client)
+        response = client.post(f"/social/notificaciones/{n1.pk}/leer/")
+        assert response.status_code == 302
+        n1.refresh_from_db()
+        assert n1.read is True
+        ajena = Notification.objects.get(title="ajeno")
+        response = client.post(f"/social/notificaciones/{ajena.pk}/leer/")
+        assert response.status_code == 404
+
+    def test_marcar_todas(self, client):
+        user, _ = self._login_with_notifications(client)
+        client.post("/social/notificaciones/leer-todas/")
+        assert not Notification.objects.filter(
+            user=user, read=False, notification_type__startswith="SOCIAL_"
+        ).exists()
+        # La de gestión NO se toca
+        assert Notification.objects.filter(user=user, read=False).count() == 1

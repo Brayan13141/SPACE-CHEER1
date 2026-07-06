@@ -15,6 +15,7 @@ from django_ratelimit.decorators import ratelimit
 
 from accounts.decorators import role_required
 from social.models import Post, PostComment
+from social.notification_services import SocialNotificationService
 from social.profile_services import SocialProfileService
 from social.services import FeedService, RankingService
 
@@ -193,22 +194,26 @@ def team_page(request, pk):
 
 @login_required
 def notifications(request):
-    from django.http import Http404
-    raise Http404  # Task 6
+    qs = SocialNotificationService.social_qs(request.user)
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(request, "social/notifications.html", {"page_obj": page_obj})
 
 
 @login_required
 @require_POST
 def notification_read(request, pk):
-    from django.http import Http404
-    raise Http404  # Task 6
+    notification = SocialNotificationService.mark_read(request.user, pk)
+    if notification.url:
+        return redirect(notification.url)
+    return redirect("social:notifications")
 
 
 @login_required
 @require_POST
 def notifications_read_all(request):
-    from django.http import Http404
-    raise Http404  # Task 6
+    SocialNotificationService.mark_all_read(request.user)
+    return _safe_next(request, fallback="social:notifications")
 
 
 @login_required
