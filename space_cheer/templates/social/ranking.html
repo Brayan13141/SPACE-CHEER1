@@ -43,7 +43,7 @@
               </td>
               <td>
                 {% if team.logo %}<img src="{{ team.logo.url }}" alt="" class="sc-avatar-40 rounded-circle me-2" loading="lazy">{% endif %}
-                <span class="fw-semibold">{{ team.name }}</span>
+                <a href="{% url 'social:team_page' team.pk %}" class="fw-semibold text-decoration-none">{{ team.name }}</a>
               </td>
               <td class="text-center">{{ team.num_competitions }}</td>
               <td class="text-center">{{ team.num_athletes }}</td>

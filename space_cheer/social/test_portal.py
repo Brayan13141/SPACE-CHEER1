@@ -345,3 +345,59 @@ class TestProfileViews:
         client.force_login(make_user("viewer"))
         response = client.get("/social/perfil/owner/")
         assert response.context["recent_comments"] is None
+
+
+@pytest.mark.django_db
+class TestTeamPages:
+    def _team_world(self):
+        coach = make_user("coach")
+        member = make_user("member")
+        team = make_team(coach=coach, name="Galaxy")
+        join(member, team)
+        Post.objects.create(author=member, text="post del equipo")
+        return team, member
+
+    def test_directorio_lista_equipos_activos(self, client):
+        team, _ = self._team_world()
+        inactive = make_team(coach=make_user("c2"), name="Muerto")
+        inactive.is_active = False
+        inactive.save()
+        client.force_login(make_user("viewer"))
+        response = client.get("/social/equipos/")
+        assert response.status_code == 200
+        names = [t.name for t in response.context["page_obj"]]
+        assert "Galaxy" in names and "Muerto" not in names
+
+    def test_directorio_busqueda(self, client):
+        self._team_world()
+        make_team(coach=make_user("c3"), name="Cometas")
+        client.force_login(make_user("viewer"))
+        response = client.get("/social/equipos/?q=gala")
+        names = [t.name for t in response.context["page_obj"]]
+        assert names == ["Galaxy"]
+
+    def test_pagina_equipo(self, client):
+        team, member = self._team_world()
+        client.force_login(make_user("viewer"))
+        response = client.get(f"/social/equipo/{team.pk}/")
+        assert response.status_code == 200
+        assert response.context["team"] == team
+        assert response.context["stats"]["num_athletes"] == 1
+        posts = list(response.context["page_obj"])
+        assert len(posts) == 1
+
+    def test_pagina_equipo_respeta_privacidad(self, client):
+        team, member = self._team_world()
+        profile = SocialProfileService.for_user(member)
+        profile.posts_visibility = SocialProfile.Visibility.TEAM
+        profile.save()
+        client.force_login(make_user("viewer"))
+        response = client.get(f"/social/equipo/{team.pk}/")
+        assert list(response.context["page_obj"]) == []
+
+    def test_equipo_inactivo_404(self, client):
+        team, _ = self._team_world()
+        team.is_active = False
+        team.save()
+        client.force_login(make_user("viewer"))
+        assert client.get(f"/social/equipo/{team.pk}/").status_code == 404

@@ -160,3 +160,22 @@ class RankingService:
             )
             .order_by(order, "name")
         )
+
+    @staticmethod
+    def team_stats(team):
+        """Métricas + posición de un equipo en el ranking por competencias."""
+        ranking = list(RankingService.team_ranking("competitions"))
+        position = None
+        stats = {"num_competitions": 0, "num_athletes": 0, "num_posts": 0}
+        for i, t in enumerate(ranking, start=1):
+            if t.pk == team.pk:
+                position = i
+                stats = {
+                    "num_competitions": t.num_competitions,
+                    "num_athletes": t.num_athletes,
+                    "num_posts": t.num_posts,
+                }
+                break
+        stats["rank_position"] = position
+        stats["total_teams"] = len(ranking)
+        return stats

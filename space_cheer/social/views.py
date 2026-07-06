@@ -217,14 +217,44 @@ def profile_detail(request, username):
 
 @login_required
 def team_directory(request):
-    from django.http import Http404
-    raise Http404  # Task 8
+    from teams.models import Team
+
+    teams = Team.objects.filter(is_active=True).order_by("name")
+    query = request.GET.get("q", "").strip()
+    if query:
+        teams = teams.filter(name__icontains=query)
+    paginator = Paginator(teams, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(
+        request, "social/team_directory.html", {"page_obj": page_obj, "q": query}
+    )
 
 
 @login_required
 def team_page(request, pk):
-    from django.http import Http404
-    raise Http404  # Task 8
+    from teams.models import Team
+
+    team = get_object_or_404(Team, pk=pk, is_active=True)
+    members = (
+        team.memberships.filter(is_active=True)
+        .select_related("user")
+        .order_by("user__username")
+    )
+    member_ids = [m.user_id for m in members]
+    posts = FeedService.feed_queryset(request.user).filter(author_id__in=member_ids)
+    paginator = Paginator(posts, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(
+        request,
+        "social/team_page.html",
+        {
+            "team": team,
+            "members": members,
+            "page_obj": page_obj,
+            "stats": RankingService.team_stats(team),
+            "feed_is_admin": FeedService.is_admin(request.user),
+        },
+    )
 
 
 @login_required

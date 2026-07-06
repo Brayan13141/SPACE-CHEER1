@@ -1,0 +1,45 @@
+{% extends "social/base_social.html" %}
+{% load i18n %}
+{% block title %}{{ team.name }} · SPACE CHEER{% endblock %}
+{% block social_content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            {% if team.logo %}<img src="{{ team.logo.url }}" width="72" height="72" class="rounded-circle object-fit-cover" alt="">{% else %}<i class="bi bi-shield fs-1 text-secondary"></i>{% endif %}
+            <div>
+                <h1 class="h4 mb-0">{{ team.name }}</h1>
+                <small class="text-secondary">{{ team.city }}</small>
+            </div>
+            {% if stats.rank_position %}
+            <span class="badge bg-primary ms-auto fs-6">#{{ stats.rank_position }} {% trans "de" %} {{ stats.total_teams }}</span>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-4 mt-3 text-secondary small">
+            <span><strong class="text-light">{{ stats.num_competitions }}</strong> {% trans "concursos" %}</span>
+            <span><strong class="text-light">{{ stats.num_athletes }}</strong> {% trans "atletas" %}</span>
+            <span><strong class="text-light">{{ stats.num_posts }}</strong> {% trans "publicaciones" %}</span>
+        </div>
+    </div>
+</div>
+
+<h2 class="h6 text-secondary">{% trans "Miembros" %}</h2>
+<div class="d-flex flex-wrap gap-2 mb-4">
+    {% for m in members %}
+    <a href="{% url 'social:profile_detail' m.user.username %}" class="badge text-bg-dark text-decoration-none border border-secondary">{{ m.user.username }}</a>
+    {% endfor %}
+</div>
+
+<h2 class="h6 text-secondary">{% trans "Publicaciones del equipo" %}</h2>
+{% for post in page_obj %}
+    {% include "social/partials/post_card.html" %}
+{% empty %}
+<p class="text-secondary">{% trans "Sin publicaciones aún." %}</p>
+{% endfor %}
+{% if page_obj.has_other_pages %}
+<nav><ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}
