@@ -83,3 +83,55 @@ def notify_task_assigned(self, task_id):
             logger.exception(
                 "Error enviando email de asignación de task %s: %s", task_id, exc
             )
+
+
+@shared_task(bind=True, max_retries=3, acks_late=True)
+def notify_job_ready(self, job_id):
+    """Notifica a ADMIN cuando todas las tasks de un ProductionJob quedaron completadas."""
+    from production.models import ProductionJob
+    from accounts.models import Notification
+
+    try:
+        job = ProductionJob.objects.select_related("order").get(pk=job_id)
+    except ProductionJob.DoesNotExist:
+        logger.warning("ProductionJob %s no encontrado para notificación de job listo", job_id)
+        return
+
+    admins = User.objects.filter(roles__name="ADMIN", is_active=True).distinct()
+
+    Notification.objects.bulk_create([
+        Notification(
+            user=admin,
+            title=f"Job de producción #{job.pk} listo",
+            body=f"Todas las tareas de la orden #{job.order_id} están completadas — lista para entregar.",
+            notification_type=Notification.NotificationType.JOB_READY,
+        )
+        for admin in admins
+    ])
+
+
+@shared_task(bind=True, max_retries=3, acks_late=True)
+def notify_error_report_created(self, report_id):
+    """Notifica a ADMIN cuando se crea un ErrorReport."""
+    from production.models import ErrorReport
+    from accounts.models import Notification
+
+    try:
+        report = ErrorReport.objects.select_related("order", "stage").get(pk=report_id)
+    except ErrorReport.DoesNotExist:
+        logger.warning("ErrorReport %s no encontrado para notificación", report_id)
+        return
+
+    admins = User.objects.filter(roles__name="ADMIN", is_active=True).distinct()
+    stage_name = report.stage.name if report.stage_id else "sin etapa"
+    reposition_note = " ⚠️ Requiere reposición." if report.requires_reposition else ""
+
+    Notification.objects.bulk_create([
+        Notification(
+            user=admin,
+            title=f"Nuevo reporte de error #{report.pk}",
+            body=f"Etapa: {stage_name}.{reposition_note}",
+            notification_type=Notification.NotificationType.ERROR_REPORTED,
+        )
+        for admin in admins
+    ])

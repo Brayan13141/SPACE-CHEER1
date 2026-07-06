@@ -2,7 +2,11 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
-from production.tasks import notify_production_stage_complete
+from production.tasks import (
+    notify_production_stage_complete,
+    notify_job_ready,
+    notify_error_report_created,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,10 +94,28 @@ class ProductionJobService:
                 ]
             )
 
+            job_finished = not (
+                ProductionTask.objects.filter(job=task.job_id)
+                .exclude(status=ProductionTask.Status.COMPLETED)
+                .exists()
+            )
+            if job_finished:
+                from production.models import ProductionJob
+
+                ProductionJob.objects.filter(
+                    pk=task.job_id, completed_at__isnull=True
+                ).update(completed_at=timezone.now())
+
         try:
             notify_production_stage_complete.delay(task.pk)
         except Exception:
             logger.warning("Celery unavailable — skipping notify_production_stage_complete for task %s", task.pk)
+
+        if job_finished:
+            try:
+                notify_job_ready.delay(task.job_id)
+            except Exception:
+                logger.warning("Celery unavailable — skipping notify_job_ready for job %s", task.job_id)
 
     @staticmethod
     def assign_task(task, operario):
@@ -234,6 +256,15 @@ class ErrorReportService:
             reported_by,
             report.requires_reposition,
         )
+
+        try:
+            notify_error_report_created.delay(report.pk)
+        except Exception:
+            logger.warning(
+                "Celery unavailable — skipping notify_error_report_created for report %s",
+                report.pk,
+            )
+
         return report
 
     @staticmethod

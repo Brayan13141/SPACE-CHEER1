@@ -23,7 +23,7 @@ class OrderQuerySet(models.QuerySet):
     def visible_for_user(self, user):
         if not user.is_authenticated:
             return self.none()
-        if user.is_superuser or user.is_staff:
+        if user.is_superuser or user.roles.filter(name="ADMIN").exists():
             return self
         return self.filter(
             Q(created_by=user)
