@@ -34,13 +34,19 @@ class FeedService:
             to_attr="recent_comments",
         )
         return (
-            Post.objects.select_related("author", "shared_post", "shared_post__author")
+            Post.objects.visible_for_viewer(user)
+            .select_related("author", "shared_post", "shared_post__author")
             .prefetch_related("images", "shared_post__images", recent_comments)
             .annotate(
                 like_count=Count("likes", distinct=True),
                 comment_count=Count("comments", distinct=True),
                 liked_by_me=Exists(
                     PostLike.objects.filter(post=OuterRef("pk"), user=user)
+                ),
+                shared_visible=Exists(
+                    Post.objects.visible_for_viewer(user).filter(
+                        pk=OuterRef("shared_post_id")
+                    )
                 ),
             )
             .order_by("-created_at", "-id")
