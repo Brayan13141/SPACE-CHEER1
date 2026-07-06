@@ -530,3 +530,48 @@ class ManageResponsabilidadesTests(TestCase):
         })
         resp = StageResponsibility.objects.get(stage=self.stage)
         self.assertIn(self.role_aux, resp.auxiliary_roles.all())
+
+
+# ---------------------------------------------------------------------------
+# Error reports
+# ---------------------------------------------------------------------------
+
+class CreateErrorReportTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.admin = make_superuser()
+        self.stage = make_stage()
+        self.responsible, _ = make_operario()
+        self.client.force_login(self.admin)
+
+    def test_post_creates_error_report_with_stage_and_responsible(self):
+        from production.models import ErrorReport
+
+        url = reverse("production:create_error_report")
+        response = self.client.post(url, {
+            "description": "Talla incorrecta en playera",
+            "error_types": ["WRONG_SIZES"],
+            "stage": self.stage.pk,
+            "responsible": self.responsible.pk,
+            "error_causes": ["LACK_OF_ATTENTION"],
+        })
+        self.assertEqual(response.status_code, 302)
+        report = ErrorReport.objects.get()
+        self.assertEqual(report.stage, self.stage)
+        self.assertEqual(report.responsible, self.responsible)
+        self.assertTrue(report.requires_reposition)
+
+    def test_post_without_stage_or_responsible(self):
+        from production.models import ErrorReport
+
+        url = reverse("production:create_error_report")
+        response = self.client.post(url, {
+            "description": "Empaque incompleto",
+            "error_types": [],
+        })
+        self.assertEqual(response.status_code, 302)
+        report = ErrorReport.objects.get()
+        self.assertIsNone(report.stage)
+        self.assertIsNone(report.responsible)
+        self.assertIsNone(report.order)

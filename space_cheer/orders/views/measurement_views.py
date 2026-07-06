@@ -5,10 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
+from accounts.decorators import role_required
 from accounts.models import AthleteProfile
 from orders.models import Order, OrderItemAthlete
 from django.db import transaction
-from django.contrib.admin.views.decorators import staff_member_required
 from orders.services.measurements.MeasurementLifecycleService import (
     MeasurementLifecycleService,
 )
@@ -173,7 +173,7 @@ def order_item_measurements(request, athlete_item_id):
     )
 
 
-@staff_member_required
+@role_required("ADMIN")
 @require_POST
 def close_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -190,7 +190,7 @@ def close_measurements(request, order_id):
     return redirect("orders:admin_order_detail", order_id=order.id)
 
 
-@staff_member_required
+@role_required("ADMIN")
 @require_POST
 def reopen_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -207,7 +207,7 @@ def reopen_measurements(request, order_id):
     return redirect("orders:admin_order_detail", order_id=order.id)
 
 
-@staff_member_required
+@role_required("ADMIN")
 @require_POST
 def lock_measurements(request, order_id):
     order = get_object_or_404(Order, pk=order_id)

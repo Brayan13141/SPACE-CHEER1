@@ -163,8 +163,8 @@ class OrderStateService:
         if user.is_superuser:
             return True
 
-        # 👨‍💼 Staff puede todo
-        if user.is_staff:
+        # 👨‍💼 Rol ADMIN puede todo
+        if user.roles.filter(name="ADMIN").exists():
             return True
 
         # Cancelar o enviar a pending → creador
@@ -175,7 +175,7 @@ class OrderStateService:
         if to_status == "DESIGN_APPROVED":
             return can_approve_design(user, order)
 
-        # Producción / Entrega solo staff
+        # Producción / Entrega solo ADMIN
         if to_status in ["IN_PRODUCTION", "DELIVERED"]:
             return False
 

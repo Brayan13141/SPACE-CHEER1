@@ -88,6 +88,25 @@ class MeasurementLifecycleTests(TestCase):
         order.refresh_from_db()
         self.assertTrue(order.measurements_locked)
 
+    def test_lock_raises_if_measurements_incomplete(self):
+        """No debe bloquear si a un atleta le faltan medidas requeridas"""
+        team = TeamFactory()
+        order = TeamOrderFactory(owner_team=team)
+
+        product = ProductWithMeasurementsFactory()
+        item = OrderItemFactory(order=order, product=product)
+
+        athlete = AthleteFactory()
+        UserTeamMembershipFactory(team=team, user=athlete, role_in_team="ATHLETE")
+        OrderItemAthleteFactory(order_item=item, athlete=athlete)
+        # NO crear medidas
+
+        with self.assertRaises(ValidationError):
+            MeasurementLifecycleService.lock(order)
+
+        order.refresh_from_db()
+        self.assertFalse(order.measurements_locked)
+
     def test_auto_close_if_due_not_due_yet(self):
         """No cierra si no ha llegado la fecha"""
         future_date = timezone.now().date() + timedelta(days=5)

@@ -21,7 +21,7 @@ ERROR_CAUSES = ErrorReport.ErrorCause.choices
 ERROR_IMPACTS = ErrorReport.ErrorImpact.choices
 
 
-@role_required("OPERARIO", "ADMIN", "STAFF")
+@role_required("OPERARIO", "ADMIN")
 def create_error_report(request, job_pk=None):
     stages = ProductionStage.objects.all()
     operarios = User.objects.filter(roles__name="OPERARIO", is_active=True).distinct()
@@ -41,19 +41,24 @@ def create_error_report(request, job_pk=None):
 
         stage_id = request.POST.get("stage") or None
         responsible_id = request.POST.get("responsible") or None
-        order_id = job.order_id if job else None
+
+        stage = get_object_or_404(ProductionStage, pk=stage_id) if stage_id else None
+        responsible = (
+            User.objects.filter(pk=responsible_id).first() if responsible_id else None
+        )
+        order = job.order if job else None
 
         try:
             report = ErrorReportService.create(
                 reported_by=request.user,
                 description=description,
                 error_types=error_types,
-                order_id=order_id,
+                order=order,
                 job=job,
-                stage_id=stage_id,
+                stage=stage,
                 area=request.POST.get("area", "").strip(),
                 error_type_other=request.POST.get("error_type_other", "").strip(),
-                responsible_id=responsible_id,
+                responsible=responsible,
                 responsible_area=request.POST.get("responsible_area", "").strip(),
                 error_causes=error_causes,
                 cause_other=request.POST.get("cause_other", "").strip(),
@@ -90,7 +95,7 @@ def _render_form(request, stages, operarios, job, error_types, error_causes, err
     })
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 def error_report_list(request):
     reports = (
         ErrorReport.objects.select_related(
@@ -115,7 +120,7 @@ def error_report_list(request):
     })
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 def error_report_detail(request, pk):
     report = get_object_or_404(
         ErrorReport.objects.select_related(

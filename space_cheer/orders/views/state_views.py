@@ -1,11 +1,11 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from accounts.decorators import role_required
 from orders.models import Order
 from orders.services.state import OrderStateService
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.contrib.admin.views.decorators import staff_member_required
 from django_ratelimit.decorators import ratelimit
 
 # ---------------------------------------------------------
@@ -24,7 +24,7 @@ def transition_order(request, order_id, to_status):
     return redirect("orders:detail_order", order_id=order_id)
 
 
-@staff_member_required
+@role_required("ADMIN")
 @require_POST
 def admin_transition_order(request, order_id, to_status):
     """Transición para admin/staff."""

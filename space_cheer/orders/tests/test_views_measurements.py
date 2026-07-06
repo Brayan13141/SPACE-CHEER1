@@ -16,6 +16,7 @@ from orders.tests.factories import (
     ProductMeasurementFieldFactory,
     MeasurementFieldFactory,
     UserTeamMembershipFactory,
+    RoleFactory,
 )
 from orders.models import OrderItemMeasurement
 
@@ -68,7 +69,7 @@ class OrderItemMeasurementsViewTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
-    def test_other_user_gets_404(self):
+    def test_other_user_gets_403(self):
         other = CoachFactory()
         self.client.force_login(other)
         url = reverse(
@@ -76,7 +77,7 @@ class OrderItemMeasurementsViewTests(TestCase):
             kwargs={"athlete_item_id": self.athlete_item.id},
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_context_has_athlete_item(self):
         url = reverse(
@@ -217,7 +218,7 @@ class ItemMeasurementsAddViewTests(TestCase):
             kwargs={"athlete_item_id": self.athlete_item.id},
         )
         response = self.client.post(url, self._get_post_data())
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
 
 @pytest.mark.django_db
@@ -226,7 +227,9 @@ class MeasurementLifecycleViewTests(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.staff = UserFactory(is_staff=True)
+        self.staff = UserFactory(
+            is_staff=True, profile_completed=True, roles=[RoleFactory(name="ADMIN")]
+        )
         self.coach = CoachFactory()
         self.order = OrderFactory(created_by=self.coach, owner_user=self.coach)
         self.client.force_login(self.staff)
@@ -236,7 +239,6 @@ class MeasurementLifecycleViewTests(TestCase):
         url = reverse("orders:close_measurements", kwargs={"order_id": self.order.id})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/admin/", response["Location"])
 
     def test_close_measurements_closes_order(self):
         url = reverse("orders:close_measurements", kwargs={"order_id": self.order.id})

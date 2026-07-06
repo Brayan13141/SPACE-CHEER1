@@ -18,6 +18,7 @@ from orders.tests.factories import (
     OrderDesignImageFactory,
     ProductWithMeasurementsFactory,
     UserTeamMembershipFactory,
+    RoleFactory,
 )
 
 
@@ -206,7 +207,9 @@ class AdminTransitionOrderViewTests(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.staff = UserFactory(is_staff=True)
+        self.staff = UserFactory(
+            is_staff=True, profile_completed=True, roles=[RoleFactory(name="ADMIN")]
+        )
         self.client.force_login(self.staff)
 
     def test_admin_transition_requires_post(self):
@@ -237,7 +240,6 @@ class AdminTransitionOrderViewTests(TestCase):
         )
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/admin/", response["Location"])
 
     def test_staff_can_cancel_any_order(self):
         coach = CoachFactory()

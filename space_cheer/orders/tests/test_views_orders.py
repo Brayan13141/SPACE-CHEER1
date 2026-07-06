@@ -111,7 +111,7 @@ class OrderListViewTests(TestCase):
         self.assertEqual(response.context["filter_status"], "finalized")
 
     def test_superuser_sees_all_orders(self):
-        superuser = UserFactory(is_superuser=True)
+        superuser = UserFactory(is_superuser=True, profile_completed=True)
         self.client.force_login(superuser)
 
         other_coach = CoachFactory()
@@ -245,7 +245,7 @@ class OrderDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_superuser_can_view_any_order(self):
-        superuser = UserFactory(is_superuser=True)
+        superuser = UserFactory(is_superuser=True, profile_completed=True)
         self.client.force_login(superuser)
         url = reverse("orders:detail_order", kwargs={"order_id": self.order.id})
         response = self.client.get(url)
@@ -369,7 +369,9 @@ class OrderContactInfoViewTests(TestCase):
 
         url = reverse("orders:contact_info_order", kwargs={"order_id": self.order.id})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(
+            response, reverse("orders:detail_order", kwargs={"order_id": self.order.id})
+        )
 
     def test_other_user_cannot_access_contact_info(self):
         other = CoachFactory()

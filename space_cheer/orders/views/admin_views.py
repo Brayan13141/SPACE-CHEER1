@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from django.contrib.admin.views.decorators import staff_member_required
+from accounts.decorators import role_required
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, render, redirect
@@ -25,7 +25,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 logger = logging.getLogger(__name__)
 
 
-@staff_member_required
+@role_required("ADMIN")
 def admin_order_list(request):
     status_filter = request.GET.get("status", "")
     type_filter = request.GET.get("type", "")
@@ -197,7 +197,7 @@ def admin_order_list(request):
     )
 
 
-@staff_member_required
+@role_required("ADMIN")
 def admin_order_detail(request, order_id):
 
     order = get_object_or_404(
@@ -294,7 +294,7 @@ def admin_order_detail(request, order_id):
     )
 
 
-@staff_member_required
+@role_required("ADMIN")
 @ratelimit(key="user", rate="5/m", method="POST", block=True)
 def admin_upload_design(request, order_id):
 
@@ -355,7 +355,7 @@ def admin_upload_design(request, order_id):
     )
 
 
-@staff_member_required
+@role_required("ADMIN")
 @require_POST
 def admin_update_order_dates(request, order_id):
 

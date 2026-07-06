@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 def admin_overview(request):
     today = timezone.now().date()
     jobs = (
@@ -61,7 +61,7 @@ def admin_overview(request):
     })
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 def admin_job_detail(request, pk):
     job = get_object_or_404(
         ProductionJob.objects.select_related("order")
@@ -82,7 +82,7 @@ def admin_job_detail(request, pk):
     })
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 @require_POST
 def toggle_urgent(request, pk):
     job = get_object_or_404(ProductionJob, pk=pk)
@@ -90,7 +90,7 @@ def toggle_urgent(request, pk):
     return redirect("production:admin_overview")
 
 
-@role_required("ADMIN", "STAFF", "OPERARIO")
+@role_required("ADMIN", "OPERARIO")
 def reglamento(request):
     from production.models import ProductionStage, ProductionRole
     stages = (
@@ -109,7 +109,7 @@ def reglamento(request):
     })
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 @require_POST
 def assign_task(request, pk):
     task = get_object_or_404(ProductionTask, pk=pk)
@@ -127,7 +127,7 @@ def assign_task(request, pk):
     return redirect("production:admin_job_detail", pk=task.job_id)
 
 
-@role_required("ADMIN", "STAFF")
+@role_required("ADMIN")
 @require_POST
 def bulk_reassign_tasks(request, pk):
     """

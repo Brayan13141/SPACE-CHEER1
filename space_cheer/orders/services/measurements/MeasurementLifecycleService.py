@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from orders.models import Order
+from orders.services.validators import OrderMeasurementsValidator
 
 
 class MeasurementLifecycleService:
@@ -103,8 +104,8 @@ class MeasurementLifecycleService:
         if order.measurements_locked:
             return
 
-        # regla crítica: no deberías bloquear si faltan medidas
-        # Order.validate_order_ready(order)
+        # regla crítica: no bloquear si faltan medidas de algún atleta
+        OrderMeasurementsValidator.validate_complete(order)
 
         order.measurements_locked = True
         order.measurements_open = False

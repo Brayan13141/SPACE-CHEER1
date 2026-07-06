@@ -87,13 +87,14 @@ class OrderItemDeleteViewTests(TestCase):
 
     def test_cannot_delete_item_from_pending_order(self):
         self.order._allow_status_change = True
-        self.order.status = "DESIGN_APROVED"
+        self.order.status = "IN_PRODUCTION"
         self.order.save(update_fields=["status"])
 
         url = reverse("orders:order_item_delete", kwargs={"item_id": self.item.id})
         response = self.client.post(url)
-        # PermissionDenied → 403
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(
+            response, reverse("orders:detail_order", kwargs={"order_id": self.order.id})
+        )
         self.assertTrue(OrderItem.objects.filter(pk=self.item.id).exists())
 
     def test_delete_redirects_to_order_detail(self):

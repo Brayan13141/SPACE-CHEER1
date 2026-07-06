@@ -70,6 +70,8 @@ class UserFactory(DjangoModelFactory):
 
 
 class CoachFactory(UserFactory):
+    profile_completed = True
+
     @factory.post_generation
     def roles(self, create, extracted, **kwargs):
         if create:
@@ -78,6 +80,8 @@ class CoachFactory(UserFactory):
 
 
 class AthleteFactory(UserFactory):
+    profile_completed = True
+
     @factory.post_generation
     def roles(self, create, extracted, **kwargs):
         if create:

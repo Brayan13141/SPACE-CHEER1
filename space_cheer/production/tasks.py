@@ -19,12 +19,12 @@ def notify_production_stage_complete(self, task_id):
         logger.warning("ProductionTask %s no encontrada para notificación", task_id)
         return
 
-    admins_and_staff = list(
-        User.objects.filter(roles__name__in=["ADMIN", "STAFF"], is_active=True).distinct()
+    admins = list(
+        User.objects.filter(roles__name="ADMIN", is_active=True).distinct()
     )
 
     try:
-        OrderNotificationService.notify_production_task_completed(task, admins_and_staff)
+        OrderNotificationService.notify_production_task_completed(task, admins)
     except Exception as exc:
         logger.exception("Error al notificar sobre task %s: %s", task_id, exc)
 
