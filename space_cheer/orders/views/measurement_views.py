@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
 from accounts.decorators import role_required
 from accounts.models import AthleteProfile
+from accounts.services.pii_audit_service import PiiAuditService
 from orders.models import Order, OrderItemAthlete
 from django.db import transaction
 from orders.services.measurements.MeasurementLifecycleService import (
@@ -138,6 +139,14 @@ def order_item_measurements(request, athlete_item_id):
 
     if not is_authorized and not is_guardian:
         raise PermissionDenied
+
+    PiiAuditService.log(
+        request=request,
+        target_user=athlete_item.athlete,
+        access_type="VIEW_MEASUREMENTS",
+        field_accessed="measurements",
+        notes=f"OrderItemAthlete pk={athlete_item.pk}",
+    )
 
     product = athlete_item.order_item.product
 

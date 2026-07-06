@@ -121,7 +121,7 @@ def _can_user_delete_item(user, order, item) -> bool:
     if not order.can_edit_general():
         return False
 
-    if user.is_staff or user.is_superuser:
+    if user.is_superuser or user.roles.filter(name="ADMIN").exists():
         return True
 
     # El creador de la orden puede eliminar sus items
