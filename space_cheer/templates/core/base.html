@@ -182,6 +182,9 @@
             50%  { background-position: 100% 50%; }
             100% { background-position: 0%   50%; }
         }
+        .sc-brand-stacked { padding-top: .25rem; padding-bottom: .25rem; line-height: 1; }
+        .sc-brand-text-small { font-size: .65rem !important; line-height: 1; }
+        .sc-nav-icon-lg { font-size: 1.1rem; line-height: 1; }
 
         .user-avatar {
             width: 32px;
@@ -365,10 +368,10 @@
         <div class="container-fluid">
 
             {# ── Brand ── #}
-            <a class="navbar-brand d-flex align-items-center gap-2"
+            <a class="navbar-brand d-flex flex-column align-items-center gap-0 sc-brand-stacked"
                href="{% if is_guardian %}{% url 'guardian:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}">
-                <img src="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}" alt="SPACE CHEER" height="36" class="d-inline-block">
-                <span class="d-none d-sm-inline sc-brand-text">SPACE CHEER</span>
+                <img src="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}" alt="SPACE CHEER" height="28" class="d-block">
+                <span class="sc-brand-text sc-brand-text-small">SPACE CHEER</span>
             </a>
 
             <button class="navbar-toggler" type="button"
@@ -396,6 +399,11 @@
                             <li><a class="dropdown-item" href="{% url 'core:landing' %}">
                                 <i class="bi bi-rocket me-2"></i>{% trans "Landing" %}
                             </a></li>
+                            {% if is_admin %}
+                            <li><a class="dropdown-item" href="{% url 'core:manage_landing' %}">
+                                <i class="bi bi-pencil-square me-2"></i>{% trans "Administrar Landing" %}
+                            </a></li>
+                            {% endif %}
                         </ul>
                     </li>
 
@@ -582,9 +590,10 @@
                     {# ── COMUNIDAD — switcher al portal social ── #}
                     {% if not is_guardian and not is_only_operario %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'social:feed' %}">
-                            <i class="bi bi-people me-1"></i>{% trans "Comunidad" %}
-                            {% if unread_social_count %}<span class="badge bg-danger rounded-pill">{{ unread_social_count }}</span>{% endif %}
+                        <a class="nav-link d-inline-flex align-items-center gap-1" href="{% url 'social:feed' %}">
+                            <i class="bi bi-people sc-nav-icon-lg"></i>
+                            <span>{% trans "Comunidad" %}</span>
+                            {% if unread_social_count %}<span class="badge bg-danger rounded-pill badge-notification ms-1">{{ unread_social_count }}</span>{% endif %}
                         </a>
                     </li>
                     {% endif %}

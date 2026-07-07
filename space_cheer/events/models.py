@@ -65,6 +65,8 @@ class Event(models.Model):
     registration_close = models.DateField(null=True, blank=True, verbose_name=_('Cierre de inscripciones'))
     max_teams = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('Máx. equipos'))
     banner = models.ImageField(upload_to='events/banners/', null=True, blank=True, verbose_name=_('Banner'))
+    featured_on_landing = models.BooleanField(default=False, verbose_name=_('Destacado en landing'))
+    landing_order = models.PositiveIntegerField(default=0, verbose_name=_('Orden en landing'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

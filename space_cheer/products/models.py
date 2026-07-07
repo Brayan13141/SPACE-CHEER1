@@ -120,6 +120,8 @@ class Product(models.Model):
     is_active = models.BooleanField(
         default=True
     )  # Para activar/desactivar sin eliminar
+    featured_on_landing = models.BooleanField(default=False)  # Destacado en landing
+    landing_order = models.PositiveIntegerField(default=0)  # Orden en landing
     created_at = models.DateTimeField(auto_now_add=True)  # Fecha de creación
 
     class Meta:
