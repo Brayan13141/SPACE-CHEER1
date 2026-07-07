@@ -944,3 +944,35 @@ class OrderLog(models.Model):
 
     def __str__(self):
         return f"Orden #{self.order_id}: {self.from_status} → {self.to_status}"
+
+
+class Customer(models.Model):
+    """
+    Cliente de pedidos personales (offline). Externo (sin cuenta) o ligado
+    a un User registrado vía el FK opcional `user`.
+    """
+
+    name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    notes = models.TextField(blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="customer_profiles",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="customers_created",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["phone"])]
+
+    def __str__(self):
+        return f"{self.name} ({self.phone})" if self.phone else self.name

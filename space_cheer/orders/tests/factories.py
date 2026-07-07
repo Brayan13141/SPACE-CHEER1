@@ -17,6 +17,7 @@ from orders.models import (
     OrderContactInfo,
     OrderDesignImage,
     OrderLog,
+    Customer,
 )
 
 
@@ -368,3 +369,13 @@ class OrderLogFactory(DjangoModelFactory):
     action = "STATUS_CHANGE"
     from_status = "DRAFT"
     to_status = "PENDING"
+
+
+class CustomerFactory(DjangoModelFactory):
+    class Meta:
+        model = "orders.Customer"
+
+    name = factory.Sequence(lambda n: f"Cliente {n}")
+    phone = factory.Sequence(lambda n: f"477000{n:04d}")
+    user = None
+    created_by = factory.SubFactory(UserFactory)
