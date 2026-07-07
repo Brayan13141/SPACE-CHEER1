@@ -1,0 +1,6 @@
+{% load static %}
+{% if avatar_user.social_profile.avatar %}
+<img src="{{ avatar_user.social_profile.avatar.url }}" alt="" class="sc-v2-avatar" style="width:{{ size|default:42 }}px;height:{{ size|default:42 }}px;max-width:{{ size|default:42 }}px;max-height:{{ size|default:42 }}px">
+{% else %}
+<div class="sc-v2-avatar-fallback" style="width:{{ size|default:42 }}px;height:{{ size|default:42 }}px;max-width:{{ size|default:42 }}px;max-height:{{ size|default:42 }}px;font-size:{{ size|default:42|add:"-24" }}px">{{ avatar_user.username|first|upper }}</div>
+{% endif %}

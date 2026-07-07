@@ -3,7 +3,7 @@ siguiendo el patrón del proyecto (vistas delgadas)."""
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.db.models import Count, Exists, OuterRef, Prefetch, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from social.models import Post, PostComment, PostImage, PostLike
@@ -29,20 +29,37 @@ class FeedService:
         contadores y 'yo di like', sin N+1."""
         recent_comments = Prefetch(
             "comments",
-            queryset=PostComment.objects.select_related("author").order_by(
-                "-created_at", "-id"
-            ),
+            queryset=PostComment.objects.select_related(
+                "author", "author__social_profile"
+            ).order_by("-created_at", "-id"),
             to_attr="recent_comments",
         )
         return (
             Post.objects.visible_for_viewer(user)
-            .select_related("author", "shared_post", "shared_post__author")
-            .prefetch_related("images", "shared_post__images", recent_comments)
+            .select_related(
+                "author",
+                "author__social_profile",
+                "shared_post",
+                "shared_post__author",
+                "shared_post__author__social_profile",
+            )
+            .prefetch_related(
+                "images",
+                "shared_post__images",
+                "author__roles",
+                "shared_post__author__roles",
+                recent_comments,
+            )
             .annotate(
                 like_count=Count("likes", distinct=True),
                 comment_count=Count("comments", distinct=True),
                 liked_by_me=Exists(
                     PostLike.objects.filter(post=OuterRef("pk"), user=user)
+                ),
+                my_reaction=Subquery(
+                    PostLike.objects.filter(post=OuterRef("pk"), user=user).values(
+                        "reaction"
+                    )[:1]
                 ),
                 shared_visible=Exists(
                     Post.objects.visible_for_viewer(user).filter(
@@ -87,12 +104,21 @@ class FeedService:
         return repost
 
     @staticmethod
-    def toggle_like(user, post):
-        like, created = PostLike.objects.get_or_create(post=post, user=user)
+    def toggle_like(user, post, reaction=PostLike.Reaction.APPLAUSE):
+        """Reacción estilo Facebook: click en tu misma reacción la quita;
+        click en una distinta la cambia; sin reacción previa, la crea."""
+        like, created = PostLike.objects.get_or_create(
+            post=post, user=user, defaults={"reaction": reaction}
+        )
         if created:
             SocialNotificationService.notify_like(user, post)
-        else:
+        elif like.reaction == reaction:
             like.delete()
+            created = False
+        else:
+            like.reaction = reaction
+            like.save(update_fields=["reaction"])
+            created = True
         return created, post.likes.count()
 
     @staticmethod
@@ -122,6 +148,54 @@ class FeedService:
         if not allowed:
             raise PermissionDenied
         comment.delete()
+
+
+class PeopleDiscoveryService:
+    """Fuentes de datos reales para la barra de historias y sugerencias del
+    feed. Sin sistema de amistad/follow todavía (subsistema futuro) — solo
+    lectura de compañeros de equipo activos."""
+
+    @staticmethod
+    def _teammate_ids(user):
+        from teams.models import UserTeamMembership
+
+        my_team_ids = UserTeamMembership.objects.filter(
+            user=user, is_active=True
+        ).values("team_id")
+        return (
+            UserTeamMembership.objects.filter(team_id__in=my_team_ids, is_active=True)
+            .exclude(user_id=user.pk)
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+
+    @staticmethod
+    def recent_active_teammates(user, limit=8):
+        """Para la barra de accesos rápidos: compañeros con publicaciones
+        recientes. No son 'historias' efímeras, son acceso directo a perfil."""
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        return (
+            User.objects.filter(pk__in=PeopleDiscoveryService._teammate_ids(user))
+            .filter(social_posts__isnull=False)
+            .select_related("social_profile")
+            .distinct()
+            .order_by("-social_posts__created_at")[:limit]
+        )
+
+    @staticmethod
+    def suggested_teammates(user, limit=3):
+        """Compañeros de equipo que el usuario probablemente ya conoce.
+        Sin botón de 'Seguir' funcional todavía — enlaza a su perfil."""
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        return (
+            User.objects.filter(pk__in=PeopleDiscoveryService._teammate_ids(user))
+            .select_related("social_profile")
+            .order_by("?")[:limit]
+        )
 
 
 class RankingService:
@@ -179,3 +253,40 @@ class RankingService:
         stats["rank_position"] = position
         stats["total_teams"] = len(ranking)
         return stats
+
+    @staticmethod
+    def upcoming_tournament_for_user(user):
+        """Próximo torneo donde compite al menos un equipo del usuario,
+        con cuántos equipos de su red (ranking) también están inscritos."""
+        from django.utils import timezone
+        from events.models import Event, EventTeamRegistration
+        from teams.models import UserTeamMembership
+
+        my_team_ids = list(
+            UserTeamMembership.objects.filter(
+                user=user, is_active=True
+            ).values_list("team_id", flat=True)
+        )
+        if not my_team_ids:
+            return None
+        event = (
+            Event.objects.filter(
+                start_date__gte=timezone.localdate(),
+                team_registrations__team_id__in=my_team_ids,
+                team_registrations__status=EventTeamRegistration.STATUS_ACCEPTED,
+            )
+            .order_by("start_date")
+            .distinct()
+            .first()
+        )
+        if not event:
+            return None
+        days_left = (event.start_date - timezone.localdate()).days
+        teams_competing = EventTeamRegistration.objects.filter(
+            event=event, status=EventTeamRegistration.STATUS_ACCEPTED
+        ).count()
+        return {
+            "event": event,
+            "days_left": days_left,
+            "teams_competing": teams_competing,
+        }

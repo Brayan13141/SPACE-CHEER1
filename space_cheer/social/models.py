@@ -97,11 +97,21 @@ class PostImage(models.Model):
 
 
 class PostLike(models.Model):
+    class Reaction(models.TextChoices):
+        APPLAUSE = "APPLAUSE", _("Aplausos")
+        FIRE = "FIRE", _("Fuego")
+        STAR = "STAR", _("Increíble")
+        HEART = "HEART", _("Me encanta")
+        MUSCLE = "MUSCLE", _("Ánimo")
+
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="post_likes",
+    )
+    reaction = models.CharField(
+        max_length=10, choices=Reaction.choices, default=Reaction.APPLAUSE
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -111,7 +121,7 @@ class PostLike(models.Model):
         ]
 
     def __str__(self):
-        return f"Like de {self.user.username} a post #{self.post_id}"
+        return f"Reacción {self.reaction} de {self.user.username} a post #{self.post_id}"
 
 
 class PostComment(models.Model):

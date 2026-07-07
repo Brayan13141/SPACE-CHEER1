@@ -1,0 +1,124 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SPACE CHEER · {% trans "Comunidad" %}{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'CSS/Bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'CSS/Bootstrap5/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/social_feed_v2.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="sc-v2" data-initial-density="{{ social_feed_density }}">
+
+<header class="sc-v2-topbar">
+    <a href="{% url 'social:feed' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+        <img src="{% static 'IMAGES/Logo_sin_fondo_blanco.png' %}" alt="" width="30" height="28" style="object-fit:contain">
+        <span class="sc-v2-brand" style="font-size:13px">SPACE CHEER</span>
+    </a>
+    <div class="sc-v2-search">🔍 {% trans "Buscar atletas, equipos, torneos…" %}</div>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+        <div class="sc-v2-accents">
+            <button type="button" class="sc-v2-accent-dot is-active" data-accent-dot="purpura" title="Púrpura" style="background:linear-gradient(135deg,#a855f7,#e879f9)"></button>
+            <button type="button" class="sc-v2-accent-dot" data-accent-dot="cyan" title="Cyan" style="background:linear-gradient(135deg,#22d3ee,#818cf8)"></button>
+            <button type="button" class="sc-v2-accent-dot" data-accent-dot="rosa" title="Rosa" style="background:linear-gradient(135deg,#ec4899,#fb7185)"></button>
+            <button type="button" class="sc-v2-accent-dot" data-accent-dot="verde" title="Verde" style="background:linear-gradient(135deg,#34d399,#2dd4bf)"></button>
+            <button type="button" class="sc-v2-accent-dot" data-accent-dot="azul" title="Azul" style="background:linear-gradient(135deg,#60a5fa,#38bdf8)"></button>
+            <button type="button" class="sc-v2-accent-dot" data-accent-dot="ambar" title="Ámbar" style="background:linear-gradient(135deg,#fbbf24,#fb923c)"></button>
+        </div>
+        <button type="button" class="sc-v2-density-btn" data-density-toggle>{% trans "Densidad" %}</button>
+        <div class="position-relative">
+            <button type="button" class="sc-v2-iconbtn" data-notif-toggle title="{% trans 'Notificaciones' %}">
+                🔔
+                {% if unread_social_count %}<span class="sc-v2-badge">{{ unread_social_count }}</span>{% endif %}
+            </button>
+            <div class="sc-v2-notif-panel" data-notif-panel hidden>
+                <div class="sc-v2-notif-head">
+                    <span class="sc-v2-heading" style="font-weight:700;font-size:14px">{% trans "Notificaciones" %}</span>
+                    {% if unread_social_count %}
+                    <form method="post" action="{% url 'social:notifications_read_all' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link btn-sm p-0" style="font-size:11.5px;font-weight:600">{% trans "Marcar leídas" %}</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% for n in social_bell_items %}
+                <form method="post" action="{% url 'social:notification_read' n.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="sc-v2-notif-item is-unread">
+                        <div>
+                            <div style="font-size:12.5px;line-height:1.45">{{ n.title }}</div>
+                            <div style="font-size:11px;color:var(--acc);font-weight:600;margin-top:2px">{{ n.created_at|timesince }} {% trans "atrás" %}</div>
+                        </div>
+                    </button>
+                </form>
+                {% empty %}
+                <div class="sc-v2-notif-empty">{% trans "Sin notificaciones nuevas" %}</div>
+                {% endfor %}
+                <a href="{% url 'social:notifications' %}" class="sc-v2-notif-foot">{% trans "Ver toda la actividad" %}</a>
+            </div>
+        </div>
+        <a href="{% url 'social:profile_me' %}" class="d-flex align-items-center gap-2 text-decoration-none" style="color:var(--tx)">
+            {% include "social/partials/avatar_v2.html" with avatar_user=request.user size=28 %}
+        </a>
+    </div>
+</header>
+
+<div class="sc-v2-layout">
+    <nav class="sc-v2-nav-desktop">
+        <a href="{% url 'social:feed' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'feed' %}is-active{% endif %}">🏠 {% trans "Inicio" %}</a>
+        <a href="{% url 'social:team_ranking' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'team_ranking' %}is-active{% endif %}">🏆 {% trans "Ranking" %}</a>
+        <a href="{% url 'social:team_directory' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'team_directory' %}is-active{% endif %}">✨ {% trans "Equipos" %}</a>
+        <a href="{% url 'social:profile_me' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'profile_me' %}is-active{% endif %}">👤 {% trans "Mi perfil" %}</a>
+        <a href="{% url 'social:settings' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'settings' %}is-active{% endif %}">🎨 {% trans "Configuración" %}</a>
+        {% if can_manage %}
+        <a href="{% url 'social:send_invite' %}" class="sc-v2-nav-link">➕ {% trans "Invitar" %}</a>
+        {% endif %}
+        <a href="/" class="sc-v2-nav-link" style="margin-top:auto">← Space Cheer</a>
+        {% if upcoming_tournament %}
+        <div class="sc-v2-tournament-card">
+            <div class="sc-v2-heading" style="font-weight:700;font-size:13px">{{ upcoming_tournament.event.name }} 🚀</div>
+            <div style="font-size:11.5px;color:var(--mut);margin-top:4px;line-height:1.45">
+                {% blocktrans count days=upcoming_tournament.days_left %}Falta {{ days }} día.{% plural %}Faltan {{ days }} días.{% endblocktrans %}
+                {% blocktrans count teams=upcoming_tournament.teams_competing %}{{ teams }} equipo de tu red compite.{% plural %}{{ teams }} equipos de tu red compiten.{% endblocktrans %}
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="sc-v2-center {% block center_class %}{% endblock %}">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% block social_content %}{% endblock %}
+    </main>
+
+    <aside class="sc-v2-right-rail">
+        {% block right_rail %}{% endblock %}
+    </aside>
+</div>
+
+<nav class="sc-v2-bottomnav">
+    <a href="{% url 'social:feed' %}" class="sc-v2-nav-link {% if request.resolver_match.url_name == 'feed' %}is-active{% endif %}"><span class="sc-v2-nav-icon">🏠</span>{% trans "Inicio" %}</a>
+    <a href="{% url 'social:team_directory' %}" class="sc-v2-nav-link"><span class="sc-v2-nav-icon">✨</span>{% trans "Equipos" %}</a>
+    <a href="{% url 'social:feed' %}#sc-v2-composer" class="sc-v2-fab" style="text-decoration:none">+</a>
+    <a href="{% url 'social:team_ranking' %}" class="sc-v2-nav-link"><span class="sc-v2-nav-icon">🏆</span>{% trans "Ranking" %}</a>
+    <a href="{% url 'social:profile_me' %}" class="sc-v2-nav-link"><span class="sc-v2-nav-icon">👤</span>{% trans "Perfil" %}</a>
+</nav>
+
+<script src="{% static 'JS/Bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'JS/social_theme.js' %}?v=1"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

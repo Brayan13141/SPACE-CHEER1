@@ -24,4 +24,5 @@ class PostCommentAdmin(admin.ModelAdmin):
 
 @admin.register(PostLike)
 class PostLikeAdmin(admin.ModelAdmin):
-    list_display = ("id", "post", "user", "created_at")
+    list_display = ("id", "post", "user", "reaction", "created_at")
+    list_filter = ("reaction",)

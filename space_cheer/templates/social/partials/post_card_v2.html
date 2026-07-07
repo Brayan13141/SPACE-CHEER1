@@ -1,0 +1,110 @@
+{% load i18n %}
+<article class="sc-v2-post" data-post-card>
+  <div class="sc-v2-post-head">
+    {% include "social/partials/avatar_v2.html" with avatar_user=post.author size=42 %}
+    <div class="flex-grow-1" style="min-width:0">
+      <div class="sc-v2-heading" style="font-weight:600;font-size:14px">
+        <a href="{% url 'social:profile_detail' post.author.username %}" style="color:inherit">{{ post.author.get_full_name|default:post.author.username }}</a>
+        {% with role=post.author.roles.all|first %}{% if role %}<span class="sc-v2-post-badge">{{ role.name|title }}</span>{% endif %}{% endwith %}
+      </div>
+      <div class="sc-v2-post-meta">{{ post.created_at|timesince }} {% trans "atrás" %}</div>
+    </div>
+    {% if request.user == post.author or feed_is_admin %}
+    <div class="dropdown">
+      <button class="btn btn-sm btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <form method="post" action="{% url 'social:post_delete' post.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash3 me-2"></i>{% trans "Eliminar" %}</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if post.text %}<p class="sc-v2-post-text">{{ post.text }}</p>{% endif %}
+
+  {% if post.shared_post %}
+    {% if post.shared_visible %}
+    <a href="{% url 'social:post_detail' post.shared_post.pk %}" class="sc-v2-repost-preview d-block">
+      {% with imgs=post.shared_post.images.all %}
+      {% if imgs %}<img src="{{ imgs.0.image.url }}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">{% endif %}
+      {% endwith %}
+      <div class="d-flex gap-2 align-items-center p-2">
+        {% include "social/partials/avatar_v2.html" with avatar_user=post.shared_post.author size=32 %}
+        <div style="min-width:0">
+          <div class="sc-v2-heading" style="font-weight:600;font-size:12.5px">{{ post.shared_post.author.get_full_name|default:post.shared_post.author.username }}</div>
+          <div style="font-size:11.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ post.shared_post.text }}</div>
+        </div>
+      </div>
+    </a>
+    {% else %}
+    <div class="mx-3 mb-2 p-3 rounded-3" style="background:var(--surf2);color:var(--mut)"><i class="bi bi-eye-slash me-1"></i>{% trans "Contenido no disponible" %}</div>
+    {% endif %}
+  {% endif %}
+
+  {% with imgs=post.images.all %}
+  {% if imgs %}
+  <div class="sc-v2-post-imgs" data-count="{{ imgs|length }}">
+    {% for img in imgs %}<img src="{{ img.image.url }}" alt="" loading="lazy">{% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="sc-v2-post-stats">
+    <div class="d-flex align-items-center gap-2">
+      {% if post.like_count %}
+      <div class="sc-v2-reaction-stack"><span>👏</span><span>🔥</span></div>
+      {% endif %}
+      <span data-like-count>{{ post.like_count }}</span>
+    </div>
+    <span>
+      {% blocktrans count count=post.comment_count %}{{ count }} comentario{% plural %}{{ count }} comentarios{% endblocktrans %}
+    </span>
+  </div>
+
+  <div class="sc-v2-post-actions">
+    <div class="sc-v2-reaction-wrap" data-reaction-wrap data-like-url="{% url 'social:post_like' post.pk %}">
+      <div class="sc-v2-reaction-picker" data-reaction-picker hidden>
+        <button type="button" data-reaction="APPLAUSE" title="{% trans 'Aplausos' %}">👏</button>
+        <button type="button" data-reaction="FIRE" title="{% trans 'Fuego' %}">🔥</button>
+        <button type="button" data-reaction="STAR" title="{% trans 'Increíble' %}">⭐</button>
+        <button type="button" data-reaction="HEART" title="{% trans 'Me encanta' %}">❤️</button>
+        <button type="button" data-reaction="MUSCLE" title="{% trans 'Ánimo' %}">💪</button>
+      </div>
+      <button type="button" class="sc-v2-post-action w-100 {% if post.liked_by_me %}has-reacted{% endif %}"
+              data-reaction-main {% if post.liked_by_me %}data-current-reaction="{{ post.my_reaction }}"{% endif %}>
+        {% if post.liked_by_me %}
+          {% if post.my_reaction == "FIRE" %}🔥 {% trans "¡Fuego!" %}
+          {% elif post.my_reaction == "STAR" %}⭐ {% trans "Increíble" %}
+          {% elif post.my_reaction == "HEART" %}❤️ {% trans "Me encanta" %}
+          {% elif post.my_reaction == "MUSCLE" %}💪 {% trans "¡Ánimo!" %}
+          {% else %}👏 {% trans "Aplaudiste" %}
+          {% endif %}
+        {% else %}👏 {% trans "Reaccionar" %}{% endif %}
+      </button>
+    </div>
+    <button type="button" class="sc-v2-post-action" data-comment-focus>💬 {% trans "Comentar" %}</button>
+    <button type="button" class="sc-v2-post-action" data-bs-toggle="modal" data-bs-target="#shareModal"
+            data-share-url="{% url 'social:repost_create' post.shared_post.pk|default:post.pk %}">↗ {% trans "Compartir" %}</button>
+  </div>
+
+  <div class="sc-v2-comments">
+    {% for comment in post.recent_comments|slice:":3" reversed %}
+      {% include "social/partials/comment_row_v2.html" %}
+    {% endfor %}
+    {% if post.comment_count > 3 %}
+      <a href="{% url 'social:post_detail' post.pk %}" style="font-size:12px;font-weight:600;padding-left:38px">
+        {% blocktrans with count=post.comment_count %}Ver los {{ count }} comentarios{% endblocktrans %}
+      </a>
+    {% endif %}
+    <form method="post" action="{% url 'social:comment_create' post.pk %}" class="sc-v2-comment-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <input type="text" name="text" id="comment-input-{{ post.pk }}" maxlength="1000" placeholder="{% trans 'Escribe un comentario…' %}" required>
+      <button type="submit"><i class="bi bi-send" style="font-size:13px"></i></button>
+    </form>
+  </div>
+</article>

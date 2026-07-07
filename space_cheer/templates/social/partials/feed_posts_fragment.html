@@ -1,0 +1,9 @@
+{% load i18n %}
+{% for post in page_obj %}
+  {% include "social/partials/post_card_v2.html" %}
+{% endfor %}
+{% if page_obj.has_next %}
+<div class="sc-v2-load-more" data-load-more-wrap>
+  <button type="button" data-load-more data-next-url="?page={{ page_obj.next_page_number }}">{% trans "Ver más publicaciones" %}</button>
+</div>
+{% endif %}

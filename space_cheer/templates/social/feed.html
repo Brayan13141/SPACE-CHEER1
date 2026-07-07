@@ -1,74 +1,75 @@
-{% extends "social/base_social.html" %}
+{% extends "social/base_social_v2.html" %}
 {% load static i18n %}
 
+{% block center_class %}sc-v2-center-feed{% endblock %}
+
 {% block social_content %}
-<div class="container py-3 py-md-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-8 col-xl-7">
 
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0"><i class="bi bi-people me-2"></i>{% trans "Comunidad" %}</h1>
-        <a href="{% url 'social:team_ranking' %}" class="btn btn-sm btn-outline-primary">
-          <i class="bi bi-trophy me-1"></i>{% trans "Ranking de equipos" %}
-        </a>
-      </div>
-
-      <!-- Crear publicación -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <form method="post" action="{% url 'social:post_create' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <textarea name="text" class="form-control mb-2" rows="3" maxlength="2000"
-                      placeholder="{% trans '¿Qué está pasando?' %}"></textarea>
-            <div id="postImagesPreview" class="d-flex flex-wrap gap-2 mb-2"></div>
-            <div class="d-flex justify-content-between align-items-center">
-              <label class="btn btn-sm btn-outline-secondary mb-0">
-                <i class="bi bi-image me-1"></i>{% trans "Fotos" %}
-                <input type="file" name="images" id="postImagesInput" class="d-none"
-                       accept="image/jpeg,image/png,image/webp" multiple>
-              </label>
-              <button type="submit" class="btn btn-sm btn-primary">
-                <i class="bi bi-send me-1"></i>{% trans "Publicar" %}
-              </button>
-            </div>
-            <small class="text-muted">{% trans "Hasta 4 imágenes (JPG/PNG/WebP, máx 5 MB c/u)." %}</small>
-          </form>
-        </div>
-      </div>
-
-      <!-- Posts -->
-      {% for post in page_obj %}
-        {% include "social/partials/post_card.html" %}
-      {% empty %}
-        <div class="text-center text-muted py-5">
-          <i class="bi bi-chat-square-dots display-4 d-block mb-3"></i>
-          {% trans "Aún no hay publicaciones. ¡Sé el primero!" %}
-        </div>
-      {% endfor %}
-
-      <!-- Paginación -->
-      {% if page_obj.has_other_pages %}
-      <nav class="d-flex justify-content-center mt-4">
-        <ul class="pagination pagination-sm">
-          {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-          {% endif %}
-          <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-          {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
-          {% endif %}
-        </ul>
-      </nav>
+<!-- Historias: acceso rápido a compañeros de equipo con actividad reciente -->
+<div class="sc-v2-stories">
+  <a href="{% url 'social:profile_me' %}" class="sc-v2-story text-decoration-none">
+    {% include "social/partials/avatar_v2.html" with avatar_user=request.user size=60 %}
+    <span class="sc-v2-story-label">{% trans "Tu perfil" %}</span>
+  </a>
+  {% for teammate in recent_active_teammates %}
+  <a href="{% url 'social:profile_detail' teammate.username %}" class="sc-v2-story text-decoration-none">
+    <div class="sc-v2-story-ring">
+      {% if teammate.social_profile.avatar %}
+      <img src="{{ teammate.social_profile.avatar.url }}" alt="">
+      {% else %}
+      <div class="sc-v2-story-fallback">{{ teammate.username|first|upper }}</div>
       {% endif %}
-
     </div>
+    <span class="sc-v2-story-label">{{ teammate.get_full_name|default:teammate.username }}</span>
+  </a>
+  {% empty %}
+  <div class="d-flex align-items-center">
+    <span class="sc-v2-story-empty">{% trans "Las publicaciones de tu equipo aparecerán aquí ✨" %}</span>
   </div>
+  {% endfor %}
 </div>
+
+<!-- Crear publicación -->
+<div class="sc-v2-composer" id="sc-v2-composer">
+  <form method="post" action="{% url 'social:post_create' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="d-flex align-items-center gap-2">
+      {% include "social/partials/avatar_v2.html" with avatar_user=request.user size=44 %}
+      <textarea name="text" class="sc-v2-composer-input flex-grow-1" rows="1" maxlength="2000"
+                placeholder="{% blocktrans with name=request.user.first_name|default:request.user.username %}¿Qué está pasando, {{ name }}?{% endblocktrans %}"
+                style="resize:vertical"></textarea>
+    </div>
+    <div id="postImagesPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+    <div class="sc-v2-composer-actions">
+      <label class="sc-v2-composer-action mb-0" style="cursor:pointer">
+        📷 {% trans "Foto" %}
+        <input type="file" name="images" id="postImagesInput" class="d-none" accept="image/jpeg,image/png,image/webp" multiple>
+      </label>
+      <button type="submit" class="sc-v2-composer-action" style="cursor:pointer">📨 {% trans "Publicar" %}</button>
+    </div>
+    <small style="color:var(--mut2);font-size:11px">{% trans "Hasta 4 imágenes (JPG/PNG/WebP, máx 5 MB c/u)." %}</small>
+  </form>
+</div>
+
+{% if page_obj.paginator.count %}
+  <div id="sc-v2-posts" class="d-flex flex-column" style="gap:var(--gap)">
+    {% include "social/partials/feed_posts_fragment.html" %}
+  </div>
+{% else %}
+  <div class="sc-v2-empty">
+    <div class="sc-v2-empty-icon">📣</div>
+    <div class="sc-v2-heading" style="font-weight:700;font-size:19px">{% trans "¡Aún no hay publicaciones!" %}</div>
+    <p style="margin:0;font-size:13.5px;color:var(--mut);line-height:1.55;max-width:320px">
+      {% trans "Sé el primero en compartir tu rutina con el equipo 🎉 Una foto del entreno basta para arrancar." %}
+    </p>
+    <a href="{% url 'social:team_directory' %}" style="font-size:12.5px;font-weight:600">{% trans "O descubre equipos para seguir →" %}</a>
+  </div>
+{% endif %}
 
 <!-- Modal compartir (uno global, la URL se setea por JS) -->
 <div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content" data-bs-theme="dark">
       <form method="post" action="">
         {% csrf_token %}
         <div class="modal-header border-0 pb-0">
@@ -89,6 +90,49 @@
 </div>
 {% endblock %}
 
+{% block right_rail %}
+{% if suggested_teammates %}
+<div class="sc-v2-rail-card">
+  <div class="sc-v2-rail-head">
+    <span class="sc-v2-heading">{% trans "Personas que quizás conozcas" %}</span>
+  </div>
+  {% for person in suggested_teammates %}
+  <div class="sc-v2-person-row">
+    {% include "social/partials/avatar_v2.html" with avatar_user=person size=40 %}
+    <div class="flex-grow-1" style="min-width:0">
+      <div style="font-size:13px;font-weight:600">{{ person.get_full_name|default:person.username }}</div>
+      <div style="font-size:11px;color:var(--mut2)">{% trans "Compañero de equipo" %}</div>
+    </div>
+    <a href="{% url 'social:profile_detail' person.username %}" class="sc-v2-person-btn">{% trans "Ver perfil" %}</a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if top_teams %}
+<div class="sc-v2-rail-card">
+  <div class="sc-v2-rail-head">
+    <span class="sc-v2-heading">{% trans "Ranking de equipos" %}</span>
+  </div>
+  <div class="d-flex flex-column gap-2">
+    {% for team in top_teams %}
+    <div class="sc-v2-rank-row {% if forloop.first %}is-first{% endif %}">
+      <span class="sc-v2-heading sc-v2-rank-num">#{{ forloop.counter }}</span>
+      <div class="sc-v2-team-badge" style="background:{% cycle 'linear-gradient(135deg,#f97316,#ef4444)' 'linear-gradient(135deg,#10b981,#14b8a6)' 'linear-gradient(135deg,#7c3aed,#ec4899)' 'linear-gradient(135deg,#0ea5e9,#6366f1)' 'linear-gradient(135deg,#fbbf24,#fb923c)' %}">{{ team.name|slice:":2"|upper }}</div>
+      <div class="flex-grow-1" style="min-width:0">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ team.name }}</div>
+        <div style="font-size:10.5px;color:var(--mut2)">
+          {% blocktrans with c=team.num_competitions a=team.num_athletes %}{{ c }} comp. aceptadas · {{ a }} atletas{% endblocktrans %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <a href="{% url 'social:team_ranking' %}" class="d-block text-center mt-2" style="padding:9px;border-radius:10px;border:1px solid var(--line);font-size:12px;font-weight:600">{% trans "Ver ranking completo" %}</a>
+</div>
+{% endif %}
+{% endblock %}
+
 {% block extra_js %}
-<script src="{% static 'JS/social-feed.js' %}?v=1"></script>
+<script src="{% static 'JS/social-feed-v2.js' %}?v=1"></script>
 {% endblock %}

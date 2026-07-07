@@ -97,6 +97,42 @@ class FeedServiceTests(SocialBaseTestCase):
         self.assertFalse(liked)
         self.assertEqual(count, 0)
 
+    def test_toggle_like_defaults_to_applause_reaction(self):
+        from social.models import Post, PostLike
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        FeedService.toggle_like(self.other, post)
+        like = PostLike.objects.get(post=post, user=self.other)
+        self.assertEqual(like.reaction, PostLike.Reaction.APPLAUSE)
+
+    def test_reacting_with_different_type_switches_it(self):
+        from social.models import Post, PostLike
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        FeedService.toggle_like(self.other, post, reaction=PostLike.Reaction.APPLAUSE)
+        liked, count = FeedService.toggle_like(
+            self.other, post, reaction=PostLike.Reaction.FIRE
+        )
+        self.assertTrue(liked)
+        self.assertEqual(count, 1)
+        like = PostLike.objects.get(post=post, user=self.other)
+        self.assertEqual(like.reaction, PostLike.Reaction.FIRE)
+
+    def test_reacting_with_same_type_twice_removes_it(self):
+        from social.models import Post, PostLike
+        from social.services import FeedService
+
+        post = Post.objects.create(author=self.user, text="hola")
+        FeedService.toggle_like(self.other, post, reaction=PostLike.Reaction.FIRE)
+        liked, count = FeedService.toggle_like(
+            self.other, post, reaction=PostLike.Reaction.FIRE
+        )
+        self.assertFalse(liked)
+        self.assertEqual(count, 0)
+        self.assertFalse(PostLike.objects.filter(post=post, user=self.other).exists())
+
     def test_repost_of_repost_points_to_original(self):
         from social.models import Post
         from social.services import FeedService
@@ -314,3 +350,83 @@ class FeedViewTests(SocialBaseTestCase):
         self.user.roles.add(admin_role)
         resp = self.client.get("/social/")
         self.assertContains(resp, f"/social/post/{post.pk}/eliminar/")
+
+    def test_like_toggle_switch_reaction_via_view(self):
+        from social.models import Post
+
+        post = Post.objects.create(author=self.other, text="reacciona")
+        self.client.post(f"/social/post/{post.pk}/like/", {"reaction": "FIRE"})
+        resp = self.client.post(f"/social/post/{post.pk}/like/", {"reaction": "STAR"})
+        data = resp.json()
+        self.assertTrue(data["liked"])
+        self.assertEqual(data["reaction"], "STAR")
+        self.assertEqual(data["like_count"], 1)
+
+    def test_like_toggle_rejects_unknown_reaction(self):
+        from social.models import Post, PostLike
+
+        post = Post.objects.create(author=self.other, text="reacciona")
+        resp = self.client.post(
+            f"/social/post/{post.pk}/like/", {"reaction": "NOT_A_REACTION"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        like = PostLike.objects.get(post=post, user=self.user)
+        self.assertEqual(like.reaction, PostLike.Reaction.APPLAUSE)
+
+    def test_feed_ajax_fragment_omits_page_chrome(self):
+        from social.models import Post
+
+        Post.objects.create(author=self.user, text="fragmento")
+        resp = self.client.get("/social/", HTTP_X_REQUESTED_WITH="fetch")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "fragmento")
+        self.assertNotContains(resp, "sc-v2-composer")
+
+    def test_feed_renders_without_teams_or_tournament(self):
+        """Usuario sin equipos: sugerencias/historias/torneo vacíos, sin 500."""
+        resp = self.client.get("/social/")
+        self.assertEqual(resp.status_code, 200)
+
+
+class SeedWelcomePostsCommandTests(SocialBaseTestCase):
+    def test_creates_posts_authored_by_admin(self):
+        from django.core.management import call_command
+        from accounts.models import Role
+        from social.models import Post
+
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.user.roles.add(admin_role)
+
+        call_command("seed_welcome_posts")
+
+        self.assertGreater(Post.objects.filter(author=self.user).count(), 0)
+
+    def test_is_idempotent(self):
+        from django.core.management import call_command
+        from accounts.models import Role
+        from social.models import Post
+
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.user.roles.add(admin_role)
+
+        call_command("seed_welcome_posts")
+        first_count = Post.objects.count()
+        call_command("seed_welcome_posts")
+        self.assertEqual(Post.objects.count(), first_count)
+
+    def test_dry_run_creates_nothing(self):
+        from django.core.management import call_command
+        from accounts.models import Role
+        from social.models import Post
+
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.user.roles.add(admin_role)
+
+        call_command("seed_welcome_posts", "--dry-run")
+        self.assertEqual(Post.objects.count(), 0)
+
+    def test_raises_without_admin_user(self):
+        from django.core.management import call_command, CommandError
+
+        with self.assertRaises(CommandError):
+            call_command("seed_welcome_posts")

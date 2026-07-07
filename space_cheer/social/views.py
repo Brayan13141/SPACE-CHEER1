@@ -18,7 +18,7 @@ from accounts.decorators import role_required
 from social.models import Post, PostComment, PostLike
 from social.notification_services import SocialNotificationService
 from social.profile_services import SocialProfileService, SocialVisibilityService
-from social.services import FeedService, RankingService
+from social.services import FeedService, PeopleDiscoveryService, RankingService
 
 Invitation = get_invitation_model()
 
@@ -73,16 +73,31 @@ def _safe_next(request, fallback="social:feed"):
 def feed(request):
     paginator = Paginator(FeedService.feed_queryset(request.user), 10)
     page_obj = paginator.get_page(request.GET.get("page"))
+    context = {
+        "page_obj": page_obj,
+        "feed_is_admin": FeedService.is_admin(request.user),
+    }
+    # Scroll infinito: el fetch() del cliente pide solo el fragmento de posts.
+    if request.headers.get("X-Requested-With") == "fetch":
+        return render(request, "social/partials/feed_posts_fragment.html", context)
+
     profile = SocialProfileService.for_user(request.user)
-    return render(
-        request,
-        "social/feed.html",
+    context.update(
         {
-            "page_obj": page_obj,
-            "feed_is_admin": FeedService.is_admin(request.user),
             "social_feed_density": profile.feed_density,
-        },
+            "recent_active_teammates": PeopleDiscoveryService.recent_active_teammates(
+                request.user
+            ),
+            "suggested_teammates": PeopleDiscoveryService.suggested_teammates(
+                request.user
+            ),
+            "top_teams": RankingService.team_ranking("competitions")[:3],
+            "upcoming_tournament": RankingService.upcoming_tournament_for_user(
+                request.user
+            ),
+        }
     )
+    return render(request, "social/feed.html", context)
 
 
 @login_required
@@ -115,8 +130,16 @@ def post_detail(request, pk):
 @require_POST
 def post_like_toggle(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    liked, like_count = FeedService.toggle_like(request.user, post)
-    return JsonResponse({"liked": liked, "like_count": like_count})
+    reaction = request.POST.get("reaction", PostLike.Reaction.APPLAUSE)
+    if reaction not in PostLike.Reaction.values:
+        reaction = PostLike.Reaction.APPLAUSE
+    liked, like_count = FeedService.toggle_like(request.user, post, reaction=reaction)
+    my_reaction = None
+    if liked:
+        my_reaction = reaction
+    return JsonResponse(
+        {"liked": liked, "like_count": like_count, "reaction": my_reaction}
+    )
 
 
 @login_required
