@@ -1,6 +1,4 @@
 """Tests de pedidos personales (offline): Customer, Order OFFLINE, pagos y servicio."""
-from decimal import Decimal
-
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
