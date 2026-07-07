@@ -69,3 +69,14 @@ class OrderOfflineTests(TestCase):
         admin = UserFactory(roles=[RoleFactory(name="ADMIN")])
         order = OfflineOrderFactory()
         self.assertIn(order, Order.objects.visible_for_user(admin))
+
+    def test_offline_invisible_para_created_by_no_admin(self):
+        coach = UserFactory()
+        order = OfflineOrderFactory(created_by=coach)
+        self.assertNotIn(order, Order.objects.visible_for_user(coach))
+
+    def test_offline_no_permite_cambiar_customer(self):
+        order = OfflineOrderFactory()
+        order.customer = CustomerFactory()
+        with self.assertRaises(ValidationError):
+            order.save()

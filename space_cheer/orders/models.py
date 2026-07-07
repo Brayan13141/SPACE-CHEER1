@@ -419,13 +419,15 @@ class Order(models.Model):
         if self.pk and not update_fields:  # Solo en saves completos
             original = (
                 type(self)
-                .objects.only("status", "owner_user_id", "owner_team_id")
+                .objects.only("status", "owner_user_id", "owner_team_id", "customer_id")
                 .get(pk=self.pk)
             )
             if original.owner_user_id != self.owner_user_id:
                 raise ValidationError("No se puede cambiar el propietario de la orden.")
             if original.owner_team_id != self.owner_team_id:
                 raise ValidationError("No se puede cambiar el equipo de la orden.")
+            if original.customer_id != self.customer_id:
+                raise ValidationError("No se puede cambiar el cliente de la orden.")
             if not getattr(self, "_allow_status_change", False):
                 if original.status != self.status:
                     raise ValidationError(
