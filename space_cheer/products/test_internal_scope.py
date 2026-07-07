@@ -2,7 +2,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from orders.tests.factories import ProductFactory, SeasonFactory, TeamFactory
+from orders.tests.factories import ProductFactory, TeamFactory
 
 pytestmark = pytest.mark.django_db
 
