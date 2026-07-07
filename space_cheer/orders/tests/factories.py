@@ -289,6 +289,14 @@ class TeamOrderFactory(OrderFactory):
     created_by = factory.LazyAttribute(lambda o: o.owner_team.coach)
 
 
+class OfflineOrderFactory(OrderFactory):
+    order_type = "OFFLINE"
+    owner_user = None
+    owner_team = None
+    customer = factory.SubFactory("orders.tests.factories.CustomerFactory")
+    agreed_price = Decimal("1000.00")
+
+
 class OrderContactInfoFactory(DjangoModelFactory):
     class Meta:
         model = OrderContactInfo

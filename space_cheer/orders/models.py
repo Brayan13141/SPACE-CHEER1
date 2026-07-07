@@ -25,8 +25,9 @@ class OrderQuerySet(models.QuerySet):
             return self.none()
         if user.is_superuser or user.roles.filter(name="ADMIN").exists():
             return self
+        # OFFLINE: intencionalmente sin cláusula aquí — solo visible para ADMIN/superuser (arriba).
         return self.filter(
-            Q(created_by=user)
+            Q(created_by=user, order_type__in=["PERSONAL", "TEAM"])
             | Q(order_type="TEAM", owner_team__coach=user)
             | Q(order_type="PERSONAL", owner_user=user)
         ).distinct()
@@ -85,6 +86,7 @@ class Order(models.Model):
     ORDER_TYPE_CHOICES = [
         ("PERSONAL", "Personal"),
         ("TEAM", "Team"),
+        ("OFFLINE", "Personal (offline)"),
     ]
 
     # Propietario: usuario (si PERSONAL) o equipo (si TEAM)
@@ -108,6 +110,18 @@ class Order(models.Model):
         blank=True,
         on_delete=models.PROTECT,
         related_name="orders",
+    )
+    # Pedido personal capturado por admin (cliente con o sin cuenta)
+    customer = models.ForeignKey(
+        "orders.Customer",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="orders",
+    )
+    # Precio total negociado — manda sobre la suma de items en OFFLINE
+    agreed_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
     )
     status = models.CharField(
         max_length=30,
@@ -176,9 +190,12 @@ class Order(models.Model):
     @property
     def owner(self):
         """
-        Devuelve el propietario de la orden, ya sea usuario (PERSONAL) o equipo (TEAM).
-        Útil para templates donde se necesita mostrar el dueño de forma genérica.
+        Devuelve el propietario de la orden: usuario (PERSONAL), equipo (TEAM)
+        o cliente (OFFLINE). Útil para templates donde se necesita mostrar el
+        dueño de forma genérica.
         """
+        if self.order_type == "OFFLINE":
+            return self.customer
         return self.owner_user if self.order_type == "PERSONAL" else self.owner_team
 
     @property
@@ -213,11 +230,19 @@ class Order(models.Model):
                         Q(order_type="PERSONAL")
                         & Q(owner_user__isnull=False)
                         & Q(owner_team__isnull=True)
+                        & Q(customer__isnull=True)
                     )
                     | (
                         Q(order_type="TEAM")
                         & Q(owner_team__isnull=False)
                         & Q(owner_user__isnull=True)
+                        & Q(customer__isnull=True)
+                    )
+                    | (
+                        Q(order_type="OFFLINE")
+                        & Q(customer__isnull=False)
+                        & Q(owner_user__isnull=True)
+                        & Q(owner_team__isnull=True)
                     )
                 ),
                 name="valid_owner_by_type",
@@ -311,6 +336,9 @@ class Order(models.Model):
         elif self.order_type == "TEAM":
             if not self.owner_team or self.owner_user:
                 raise ValidationError("Configuración inválida para orden TEAM")
+        elif self.order_type == "OFFLINE":
+            if not self.customer_id or self.owner_user or self.owner_team:
+                raise ValidationError("Configuración inválida para orden OFFLINE")
         else:
             raise ValidationError("Tipo de orden inválido")
 
