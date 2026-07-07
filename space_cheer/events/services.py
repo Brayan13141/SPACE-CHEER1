@@ -300,12 +300,17 @@ class EventRegistrationService:
         # Auto-create an EventParticipant record for the team coach if one exists
         coach = getattr(team, 'coach', None)
         if coach is not None:
+            coach_role = (
+                EventParticipant.ROLE_HEADCOACH
+                if coach.is_headcoach
+                else EventParticipant.ROLE_COACH
+            )
             try:
                 EventParticipant.objects.get_or_create(
                     event=event,
                     user=coach,
                     defaults={
-                        'role': EventParticipant.ROLE_COACH,
+                        'role': coach_role,
                         'team_registration': registration,
                     },
                 )

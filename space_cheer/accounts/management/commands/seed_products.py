@@ -32,14 +32,6 @@ MEASUREMENT_FIELDS_DATA = [
     {"name": "Peso",             "slug": "peso",           "field_type": "decimal", "unit": "kg", "required": False, "order": 8},
 ]
 
-TEAM_CATEGORIES_DATA = [
-    {"name": "Juvenil Nivel 1", "level": 1, "description": "Categoría juvenil básica, edades 10-13"},
-    {"name": "Juvenil Nivel 2", "level": 2, "description": "Categoría juvenil intermedia, edades 12-15"},
-    {"name": "Juvenil Nivel 3", "level": 3, "description": "Categoría juvenil avanzada, edades 14-17"},
-    {"name": "Senior Nivel 1",  "level": 4, "description": "Categoría senior básica, 18+"},
-    {"name": "Senior Nivel 2",  "level": 5, "description": "Categoría senior avanzada, élite"},
-]
-
 PRODUCTS_DATA = [
     {
         "name": "Uniforme Base",
@@ -236,16 +228,11 @@ class Command(BaseCommand):
     # ═══════════════════════════════════════════════════════════════
 
     def _seed_team_categories(self):
-        from teams.models import TeamCategory
+        from django.core.management import call_command
 
         self.stdout.write(self.style.MIGRATE_LABEL("\n[3/4] Categorías de equipo"))
-        for data in TEAM_CATEGORIES_DATA:
-            cat, created = TeamCategory.objects.get_or_create(
-                name=data["name"],
-                defaults={"level": data["level"], "description": data["description"]},
-            )
-            action = "CREADA" if created else "ya existe"
-            self.stdout.write(f"    {cat.name}: {action}")
+        # Taxonomía USASF completa — seed_categories es la única fuente de verdad
+        call_command("seed_categories", stdout=self.stdout)
 
     # ═══════════════════════════════════════════════════════════════
     # 4. PRODUCTOS

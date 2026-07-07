@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
 
@@ -103,8 +104,27 @@ class OperarioRoleAssignment(models.Model):
 
 
 class ProductionJob(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendiente"
+        IN_PROGRESS = "IN_PROGRESS", "En progreso"
+        PAUSED = "PAUSED", "Pausado"
+        COMPLETED = "COMPLETED", "Completado"
+        CANCELLED = "CANCELLED", "Cancelado"
+
+    # Mapa de transiciones permitidas (desde -> [destinos])
+    ALLOWED_TRANSITIONS = {
+        Status.PENDING: [Status.IN_PROGRESS, Status.CANCELLED],
+        Status.IN_PROGRESS: [Status.PAUSED, Status.COMPLETED, Status.CANCELLED],
+        Status.PAUSED: [Status.IN_PROGRESS, Status.CANCELLED],
+        Status.COMPLETED: [],
+        Status.CANCELLED: [],
+    }
+
     order = models.OneToOneField(
         "orders.Order", on_delete=models.CASCADE, related_name="production_job"
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
     )
     is_urgent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,6 +132,23 @@ class ProductionJob(models.Model):
 
     def __str__(self):
         return f"Job #{self.pk} — Orden #{self.order_id}"
+
+    def save(self, *args, **kwargs):
+        # El estado solo cambia vía ProductionJobStateService.transition()
+        if self.pk and not getattr(self, "_allow_status_change", False):
+            original_status = (
+                ProductionJob.objects.filter(pk=self.pk)
+                .values_list("status", flat=True)
+                .first()
+            )
+            if original_status is not None and original_status != self.status:
+                raise ValidationError(
+                    "No se permite modificar el estado del job directamente. "
+                    "Usa ProductionJobStateService.transition()."
+                )
+        super().save(*args, **kwargs)
+        if hasattr(self, "_allow_status_change"):
+            del self._allow_status_change
 
 
 class ProductionTask(models.Model):

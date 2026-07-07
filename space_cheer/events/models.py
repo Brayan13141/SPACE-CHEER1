@@ -217,6 +217,7 @@ class EventTeamRegistration(models.Model):
 
 class EventParticipant(models.Model):
     ROLE_ATHLETE = 'ATHLETE'
+    ROLE_HEADCOACH = 'HEADCOACH'
     ROLE_COACH = 'COACH'
     ROLE_STAFF = 'STAFF'
     ROLE_GUARDIAN = 'GUARDIAN'
@@ -224,6 +225,7 @@ class EventParticipant(models.Model):
 
     ROLE_CHOICES = [
         (ROLE_ATHLETE, _('Atleta')),
+        (ROLE_HEADCOACH, _('Head Coach')),
         (ROLE_COACH, _('Coach')),
         (ROLE_STAFF, _('Staff')),
         (ROLE_GUARDIAN, _('Tutor')),

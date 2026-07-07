@@ -54,7 +54,16 @@ class ProductionJobService:
 
     @staticmethod
     def complete_task(task, user, started_at, notes=""):
-        from production.models import ProductionTask
+        from production.models import ProductionJob, ProductionTask
+        from production.state import ProductionJobStateService
+
+        # Un job pausado o cancelado no acepta avances.
+        job_status = task.job.status
+        if job_status in (ProductionJob.Status.PAUSED, ProductionJob.Status.CANCELLED):
+            raise ValidationError(
+                f"No se puede completar «{task.stage.name}»: "
+                f"el job #{task.job_id} está {task.job.get_status_display().lower()}."
+            )
 
         # Regla de Oro: no pasar a la siguiente etapa si la anterior está pendiente.
         blocked_by = (
@@ -94,17 +103,21 @@ class ProductionJobService:
                 ]
             )
 
+            job = ProductionJob.objects.select_for_update().get(pk=task.job_id)
+            if job.status == ProductionJob.Status.PENDING:
+                ProductionJobStateService.transition(
+                    job, ProductionJob.Status.IN_PROGRESS
+                )
+
             job_finished = not (
                 ProductionTask.objects.filter(job=task.job_id)
                 .exclude(status=ProductionTask.Status.COMPLETED)
                 .exists()
             )
-            if job_finished:
-                from production.models import ProductionJob
-
-                ProductionJob.objects.filter(
-                    pk=task.job_id, completed_at__isnull=True
-                ).update(completed_at=timezone.now())
+            if job_finished and job.status != ProductionJob.Status.COMPLETED:
+                ProductionJobStateService.transition(
+                    job, ProductionJob.Status.COMPLETED
+                )
 
         try:
             notify_production_stage_complete.delay(task.pk)
