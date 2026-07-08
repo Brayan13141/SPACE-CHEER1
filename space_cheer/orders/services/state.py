@@ -226,6 +226,10 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_pending(cls, order, user=None):
+        if order.order_type == "OFFLINE":
+            cls._validate_offline_ready(order)
+            return
+
         Order.validate_order_ready(order)
 
         for item in order.items.select_related("product").all():
@@ -257,7 +261,26 @@ class OrderStateService:
             )
 
     @classmethod
+    def _validate_offline_ready(cls, order):
+        """Validación de captura para pedidos offline (sin contact_info ni atletas)."""
+        if not order.customer_id:
+            raise ValidationError("El pedido offline no tiene cliente")
+        if not order.items.exists():
+            raise ValidationError("La orden debe tener al menos un item")
+        if not order.agreed_price or order.agreed_price <= 0:
+            raise ValidationError("El pedido offline requiere un precio acordado mayor a cero")
+
+    @classmethod
     def _validate_to_design_approved(cls, order, user=None):
+        if order.order_type == "OFFLINE":
+            items = list(order.items.select_related("product"))
+            if not items:
+                raise ValidationError("La orden no tiene productos")
+            if any(item.product.requires_design for item in items):
+                if not order.design_images.filter(is_final=True).exists():
+                    raise ValidationError("Se requiere una imagen de diseño final")
+            return
+
         items = list(
             order.items.select_related("product").prefetch_related("athletes__athlete")
         )
@@ -354,6 +377,22 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_in_production(cls, order, user=None):
+        if order.order_type == "OFFLINE":
+            items = list(order.items.select_related("product"))
+            if not items:
+                raise ValidationError("La orden no tiene productos")
+            if any(item.product.requires_design for item in items):
+                if not order.design_images.filter(is_final=True).exists():
+                    raise ValidationError("No hay diseño final aprobado")
+            has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+            if has_uniforms and not order.uniform_delivery_date:
+                raise ValidationError(
+                    "Debe establecerse la fecha de entrega del uniforme antes de iniciar producción."
+                )
+            # Sin measurements_locked: las medidas offline viven en custom_measurements.
+            # Sin first_payment_date: el anticipo es opcional en pedidos offline (OrderPayment).
+            return
+
         items = list(order.items.select_related("product"))
 
         if not items:
@@ -391,6 +430,18 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_delivered(cls, order, user=None):
+        if order.order_type == "OFFLINE":
+            items = list(order.items.select_related("product"))
+            if any(item.product.requires_design for item in items):
+                if order.payment_status != "LIQUIDADO":
+                    raise ValidationError(
+                        "Debe liquidarse el saldo antes de marcar como entregada."
+                    )
+            has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+            if has_uniforms and not order.uniform_delivery_date:
+                raise ValidationError("Debe establecer la fecha de entrega del uniforme.")
+            return
+
         items = list(order.items.select_related("product"))
 
         # ── final_payment solo si la orden tuvo diseño (fue una orden custom) ──

@@ -17,6 +17,14 @@
         {% endblocktrans %}
       </p>
     </div>
+    <div class="col-md-6 text-md-end">
+      <a href="{% url 'orders:offline_order_create' %}" class="btn btn-primary me-2">
+        <i class="bi bi-person-plus me-1"></i>{% trans "Pedido personal" %}
+      </a>
+      <a href="{% url 'orders:customer_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-people me-1"></i>{% trans "Clientes" %}
+      </a>
+    </div>
   </div>
 
   <!-- STATS CARDS -->
@@ -67,6 +75,7 @@
               <option value="">{% trans "Todos" %}</option>
               <option value="PERSONAL" {% if type_filter == "PERSONAL" %}selected{% endif %}>{% trans "Personal" %}</option>
               <option value="TEAM" {% if type_filter == "TEAM" %}selected{% endif %}>{% trans "Equipo" %}</option>
+              <option value="OFFLINE" {% if type_filter == "OFFLINE" %}selected{% endif %}>{% trans "Personal (offline)" %}</option>
             </select>
           </div>
 
@@ -117,6 +126,8 @@
             <td>
               {% if order.order_type == "PERSONAL" %}
                 <i class="bi bi-person text-primary"></i> {% trans "Personal" %}
+              {% elif order.order_type == "OFFLINE" %}
+                <span class="badge bg-info text-dark"><i class="bi bi-person-badge me-1"></i>{% trans "Personal (offline)" %}</span>
               {% else %}
                 <i class="bi bi-people text-primary"></i> {% trans "Equipo" %}
               {% endif %}
@@ -131,6 +142,8 @@
                 {{ order.owner_user.get_full_name|default:order.owner_user.email }}
               {% elif order.owner_team %}
                 {{ order.owner_team.name }}
+              {% elif order.customer %}
+                {{ order.customer.name }}
               {% endif %}
             </td>
 

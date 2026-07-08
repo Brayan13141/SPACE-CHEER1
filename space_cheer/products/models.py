@@ -71,6 +71,7 @@ class Product(models.Model):
     SCOPE_CHOICES = [
         ("CATALOG", "Catálogo"),
         ("TEAM_ONLY", "Solo un equipo"),
+        ("INTERNAL", "Interno (taller)"),
     ]
 
     # Campos básicos
@@ -257,8 +258,13 @@ class Product(models.Model):
                 "Un producto de uso global no puede ser exclusivo de un equipo."
             )
 
-        # GLOBAL no puede usar medidas
-        if self.usage_type == "GLOBAL" and self.size_strategy == "MEASUREMENTS":
+        # GLOBAL no puede usar medidas (excepto productos internos de taller,
+        # donde los campos de medida son plantilla de captura sin atletas)
+        if (
+            self.usage_type == "GLOBAL"
+            and self.size_strategy == "MEASUREMENTS"
+            and self.scope != "INTERNAL"
+        ):
             errors["size_strategy"] = (
                 "Los productos de uso global no pueden usar medidas personalizadas."
             )
@@ -273,6 +279,12 @@ class Product(models.Model):
         if self.scope == "CATALOG" and self.owner_team:
             errors["owner_team"] = (
                 "Los productos de catálogo no deben estar asignados a un equipo."
+            )
+
+        # INTERNAL no debe tener equipo
+        if self.scope == "INTERNAL" and self.owner_team:
+            errors["owner_team"] = (
+                "Los productos internos no pertenecen a un equipo."
             )
 
         # ATHLETE_CUSTOM requiere medidas

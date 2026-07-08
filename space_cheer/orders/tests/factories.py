@@ -17,6 +17,7 @@ from orders.models import (
     OrderContactInfo,
     OrderDesignImage,
     OrderLog,
+    Customer,
 )
 
 
@@ -288,6 +289,17 @@ class TeamOrderFactory(OrderFactory):
     created_by = factory.LazyAttribute(lambda o: o.owner_team.coach)
 
 
+class OfflineOrderFactory(OrderFactory):
+    order_type = "OFFLINE"
+    owner_user = None
+    owner_team = None
+    customer = factory.SubFactory("orders.tests.factories.CustomerFactory")
+    agreed_price = Decimal("1000.00")
+    uniform_delivery_date = factory.LazyFunction(
+        lambda: (timezone.now() + timedelta(days=30)).date()
+    )
+
+
 class OrderContactInfoFactory(DjangoModelFactory):
     class Meta:
         model = OrderContactInfo
@@ -368,3 +380,13 @@ class OrderLogFactory(DjangoModelFactory):
     action = "STATUS_CHANGE"
     from_status = "DRAFT"
     to_status = "PENDING"
+
+
+class CustomerFactory(DjangoModelFactory):
+    class Meta:
+        model = "orders.Customer"
+
+    name = factory.Sequence(lambda n: f"Cliente {n}")
+    phone = factory.Sequence(lambda n: f"477000{n:04d}")
+    user = None
+    created_by = factory.SubFactory(UserFactory)

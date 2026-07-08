@@ -39,7 +39,7 @@ def admin_order_list(request):
     # Query principal
     # ─────────────────────────────
     orders = (
-        Order.objects.select_related("owner_user", "owner_team", "created_by")
+        Order.objects.select_related("owner_user", "owner_team", "created_by", "customer")
         .prefetch_related(
             Prefetch("items", queryset=OrderItem.objects.select_related("product"))
         )

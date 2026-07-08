@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static i18n %}
+{% load static i18n orders_extras %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
@@ -80,6 +80,138 @@
       </div>
     </div>
   </div>
+
+  <!-- ========== OFFLINE: CLIENTE ========== -->
+  {% if order.order_type == "OFFLINE" %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-person-vcard me-2"></i>{% trans "Cliente" %}
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block">{% trans "Nombre" %}</span>
+            <span class="fw-semibold">{{ order.customer.name }}</span>
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block">{% trans "Teléfono" %}</span>
+            <span>{{ order.customer.phone|default:"—" }}</span>
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block">{% trans "Email" %}</span>
+            <span>{{ order.customer.email|default:"—" }}</span>
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <span class="text-muted small d-block">{% trans "Cuenta vinculada" %}</span>
+            {% if order.customer.user %}
+              <a href="{% url 'admin:accounts_user_change' order.customer.user.pk %}">
+                {{ order.customer.user.get_full_name|default:order.customer.user.email }}
+              </a>
+            {% else %}
+              <span class="text-muted">{% trans "Sin cuenta" %}</span>
+            {% endif %}
+          </div>
+          {% if order.customer.notes %}
+            <div class="col-12">
+              <span class="text-muted small d-block">{% trans "Notas" %}</span>
+              <span>{{ order.customer.notes }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== OFFLINE: PAGOS ========== -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-cash-coin me-2"></i>{% trans "Pagos" %}
+        </h5>
+        <span class="badge
+          {% if order.payment_status == 'LIQUIDADO' %}bg-success
+          {% elif order.payment_status == 'ANTICIPO' %}bg-warning text-dark
+          {% else %}bg-secondary{% endif %}">
+          {{ order.payment_status }}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 mb-3">
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">{% trans "Precio acordado" %}</span>
+            <span class="fw-bold text-primary">${{ order.agreed_price|floatformat:2 }}</span>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">{% trans "Pagado" %}</span>
+            <span class="fw-semibold">${{ order.total_paid|floatformat:2 }}</span>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small d-block">{% trans "Saldo pendiente" %}</span>
+            <span class="fw-bold {% if order.balance_due > 0 %}text-danger{% else %}text-success{% endif %}">
+              ${{ order.balance_due|floatformat:2 }}
+            </span>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-3">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>{% trans "Fecha" %}</th>
+                <th>{% trans "Monto" %}</th>
+                <th>{% trans "Método" %}</th>
+                <th>{% trans "Registrado por" %}</th>
+                <th>{% trans "Notas" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for payment in order.payments.all %}
+                <tr>
+                  <td>{{ payment.paid_at|date:"d/m/Y H:i" }}</td>
+                  <td>${{ payment.amount|floatformat:2 }}</td>
+                  <td>{{ payment.get_method_display }}</td>
+                  <td>{{ payment.registered_by.get_full_name|default:payment.registered_by.email }}</td>
+                  <td>{{ payment.notes|default:"—" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-3">{% trans "Sin abonos registrados." %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if not order.closed %}
+          <form method="post" action="{% url 'orders:register_payment' order.id %}" class="row g-2 align-items-end">
+            {% csrf_token %}
+            <div class="col-sm-3">
+              <label class="form-label small">{% trans "Monto" %}</label>
+              <input type="number" step="0.01" min="0.01" class="form-control form-control-sm" name="amount" required>
+            </div>
+            <div class="col-sm-3">
+              <label class="form-label small">{% trans "Método" %}</label>
+              <select class="form-select form-select-sm" name="method">
+                <option value="CASH">{% trans "Efectivo" %}</option>
+                <option value="TRANSFER">{% trans "Transferencia" %}</option>
+                <option value="OTHER">{% trans "Otro" %}</option>
+              </select>
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label small">{% trans "Notas" %}</label>
+              <input type="text" class="form-control form-control-sm" name="notes">
+            </div>
+            <div class="col-sm-2">
+              <button type="submit" class="btn btn-sm btn-primary w-100">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "Registrar abono" %}
+              </button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 
   <!-- ========== CONTACT INFO ========== -->
   {% if order.has_contact_info %}
@@ -281,6 +413,44 @@
                           </li>
                         {% endfor %}
                       </ul>
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+              {% if order.order_type == "OFFLINE" %}
+                <tr class="table-light">
+                  <td colspan="5">
+                    <div class="p-2">
+                      <strong><i class="bi bi-rulers me-1"></i>{% trans "Talla, notas y medidas:" %}</strong>
+                      {% if order.can_edit_general %}
+                        <form method="post" action="{% url 'orders:offline_item_measurements' item.id %}" class="row g-2 mt-1">
+                          {% csrf_token %}
+                          <div class="col-sm-2">
+                            <label class="form-label small">{% trans "Talla" %}</label>
+                            <input type="text" class="form-control form-control-sm" name="talla" value="{{ item.custom_measurements.talla|default:'' }}">
+                          </div>
+                          <div class="col-sm-4">
+                            <label class="form-label small">{% trans "Notas" %}</label>
+                            <input type="text" class="form-control form-control-sm" name="notas" value="{{ item.custom_measurements.notas|default:'' }}">
+                          </div>
+                          {% for pmf in item.product.measurement_fields.all %}
+                            <div class="col-sm-2">
+                              <label class="form-label small">{{ pmf.field.name }}{% if pmf.field.unit %} ({{ pmf.field.unit }}){% endif %}</label>
+                              <input type="text" class="form-control form-control-sm" name="medida-{{ pmf.field.slug }}" value="{{ item.custom_measurements.medidas|dict_get:pmf.field.slug }}">
+                            </div>
+                          {% endfor %}
+                          <div class="col-sm-2">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                              <i class="bi bi-save me-1"></i>{% trans "Guardar" %}
+                            </button>
+                          </div>
+                        </form>
+                      {% else %}
+                        <div class="small mt-1">
+                          <span class="text-muted">{% trans "Talla:" %}</span> {{ item.custom_measurements.talla|default:"—" }}
+                          <span class="text-muted ms-3">{% trans "Notas:" %}</span> {{ item.custom_measurements.notas|default:"—" }}
+                        </div>
+                      {% endif %}
                     </div>
                   </td>
                 </tr>

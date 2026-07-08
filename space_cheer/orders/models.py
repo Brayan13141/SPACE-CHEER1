@@ -3,6 +3,7 @@
 # Incluye órdenes, items de producto, asignación de atletas, medidas personalizadas,
 # imágenes de diseño y registro de cambios.
 
+from decimal import Decimal
 from functools import cached_property
 from django.db import models
 from django.conf import settings
@@ -11,6 +12,8 @@ from teams.models import Team
 from django.core.exceptions import ValidationError
 from products.models import Product
 from django.db.models import Sum, Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from core.file_utils import design_upload_path, validate_image_magic, validate_min_size_35mb
 from teams.models import UserTeamMembership
 
@@ -25,8 +28,9 @@ class OrderQuerySet(models.QuerySet):
             return self.none()
         if user.is_superuser or user.roles.filter(name="ADMIN").exists():
             return self
+        # OFFLINE: intencionalmente sin cláusula aquí — solo visible para ADMIN/superuser (arriba).
         return self.filter(
-            Q(created_by=user)
+            Q(created_by=user, order_type__in=["PERSONAL", "TEAM"])
             | Q(order_type="TEAM", owner_team__coach=user)
             | Q(order_type="PERSONAL", owner_user=user)
         ).distinct()
@@ -85,6 +89,7 @@ class Order(models.Model):
     ORDER_TYPE_CHOICES = [
         ("PERSONAL", "Personal"),
         ("TEAM", "Team"),
+        ("OFFLINE", "Personal (offline)"),
     ]
 
     # Propietario: usuario (si PERSONAL) o equipo (si TEAM)
@@ -108,6 +113,18 @@ class Order(models.Model):
         blank=True,
         on_delete=models.PROTECT,
         related_name="orders",
+    )
+    # Pedido personal capturado por admin (cliente con o sin cuenta)
+    customer = models.ForeignKey(
+        "orders.Customer",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="orders",
+    )
+    # Precio total negociado — manda sobre la suma de items en OFFLINE
+    agreed_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
     )
     status = models.CharField(
         max_length=30,
@@ -176,14 +193,36 @@ class Order(models.Model):
     @property
     def owner(self):
         """
-        Devuelve el propietario de la orden, ya sea usuario (PERSONAL) o equipo (TEAM).
-        Útil para templates donde se necesita mostrar el dueño de forma genérica.
+        Devuelve el propietario de la orden: usuario (PERSONAL), equipo (TEAM)
+        o cliente (OFFLINE). Útil para templates donde se necesita mostrar el
+        dueño de forma genérica.
         """
+        if self.order_type == "OFFLINE":
+            return self.customer
         return self.owner_user if self.order_type == "PERSONAL" else self.owner_team
 
     @property
     def total(self):
         return self.items.aggregate(total=Sum("subtotal"))["total"] or 0
+
+    @property
+    def total_paid(self):
+        return self.payments.aggregate(t=Sum("amount"))["t"] or Decimal("0")
+
+    @property
+    def balance_due(self):
+        if self.agreed_price is None:
+            return None
+        return self.agreed_price - self.total_paid
+
+    @property
+    def payment_status(self):
+        paid = self.total_paid
+        if not paid:
+            return "SIN_PAGOS"
+        if self.agreed_price is not None and paid >= self.agreed_price:
+            return "LIQUIDADO"
+        return "ANTICIPO"
 
     @cached_property
     def total_quantity(self):
@@ -213,11 +252,19 @@ class Order(models.Model):
                         Q(order_type="PERSONAL")
                         & Q(owner_user__isnull=False)
                         & Q(owner_team__isnull=True)
+                        & Q(customer__isnull=True)
                     )
                     | (
                         Q(order_type="TEAM")
                         & Q(owner_team__isnull=False)
                         & Q(owner_user__isnull=True)
+                        & Q(customer__isnull=True)
+                    )
+                    | (
+                        Q(order_type="OFFLINE")
+                        & Q(customer__isnull=False)
+                        & Q(owner_user__isnull=True)
+                        & Q(owner_team__isnull=True)
                     )
                 ),
                 name="valid_owner_by_type",
@@ -311,6 +358,9 @@ class Order(models.Model):
         elif self.order_type == "TEAM":
             if not self.owner_team or self.owner_user:
                 raise ValidationError("Configuración inválida para orden TEAM")
+        elif self.order_type == "OFFLINE":
+            if not self.customer_id or self.owner_user or self.owner_team:
+                raise ValidationError("Configuración inválida para orden OFFLINE")
         else:
             raise ValidationError("Tipo de orden inválido")
 
@@ -391,13 +441,15 @@ class Order(models.Model):
         if self.pk and not update_fields:  # Solo en saves completos
             original = (
                 type(self)
-                .objects.only("status", "owner_user_id", "owner_team_id")
+                .objects.only("status", "owner_user_id", "owner_team_id", "customer_id")
                 .get(pk=self.pk)
             )
             if original.owner_user_id != self.owner_user_id:
                 raise ValidationError("No se puede cambiar el propietario de la orden.")
             if original.owner_team_id != self.owner_team_id:
                 raise ValidationError("No se puede cambiar el equipo de la orden.")
+            if original.customer_id != self.customer_id:
+                raise ValidationError("No se puede cambiar el cliente de la orden.")
             if not getattr(self, "_allow_status_change", False):
                 if original.status != self.status:
                     raise ValidationError(
@@ -506,6 +558,9 @@ class OrderItem(models.Model):
     size_variant = models.ForeignKey(
         "products.ProductSizeVariant", null=True, blank=True, on_delete=models.PROTECT
     )
+
+    # Solo órdenes OFFLINE: {"talla": str, "notas": str, "medidas": {slug: valor}}
+    custom_measurements = models.JSONField(null=True, blank=True)
 
     class Meta:
         # Índices para mejorar rendimiento en búsquedas frecuentes
@@ -644,6 +699,15 @@ class OrderItem(models.Model):
                 )
             if product.owner_team_id != order.owner_team_id:
                 raise ValidationError("El producto no pertenece a este equipo")
+
+        if product.scope == "INTERNAL" and order.order_type != "OFFLINE":
+            raise ValidationError(
+                "Los productos internos solo pueden usarse en pedidos offline"
+            )
+        if order.order_type == "OFFLINE" and product.scope != "INTERNAL":
+            raise ValidationError(
+                "Los pedidos offline solo aceptan productos internos"
+            )
 
     def _validate_athlete_rules(self):
         """
@@ -944,3 +1008,98 @@ class OrderLog(models.Model):
 
     def __str__(self):
         return f"Orden #{self.order_id}: {self.from_status} → {self.to_status}"
+
+
+class Customer(models.Model):
+    """
+    Cliente de pedidos personales (offline). Externo (sin cuenta) o ligado
+    a un User registrado vía el FK opcional `user`.
+    """
+
+    name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    notes = models.TextField(blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="customer_profiles",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="customers_created",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["phone"])]
+
+    def __str__(self):
+        return f"{self.name} ({self.phone})" if self.phone else self.name
+
+
+class OrderPayment(models.Model):
+    """
+    Abono a un pedido (anticipo o pago). Inmutable una vez registrado:
+    los errores se corrigen con un ajuste anotado, nunca editando.
+    """
+
+    METHOD_CHOICES = [
+        ("CASH", "Efectivo"),
+        ("TRANSFER", "Transferencia"),
+        ("OTHER", "Otro"),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default="CASH")
+    paid_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+    registered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        related_name="payments_registered",
+    )
+
+    class Meta:
+        ordering = ["paid_at"]
+
+    def __str__(self):
+        return f"Pago ${self.amount} — Orden #{self.order_id}"
+
+    def clean(self):
+        if self.amount is None or self.amount <= 0:
+            raise ValidationError("El monto debe ser mayor a cero")
+        if self.order.agreed_price is None:
+            raise ValidationError("La orden no tiene precio acordado")
+        paid = self.order.payments.exclude(pk=self.pk).aggregate(
+            t=Sum("amount")
+        )["t"] or Decimal("0")
+        if paid + self.amount > self.order.agreed_price:
+            raise ValidationError(
+                "El total pagado no puede exceder el precio acordado "
+                f"(pagado ${paid} + ${self.amount} > ${self.order.agreed_price})"
+            )
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Los pagos no se editan; registra un ajuste con notas")
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Los pagos no se eliminan; registra un ajuste con notas")
+
+
+@receiver(pre_delete, sender=OrderPayment)
+def _orderpayment_block_queryset_delete(sender, instance, **kwargs):
+    """
+    Bloquea también el borrado vía QuerySet.delete()/cascada, que no pasa por
+    OrderPayment.delete(). Conectar este receptor obliga a Django a resolver
+    cada instancia antes de borrar (sin esto, un delete() masivo sin objetos
+    relacionados puede tomar el atajo SQL directo y saltarse la instancia).
+    """
+    raise ValidationError("Los pagos no se eliminan; registra un ajuste con notas")
