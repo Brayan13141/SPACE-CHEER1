@@ -125,3 +125,30 @@ class OfflineCaptureFlowTests(TestCase):
         )
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(order.payment_status, "LIQUIDADO")
+
+
+class AdminIntegrationTests(TestCase):
+    def setUp(self):
+        self.admin = _admin()
+        self.client.force_login(self.admin)
+        from orders.services.offline import OfflineOrderService
+        self.order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Doña Mary"},
+            items=[{"product_id": _internal_product().pk, "quantity": 1}],
+            agreed_price=Decimal("1000.00"),
+        )
+
+    def test_lista_admin_muestra_badge_offline(self):
+        resp = self.client.get(reverse("orders:admin_order_list"))
+        self.assertContains(resp, "Personal (offline)")
+
+    def test_filtro_por_tipo(self):
+        resp = self.client.get(reverse("orders:admin_order_list") + "?type=OFFLINE")
+        self.assertContains(resp, f"#{self.order.pk}")
+        resp = self.client.get(reverse("orders:admin_order_list") + "?type=TEAM")
+        self.assertNotContains(resp, "Doña Mary")
+
+    def test_detalle_muestra_cliente_y_pagos(self):
+        resp = self.client.get(reverse("orders:admin_order_detail", args=[self.order.pk]))
+        self.assertContains(resp, "Doña Mary")
+        self.assertContains(resp, "1000")
