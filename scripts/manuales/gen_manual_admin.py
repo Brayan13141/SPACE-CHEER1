@@ -39,6 +39,12 @@ PAGES = [
     ("/orders/admin/orders/21/",       "order_21_delivered",  "Pedido #21 — ENTREGADO",        "Pedido ya entregado al equipo"),
     ("/orders/admin/orders/17/",       "order_17_draft",      "Pedido #17 — BORRADOR",         "Pedido en estado borrador pendiente de confirmación"),
 
+    # ── PEDIDOS PERSONALES (OFFLINE) ────────────────────────────────────────
+    ("/orders/admin/orders/?type=OFFLINE", "orders_offline_filter", "Filtro — Pedidos Personales", "Lista de pedidos filtrada por tipo Personal (offline)"),
+    ("/orders/admin/offline/nuevo/",   "offline_order_create", "Nuevo Pedido Personal (Offline)", "Formulario de captura: cliente, productos y anticipo"),
+    ("/orders/admin/clientes/",        "customer_list",        "Clientes",                      "Directorio de clientes de pedidos personales"),
+    ("/orders/admin/orders/24/",       "order_24_offline",     "Pedido #24 — PERSONAL (Offline)", "Detalle de un pedido offline: cliente, pagos y medidas por producto"),
+
     # ── PRODUCCIÓN ────────────────────────────────────────────────────────────
     ("/production/admin/",             "production_panel",    "Panel de Producción",           "Vista general de estadísticas y jobs activos"),
     ("/production/admin/job/2/",       "production_job2",     "Job #2 — Detalle",              "Detalle del job con tareas y operarios asignados"),
