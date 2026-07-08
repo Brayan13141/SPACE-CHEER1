@@ -8,7 +8,9 @@ from django.urls import reverse
 from orders.models import Order
 from orders.tests.factories import (
     CustomerFactory,
+    MeasurementFieldFactory,
     ProductFactory,
+    ProductMeasurementFieldFactory,
     RoleFactory,
     SeasonFactory,
     UserFactory,
@@ -152,3 +154,51 @@ class AdminIntegrationTests(TestCase):
         resp = self.client.get(reverse("orders:admin_order_detail", args=[self.order.pk]))
         self.assertContains(resp, "Doña Mary")
         self.assertContains(resp, "1000")
+
+
+class ItemMeasurementsPrefillTests(TestCase):
+    """Bug: el input medida-<slug> siempre se renderizaba vacío, lo que
+    hacía que reenviar el form borrara silenciosamente medidas guardadas
+    previamente (save_item_measurements hace reemplazo completo del dict).
+    """
+
+    def setUp(self):
+        self.admin = _admin()
+        self.client.force_login(self.admin)
+        self.field = MeasurementFieldFactory(name="Pecho", slug="pecho", unit="cm")
+        self.product = _internal_product()
+        ProductMeasurementFieldFactory(product=self.product, field=self.field)
+
+        from orders.services.offline import OfflineOrderService
+
+        self.order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Doña Mary"},
+            items=[{"product_id": self.product.pk, "quantity": 1}],
+            agreed_price=Decimal("1000.00"),
+        )
+        self.item = self.order.items.get()
+
+    def test_medida_guardada_se_prellena_en_el_detalle(self):
+        from orders.services.offline import OfflineOrderService
+
+        OfflineOrderService.save_item_measurements(
+            item=self.item, medidas={"pecho": "92"},
+        )
+
+        resp = self.client.get(reverse("orders:admin_order_detail", args=[self.order.pk]))
+        self.assertContains(resp, 'name="medida-pecho" value="92"')
+
+    def test_reenvio_del_form_no_borra_medida_no_incluida(self):
+        # Reproduce el escenario del bug: se guarda "pecho" via POST, luego
+        # se reenvía el form SIN el campo pecho (como pasaría si el admin no
+        # lo ve prellenado y no lo vuelve a escribir). Con el fix, el HTML
+        # debe seguir mostrando "92", confirmando que el admin sí puede
+        # ver el valor existente antes de decidir sobrescribirlo.
+        resp = self.client.post(
+            reverse("orders:offline_item_measurements", args=[self.item.pk]),
+            {"talla": "M", "notas": "", f"medida-{self.field.slug}": "92"},
+        )
+        self.assertEqual(resp.status_code, 302)
+
+        resp = self.client.get(reverse("orders:admin_order_detail", args=[self.order.pk]))
+        self.assertContains(resp, 'name="medida-pecho" value="92"')

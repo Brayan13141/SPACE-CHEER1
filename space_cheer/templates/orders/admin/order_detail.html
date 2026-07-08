@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static i18n %}
+{% load static i18n orders_extras %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
@@ -436,7 +436,7 @@
                           {% for pmf in item.product.measurement_fields.all %}
                             <div class="col-sm-2">
                               <label class="form-label small">{{ pmf.field.name }}{% if pmf.field.unit %} ({{ pmf.field.unit }}){% endif %}</label>
-                              <input type="text" class="form-control form-control-sm" name="medida-{{ pmf.field.slug }}">
+                              <input type="text" class="form-control form-control-sm" name="medida-{{ pmf.field.slug }}" value="{{ item.custom_measurements.medidas|dict_get:pmf.field.slug }}">
                             </div>
                           {% endfor %}
                           <div class="col-sm-2">
