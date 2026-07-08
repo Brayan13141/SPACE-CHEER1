@@ -68,8 +68,14 @@ class OfflineOrderService:
         return order
 
     @staticmethod
+    @transaction.atomic
     def add_payment(*, order, admin_user, amount, method="CASH", notes=""):
-        from orders.models import OrderPayment
+        from orders.models import Order, OrderPayment
+
+        # Bloquea la fila de la orden para serializar abonos concurrentes:
+        # la segunda llamada espera a que la primera confirme antes de leer
+        # total_paid, así su validación de sobrepago ve el pago ya aplicado.
+        order = Order.objects.select_for_update().get(pk=order.pk)
 
         return OrderPayment.objects.create(
             order=order, amount=Decimal(amount), method=method,

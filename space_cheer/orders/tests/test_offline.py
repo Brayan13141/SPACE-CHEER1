@@ -3,8 +3,9 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, connection, transaction
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 from orders.models import Customer, Order, OrderItem, OrderPayment
 from orders.services.state import OrderStateService
@@ -358,3 +359,72 @@ class OfflineOrderServiceTests(TestCase):
                 admin_user=self.admin, customer_data={"name": "W"},
                 items=[], agreed_price=Decimal("100.00"),
             )
+
+
+class AddPaymentConcurrencyTests(TestCase):
+    """
+    Finding (Important) del review final: add_payment no bloqueaba la fila
+    de la orden, permitiendo que dos abonos concurrentes leyeran el mismo
+    total_paid antes de que cualquiera confirmara, pasando ambos la
+    validación de sobrepago de OrderPayment.clean() y dejando total_paid
+    > agreed_price.
+
+    Un test con threads reales (dos conexiones de BD compitiendo por el
+    lock) sería la prueba más fiel, pero este proyecto no tiene ningún
+    precedente de tests basados en threads (grep sobre orders/ no encontró
+    threading.Thread ni patrones equivalentes) y SQLite/TestCase con
+    transacciones envueltas en savepoints no soporta bien conexiones
+    concurrentes reales. En su lugar, dos pruebas más ligeras dan
+    confianza equivalente para este bug concreto:
+
+    1) Verificamos que add_payment efectivamente emite un SELECT ... FOR
+       UPDATE sobre orders_order — es decir, que el lock existe y se toma
+       sobre la fila correcta antes de crear el pago.
+    2) Un test secuencial de "doble abono" que reproduce el efecto que
+       importa: dos llamadas a add_payment (simulando abonos sucesivos que,
+       sin el lock, podrían haber corrido en paralelo) — la segunda,
+       cuando ya se cubrió el precio acordado, debe seguir siendo
+       rechazada por sobrepago. Esto no prueba directamente la
+       serialización a nivel de threads, pero confirma que el flujo
+       bloqueado sigue leyendo total_paid fresco vía self.order.payments
+       (no un valor cacheado del objeto order pasado desde fuera).
+    """
+
+    def setUp(self):
+        self.admin = UserFactory()
+        self.order = OfflineOrderFactory(agreed_price=Decimal("1000.00"))
+
+    def test_add_payment_toma_lock_select_for_update_sobre_la_orden(self):
+        from orders.services.offline import OfflineOrderService
+
+        with CaptureQueriesContext(connection) as ctx:
+            OfflineOrderService.add_payment(
+                order=self.order, admin_user=self.admin, amount=Decimal("100.00"),
+            )
+
+        locking_queries = [
+            q["sql"] for q in ctx.captured_queries
+            if "orders_order" in q["sql"] and "FOR UPDATE" in q["sql"].upper()
+        ]
+        self.assertTrue(
+            locking_queries,
+            "add_payment debe emitir un SELECT ... FOR UPDATE sobre orders_order",
+        )
+
+    def test_segundo_abono_tras_liquidar_sigue_siendo_rechazado(self):
+        from orders.services.offline import OfflineOrderService
+
+        OfflineOrderService.add_payment(
+            order=self.order, admin_user=self.admin, amount=Decimal("1000.00"),
+        )
+        # Reproduce el escenario post-fix: como add_payment relee la orden
+        # bloqueada y OrderPayment.clean() usa self.order.payments (fresco,
+        # no cacheado), un segundo abono que llega después de que el
+        # primero ya liquidó el precio acordado se sigue rechazando —
+        # exactamente lo que fallaba en la carrera original.
+        with self.assertRaises(ValidationError):
+            OfflineOrderService.add_payment(
+                order=self.order, admin_user=self.admin, amount=Decimal("50.00"),
+            )
+        self.assertEqual(self.order.payment_status, "LIQUIDADO")
+        self.assertEqual(OrderPayment.objects.filter(order=self.order).count(), 1)

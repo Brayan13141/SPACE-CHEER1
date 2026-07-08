@@ -183,7 +183,7 @@
           </table>
         </div>
 
-        {% if order.can_edit_general %}
+        {% if not order.closed %}
           <form method="post" action="{% url 'orders:register_payment' order.id %}" class="row g-2 align-items-end">
             {% csrf_token %}
             <div class="col-sm-3">

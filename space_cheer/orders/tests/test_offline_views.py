@@ -156,6 +156,68 @@ class AdminIntegrationTests(TestCase):
         self.assertContains(resp, "1000")
 
 
+class PaymentFormVisibilityInProductionTests(TestCase):
+    """
+    Finding (Important) del review final: el form de "Registrar abono" se
+    ocultaba con order.can_edit_general, que es False en IN_PRODUCTION —
+    justo el estado donde se cobra el saldo final antes de DELIVERED. La
+    vista register_payment nunca tuvo guard de status (acepta pagos en
+    cualquier estado); el bug era solo de visibilidad en el template.
+    """
+
+    def setUp(self):
+        self.admin = _admin()
+        self.client.force_login(self.admin)
+        from orders.services.offline import OfflineOrderService
+        from orders.services.state import OrderStateService
+
+        # product_type="OTHER" (no UNIFORM, no requiere diseño): evita los
+        # gates de uniform_delivery_date/diseño para poder llegar a
+        # IN_PRODUCTION sin ruido ajeno a este test (mismo patrón que
+        # OfflineTransitionTests._offline_ready_for_delivery en test_offline.py).
+        product = _internal_product(product_type="OTHER")
+        self.order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Doña Mary"},
+            items=[{"product_id": product.pk, "quantity": 1}],
+            agreed_price=Decimal("1000.00"),
+        )
+        # OfflineOrderService.create ya transiciona la orden a PENDING.
+        OrderStateService.transition(self.order, "IN_PRODUCTION", self.admin)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, "IN_PRODUCTION")
+
+    def test_form_de_abono_visible_en_produccion(self):
+        resp = self.client.get(
+            reverse("orders:admin_order_detail", args=[self.order.pk])
+        )
+        self.assertContains(
+            resp, reverse("orders:register_payment", args=[self.order.pk])
+        )
+
+    def test_registrar_abono_funciona_en_produccion(self):
+        resp = self.client.post(
+            reverse("orders:register_payment", args=[self.order.pk]),
+            {"amount": "1000.00", "method": "CASH", "notes": ""},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, "LIQUIDADO")
+
+    def test_form_de_abono_oculto_una_vez_cerrada_la_orden(self):
+        from orders.services.state import OrderStateService
+
+        OrderStateService.transition(self.order, "DELIVERED", self.admin)
+        self.order.refresh_from_db()
+        self.assertTrue(self.order.closed)
+
+        resp = self.client.get(
+            reverse("orders:admin_order_detail", args=[self.order.pk])
+        )
+        self.assertNotContains(
+            resp, reverse("orders:register_payment", args=[self.order.pk])
+        )
+
+
 class ItemMeasurementsPrefillTests(TestCase):
     """Bug: el input medida-<slug> siempre se renderizaba vacío, lo que
     hacía que reenviar el form borrara silenciosamente medidas guardadas
