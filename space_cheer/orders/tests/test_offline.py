@@ -191,6 +191,12 @@ class OfflineTransitionTests(TestCase):
         with self.assertRaises(ValidationError):
             OrderStateService.transition(order, "PENDING", self.admin)
 
+    def test_in_production_valida_fecha_entrega_uniforme(self):
+        order = self._offline_with_item(uniform_delivery_date=None)
+        OrderStateService.transition(order, "PENDING", self.admin)
+        with self.assertRaises(ValidationError):
+            OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
+
     def test_flujo_completo_hasta_produccion_crea_job(self):
         from production.models import ProductionStage, ProductStageConfig
 

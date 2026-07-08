@@ -384,7 +384,13 @@ class OrderStateService:
             if any(item.product.requires_design for item in items):
                 if not order.design_images.filter(is_final=True).exists():
                     raise ValidationError("No hay diseño final aprobado")
-            # Sin measurements_locked: las medidas offline viven en custom_measurements
+            has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+            if has_uniforms and not order.uniform_delivery_date:
+                raise ValidationError(
+                    "Debe establecerse la fecha de entrega del uniforme antes de iniciar producción."
+                )
+            # Sin measurements_locked: las medidas offline viven en custom_measurements.
+            # Sin first_payment_date: el anticipo es opcional en pedidos offline (OrderPayment).
             return
 
         items = list(order.items.select_related("product"))

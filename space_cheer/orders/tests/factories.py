@@ -295,6 +295,9 @@ class OfflineOrderFactory(OrderFactory):
     owner_team = None
     customer = factory.SubFactory("orders.tests.factories.CustomerFactory")
     agreed_price = Decimal("1000.00")
+    uniform_delivery_date = factory.LazyFunction(
+        lambda: (timezone.now() + timedelta(days=30)).date()
+    )
 
 
 class OrderContactInfoFactory(DjangoModelFactory):
