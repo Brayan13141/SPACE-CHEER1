@@ -9,6 +9,9 @@ class OrderNotificationService:
 
     @staticmethod
     def _send_email(subject, to_emails, text_content, html_content=None):
+        if not to_emails:
+            return
+
         email = EmailMultiAlternatives(
             subject=subject,
             body=text_content,
@@ -28,6 +31,8 @@ class OrderNotificationService:
     @classmethod
     def notify_design_approved(cls, order, triggered_by):
         recipients = cls._get_recipients(order)
+        if not recipients:
+            return
 
         subject = f"Orden #{order.id} - Diseño aprobado 🎨"
 
@@ -51,6 +56,8 @@ class OrderNotificationService:
     @classmethod
     def notify_production_started(cls, order, triggered_by):
         recipients = cls._get_recipients(order)
+        if not recipients:
+            return
 
         subject = f"Orden #{order.id} en producción 🏭"
 
@@ -68,6 +75,8 @@ class OrderNotificationService:
     @classmethod
     def notify_order_delivered(cls, order, triggered_by):
         recipients = cls._get_recipients(order)
+        if not recipients:
+            return
 
         subject = f"Orden #{order.id} entregada 📦"
 
@@ -171,5 +180,9 @@ class OrderNotificationService:
             for m in members:
                 if m.user.email:
                     emails.add(m.user.email)
+
+        if order.order_type == "OFFLINE" and order.customer and order.customer.user:
+            if order.customer.user.email:
+                emails.add(order.customer.user.email)
 
         return list(emails)

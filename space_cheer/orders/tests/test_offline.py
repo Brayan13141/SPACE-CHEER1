@@ -1,11 +1,13 @@
 """Tests de pedidos personales (offline): Customer, Order OFFLINE, pagos y servicio."""
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
 from orders.models import Customer, Order, OrderItem, OrderPayment
+from orders.services.state import OrderStateService
 from orders.tests.factories import (
     CustomerFactory,
     OfflineOrderFactory,
@@ -167,3 +169,58 @@ class OrderPaymentTests(TestCase):
         self._pay("100.00")
         with self.assertRaises(ValidationError):
             OrderPayment.objects.filter(order=self.order).delete()
+
+
+class OfflineTransitionTests(TestCase):
+    def setUp(self):
+        from orders.tests.factories import RoleFactory
+        self.admin = UserFactory(roles=[RoleFactory(name="ADMIN")])
+
+    def _offline_with_item(self, **order_kw):
+        order = OfflineOrderFactory(**order_kw)
+        OrderItem.objects.create(order=order, product=_internal_product(), quantity=1)
+        return order
+
+    def test_pending_valida_agreed_price(self):
+        order = self._offline_with_item(agreed_price=None)
+        with self.assertRaises(ValidationError):
+            OrderStateService.transition(order, "PENDING", self.admin)
+
+    def test_pending_valida_items(self):
+        order = OfflineOrderFactory()
+        with self.assertRaises(ValidationError):
+            OrderStateService.transition(order, "PENDING", self.admin)
+
+    def test_flujo_completo_hasta_produccion_crea_job(self):
+        from production.models import ProductionStage, ProductStageConfig
+
+        product = _internal_product()
+        stage = ProductionStage.objects.create(name="Corte", slug="corte-off", display_order=1)
+        ProductStageConfig.objects.create(product=product, stage=stage, display_order=1)
+
+        order = OfflineOrderFactory()
+        OrderItem.objects.create(order=order, product=product, quantity=1)
+
+        OrderStateService.transition(order, "PENDING", self.admin)
+        OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "IN_PRODUCTION")
+        self.assertTrue(hasattr(order, "production_job"))
+        self.assertEqual(order.production_job.tasks.count(), 1)
+
+    @patch("orders.services.notifications.order_notifications.OrderNotificationService._send_email")
+    def test_notificacion_omitida_para_cliente_externo(self, mock_send):
+        order = self._offline_with_item()  # customer sin user
+        OrderStateService.transition(order, "PENDING", self.admin)
+        OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
+        mock_send.assert_not_called()
+
+    @patch("orders.services.notifications.order_notifications.OrderNotificationService._send_email")
+    def test_notificacion_enviada_si_customer_tiene_user(self, mock_send):
+        user = UserFactory(email="cliente@test.com")
+        order = self._offline_with_item(customer=CustomerFactory(user=user))
+        OrderStateService.transition(order, "PENDING", self.admin)
+        OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
+        mock_send.assert_called()
+        args_to = mock_send.call_args[0][1]
+        self.assertIn("cliente@test.com", args_to)
