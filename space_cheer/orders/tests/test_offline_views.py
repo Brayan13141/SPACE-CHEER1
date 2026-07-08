@@ -93,6 +93,24 @@ class OfflineCaptureFlowTests(TestCase):
         order = Order.objects.get(order_type="OFFLINE")
         self.assertEqual(order.items.get().product.name, "Traje mascota")
 
+    def test_post_sin_agreed_price_no_500(self):
+        # POST malformado (sin agreed_price) debe redirigir con error,
+        # no propagar un KeyError sin capturar (500).
+        product = _internal_product()
+        resp = self.client.post(reverse("orders:offline_order_create"), {
+            "customer_mode": "new",
+            "customer_name": "Cliente Sin Precio",
+            "items-TOTAL": "1",
+            "items-0-product_id": str(product.pk),
+            "items-0-quantity": "1",
+            # agreed_price deliberadamente ausente del POST.
+        })
+        self.assertRedirects(
+            resp, reverse("orders:offline_order_create"),
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(Order.objects.filter(order_type="OFFLINE").exists())
+
     def test_registrar_abono(self):
         product = _internal_product()
         from orders.services.offline import OfflineOrderService

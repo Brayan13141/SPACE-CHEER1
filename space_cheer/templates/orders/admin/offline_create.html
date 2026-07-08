@@ -224,6 +224,28 @@ document.addEventListener('DOMContentLoaded', function () {
   var itemRowTemplate = document.getElementById('item-row');
   var itemCount = 0;
 
+  // Renumera todas las filas sobrevivientes para que sus `name="items-N-*"`
+  // (incluyendo el radio de origen "items-N-source") queden contiguos desde 0.
+  // Se llama tras eliminar una fila, para que items-TOTAL y los índices en el
+  // POST coincidan siempre con el número real de filas presentes en el DOM.
+  function renumberRows() {
+    var rows = itemsContainer.querySelectorAll('.item-row');
+    rows.forEach(function (row, index) {
+      row.querySelectorAll('[name]').forEach(function (el) {
+        var match = /^items-\d+-(.+)$/.exec(el.name);
+        if (match) {
+          el.name = 'items-' + index + '-' + match[1];
+        }
+      });
+      var indexLabel = row.querySelector('.item-row-index');
+      if (indexLabel) {
+        indexLabel.textContent = '#' + (index + 1);
+      }
+    });
+    itemCount = rows.length;
+    itemsTotalInput.value = rows.length;
+  }
+
   function addItemRow() {
     var index = itemCount;
     var fragment = itemRowTemplate.content.cloneNode(true);
@@ -261,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     row.querySelector('.remove-item-btn').addEventListener('click', function () {
       row.remove();
-      itemsTotalInput.value = itemsContainer.querySelectorAll('.item-row').length;
+      renumberRows();
     });
 
     itemsContainer.appendChild(fragment);

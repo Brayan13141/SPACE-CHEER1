@@ -19,7 +19,7 @@ def offline_order_create(request):
     if request.method == "POST":
         try:
             order = _create_from_post(request)
-        except (ValidationError, ValueError, InvalidOperation) as exc:
+        except (ValidationError, ValueError, InvalidOperation, KeyError) as exc:
             messages.error(request, f"No se pudo crear el pedido: {exc}")
             return redirect("orders:offline_order_create")
         messages.success(request, f"Pedido offline #{order.pk} creado.")
