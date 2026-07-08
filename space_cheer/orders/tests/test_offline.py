@@ -276,3 +276,85 @@ class OfflineTransitionTests(TestCase):
         OrderStateService.transition(order, "DELIVERED", self.admin)
         order.refresh_from_db()
         self.assertEqual(order.status, "DELIVERED")
+
+
+class OfflineOrderServiceTests(TestCase):
+    def setUp(self):
+        from orders.tests.factories import RoleFactory, SeasonFactory
+        self.admin = UserFactory(roles=[RoleFactory(name="ADMIN")])
+        self.season = SeasonFactory(is_active=True)
+
+    def test_create_con_cliente_nuevo_y_producto_existente(self):
+        from orders.services.offline import OfflineOrderService
+        product = _internal_product()
+        order = OfflineOrderService.create(
+            admin_user=self.admin,
+            customer_data={"name": "Doña Mary", "phone": "4771112233"},
+            items=[{"product_id": product.pk, "quantity": 2, "talla": "M", "notas": "logo dorado"}],
+            agreed_price=Decimal("1500.00"),
+        )
+        self.assertEqual(order.status, "PENDING")
+        self.assertEqual(order.order_type, "OFFLINE")
+        self.assertEqual(order.customer.name, "Doña Mary")
+        item = order.items.get()
+        self.assertEqual(item.quantity, 2)
+        self.assertEqual(item.custom_measurements["talla"], "M")
+
+    def test_create_con_cliente_existente(self):
+        from orders.services.offline import OfflineOrderService
+        customer = CustomerFactory()
+        product = _internal_product()
+        order = OfflineOrderService.create(
+            admin_user=self.admin, customer_id=customer.pk,
+            items=[{"product_id": product.pk, "quantity": 1}],
+            agreed_price=Decimal("500.00"),
+        )
+        self.assertEqual(order.customer, customer)
+
+    def test_create_con_producto_nuevo_al_vuelo(self):
+        from orders.services.offline import OfflineOrderService
+        order = OfflineOrderService.create(
+            admin_user=self.admin,
+            customer_data={"name": "Cliente X"},
+            items=[{"new_product": {"name": "Traje mascota", "base_price": "3500.00"},
+                    "quantity": 1}],
+            agreed_price=Decimal("3500.00"),
+        )
+        item = order.items.get()
+        self.assertEqual(item.product.scope, "INTERNAL")
+        self.assertEqual(item.product.name, "Traje mascota")
+
+    def test_create_con_producto_nuevo_copia_etapas_de_template(self):
+        from orders.services.offline import OfflineOrderService
+        from production.models import ProductionTemplate, ProductionTemplateStage, ProductionStage, ProductStageConfig
+        stage = ProductionStage.objects.create(name="Costura", slug="costura-off", display_order=1)
+        template = ProductionTemplate.objects.create(name="Básico", created_by=self.admin)
+        ProductionTemplateStage.objects.create(template=template, stage=stage, display_order=1)
+        order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Y"},
+            items=[{"new_product": {"name": "Capa", "base_price": "800.00",
+                                    "template_id": template.pk}, "quantity": 1}],
+            agreed_price=Decimal("800.00"),
+        )
+        product = order.items.get().product
+        self.assertEqual(ProductStageConfig.objects.filter(product=product).count(), 1)
+
+    def test_create_con_anticipo_inicial(self):
+        from orders.services.offline import OfflineOrderService
+        product = _internal_product()
+        order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Z"},
+            items=[{"product_id": product.pk, "quantity": 1}],
+            agreed_price=Decimal("1000.00"),
+            initial_payment={"amount": Decimal("400.00"), "method": "CASH", "notes": ""},
+        )
+        self.assertEqual(order.payment_status, "ANTICIPO")
+        self.assertEqual(order.balance_due, Decimal("600.00"))
+
+    def test_create_sin_items_falla(self):
+        from orders.services.offline import OfflineOrderService
+        with self.assertRaises(ValidationError):
+            OfflineOrderService.create(
+                admin_user=self.admin, customer_data={"name": "W"},
+                items=[], agreed_price=Decimal("100.00"),
+            )
