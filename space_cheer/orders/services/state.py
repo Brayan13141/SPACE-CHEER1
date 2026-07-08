@@ -430,6 +430,18 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_delivered(cls, order, user=None):
+        if order.order_type == "OFFLINE":
+            items = list(order.items.select_related("product"))
+            if any(item.product.requires_design for item in items):
+                if order.payment_status != "LIQUIDADO":
+                    raise ValidationError(
+                        "Debe liquidarse el saldo antes de marcar como entregada."
+                    )
+            has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
+            if has_uniforms and not order.uniform_delivery_date:
+                raise ValidationError("Debe establecer la fecha de entrega del uniforme.")
+            return
+
         items = list(order.items.select_related("product"))
 
         # ── final_payment solo si la orden tuvo diseño (fue una orden custom) ──

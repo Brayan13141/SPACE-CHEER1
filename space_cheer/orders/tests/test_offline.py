@@ -11,6 +11,7 @@ from orders.services.state import OrderStateService
 from orders.tests.factories import (
     CustomerFactory,
     OfflineOrderFactory,
+    OrderDesignImageFactory,
     OrderFactory,
     ProductFactory,
     UserFactory,
@@ -230,3 +231,48 @@ class OfflineTransitionTests(TestCase):
         mock_send.assert_called()
         args_to = mock_send.call_args[0][1]
         self.assertIn("cliente@test.com", args_to)
+
+    def _offline_ready_for_delivery(self, *, requires_design, agreed_price=Decimal("1000.00")):
+        """Orden OFFLINE transicionada hasta IN_PRODUCTION, lista para intentar DELIVERED."""
+        order = OfflineOrderFactory(agreed_price=agreed_price)
+        # product_type="OTHER" evita el gate de uniform_delivery_date, que no
+        # es lo que este set de tests quiere ejercitar.
+        if requires_design:
+            product = _internal_product(
+                usage_type="TEAM_CUSTOM", size_strategy="MEASUREMENTS", product_type="OTHER"
+            )
+        else:
+            product = _internal_product(product_type="OTHER")
+        OrderItem.objects.create(order=order, product=product, quantity=1)
+        if requires_design:
+            OrderDesignImageFactory(order=order, is_final=True)
+        OrderStateService.transition(order, "PENDING", self.admin)
+        OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
+        return order
+
+    def test_delivered_offline_con_diseno_exige_payment_status_liquidado(self):
+        order = self._offline_ready_for_delivery(requires_design=True)
+        # anticipo parcial: no liquida el saldo
+        OrderPayment.objects.create(
+            order=order, amount=Decimal("400.00"), method="CASH", registered_by=self.admin,
+        )
+        self.assertEqual(order.payment_status, "ANTICIPO")
+        with self.assertRaises(ValidationError):
+            OrderStateService.transition(order, "DELIVERED", self.admin)
+
+    def test_delivered_offline_con_diseno_pasa_si_liquidado(self):
+        order = self._offline_ready_for_delivery(requires_design=True)
+        OrderPayment.objects.create(
+            order=order, amount=order.agreed_price, method="CASH", registered_by=self.admin,
+        )
+        self.assertEqual(order.payment_status, "LIQUIDADO")
+        OrderStateService.transition(order, "DELIVERED", self.admin)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "DELIVERED")
+
+    def test_delivered_offline_sin_diseno_no_exige_liquidacion(self):
+        order = self._offline_ready_for_delivery(requires_design=False)
+        self.assertEqual(order.payment_status, "SIN_PAGOS")
+        OrderStateService.transition(order, "DELIVERED", self.admin)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "DELIVERED")
