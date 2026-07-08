@@ -3,11 +3,12 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from orders.models import Customer, Order
+from orders.models import Customer, Order, OrderItem
 from orders.tests.factories import (
     CustomerFactory,
     OfflineOrderFactory,
     OrderFactory,
+    ProductFactory,
     UserFactory,
 )
 
@@ -80,3 +81,36 @@ class OrderOfflineTests(TestCase):
         order.customer = CustomerFactory()
         with self.assertRaises(ValidationError):
             order.save()
+
+
+def _internal_product(**kw):
+    kw.setdefault("scope", "INTERNAL")
+    kw.setdefault("usage_type", "GLOBAL")
+    kw.setdefault("size_strategy", "NONE")
+    return ProductFactory(**kw)
+
+
+class OrderItemOfflineTests(TestCase):
+    def test_item_offline_guarda_custom_measurements(self):
+        order = OfflineOrderFactory()
+        item = OrderItem(
+            order=order,
+            product=_internal_product(),
+            quantity=1,
+            custom_measurements={"talla": "M", "notas": "logo dorado", "medidas": {}},
+        )
+        item.save()
+        item.refresh_from_db()
+        self.assertEqual(item.custom_measurements["talla"], "M")
+
+    def test_producto_internal_rechazado_en_orden_personal(self):
+        order = OrderFactory()  # PERSONAL
+        item = OrderItem(order=order, product=_internal_product(), quantity=1)
+        with self.assertRaises(ValidationError):
+            item.save()
+
+    def test_producto_catalog_rechazado_en_orden_offline(self):
+        order = OfflineOrderFactory()
+        item = OrderItem(order=order, product=ProductFactory(), quantity=1)
+        with self.assertRaises(ValidationError):
+            item.save()

@@ -537,6 +537,9 @@ class OrderItem(models.Model):
         "products.ProductSizeVariant", null=True, blank=True, on_delete=models.PROTECT
     )
 
+    # Solo órdenes OFFLINE: {"talla": str, "notas": str, "medidas": {slug: valor}}
+    custom_measurements = models.JSONField(null=True, blank=True)
+
     class Meta:
         # Índices para mejorar rendimiento en búsquedas frecuentes
         indexes = [
@@ -674,6 +677,15 @@ class OrderItem(models.Model):
                 )
             if product.owner_team_id != order.owner_team_id:
                 raise ValidationError("El producto no pertenece a este equipo")
+
+        if product.scope == "INTERNAL" and order.order_type != "OFFLINE":
+            raise ValidationError(
+                "Los productos internos solo pueden usarse en pedidos offline"
+            )
+        if order.order_type == "OFFLINE" and product.scope != "INTERNAL":
+            raise ValidationError(
+                "Los pedidos offline solo aceptan productos internos"
+            )
 
     def _validate_athlete_rules(self):
         """
