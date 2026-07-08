@@ -162,3 +162,8 @@ class OrderPaymentTests(TestCase):
             pago.save()
         with self.assertRaises(ValidationError):
             pago.delete()
+
+    def test_pagos_inmutables_via_queryset_delete(self):
+        self._pay("100.00")
+        with self.assertRaises(ValidationError):
+            OrderPayment.objects.filter(order=self.order).delete()

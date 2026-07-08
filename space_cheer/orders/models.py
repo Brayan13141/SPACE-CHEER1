@@ -12,6 +12,8 @@ from teams.models import Team
 from django.core.exceptions import ValidationError
 from products.models import Product
 from django.db.models import Sum, Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from core.file_utils import design_upload_path, validate_image_magic, validate_min_size_35mb
 from teams.models import UserTeamMembership
 
@@ -1090,3 +1092,14 @@ class OrderPayment(models.Model):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Los pagos no se eliminan; registra un ajuste con notas")
+
+
+@receiver(pre_delete, sender=OrderPayment)
+def _orderpayment_block_queryset_delete(sender, instance, **kwargs):
+    """
+    Bloquea también el borrado vía QuerySet.delete()/cascada, que no pasa por
+    OrderPayment.delete(). Conectar este receptor obliga a Django a resolver
+    cada instancia antes de borrar (sin esto, un delete() masivo sin objetos
+    relacionados puede tomar el atajo SQL directo y saltarse la instancia).
+    """
+    raise ValidationError("Los pagos no se eliminan; registra un ajuste con notas")
