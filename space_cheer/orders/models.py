@@ -3,6 +3,7 @@
 # Incluye órdenes, items de producto, asignación de atletas, medidas personalizadas,
 # imágenes de diseño y registro de cambios.
 
+from decimal import Decimal
 from functools import cached_property
 from django.db import models
 from django.conf import settings
@@ -201,6 +202,25 @@ class Order(models.Model):
     @property
     def total(self):
         return self.items.aggregate(total=Sum("subtotal"))["total"] or 0
+
+    @property
+    def total_paid(self):
+        return self.payments.aggregate(t=Sum("amount"))["t"] or Decimal("0")
+
+    @property
+    def balance_due(self):
+        if self.agreed_price is None:
+            return None
+        return self.agreed_price - self.total_paid
+
+    @property
+    def payment_status(self):
+        paid = self.total_paid
+        if not paid:
+            return "SIN_PAGOS"
+        if self.agreed_price is not None and paid >= self.agreed_price:
+            return "LIQUIDADO"
+        return "ANTICIPO"
 
     @cached_property
     def total_quantity(self):
@@ -1018,3 +1038,55 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.phone})" if self.phone else self.name
+
+
+class OrderPayment(models.Model):
+    """
+    Abono a un pedido (anticipo o pago). Inmutable una vez registrado:
+    los errores se corrigen con un ajuste anotado, nunca editando.
+    """
+
+    METHOD_CHOICES = [
+        ("CASH", "Efectivo"),
+        ("TRANSFER", "Transferencia"),
+        ("OTHER", "Otro"),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default="CASH")
+    paid_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+    registered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        related_name="payments_registered",
+    )
+
+    class Meta:
+        ordering = ["paid_at"]
+
+    def __str__(self):
+        return f"Pago ${self.amount} — Orden #{self.order_id}"
+
+    def clean(self):
+        if self.amount is None or self.amount <= 0:
+            raise ValidationError("El monto debe ser mayor a cero")
+        if self.order.agreed_price is None:
+            raise ValidationError("La orden no tiene precio acordado")
+        paid = self.order.payments.exclude(pk=self.pk).aggregate(
+            t=Sum("amount")
+        )["t"] or Decimal("0")
+        if paid + self.amount > self.order.agreed_price:
+            raise ValidationError(
+                "El total pagado no puede exceder el precio acordado "
+                f"(pagado ${paid} + ${self.amount} > ${self.order.agreed_price})"
+            )
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Los pagos no se editan; registra un ajuste con notas")
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Los pagos no se eliminan; registra un ajuste con notas")

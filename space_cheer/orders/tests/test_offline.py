@@ -1,9 +1,11 @@
 """Tests de pedidos personales (offline): Customer, Order OFFLINE, pagos y servicio."""
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from orders.models import Customer, Order, OrderItem
+from orders.models import Customer, Order, OrderItem, OrderPayment
 from orders.tests.factories import (
     CustomerFactory,
     OfflineOrderFactory,
@@ -114,3 +116,49 @@ class OrderItemOfflineTests(TestCase):
         item = OrderItem(order=order, product=ProductFactory(), quantity=1)
         with self.assertRaises(ValidationError):
             item.save()
+
+
+class OrderPaymentTests(TestCase):
+    def setUp(self):
+        self.admin = UserFactory()
+        self.order = OfflineOrderFactory(agreed_price=Decimal("1000.00"))
+
+    def _pay(self, amount):
+        return OrderPayment.objects.create(
+            order=self.order, amount=Decimal(amount),
+            method="CASH", registered_by=self.admin,
+        )
+
+    def test_balance_y_estado(self):
+        self.assertEqual(self.order.payment_status, "SIN_PAGOS")
+        self._pay("400.00")
+        self.assertEqual(self.order.total_paid, Decimal("400.00"))
+        self.assertEqual(self.order.balance_due, Decimal("600.00"))
+        self.assertEqual(self.order.payment_status, "ANTICIPO")
+        self._pay("600.00")
+        self.assertEqual(self.order.payment_status, "LIQUIDADO")
+
+    def test_pago_no_puede_exceder_agreed_price(self):
+        self._pay("900.00")
+        with self.assertRaises(ValidationError):
+            self._pay("200.00")
+
+    def test_monto_debe_ser_positivo(self):
+        with self.assertRaises(ValidationError):
+            self._pay("0.00")
+
+    def test_pago_sin_agreed_price_rechazado(self):
+        order = OfflineOrderFactory(agreed_price=None)
+        with self.assertRaises(ValidationError):
+            OrderPayment.objects.create(
+                order=order, amount=Decimal("100.00"),
+                method="CASH", registered_by=self.admin,
+            )
+
+    def test_pagos_inmutables(self):
+        pago = self._pay("100.00")
+        pago.amount = Decimal("999.00")
+        with self.assertRaises(ValidationError):
+            pago.save()
+        with self.assertRaises(ValidationError):
+            pago.delete()
