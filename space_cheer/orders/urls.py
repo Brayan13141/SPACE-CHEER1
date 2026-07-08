@@ -104,4 +104,25 @@ urlpatterns = [
         views.lock_measurements,
         name="lock_measurements",
     ),
+    # ================================================ Pedidos offline (captura admin) ====
+    path(
+        "admin/offline/nuevo/",
+        views.offline_order_create,
+        name="offline_order_create",
+    ),
+    path(
+        "admin/clientes/",
+        views.customer_list,
+        name="customer_list",
+    ),
+    path(
+        "admin/orders/<int:order_id>/pagos/",
+        views.register_payment,
+        name="register_payment",
+    ),
+    path(
+        "admin/items/<int:item_id>/medidas-offline/",
+        views.offline_item_measurements,
+        name="offline_item_measurements",
+    ),
 ]
