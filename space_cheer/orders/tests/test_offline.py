@@ -271,9 +271,21 @@ class OfflineTransitionTests(TestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, "DELIVERED")
 
-    def test_delivered_offline_sin_diseno_no_exige_liquidacion(self):
+    def test_delivered_offline_sin_diseno_exige_liquidacion(self):
+        """F3: el gate LIQUIDADO aplica a TODO pedido OFFLINE, tenga diseño o no
+        (hallazgo 6.1 — antes solo aplicaba con diseño y casi ningún producto
+        offline lo requiere, dejando entregar con saldo pendiente)."""
         order = self._offline_ready_for_delivery(requires_design=False)
         self.assertEqual(order.payment_status, "SIN_PAGOS")
+        with self.assertRaises(ValidationError):
+            OrderStateService.transition(order, "DELIVERED", self.admin)
+
+    def test_delivered_offline_sin_diseno_pasa_si_liquidado(self):
+        order = self._offline_ready_for_delivery(requires_design=False)
+        OrderPayment.objects.create(
+            order=order, amount=order.agreed_price, method="CASH", registered_by=self.admin,
+        )
+        self.assertEqual(order.payment_status, "LIQUIDADO")
         OrderStateService.transition(order, "DELIVERED", self.admin)
         order.refresh_from_db()
         self.assertEqual(order.status, "DELIVERED")

@@ -776,16 +776,21 @@
                 <h5 class="modal-title" id="modalCancelledLabel">✖ {% trans "Confirmar cancelación" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
               </div>
-              <div class="modal-body">
-                {% trans "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?" %}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "No, mantener pedido" %}</button>
-                <form method="post" action="{% url 'orders:transition_admin' order.id 'CANCELLED' %}">
-                  {% csrf_token %}
+              <form method="post" action="{% url 'orders:transition_admin' order.id 'CANCELLED' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <p>{% trans "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?" %}</p>
+                  <label for="adminCancelOrderReason" class="form-label">
+                    {% trans "Motivo de la cancelación (opcional)" %}
+                  </label>
+                  <textarea class="form-control" id="adminCancelOrderReason" name="reason" rows="3"
+                            placeholder="{% trans 'Ej. el cliente ya no lo necesita, se pidió por error…' %}"></textarea>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "No, mantener pedido" %}</button>
                   <button type="submit" class="btn btn-danger fw-semibold">✖ {% trans "Sí, cancelar pedido" %}</button>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>

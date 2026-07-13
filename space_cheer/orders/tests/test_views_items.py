@@ -19,6 +19,35 @@ from orders.tests.factories import (
 
 
 @pytest.mark.django_db
+class OrderItemDetailCanImportAthletesTests(TestCase):
+    """Hallazgo 4.1: el botón 'Importar atletas' debe depender de
+    order.order_type == 'TEAM' y product.requires_athletes, no de
+    product.requires_team (que es False para ATHLETE_CUSTOM)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.coach = CoachFactory()
+        self.team = TeamFactory(coach=self.coach)
+        self.order = TeamOrderFactory(owner_team=self.team, created_by=self.coach)
+        self.client.force_login(self.coach)
+
+    def test_athlete_custom_product_in_team_order_shows_import_button(self):
+        product = ProductWithMeasurementsFactory(
+            usage_type="ATHLETE_CUSTOM",
+            scope="CATALOG",
+        )
+        item = OrderItemFactory(order=self.order, product=product)
+
+        self.assertFalse(product.requires_team)
+        self.assertTrue(product.requires_athletes)
+
+        url = reverse("orders:order_item_detail", kwargs={"item_id": item.id})
+        response = self.client.get(url)
+
+        self.assertTrue(response.context["can_import_athletes"])
+
+
+@pytest.mark.django_db
 class OrderItemDetailViewTests(TestCase):
 
     def setUp(self):

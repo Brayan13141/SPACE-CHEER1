@@ -244,6 +244,35 @@ class OrderItemAthleteModelTests(TestCase):
 
         self.assertFalse(athlete_item.has_complete_measurements())
 
+    def test_athlete_has_complete_measurements_false_when_product_has_no_fields_configured(self):
+        """F7 (hallazgo 4.3): un producto MEASUREMENTS sin ningún
+        ProductMeasurementField configurado no debe pasar como 'Completo'
+        vacuamente — significa que el producto está mal configurado, no que
+        no falte nada por capturar."""
+        product = ProductFactory(usage_type="TEAM_CUSTOM", size_strategy="MEASUREMENTS")
+        # ProductFactory auto-corrige productos MEASUREMENTS sin campos (ver
+        # ensure_domain_consistency) — se borran para reproducir el estado
+        # real observado (producto MEASUREMENTS con 0 ProductMeasurementField).
+        product.measurement_fields.all().delete()
+
+        order = TeamOrderFactory()
+        item = OrderItemFactory(order=order, product=product)
+
+        athlete = AthleteFactory()
+        UserTeamMembershipFactory(
+            team=order.owner_team,
+            user=athlete,
+            role_in_team="ATHLETE",
+            status="accepted",
+        )
+
+        athlete_item = OrderItemAthleteFactory(
+            order_item=item,
+            athlete=athlete,
+        )
+
+        self.assertFalse(athlete_item.has_complete_measurements())
+
 
 class OrderContactInfoModelTests(TestCase):
     """Tests para OrderContactInfo"""

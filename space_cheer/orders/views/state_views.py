@@ -52,6 +52,7 @@ def _do_transition(request, order_id, to_status, is_admin=False):
             order=order,
             to_status=to_status,
             user=request.user,
+            notes=request.POST.get("reason", ""),
         )
         messages.success(request, f"Orden actualizada a {to_status}.")
 

@@ -128,6 +128,26 @@ class OfflineCaptureFlowTests(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(order.payment_status, "LIQUIDADO")
 
+    def test_registrar_abono_excede_precio_muestra_mensaje_limpio(self):
+        """F11 (hallazgo 6.3): el error de sobrepago no debe exponer el
+        dict crudo de ValidationError ({'__all__': [...]})."""
+        product = _internal_product()
+        from orders.services.offline import OfflineOrderService
+        order = OfflineOrderService.create(
+            admin_user=self.admin, customer_data={"name": "Sobrepago"},
+            items=[{"product_id": product.pk, "quantity": 1}],
+            agreed_price=Decimal("1000.00"),
+        )
+        resp = self.client.post(
+            reverse("orders:register_payment", args=[order.pk]),
+            {"amount": "1200.00", "method": "TRANSFER", "notes": ""},
+            follow=True,
+        )
+        messages_text = " ".join(str(m) for m in resp.context["messages"])
+        self.assertIn("exceder", messages_text)
+        self.assertNotIn("__all__", messages_text)
+        self.assertNotIn("{", messages_text)
+
 
 class AdminIntegrationTests(TestCase):
     def setUp(self):
@@ -204,8 +224,14 @@ class PaymentFormVisibilityInProductionTests(TestCase):
         self.assertEqual(self.order.payment_status, "LIQUIDADO")
 
     def test_form_de_abono_oculto_una_vez_cerrada_la_orden(self):
+        from orders.models import OrderPayment
         from orders.services.state import OrderStateService
 
+        # F3: OFFLINE exige LIQUIDADO siempre para poder entregar.
+        OrderPayment.objects.create(
+            order=self.order, amount=self.order.agreed_price,
+            method="CASH", registered_by=self.admin,
+        )
         OrderStateService.transition(self.order, "DELIVERED", self.admin)
         self.order.refresh_from_db()
         self.assertTrue(self.order.closed)
