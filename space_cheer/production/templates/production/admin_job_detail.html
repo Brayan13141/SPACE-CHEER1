@@ -28,6 +28,18 @@
     {% endfor %}
   {% endif %}
 
+  {% if items_without_tasks %}
+    <div class="alert alert-warning">
+      <strong>⚠️ {{ items_without_tasks|length }} artículo{{ items_without_tasks|pluralize }} sin seguimiento de producción:</strong>
+      su producto no tiene etapas configuradas, así que no generó ninguna tarea.
+      <ul class="mb-0 mt-2">
+        {% for item in items_without_tasks %}
+          <li>{{ item.product.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <h5 class="mb-3">Tareas de producción</h5>
 
   {% for task in job.tasks.all %}

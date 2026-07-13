@@ -2,26 +2,32 @@
 Generador de Manual de Juez — Space Cheer (cobertura completa)
 """
 import base64
+import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+
+sys.path.insert(0, str(Path(__file__).parent))
+from highlight_utils import capture_with_button
 
 LOGO_PATH  = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/space_cheer/static/IMAGES/Logo_sin_fondo_blanco.png")
 BASE_URL   = "http://127.0.0.1:8000"
 OUTPUT_PDF = "C:/Users/Lenovo/Documents/SPACE-CHEER/manual_juez.pdf"
 USERNAME   = "juez_test"
 PASSWORD   = "Test1234!"
+SCREENSHOTS_DIR = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_juez_screenshots")
 
+# (url_path, filename, from_path, link_text_hint)
 PAGES = [
-    ("/",                              "home"),
-    ("/events/",                       "eventos_lista"),
-    ("/events/8/",                     "evento_grandprix"),
-    ("/events/9/",                     "evento_copa"),
-    ("/events/8/judge/",               "panel_juez_8"),
-    ("/events/9/judge/",               "panel_juez_9"),
-    ("/hospitality/event/8/my-stay/",  "mi_estancia"),
-    ("/hospitality/event/8/preferences/", "preferencias"),
-    ("/accounts/profile/edit/",        "perfil_editar"),
-    ("/accounts/profile/settings/",    "perfil_config"),
+    ("/",                              "home",              None,                None),
+    ("/events/",                       "eventos_lista",     "/",                 "Competencias"),
+    ("/events/8/",                     "evento_grandprix",  "/events/",          "Grand Prix"),
+    ("/events/9/",                     "evento_copa",       "/events/",          "Copa Galaxia"),
+    ("/events/8/judge/",               "panel_juez_8",      "/events/8/",        "Juez"),
+    ("/events/9/judge/",               "panel_juez_9",      "/events/9/",        "Juez"),
+    ("/hospitality/event/8/my-stay/",  "mi_estancia",       "/events/8/",        "Hospitalidad"),
+    ("/hospitality/event/8/preferences/", "preferencias",   "/hospitality/event/8/my-stay/", "Preferencias"),
+    ("/accounts/profile/edit/",        "perfil_editar",     "/",                 "Perfil"),
+    ("/accounts/profile/settings/",    "perfil_config",     "/accounts/profile/edit/", "Configuración"),
 ]
 
 
@@ -60,18 +66,35 @@ def capture():
         print(f"  Login -> {page.url}")
         print("  OK /accounts/login/")
 
-        for path, key in PAGES:
+        SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+        for path, key, from_path, link_hint in PAGES:
             try:
-                page.goto(f"{BASE_URL}{path}", wait_until="load")
+                result = capture_with_button(
+                    page, BASE_URL, SCREENSHOTS_DIR,
+                    from_path=from_path, to_path=path, filename=key,
+                    link_text_hint=link_hint,
+                )
                 final = page.url.replace(BASE_URL, "")
 
-                # Always capture — even if redirected
-                shots[key] = base64.b64encode(page.screenshot(full_page=True)).decode()
+                if result["ok"]:
+                    with open(result["path"], "rb") as f:
+                        shots[key] = base64.b64encode(f.read()).decode()
+                else:
+                    # Se captura igual la pantalla a la que redirigió, para
+                    # documentar el comportamiento real (ej. acceso denegado).
+                    shots[key] = base64.b64encode(page.screenshot(full_page=True)).decode()
 
                 if path != "/" and not final.rstrip("/").startswith(path.rstrip("/")):
                     print(f"  -- {path} REDIRECTED -> {final} (capturado igualmente)")
                 else:
                     print(f"  OK {path}")
+
+                if result["button_ok"]:
+                    with open(result["button_path"], "rb") as f:
+                        shots[f"{key}_boton"] = base64.b64encode(f.read()).decode()
+                    print(f"       BOTON OK: {result['button_path']}")
+                elif from_path:
+                    print(f"       BOTON no encontrado (origen: {from_path}, hint: {link_hint})")
 
             except Exception as e:
                 print(f"  ERR {path}: {e}")
@@ -88,6 +111,18 @@ def build_html(shots, json_responses, logo):
             f'<div class="ss-wrap"><img src="data:image/png;base64,{shots[key]}" alt="{key}"></div>'
             + (f'<p class="ss-cap">{cap}</p>' if cap else "")
         )
+
+    def ssb(key, cap=""):
+        """Como ss(), pero antepone la captura con el botón resaltado (si existe)."""
+        button_key = f"{key}_boton"
+        button_html = ""
+        if button_key in shots:
+            button_html = (
+                '<p class="button-caption">&#128073; Así se llega a esta pantalla &mdash; '
+                'el botón resaltado en rojo:</p>'
+                f'<div class="ss-wrap screenshot-button"><img src="data:image/png;base64,{shots[button_key]}" alt="Botón hacia {key}"></div>'
+            )
+        return button_html + ss(key, cap)
 
     def json_block(key):
         content = json_responses.get(key, "")
@@ -143,6 +178,12 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 .status-done{{background:#f3f4f6;color:#374151}}
 .backcover{{background:linear-gradient(160deg,#1a0d0d,#3d1a0a);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px}}
 .backcover p{{color:#fca5a5}}
+.button-caption{{color:#b91c1c;font-size:9pt;font-weight:600;margin:14px 0 4px}}
+.screenshot-button img{{box-shadow:0 2px 12px rgba(0,0,0,.2),0 0 0 2px #ef4444}}
+.use-case{{background:#fff5f5;border:1px solid #fca5a5;border-left:4px solid #dc2626;border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0}}
+.use-case-title{{color:#b91c1c;font-weight:700;font-size:10.5pt;margin-bottom:8px}}
+.use-case ol{{margin:6px 0 0 18px;padding:0}}
+.use-case li{{color:#374151;font-size:9.5pt;margin-bottom:4px}}
 </style></head><body>
 
 <!-- PORTADA -->
@@ -181,7 +222,7 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Directorio de Competencias</h3>
   <p>En <strong>/events/</strong> se muestra el catalogo de todos los eventos registrados en el sistema. Como juez veras los eventos donde estas asignado.</p>
-  {ss("eventos_lista", "Listado de todos los eventos")}
+  {ssb("eventos_lista", "Listado de todos los eventos")}
 
   <table>
     <tr><th>Campo</th><th>Descripcion</th></tr>
@@ -193,11 +234,11 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Detalle: Grand Prix (Evento 8 — REGISTRATION_OPEN)</h3>
   <p>El Grand Prix es el evento activo donde estas asignado como juez. Su estado es <strong>REGISTRATION_OPEN</strong>, lo que significa que la evaluacion esta disponible.</p>
-  {ss("evento_grandprix", "Pagina de detalle del Grand Prix (evento activo)")}
+  {ssb("evento_grandprix", "Pagina de detalle del Grand Prix (evento activo)")}
 
   <h3>Detalle: Copa Galaxia (Evento 9 — COMPLETED)</h3>
   <p>La Copa Galaxia es un evento ya finalizado. Puede mostrarse en modo de solo lectura con los resultados definitivos.</p>
-  {ss("evento_copa", "Pagina de detalle de Copa Galaxia (evento completado)")}
+  {ssb("evento_copa", "Pagina de detalle de Copa Galaxia (evento completado)")}
 </div>
 
 <!-- § 3 PANEL DE EVALUACION -->
@@ -207,7 +248,7 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Panel de Juez — Grand Prix (Evento 8, activo)</h3>
   <p>Como juez asignado al Grand Prix (pk=8), tienes acceso completo al formulario de evaluacion. Aqui ingresaras los puntajes para cada equipo durante la competencia.</p>
-  {ss("panel_juez_8", "Panel de evaluacion en tiempo real — Grand Prix")}
+  {ssb("panel_juez_8", "Panel de evaluacion en tiempo real — Grand Prix")}
 
   <ol class="steps">
     <li><strong>Selecciona el equipo a evaluar</strong><span>El panel muestra la lista de equipos participantes en turno. Selecciona el equipo que se esta presentando.</span></li>
@@ -219,10 +260,19 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <div class="warn"><strong>Imparcialidad:</strong> Las evaluaciones se registran con tu usuario y son auditables por el organizador. Califica objetivamente segun el reglamento vigente del evento.</div>
   <div class="info"><strong>Sin modificaciones:</strong> Una vez confirmada la puntuacion, no podra modificarse sin autorizacion expresa del organizador del evento.</div>
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Evaluar un equipo durante la competencia</div>
+    <ol>
+      <li>Desde el detalle del evento activo, entra al <strong>Panel de Juez</strong>.</li>
+      <li>Selecciona el equipo que se está presentando en ese momento.</li>
+      <li>Llena cada categoría de evaluación según el reglamento del evento.</li>
+      <li>Revisa los puntajes y confirma el envío &mdash; una vez enviado, no se puede editar sin autorización del organizador.</li>
+    </ol>
+  </div>
 
   <h3>Panel de Juez — Copa Galaxia (Evento 9, completado)</h3>
   <p>La Copa Galaxia ya ha concluido. El panel puede mostrar los resultados finales o estar en modo de solo lectura.</p>
-  {ss("panel_juez_9", "Panel de evaluacion — Copa Galaxia (evento completado)")}
+  {ssb("panel_juez_9", "Panel de evaluacion — Copa Galaxia (evento completado)")}
 
   <table>
     <tr><th>Accion</th><th>Descripcion</th></tr>
@@ -240,11 +290,11 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Mi Estancia</h3>
   <p>La seccion <strong>Mi Estancia</strong> muestra los detalles de tu alojamiento asignado para el Grand Prix: hotel, habitacion, fechas de check-in y check-out.</p>
-  {ss("mi_estancia", "Mi Estancia — detalles del alojamiento (Grand Prix)")}
+  {ssb("mi_estancia", "Mi Estancia — detalles del alojamiento (Grand Prix)")}
 
   <h3>Preferencias</h3>
   <p>En <strong>Preferencias</strong> puedes indicar necesidades especiales: tipo de habitacion, restricciones alimentarias, accesibilidad u otras solicitudes al organizador.</p>
-  {ss("preferencias", "Formulario de preferencias de estancia")}
+  {ssb("preferencias", "Formulario de preferencias de estancia")}
 
   <div class="tip"><strong>Recomendacion:</strong> Completa tus preferencias lo antes posible para que el organizador pueda gestionarlas con suficiente anticipacion al evento.</div>
 
@@ -263,7 +313,7 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Editar Perfil</h3>
   <p>Desde <strong>Editar Perfil</strong> puedes actualizar tu nombre, apellidos, foto, numero de contacto y cualquier otro dato personal.</p>
-  {ss("perfil_editar", "Formulario de edicion de perfil")}
+  {ssb("perfil_editar", "Formulario de edicion de perfil")}
 
   <ol class="steps">
     <li><strong>Accede a "Mi Perfil"</strong><span>Haz clic en tu nombre o avatar en la barra superior de navegacion.</span></li>
@@ -274,7 +324,7 @@ ol.steps li span{{color:#4b5563;font-size:9.5pt}}
 
   <h3>Configuracion de Cuenta</h3>
   <p>En <strong>Configuracion</strong> puedes cambiar tu contrasena, ajustar notificaciones y gestionar la seguridad de tu cuenta.</p>
-  {ss("perfil_config", "Configuracion de cuenta y seguridad")}
+  {ssb("perfil_config", "Configuracion de cuenta y seguridad")}
 
   <div class="info"><strong>Contrasena:</strong> Si necesitas cambiar tu contrasena de acceso, hazlo desde esta seccion. Usa una contrasena segura de al menos 8 caracteres con letras y numeros.</div>
 </div>

@@ -102,6 +102,37 @@ class TransitionOrderViewTests(TestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, "CANCELLED")
 
+    def test_cancel_captures_custom_reason(self):
+        """F10 (hallazgo 5.3): el modal de cancelación debe poder registrar
+        el motivo real, no siempre el texto genérico."""
+        order = OrderFactory(created_by=self.coach, owner_user=self.coach)
+        url = reverse(
+            "orders:transition",
+            kwargs={
+                "order_id": order.id,
+                "to_status": "CANCELLED",
+            },
+        )
+        response = self.client.post(
+            url, {"reason": "Cliente canceló por falta de pago"}
+        )
+        self.assertEqual(response.status_code, 302)
+        order.refresh_from_db()
+        self.assertEqual(order.cancelled_reason, "Cliente canceló por falta de pago")
+
+    def test_cancel_without_reason_uses_default_text(self):
+        order = OrderFactory(created_by=self.coach, owner_user=self.coach)
+        url = reverse(
+            "orders:transition",
+            kwargs={
+                "order_id": order.id,
+                "to_status": "CANCELLED",
+            },
+        )
+        self.client.post(url)
+        order.refresh_from_db()
+        self.assertEqual(order.cancelled_reason, "Cancelado por el usuario")
+
     def test_cancel_redirects_to_order_detail(self):
         order = OrderFactory(created_by=self.coach, owner_user=self.coach)
         url = reverse(

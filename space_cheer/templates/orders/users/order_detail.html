@@ -747,17 +747,21 @@
     <div class="row g-2">
       {% for status in available_transitions %}
         <div class="col-12 col-md-6 col-lg-4">
+          {% if status == 'CANCELLED' %}
+            <button type="button"
+                    class="btn w-100 d-flex align-items-center justify-content-center py-3 btn-outline-danger"
+                    data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+              <i class="bi bi-x-circle me-2"></i><span>{% trans "Cancelar pedido" %}</span>
+            </button>
+          {% else %}
           <form method="post" action="{% url 'orders:transition' order.id status %}">
             {% csrf_token %}
             <button type="submit"
                     class="btn w-100 d-flex align-items-center justify-content-center py-3
-                      {% if status == 'CANCELLED' %}btn-outline-danger
-                      {% elif status == 'PENDING' %}btn-success
+                      {% if status == 'PENDING' %}btn-success
                       {% else %}btn-outline-primary{% endif %}">
               {% if status == 'PENDING' %}
                 <i class="bi bi-send me-2"></i><span>{% trans "Enviar pedido" %}</span>
-              {% elif status == 'CANCELLED' %}
-                <i class="bi bi-x-circle me-2"></i><span>{% trans "Cancelar pedido" %}</span>
               {% elif status == 'DESIGN_APPROVED' %}
                 <i class="bi bi-palette-fill me-2"></i><span>{% trans "Aprobar diseño" %}</span>
               {% elif status == 'IN_PRODUCTION' %}
@@ -770,6 +774,7 @@
               {% endif %}
             </button>
           </form>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
@@ -788,6 +793,36 @@
 
 </div>
 
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title">
+          <i class="bi bi-x-circle text-danger me-2"></i>{% trans "Cancelar pedido" %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'orders:transition' order.id 'CANCELLED' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label for="cancelOrderReason" class="form-label">
+            {% trans "Motivo de la cancelación (opcional)" %}
+          </label>
+          <textarea class="form-control" id="cancelOrderReason" name="reason" rows="3"
+                    placeholder="{% trans 'Ej. el cliente ya no lo necesita, se pidió por error…' %}"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            {% trans "Volver" %}
+          </button>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-x-circle me-1"></i>{% trans "Sí, cancelar pedido" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% if can_edit %}
 <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-hidden="true">

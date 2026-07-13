@@ -75,7 +75,7 @@ def order_item_detail(request, item_id):
     # PERMISOS UI — ahora con lógica real
     # -------------------------------------------------
     can_import_athletes = (
-        requires_team
+        order.order_type == "TEAM"
         and requires_athlete
         and order.can_edit_general()  # ← solo si la orden es editable
     )

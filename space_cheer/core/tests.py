@@ -97,6 +97,8 @@ class GetHelpTextTests(TestCase):
 class PageHelpContextProcessorTests(TestCase):
 
     def _get(self, user, url_name, **kwargs):
+        from django.core.cache import cache
+        cache.clear()  # core:privacy usa @cache_page; el hit cacheado no trae context
         client = Client()
         client.force_login(user)
         return client.get(reverse(url_name, **kwargs))
@@ -108,9 +110,9 @@ class PageHelpContextProcessorTests(TestCase):
         self.assertIn("administración", response.context["page_help_text"])
 
     def test_page_help_text_empty_for_unregistered_view(self):
-        # accounts:profile_settings has no registry entry
+        # core:privacy intencionalmente sin entrada en el registry (página legal)
         user = make_user_with_role("ADMIN")
-        response = self._get(user, "accounts:profile_settings")
+        response = self._get(user, "core:privacy")
         self.assertEqual(response.context["page_help_text"], "")
 
     def test_page_help_cards_present_for_admin_dashboard(self):
@@ -121,7 +123,7 @@ class PageHelpContextProcessorTests(TestCase):
 
     def test_page_help_cards_empty_for_unregistered_view(self):
         user = make_user_with_role("ADMIN")
-        response = self._get(user, "accounts:profile_settings")
+        response = self._get(user, "core:privacy")
         self.assertEqual(response.context["page_help_cards"], [])
 
     def test_page_help_text_is_first_card(self):
@@ -264,9 +266,124 @@ class GetHelpCardsTests(TestCase):
         self.assertEqual(text, cards[0])
 
 
+class RegistryFullCoverageTests(TestCase):
+    """Toda página navegable (GET con template) debe tener ayuda registrada.
+
+    Se excluyen: red social (decisión de producto), páginas legales
+    (privacy/terminos), páginas de allauth (usuario anónimo → sin FAB) y
+    endpoints solo-POST/JSON que no renderizan página propia.
+    """
+
+    def _user(self, *role_names):
+        user = MagicMock()
+        user.is_authenticated = True
+        user.help_dismissed = False
+        user.roles.values_list.return_value = list(role_names)
+        return user
+
+    # (view_name, rol con el que debe resolver ayuda)
+    EXPECTED_COVERAGE = [
+        # core
+        ("core:landing", "ATHLETE"),
+        ("core:manage_landing", "ADMIN"),
+        ("core:contact", "ATHLETE"),
+        # accounts
+        ("accounts:profile_settings", "ATHLETE"),
+        ("accounts:list_address", "ATHLETE"),
+        ("accounts:create_address", "ATHLETE"),
+        ("accounts:update_address", "ATHLETE"),
+        ("accounts:curp_verification", "ATHLETE"),
+        ("accounts:bulk_import_athletes", "HEADCOACH"),
+        ("accounts:coach_pending_approval", "HEADCOACH"),
+        ("accounts:coach_rejected", "HEADCOACH"),
+        ("accounts:account_deactivate", "ATHLETE"),
+        # guardian / custodia
+        ("guardian:assign_guardian", "HEADCOACH"),
+        ("guardian:minor_blocked", "ATHLETE"),
+        ("guardian:create_order_for_minor", "GUARDIAN"),
+        # coach
+        ("coach:edit_athlete_measures", "COACH"),
+        ("coach:edit_owned_user", "COACH"),
+        ("coach:create_team_crew_member", "HEADCOACH"),
+        # teams
+        ("teams:coach_teams", "COACH"),
+        ("teams:join_by_code", "ATHLETE"),
+        ("teams:manage_categories", "ADMIN"),
+        ("teams:manage_team_members", "HEADCOACH"),
+        # orders (usuario)
+        ("orders:edit_order", "HEADCOACH"),
+        ("orders:contact_info_order", "HEADCOACH"),
+        ("orders:order_item_detail", "HEADCOACH"),
+        ("orders:cart_team_select", "HEADCOACH"),
+        # orders (admin / offline)
+        ("orders:customer_list", "ADMIN"),
+        ("orders:offline_order_create", "ADMIN"),
+        # production
+        ("production:mi_area", "OPERARIO"),
+        ("production:reglamento", "OPERARIO"),
+        ("production:admin_job_detail", "ADMIN"),
+        ("production:error_report_detail", "OPERARIO"),
+        ("production:item_measurements", "OPERARIO"),
+        ("production:order_design", "OPERARIO"),
+        ("production:manage_responsibilities", "ADMIN"),
+        ("production:manage_templates", "ADMIN"),
+        ("production:product_stages_matrix", "ADMIN"),
+        ("production:operario_detail", "ADMIN"),
+        ("production:manage_role_operarios", "ADMIN"),
+        # products
+        ("products:create_product", "ADMIN"),
+        ("products:select_template", "ADMIN"),
+        # events
+        ("events:event_edit", "ADMIN"),
+        ("events:my_registrations", "HEADCOACH"),
+        ("events:team_register", "HEADCOACH"),
+        ("events:registrations_list", "ADMIN"),
+        ("events:staff_manage", "ADMIN"),
+        ("events:criteria_manage", "ADMIN"),
+        ("events:score_entry", "ADMIN"),
+        ("events:results_manage", "ADMIN"),
+        ("events:judge_panel", "ATHLETE"),
+        # hospitality
+        ("hospitality:hotel_detail", "ADMIN"),
+        ("hospitality:hotel_create", "ADMIN"),
+        ("hospitality:hotel_edit", "ADMIN"),
+        ("hospitality:room_type_create", "ADMIN"),
+        ("hospitality:room_type_edit", "ADMIN"),
+        ("hospitality:room_create", "ADMIN"),
+        ("hospitality:room_edit", "ADMIN"),
+        ("hospitality:bed_create", "ADMIN"),
+        ("hospitality:stay_list", "ADMIN"),
+        ("hospitality:stay_create", "ADMIN"),
+        ("hospitality:stay_detail", "ADMIN"),
+        ("hospitality:stay_confirm", "ADMIN"),
+        ("hospitality:room_assign", "ADMIN"),
+        ("hospitality:bed_assign", "ADMIN"),
+        ("hospitality:preference_form", "ATHLETE"),
+        ("hospitality:room_feature_list", "ADMIN"),
+        ("hospitality:room_feature_create", "ADMIN"),
+        ("hospitality:room_feature_edit", "ADMIN"),
+    ]
+
+    def test_every_expected_view_has_help_cards(self):
+        for view_name, role in self.EXPECTED_COVERAGE:
+            with self.subTest(view=view_name, role=role):
+                cards = get_help_cards(view_name, self._user(role))
+                self.assertGreaterEqual(
+                    len(cards), 2,
+                    f"{view_name} (rol {role}) sin ayuda registrada",
+                )
+
+    def test_legal_pages_have_no_help(self):
+        for view_name in ("core:privacy", "core:terminos"):
+            with self.subTest(view=view_name):
+                self.assertEqual(get_help_cards(view_name, self._user("ADMIN")), [])
+
+
 class HelpFabRenderTests(TestCase):
 
     def _get(self, user, url_name):
+        from django.core.cache import cache
+        cache.clear()  # core:privacy usa @cache_page
         client = Client()
         client.force_login(user)
         return client.get(reverse(url_name))
@@ -279,9 +396,9 @@ class HelpFabRenderTests(TestCase):
         self.assertContains(response, "carousel-item")
 
     def test_fab_hidden_when_no_cards(self):
-        # accounts:profile_settings has no registry entry → no FAB/modal
+        # core:privacy intencionalmente sin entrada en el registry → no FAB/modal
         user = make_user_with_role("ADMIN")
-        response = self._get(user, "accounts:profile_settings")
+        response = self._get(user, "core:privacy")
         self.assertNotContains(response, 'id="scHelpModal"')
 
     def test_modal_hidden_when_help_dismissed(self):
@@ -297,6 +414,43 @@ class HelpFabRenderTests(TestCase):
         user.save(update_fields=["help_dismissed"])
         response = self._get(user, "accounts:profile_settings")
         self.assertContains(response, 'value="enable"')
+
+
+class HelpAutoOpenTests(TestCase):
+    """Primera visita a una página con ayuda → el modal se abre solo (una vez).
+
+    El JS usa localStorage con llave por view_name; aquí verificamos que el
+    template exponga lo necesario: data-help-view en el modal y el script.
+    """
+
+    def _get(self, user, url_name):
+        from django.core.cache import cache
+        cache.clear()
+        client = Client()
+        client.force_login(user)
+        return client.get(reverse(url_name))
+
+    def test_context_has_page_help_view(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertEqual(response.context["page_help_view"], "core:dashboard")
+
+    def test_modal_carries_view_name_attribute(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertContains(response, 'data-help-view="core:dashboard"')
+
+    def test_auto_open_script_present_with_cards(self):
+        user = make_user_with_role("ADMIN")
+        response = self._get(user, "core:dashboard")
+        self.assertContains(response, "sc_help_seen:")
+
+    def test_auto_open_absent_when_dismissed(self):
+        user = make_user_with_role("ADMIN")
+        user.help_dismissed = True
+        user.save(update_fields=["help_dismissed"])
+        response = self._get(user, "core:dashboard")
+        self.assertNotContains(response, "sc_help_seen:")
 
 
 class HelpDismissedFieldTests(TestCase):

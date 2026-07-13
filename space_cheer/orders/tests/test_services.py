@@ -309,3 +309,105 @@ class OrderStateTransitionMeasurementsTests(TestCase):
 
         self.assertTrue(order.measurements_locked)
         self.assertIsNotNone(order.locked_at)
+
+
+class OrderStateCancelInProductionTests(TestCase):
+    """F1: IN_PRODUCTION → CANCELLED solo ADMIN/superuser; cancela el ProductionJob vivo."""
+
+    def setUp(self):
+        self.creator = UserFactory()
+        self.order = OrderFactory(created_by=self.creator, owner_user=self.creator)
+        self.order.status = "IN_PRODUCTION"
+        self.order._allow_status_change = True
+        self.order.save()
+
+    def test_admin_can_cancel_order_in_production(self):
+        admin = UserFactory(is_superuser=True)
+
+        order = OrderStateService.transition(
+            order=self.order, to_status="CANCELLED", user=admin
+        )
+
+        self.assertEqual(order.status, "CANCELLED")
+        self.assertTrue(order.closed)
+
+    def test_creator_cannot_cancel_order_in_production(self):
+        with self.assertRaises(PermissionDenied):
+            OrderStateService.transition(
+                order=self.order, to_status="CANCELLED", user=self.creator
+            )
+
+    def test_cancelling_in_production_order_cancels_live_production_job(self):
+        from production.models import ProductionJob
+
+        job = ProductionJob.objects.create(order=self.order)
+        admin = UserFactory(is_superuser=True)
+
+        OrderStateService.transition(
+            order=self.order, to_status="CANCELLED", user=admin
+        )
+
+        job.refresh_from_db()
+        self.assertEqual(job.status, ProductionJob.Status.CANCELLED)
+
+
+class OrderStateDeliveredProductionSyncTests(TestCase):
+    """F2: →DELIVERED se bloquea si el ProductionJob tiene tasks sin completar;
+    se auto-completa si el job no tiene ninguna task."""
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.order = OrderFactory(created_by=self.user, owner_user=self.user)
+        product = ProductFactory(
+            usage_type="GLOBAL", size_strategy="NONE", product_type="OTHER"
+        )
+        self.item = OrderItemFactory(order=self.order, product=product)
+        self.order.status = "IN_PRODUCTION"
+        self.order._allow_status_change = True
+        self.order.save()
+        self.admin = UserFactory(is_superuser=True)
+
+    def test_delivered_blocked_when_job_has_pending_tasks(self):
+        from production.models import ProductionJob, ProductionStage, ProductionTask
+
+        job = ProductionJob.objects.create(order=self.order)
+        stage = ProductionStage.objects.create(
+            name="Corte", slug="corte-f2", display_order=1
+        )
+        ProductionTask.objects.create(job=job, order_item=self.item, stage=stage)
+
+        with self.assertRaises(ValidationError) as cm:
+            OrderStateService.transition(
+                order=self.order, to_status="DELIVERED", user=self.admin
+            )
+
+        self.assertIn("sin completar", str(cm.exception).lower())
+        job.refresh_from_db()
+        self.assertNotEqual(job.status, ProductionJob.Status.COMPLETED)
+
+    def test_delivered_auto_completes_job_without_tasks(self):
+        from production.models import ProductionJob
+
+        job = ProductionJob.objects.create(order=self.order)
+
+        order = OrderStateService.transition(
+            order=self.order, to_status="DELIVERED", user=self.admin
+        )
+
+        self.assertEqual(order.status, "DELIVERED")
+        job.refresh_from_db()
+        self.assertEqual(job.status, ProductionJob.Status.COMPLETED)
+
+    def test_delivered_succeeds_when_job_already_completed(self):
+        from production.models import ProductionJob
+        from production.state import ProductionJobStateService
+
+        job = ProductionJob.objects.create(order=self.order)
+        ProductionJobStateService.transition(job, ProductionJob.Status.IN_PROGRESS)
+        ProductionJobStateService.transition(job, ProductionJob.Status.COMPLETED)
+
+        order = OrderStateService.transition(
+            order=self.order, to_status="DELIVERED", user=self.admin
+        )
+
+        self.assertEqual(order.status, "DELIVERED")

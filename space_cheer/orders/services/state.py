@@ -167,8 +167,14 @@ class OrderStateService:
         if user.roles.filter(name="ADMIN").exists():
             return True
 
-        # Cancelar o enviar a pending → creador
-        if to_status in ["PENDING", "CANCELLED"]:
+        # Enviar a pending → creador
+        if to_status == "PENDING":
+            return can_manage_order(user, order)
+
+        # Cancelar → creador, salvo en IN_PRODUCTION (solo ADMIN/superuser, ya evaluado arriba)
+        if to_status == "CANCELLED":
+            if order.status == "IN_PRODUCTION":
+                return False
             return can_manage_order(user, order)
 
         # Aprobar diseño
@@ -430,13 +436,14 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_delivered(cls, order, user=None):
+        cls._sync_production_job_on_delivery(order)
+
         if order.order_type == "OFFLINE":
             items = list(order.items.select_related("product"))
-            if any(item.product.requires_design for item in items):
-                if order.payment_status != "LIQUIDADO":
-                    raise ValidationError(
-                        "Debe liquidarse el saldo antes de marcar como entregada."
-                    )
+            if order.payment_status != "LIQUIDADO":
+                raise ValidationError(
+                    "Debe liquidarse el saldo antes de marcar como entregada."
+                )
             has_uniforms = any(item.product.product_type == "UNIFORM" for item in items)
             if has_uniforms and not order.uniform_delivery_date:
                 raise ValidationError("Debe establecer la fecha de entrega del uniforme.")
@@ -456,6 +463,34 @@ class OrderStateService:
 
         if has_uniforms and not order.uniform_delivery_date:
             raise ValidationError("Debe establecer la fecha de entrega del uniforme.")
+
+    @classmethod
+    def _sync_production_job_on_delivery(cls, order):
+        """F2: no se puede entregar con tasks de producción sin completar;
+        un job sin ninguna task se auto-completa al entregar."""
+        from production.models import ProductionJob, ProductionTask
+        from production.state import ProductionJobStateService
+
+        job = ProductionJob.objects.filter(order=order).first()
+        if job is None:
+            return
+        if job.status in (ProductionJob.Status.COMPLETED, ProductionJob.Status.CANCELLED):
+            return
+
+        has_pending_tasks = (
+            ProductionTask.objects.filter(job=job)
+            .exclude(status=ProductionTask.Status.COMPLETED)
+            .exists()
+        )
+        if has_pending_tasks:
+            raise ValidationError(
+                f"No se puede marcar como entregada: el job de producción #{job.pk} "
+                "tiene tareas sin completar."
+            )
+
+        if job.status == ProductionJob.Status.PENDING:
+            ProductionJobStateService.transition(job, ProductionJob.Status.IN_PROGRESS)
+        ProductionJobStateService.transition(job, ProductionJob.Status.COMPLETED)
 
     @classmethod
     def _create_transition_log(cls, order, user, from_status, to_status, notes):
@@ -484,6 +519,25 @@ class OrderStateService:
             cls._notify_production_started(order, user)
         elif to_status == "DELIVERED":
             cls._notify_order_delivered(order, user)
+        elif to_status == "CANCELLED":
+            cls._cancel_production_job(order, user)
+
+    @classmethod
+    def _cancel_production_job(cls, order, user):
+        from production.models import ProductionJob
+        from production.state import ProductionJobStateService
+
+        job = ProductionJob.objects.filter(order=order).first()
+        if job is None:
+            return
+        if job.status in (
+            ProductionJob.Status.PENDING,
+            ProductionJob.Status.IN_PROGRESS,
+            ProductionJob.Status.PAUSED,
+        ):
+            ProductionJobStateService.transition(
+                job, ProductionJob.Status.CANCELLED, user=user
+            )
 
     # NOTIFICACIONES
     @classmethod

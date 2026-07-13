@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-08 15:55-0600\n"
+"POT-Creation-Date: 2026-07-12 22:44-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -131,8 +131,7 @@ msgstr ""
 msgid ""
 "Las competencias se organizan en categorías según el nivel y el tipo de "
 "equipo."
-msgstr ""
-"Competitions are organized into categories by level and team type."
+msgstr "Competitions are organized into categories by level and team type."
 
 #: .\core\help_registry.py:40
 msgid ""
@@ -524,6 +523,682 @@ msgstr ""
 "These fields determine what data athletes must enter when measuring "
 "themselves."
 
+#: .\core\help_registry.py:200
+msgid ""
+"Página pública de Space Cheer: conoce nuestros servicios, competencias y "
+"uniformes."
+msgstr "Space Cheer's public page: learn about our services, competitions and uniforms."
+
+#: .\core\help_registry.py:201
+msgid ""
+"Usa el menú superior para volver a tu panel o navegar a la tienda y "
+"competencias."
+msgstr "Use the top menu to return to your dashboard or browse the store and competitions."
+
+#: .\core\help_registry.py:204
+msgid ""
+"Edita el contenido de la página pública: textos e imágenes que ven los "
+"visitantes."
+msgstr "Edit the public page content: the texts and images visitors see."
+
+#: .\core\help_registry.py:205
+msgid ""
+"Los cambios se publican de inmediato — revisa la landing después de guardar."
+msgstr "Changes are published immediately — review the landing page after saving."
+
+#: .\core\help_registry.py:208
+msgid ""
+"¿Tienes dudas o problemas? Escríbenos con este formulario y te responderemos "
+"por correo."
+msgstr "Questions or problems? Write to us with this form and we'll reply by email."
+
+#: .\core\help_registry.py:209
+msgid ""
+"Incluye todos los detalles posibles (pedido, equipo, pantalla) para ayudarte "
+"más rápido."
+msgstr "Include as many details as possible (order, team, screen) so we can help you faster."
+
+#: .\core\help_registry.py:214
+msgid "Configura las preferencias de tu cuenta desde esta pantalla."
+msgstr "Configure your account preferences from this screen."
+
+#: .\core\help_registry.py:215
+msgid ""
+"Si desactivaste los consejos de ayuda (el botón ? flotante), aquí puedes "
+"reactivarlos."
+msgstr "If you turned off the help tips (the floating ? button), you can re-enable them here."
+
+#: .\core\help_registry.py:218
+msgid ""
+"Tus direcciones guardadas. Se usan como datos de contacto y entrega en tus "
+"pedidos."
+msgstr "Your saved addresses. They are used as contact and delivery details on your orders."
+
+#: .\core\help_registry.py:219
+msgid ""
+"Mantén al menos una dirección completa y actualizada para evitar retrasos en "
+"envíos."
+msgstr "Keep at least one complete, up-to-date address to avoid shipping delays."
+
+#: .\core\help_registry.py:222
+msgid ""
+"Captura tu dirección completa: calle, número, colonia, ciudad y código "
+"postal."
+msgstr "Enter your full address: street, number, neighborhood, city and zip code."
+
+#: .\core\help_registry.py:223
+msgid ""
+"Verifica bien los datos — esta dirección puede usarse para la entrega de "
+"pedidos."
+msgstr "Double-check the details — this address may be used for order delivery."
+
+#: .\core\help_registry.py:226
+msgid "Corrige o actualiza los datos de esta dirección."
+msgstr "Correct or update this address's details."
+
+#: .\core\help_registry.py:227
+msgid "Los pedidos nuevos usarán la información actualizada."
+msgstr "New orders will use the updated information."
+
+#: .\core\help_registry.py:230
+msgid ""
+"La CURP se solicita por requisito legal para atletas. Verifica que coincida "
+"con tu documento oficial."
+msgstr "The CURP is required by law for athletes. Make sure it matches your official document."
+
+#: .\core\help_registry.py:231
+msgid ""
+"Tus datos están protegidos: el acceso a esta información queda registrado y "
+"auditado."
+msgstr "Your data is protected: access to this information is logged and audited."
+
+#: .\core\help_registry.py:234
+msgid ""
+"Importa varios atletas a la vez: descarga la plantilla, llénala y súbela "
+"aquí."
+msgstr "Import several athletes at once: download the template, fill it in and upload it here."
+
+#: .\core\help_registry.py:235
+msgid ""
+"Al terminar verás un resumen con las filas aceptadas y los errores a "
+"corregir."
+msgstr "When finished you'll see a summary with accepted rows and errors to fix."
+
+#: .\core\help_registry.py:238
+msgid "Tu solicitud de HeadCoach está en revisión por el administrador."
+msgstr "Your HeadCoach application is under review by the administrator."
+
+#: .\core\help_registry.py:239
+msgid ""
+"Recibirás un correo cuando sea aprobada y podrás acceder a todas las "
+"funciones."
+msgstr "You'll receive an email once it's approved and you'll get access to all features."
+
+#: .\core\help_registry.py:242
+msgid "Tu solicitud de HeadCoach fue rechazada."
+msgstr "Your HeadCoach application was rejected."
+
+#: .\core\help_registry.py:243
+msgid ""
+"Si crees que es un error, contáctanos desde la página de contacto para "
+"revisarlo."
+msgstr "If you think this is a mistake, contact us from the contact page so we can review it."
+
+#: .\core\help_registry.py:246
+msgid ""
+"Al desactivar tu cuenta perderás acceso a tus pedidos, equipos y datos de la "
+"plataforma."
+msgstr "Deactivating your account means losing access to your orders, teams and platform data."
+
+#: .\core\help_registry.py:247
+msgid ""
+"Si solo quieres dejar de recibir avisos, mejor ajusta tu configuración de "
+"perfil."
+msgstr "If you only want to stop receiving notifications, adjust your profile settings instead."
+
+#: .\core\help_registry.py:252
+msgid ""
+"Vincula un tutor al atleta menor de edad. Es requisito para que el menor use "
+"la plataforma."
+msgstr "Link a guardian to the underage athlete. It's required for the minor to use the platform."
+
+#: .\core\help_registry.py:253
+msgid ""
+"El tutor podrá ver los pedidos y datos del atleta, y autorizar su "
+"información."
+msgstr "The guardian can view the athlete's orders and data, and authorize their information."
+
+#: .\core\help_registry.py:256
+msgid "Tu cuenta está bloqueada porque aún no tienes un tutor vinculado."
+msgstr "Your account is blocked because you don't have a linked guardian yet."
+
+#: .\core\help_registry.py:257
+msgid ""
+"Pide a tu coach o headcoach que vincule a tu papá, mamá o tutor para "
+"continuar."
+msgstr "Ask your coach or headcoach to link your parent or guardian to continue."
+
+#: .\core\help_registry.py:260
+msgid ""
+"Crea un pedido en nombre de tu atleta a cargo, eligiendo productos del "
+"catálogo."
+msgstr "Create an order on behalf of the athlete in your care, choosing products from the catalog."
+
+#: .\core\help_registry.py:261
+msgid ""
+"Después podrás capturar sus medidas y dar seguimiento al pedido desde tu "
+"panel."
+msgstr "Afterwards you can enter their measurements and track the order from your dashboard."
+
+#: .\core\help_registry.py:266
+msgid ""
+"Edita las medidas corporales del atleta. Se usan en productos con tallas por "
+"medidas."
+msgstr "Edit the athlete's body measurements. They are used in measurement-sized products."
+
+#: .\core\help_registry.py:267
+msgid ""
+"Captura con cinta métrica y verifica dos veces — de esto depende que el "
+"uniforme quede bien."
+msgstr "Measure with a tape measure and double-check — a well-fitting uniform depends on this."
+
+#: .\core\help_registry.py:270
+msgid ""
+"Edita los datos del miembro de tu crew: información personal y de contacto."
+msgstr "Edit your crew member's data: personal and contact information."
+
+#: .\core\help_registry.py:271
+msgid "Mantén estos datos al día para pedidos y competencias."
+msgstr "Keep this data up to date for orders and competitions."
+
+#: .\core\help_registry.py:274
+msgid "Agrega personal de apoyo (crew) a tu equipo con su información básica."
+msgstr "Add support staff (crew) to your team with their basic information."
+
+#: .\core\help_registry.py:275
+msgid ""
+"El crew participa en la operación del equipo pero no captura medidas de "
+"atleta."
+msgstr "Crew members take part in team operations but don't enter athlete measurements."
+
+#: .\core\help_registry.py:280
+msgid "Los equipos donde participas como coach."
+msgstr "The teams where you participate as a coach."
+
+#: .\core\help_registry.py:281
+msgid "Entra a un equipo para ver a sus miembros y gestionar solicitudes."
+msgstr "Open a team to see its members and manage requests."
+
+#: .\core\help_registry.py:284
+msgid ""
+"Ingresa el código de invitación que te dio tu coach para unirte a su equipo."
+msgstr "Enter the invitation code your coach gave you to join their team."
+
+#: .\core\help_registry.py:285
+msgid "Tu solicitud quedará pendiente hasta que el coach la acepte."
+msgstr "Your request will remain pending until the coach accepts it."
+
+#: .\core\help_registry.py:288
+msgid "Categorías para clasificar los equipos (nivel, edad, modalidad)."
+msgstr "Categories to classify teams (level, age, discipline)."
+
+#: .\core\help_registry.py:289
+msgid "Las categorías se usan también al registrar equipos en competencias."
+msgstr "Categories are also used when registering teams for competitions."
+
+#: .\core\help_registry.py:292
+msgid ""
+"Miembros del equipo: acepta o rechaza solicitudes, cambia roles o retira "
+"miembros."
+msgstr "Team members: accept or reject requests, change roles or remove members."
+
+#: .\core\help_registry.py:293
+msgid ""
+"Si el código de invitación se filtró, puedes regenerarlo — el anterior deja "
+"de funcionar."
+msgstr "If the invitation code leaked, you can regenerate it — the old one stops working."
+
+#: .\core\help_registry.py:298
+msgid "Edita los datos generales del pedido mientras siga siendo editable."
+msgstr "Edit the order's general details while it is still editable."
+
+#: .\core\help_registry.py:299
+msgid ""
+"Una vez enviado a revisión, los cambios mayores los gestiona el "
+"administrador."
+msgstr "Once submitted for review, major changes are handled by the administrator."
+
+#: .\core\help_registry.py:302
+msgid "Captura los datos de contacto y entrega del pedido."
+msgstr "Enter the order's contact and delivery details."
+
+#: .\core\help_registry.py:303
+msgid ""
+"Con esta información te avisamos de avances y coordinamos la entrega final."
+msgstr "We use this information to notify you of progress and coordinate the final delivery."
+
+#: .\core\help_registry.py:306
+msgid "Detalle del artículo: los atletas asignados y el estado de sus medidas."
+msgstr "Item detail: the assigned athletes and the status of their measurements."
+
+#: .\core\help_registry.py:307
+msgid ""
+"Puedes importar de golpe a los atletas del equipo en lugar de agregarlos uno "
+"por uno."
+msgstr "You can import the team's athletes in one go instead of adding them one by one."
+
+#: .\core\help_registry.py:310
+msgid ""
+"Este producto es personalizado por equipo: elige a qué equipo pertenece "
+"antes de agregarlo."
+msgstr "This product is team-customized: choose which team it belongs to before adding it."
+
+#: .\core\help_registry.py:311
+msgid ""
+"Así el pedido queda ligado al equipo correcto y sus atletas podrán capturar "
+"medidas."
+msgstr "This links the order to the right team so its athletes can enter their measurements."
+
+#: .\core\help_registry.py:316
+msgid "Clientes de mostrador para pedidos offline (fuera de la plataforma)."
+msgstr "Walk-in customers for offline orders (outside the platform)."
+
+#: .\core\help_registry.py:317
+msgid "Crea aquí al cliente antes de levantar su pedido offline."
+msgstr "Create the customer here before placing their offline order."
+
+#: .\core\help_registry.py:320
+msgid ""
+"Levanta un pedido de mostrador: elige cliente, productos internos y "
+"plantilla de producción."
+msgstr "Place a walk-in order: choose the customer, internal products and a production template."
+
+#: .\core\help_registry.py:321
+msgid ""
+"Los abonos y anticipos se registran después, desde el detalle del pedido."
+msgstr "Payments and deposits are recorded later, from the order detail."
+
+#: .\core\help_registry.py:326
+msgid ""
+"Tu área de trabajo: los roles que tienes asignados y las etapas donde eres "
+"responsable o auxiliar."
+msgstr "Your work area: your assigned roles and the stages where you are responsible or auxiliary."
+
+#: .\core\help_registry.py:327
+msgid "También ves aquí los reportes de error que has generado y su estado."
+msgstr "You can also see the error reports you have created and their status here."
+
+#: .\core\help_registry.py:330
+msgid ""
+"El reglamento de producción: quién es responsable de cada etapa y quiénes "
+"son auxiliares."
+msgstr "The production rulebook: who is responsible for each stage and who the auxiliaries are."
+
+#: .\core\help_registry.py:331
+msgid ""
+"Regla de Oro: ninguna etapa puede iniciarse sin haber completado la anterior."
+msgstr "Golden Rule: no stage can start until the previous one is completed."
+
+#: .\core\help_registry.py:334
+msgid ""
+"Trabajo de producción de la orden: todas sus tareas por artículo y etapa."
+msgstr "The order's production job: all its tasks by item and stage."
+
+#: .\core\help_registry.py:335
+msgid ""
+"Asigna operarios a cada tarea, márcala urgente o reasigna en bloque si hace "
+"falta."
+msgstr "Assign workers to each task, mark it urgent or bulk-reassign if needed."
+
+#: .\core\help_registry.py:338
+msgid ""
+"Detalle del reporte de error: qué pasó, en qué etapa y las acciones "
+"correctivas."
+msgstr "Error report detail: what happened, at which stage, and the corrective actions."
+
+#: .\core\help_registry.py:339
+msgid "El administrador lo revisa y decide si la prenda requiere reposición."
+msgstr "The administrator reviews it and decides whether the garment needs a replacement."
+
+#: .\core\help_registry.py:342
+msgid ""
+"Las medidas capturadas de este artículo, tal como las verá el piso de "
+"producción."
+msgstr "The measurements captured for this item, as the production floor will see them."
+
+#: .\core\help_registry.py:343
+msgid "Si algo no cuadra con la prenda física, genera un reporte de error."
+msgstr "If something doesn't match the physical garment, create an error report."
+
+#: .\core\help_registry.py:346
+msgid "El diseño aprobado de la orden, para consulta durante la producción."
+msgstr "The order's approved design, for reference during production."
+
+#: .\core\help_registry.py:347
+msgid ""
+"Produce siempre contra este diseño — es el que autorizó el administrador."
+msgstr "Always produce against this design — it's the one the administrator authorized."
+
+#: .\core\help_registry.py:350
+msgid ""
+"Define el responsable primario y los auxiliares de cada etapa — esto es el "
+"reglamento."
+msgstr "Define the primary responsible and auxiliaries for each stage — this is the rulebook."
+
+#: .\core\help_registry.py:351
+msgid ""
+"Los cambios se reflejan de inmediato en la vista de reglamento y en Mi Área "
+"de los operarios."
+msgstr "Changes are reflected immediately in the rulebook view and in the workers' My Area."
+
+#: .\core\help_registry.py:354
+msgid ""
+"Plantillas de producción: conjuntos de etapas predefinidos para crear "
+"pedidos más rápido."
+msgstr "Production templates: predefined sets of stages to create orders faster."
+
+#: .\core\help_registry.py:355
+msgid ""
+"Se usan al levantar pedidos offline para no configurar las etapas una por "
+"una."
+msgstr "They are used when placing offline orders so you don't configure stages one by one."
+
+#: .\core\help_registry.py:358
+msgid "Matriz producto × etapa: marca qué etapas aplican a cada producto."
+msgstr "Product × stage matrix: mark which stages apply to each product."
+
+#: .\core\help_registry.py:359
+msgid ""
+"Al enviar un pedido a producción, esta matriz define qué tareas se generan."
+msgstr "When an order is sent to production, this matrix defines which tasks are generated."
+
+#: .\core\help_registry.py:362
+msgid ""
+"Detalle del operario: sus roles de producción y las tareas que tiene "
+"asignadas."
+msgstr "Worker detail: their production roles and assigned tasks."
+
+#: .\core\help_registry.py:363
+msgid "Desde aquí controlas su carga de trabajo y sus responsabilidades."
+msgstr "From here you control their workload and responsibilities."
+
+#: .\core\help_registry.py:366
+msgid "Agrega o quita operarios de este rol de producción."
+msgstr "Add or remove workers from this production role."
+
+#: .\core\help_registry.py:367
+msgid ""
+"Las tareas ya asignadas no cambian solas: reasígnalas desde el detalle del "
+"trabajo."
+msgstr "Already-assigned tasks don't change on their own: reassign them from the job detail."
+
+#: .\core\help_registry.py:372
+msgid ""
+"Configura el producto: tipo de uso (global, por equipo o por atleta), tallas "
+"y alcance."
+msgstr "Configure the product: usage type (global, per team or per athlete), sizes and scope."
+
+#: .\core\help_registry.py:373
+msgid ""
+"Ojo: una vez usado en un pedido, el tipo de uso y la estrategia de tallas "
+"quedan fijos."
+msgstr "Note: once used in an order, the usage type and size strategy become fixed."
+
+#: .\core\help_registry.py:376
+msgid ""
+"Elige una plantilla base para crear el producto con su configuración "
+"precargada."
+msgstr "Choose a base template to create the product with its configuration preloaded."
+
+#: .\core\help_registry.py:377
+msgid "Después podrás ajustar nombre, precio, tallas y campos de medida."
+msgstr "Afterwards you can adjust the name, price, sizes and measurement fields."
+
+#: .\core\help_registry.py:382
+msgid "Edita los datos del evento: fechas, sede y categorías disponibles."
+msgstr "Edit the event's details: dates, venue and available categories."
+
+#: .\core\help_registry.py:383
+msgid ""
+"Si el evento ya tiene registros, avisa a los equipos de cualquier cambio "
+"importante."
+msgstr "If the event already has registrations, notify the teams of any important change."
+
+#: .\core\help_registry.py:386
+msgid ""
+"Los registros de tus equipos en competencias y su estado (pendiente, "
+"aceptado, rechazado)."
+msgstr "Your teams' competition registrations and their status (pending, accepted, rejected)."
+
+#: .\core\help_registry.py:387
+msgid "Puedes retirar un registro si tu equipo ya no participará."
+msgstr "You can withdraw a registration if your team will no longer participate."
+
+#: .\core\help_registry.py:390
+msgid "Registra a tu equipo en este evento eligiendo la categoría adecuada."
+msgstr "Register your team for this event by choosing the right category."
+
+#: .\core\help_registry.py:391
+msgid ""
+"Hazlo antes del cierre de inscripciones — el organizador aceptará o "
+"rechazará el registro."
+msgstr "Do it before registration closes — the organizer will accept or reject the registration."
+
+#: .\core\help_registry.py:394
+msgid "Los equipos registrados en el evento. Acepta o rechaza cada solicitud."
+msgstr "The teams registered for the event. Accept or reject each request."
+
+#: .\core\help_registry.py:395
+msgid ""
+"Solo los registros aceptados participan y aparecen en el panel de jueces."
+msgstr "Only accepted registrations participate and appear in the judges' panel."
+
+#: .\core\help_registry.py:398
+msgid "Asigna jueces y staff al evento con su función específica."
+msgstr "Assign judges and staff to the event with their specific role."
+
+#: .\core\help_registry.py:399
+msgid "Los jueces asignados tendrán acceso a su panel de calificación."
+msgstr "Assigned judges will have access to their scoring panel."
+
+#: .\core\help_registry.py:402
+msgid "Define los criterios de calificación del evento y su ponderación."
+msgstr "Define the event's scoring criteria and their weighting."
+
+#: .\core\help_registry.py:403
+msgid ""
+"Los jueces calificarán cada rutina criterio por criterio según esta "
+"configuración."
+msgstr "Judges will score each routine criterion by criterion according to this setup."
+
+#: .\core\help_registry.py:406
+msgid "Captura o corrige calificaciones de los equipos participantes."
+msgstr "Enter or correct scores for the participating teams."
+
+#: .\core\help_registry.py:407
+msgid ""
+"Úsalo para ajustes administrativos; los jueces capturan desde su propio "
+"panel."
+msgstr "Use it for administrative adjustments; judges enter scores from their own panel."
+
+#: .\core\help_registry.py:410
+msgid "Revisa y publica los resultados finales del evento."
+msgstr "Review and publish the event's final results."
+
+#: .\core\help_registry.py:411
+msgid ""
+"Una vez publicados, los equipos podrán consultarlos en la página del evento."
+msgstr "Once published, teams can view them on the event page."
+
+#: .\core\help_registry.py:414
+msgid ""
+"Tu panel de juez: califica cada rutina según los criterios configurados."
+msgstr "Your judge panel: score each routine according to the configured criteria."
+
+#: .\core\help_registry.py:415
+msgid ""
+"Las calificaciones se guardan por criterio — revisa antes de enviar cada "
+"puntuación."
+msgstr "Scores are saved per criterion — review before submitting each score."
+
+#: .\core\help_registry.py:420
+msgid "Detalle del hotel: sus tipos de habitación, habitaciones y camas."
+msgstr "Hotel detail: its room types, rooms and beds."
+
+#: .\core\help_registry.py:421
+msgid ""
+"Configura primero tipos y habitaciones para poder asignar estancias después."
+msgstr "Set up room types and rooms first so you can assign stays later."
+
+#: .\core\help_registry.py:424
+msgid "Registra un hotel para el evento con sus datos generales."
+msgstr "Register a hotel for the event with its general details."
+
+#: .\core\help_registry.py:425
+msgid "Después agrégale tipos de habitación, habitaciones y camas."
+msgstr "Then add room types, rooms and beds to it."
+
+#: .\core\help_registry.py:428
+msgid "Edita los datos del hotel."
+msgstr "Edit the hotel's details."
+
+#: .\core\help_registry.py:429
+msgid "Los cambios no afectan las estancias ya asignadas."
+msgstr "Changes don't affect stays that are already assigned."
+
+#: .\core\help_registry.py:432
+msgid "Crea un tipo de habitación: capacidad y características (amenidades)."
+msgstr "Create a room type: capacity and features (amenities)."
+
+#: .\core\help_registry.py:433
+msgid ""
+"También puedes aplicar presets para crear varios tipos comunes de una vez."
+msgstr "You can also apply presets to create several common types at once."
+
+#: .\core\help_registry.py:436
+msgid "Edita el tipo de habitación: capacidad y características."
+msgstr "Edit the room type: capacity and features."
+
+#: .\core\help_registry.py:437
+msgid ""
+"Las habitaciones existentes conservan su tipo con los datos actualizados."
+msgstr "Existing rooms keep their type with the updated details."
+
+#: .\core\help_registry.py:440
+msgid "Agrega una habitación al hotel indicando su tipo y número."
+msgstr "Add a room to the hotel indicating its type and number."
+
+#: .\core\help_registry.py:441
+msgid "Después crea sus camas para poder asignar huéspedes."
+msgstr "Then create its beds so you can assign guests."
+
+#: .\core\help_registry.py:444
+msgid "Edita los datos de la habitación."
+msgstr "Edit the room's details."
+
+#: .\core\help_registry.py:445
+msgid "Revisa las asignaciones existentes si cambias su capacidad o tipo."
+msgstr "Review existing assignments if you change its capacity or type."
+
+#: .\core\help_registry.py:448
+msgid "Agrega camas a la habitación indicando su tipo."
+msgstr "Add beds to the room indicating their type."
+
+#: .\core\help_registry.py:449
+msgid "Cada cama puede asignarse a un huésped específico."
+msgstr "Each bed can be assigned to a specific guest."
+
+#: .\core\help_registry.py:452
+msgid "Las estancias de los participantes del evento y su estado."
+msgstr "The event participants' stays and their status."
+
+#: .\core\help_registry.py:453
+msgid ""
+"Flujo: crear → confirmar → asignar habitación y cama → check-in → check-out."
+msgstr "Flow: create → confirm → assign room and bed → check-in → check-out."
+
+#: .\core\help_registry.py:456
+msgid "Crea la estancia de un participante con sus fechas de entrada y salida."
+msgstr "Create a participant's stay with their arrival and departure dates."
+
+#: .\core\help_registry.py:457
+msgid "Después confírmala y asígnale habitación y cama."
+msgstr "Then confirm it and assign a room and bed."
+
+#: .\core\help_registry.py:460
+msgid "Detalle de la estancia: huésped, fechas, habitación y cama asignadas."
+msgstr "Stay detail: guest, dates, assigned room and bed."
+
+#: .\core\help_registry.py:461
+msgid ""
+"Desde aquí confirmas, asignas habitación/cama y registras check-in y check-"
+"out."
+msgstr "From here you confirm, assign room/bed and record check-in and check-out."
+
+#: .\core\help_registry.py:464
+msgid "Confirma la estancia para apartar el lugar del huésped."
+msgstr "Confirm the stay to reserve the guest's place."
+
+#: .\core\help_registry.py:465
+msgid "Una vez confirmada podrás asignarle habitación y cama."
+msgstr "Once confirmed you can assign a room and bed."
+
+#: .\core\help_registry.py:468
+msgid "Asigna una habitación a esta estancia según disponibilidad."
+msgstr "Assign a room to this stay based on availability."
+
+#: .\core\help_registry.py:469
+msgid ""
+"También puedes usar la auto-asignación para que el sistema elija por ti."
+msgstr "You can also use auto-assignment so the system chooses for you."
+
+#: .\core\help_registry.py:472
+msgid "Asigna la cama específica dentro de la habitación."
+msgstr "Assign the specific bed within the room."
+
+#: .\core\help_registry.py:473
+msgid "Considera las preferencias registradas por el huésped."
+msgstr "Take into account the preferences registered by the guest."
+
+#: .\core\help_registry.py:476
+msgid ""
+"Registra tus preferencias de hospedaje: con quién compartir y qué "
+"características necesitas."
+msgstr "Register your lodging preferences: who to share with and what features you need."
+
+#: .\core\help_registry.py:477
+msgid "El organizador las toma en cuenta al asignarte habitación y cama."
+msgstr "The organizer takes them into account when assigning your room and bed."
+
+#: .\core\help_registry.py:480
+msgid ""
+"Características de habitación (amenidades) reutilizables en todos los "
+"hoteles."
+msgstr "Room features (amenities) reusable across all hotels."
+
+#: .\core\help_registry.py:481
+msgid ""
+"Crea aquí las características antes de usarlas en los tipos de habitación."
+msgstr "Create the features here before using them in room types."
+
+#: .\core\help_registry.py:484
+msgid ""
+"Crea una característica de habitación (ej. aire acondicionado, vista al mar)."
+msgstr "Create a room feature (e.g. air conditioning, sea view)."
+
+#: .\core\help_registry.py:485
+msgid ""
+"Estará disponible para todos los tipos de habitación de todos los hoteles."
+msgstr "It will be available for all room types in all hotels."
+
+#: .\core\help_registry.py:488
+msgid "Edita el nombre o descripción de la característica."
+msgstr "Edit the feature's name or description."
+
+#: .\core\help_registry.py:489
+msgid "El cambio se refleja en todos los tipos de habitación que la usan."
+msgstr "The change is reflected in all room types that use it."
+
 #: .\events\forms.py:173
 msgid "Motivo del rechazo"
 msgstr "Rejection reason"
@@ -686,7 +1361,7 @@ msgstr "Featured on landing"
 
 #: .\events\models.py:69
 msgid "Orden en landing"
-msgstr ""
+msgstr "Order on landing"
 
 #: .\events\models.py:75 .\templates\events\coach\my_registrations.html:33
 msgid "Evento"
@@ -777,7 +1452,7 @@ msgstr "Category"
 #: .\templates\orders\admin\order_detail.html:165
 #: .\templates\orders\admin\order_detail.html:202
 #: .\templates\orders\admin\order_detail.html:433
-#: .\templates\orders\admin\order_detail.html:818
+#: .\templates\orders\admin\order_detail.html:823
 msgid "Notas"
 msgstr "Notes"
 
@@ -870,7 +1545,7 @@ msgstr "Staff roles"
 #: .\templates\account\profile\edit.html:74
 #: .\templates\coach\crew\edit_owned_user.html:39
 #: .\templates\events\admin\staff_manage.html:89
-#: .\templates\orders\admin\order_detail.html:816
+#: .\templates\orders\admin\order_detail.html:821
 msgid "Usuario"
 msgstr "User"
 
@@ -1372,7 +2047,7 @@ msgstr "Delete"
 
 #: .\production\templates\production\config\plantillas.html:93
 msgid "¿Quitar esta etapa?"
-msgstr ""
+msgstr "Remove this stage?"
 
 #: .\production\templates\production\config\plantillas.html:105
 #: .\production\templates\production\config\product_stages_matrix.html:85
@@ -1411,7 +2086,7 @@ msgstr "Manage templates"
 #: .\production\templates\production\config\product_stages_matrix.html:21
 #: .\templates\account\guardian\minors_without_guardian.html:149
 #: .\templates\coach\athlete\edit_measures.html:71
-#: .\templates\core\base.html:935 .\templates\core\base.html:973
+#: .\templates\core\base.html:936 .\templates\core\base.html:974
 #: .\templates\orders\admin\order_detail.html:646
 #: .\templates\orders\admin\order_detail.html:753
 #: .\templates\orders\admin\order_detail.html:777
@@ -1479,7 +2154,7 @@ msgstr "All stages are already configured."
 
 #: .\production\templates\production\config\responsabilidades.html:8
 msgid "Responsabilidades de Etapa"
-msgstr ""
+msgstr "Stage Responsibilities"
 
 #: .\production\templates\production\config\responsabilidades.html:10
 msgid "Gestionar roles"
@@ -1492,7 +2167,7 @@ msgstr "Assigned"
 #: .\production\templates\production\config\responsabilidades.html:31
 #: .\production\templates\production\config\responsabilidades.html:57
 msgid "Responsable primario"
-msgstr ""
+msgstr "Primary responsible"
 
 #: .\production\templates\production\config\responsabilidades.html:35
 #: .\production\templates\production\config\responsabilidades.html:69
@@ -1501,7 +2176,7 @@ msgstr "Auxiliary roles"
 
 #: .\production\templates\production\config\responsabilidades.html:39
 msgid "Ninguno"
-msgstr ""
+msgstr "None"
 
 #: .\production\templates\production\config\responsabilidades.html:48
 #: .\production\templates\production\config\stages.html:114
@@ -1577,7 +2252,7 @@ msgstr ""
 
 #: .\production\templates\production\config\stages.html:72
 msgid "Ord."
-msgstr ""
+msgstr "Ord."
 
 #: .\production\templates\production\config\stages.html:76
 msgid "Prods."
@@ -1590,7 +2265,7 @@ msgstr "Templates"
 
 #: .\production\templates\production\config\stages.html:78
 msgid "Tasks"
-msgstr ""
+msgstr "Tasks"
 
 #: .\production\templates\production\config\stages.html:124
 #: .\templates\products\product_detail.html:654
@@ -1620,7 +2295,7 @@ msgstr "No stages configured. Create the first one above."
 #: .\templates\orders\items\item_detail.html:349
 #: .\templates\orders\items\item_measurements.html:98
 #: .\templates\orders\users\order_contact_info.html:111
-#: .\templates\orders\users\order_detail.html:815
+#: .\templates\orders\users\order_detail.html:850
 #: .\templates\orders\users\order_edit.html:14
 #: .\templates\orders\users\order_edit.html:35
 #: .\templates\products\product_detail.html:693
@@ -1783,7 +2458,7 @@ msgstr ""
 
 #: .\templates\account\addresses\confirm_delete.html:15
 #: .\templates\orders\items\item_detail.html:353
-#: .\templates\orders\users\order_detail.html:820
+#: .\templates\orders\users\order_detail.html:855
 msgid "Sí, eliminar"
 msgstr "Yes, delete"
 
@@ -2402,7 +3077,7 @@ msgid "Guardián Actual"
 msgstr "Current Guardian"
 
 #: .\templates\account\guardian\headcoach_dashboard.html:51
-#: .\templates\orders\admin\order_detail.html:817
+#: .\templates\orders\admin\order_detail.html:822
 msgid "Acción"
 msgstr "Action"
 
@@ -3084,6 +3759,7 @@ msgstr "Body Measurements"
 #: .\templates\orders\users\order_contact_info.html:14
 #: .\templates\orders\users\order_create.html:14
 #: .\templates\orders\users\order_detail.html:32
+#: .\templates\orders\users\order_detail.html:816
 #: .\templates\products\product_detail.html:67
 #: .\templates\products\product_form.html:18
 msgid "Volver"
@@ -3302,15 +3978,15 @@ msgstr "My Tasks"
 
 #: .\templates\core\base.html:421 .\templates\core\base.html:765
 msgid "Mi Área"
-msgstr ""
+msgstr "My Area"
 
 #: .\templates\core\base.html:424 .\templates\core\base.html:776
 msgid "Reglamento"
-msgstr ""
+msgstr "Rulebook"
 
 #: .\templates\core\base.html:427 .\templates\core\base.html:768
 msgid "Reportar Error"
-msgstr ""
+msgstr "Report Error"
 
 #: .\templates\core\base.html:437 .\templates\core\base.html:887
 #: .\templates\core\home.html:66 .\templates\events\event_list.html:4
@@ -3454,7 +4130,7 @@ msgstr "Production Config."
 
 #: .\templates\core\base.html:804
 msgid "Responsabilidades"
-msgstr ""
+msgstr "Responsibilities"
 
 #: .\templates\core\base.html:810
 msgid "Etapas por producto"
@@ -3496,31 +4172,31 @@ msgstr "Contact us"
 msgid "Todos los derechos reservados."
 msgstr "All rights reserved."
 
-#: .\templates\core\base.html:921 .\templates\core\base.html:932
+#: .\templates\core\base.html:921 .\templates\core\base.html:933
 msgid "¿Cómo funciona esta página?"
 msgstr "How does this page work?"
 
-#: .\templates\core\base.html:944
+#: .\templates\core\base.html:945
 msgid "Consejo"
 msgstr "Tip"
 
-#: .\templates\core\base.html:953
+#: .\templates\core\base.html:954
 #: .\templates\orders\partials\pagination.html:31
 #: .\templates\orders\users\order_list.html:229
 msgid "Anterior"
 msgstr "Previous"
 
-#: .\templates\core\base.html:958
+#: .\templates\core\base.html:959
 #: .\templates\orders\partials\pagination.html:59
 #: .\templates\orders\users\order_list.html:243
 msgid "Siguiente"
 msgstr "Next"
 
-#: .\templates\core\base.html:969
+#: .\templates\core\base.html:970
 msgid "No volver a mostrar"
 msgstr "Don't show again"
 
-#: .\templates\core\base.html:1004
+#: .\templates\core\base.html:1023
 msgid "PRÓXIMO"
 msgstr "UPCOMING"
 
@@ -3741,7 +4417,7 @@ msgstr ""
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
 #: .\templates\orders\admin\order_detail.html:161
-#: .\templates\orders\admin\order_detail.html:815
+#: .\templates\orders\admin\order_detail.html:820
 msgid "Fecha"
 msgstr "Date"
 
@@ -5353,28 +6029,39 @@ msgstr "Yes, send to production"
 msgid "Confirmar cancelación"
 msgstr "Confirm cancellation"
 
-#: .\templates\orders\admin\order_detail.html:780
+#: .\templates\orders\admin\order_detail.html:782
 msgid "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?"
 msgstr "This action will permanently cancel the order. Are you sure?"
 
-#: .\templates\orders\admin\order_detail.html:783
+#: .\templates\orders\admin\order_detail.html:784
+#: .\templates\orders\users\order_detail.html:809
+msgid "Motivo de la cancelación (opcional)"
+msgstr "Cancellation reason (optional)"
+
+#: .\templates\orders\admin\order_detail.html:787
+#: .\templates\orders\users\order_detail.html:812
+msgid "Ej. el cliente ya no lo necesita, se pidió por error…"
+msgstr "E.g. the customer no longer needs it, it was ordered by mistake…"
+
+#: .\templates\orders\admin\order_detail.html:790
 msgid "No, mantener pedido"
 msgstr "No, keep order"
 
-#: .\templates\orders\admin\order_detail.html:786
+#: .\templates\orders\admin\order_detail.html:791
+#: .\templates\orders\users\order_detail.html:819
 msgid "Sí, cancelar pedido"
 msgstr "Yes, cancel order"
 
-#: .\templates\orders\admin\order_detail.html:797
+#: .\templates\orders\admin\order_detail.html:802
 msgid "No hay transiciones disponibles en este estado."
 msgstr "No transitions available in this state."
 
-#: .\templates\orders\admin\order_detail.html:807
+#: .\templates\orders\admin\order_detail.html:812
 #: .\templates\orders\users\order_detail.html:702
 msgid "Historial"
 msgstr "History"
 
-#: .\templates\orders\admin\order_detail.html:832
+#: .\templates\orders\admin\order_detail.html:837
 msgid "No hay eventos registrados."
 msgstr "No events registered."
 
@@ -5474,7 +6161,7 @@ msgstr "Import athletes"
 
 #: .\templates\orders\items\item_detail.html:134
 #: .\templates\orders\items\item_detail.html:336
-#: .\templates\orders\users\order_detail.html:799
+#: .\templates\orders\users\order_detail.html:834
 msgid "Eliminar producto"
 msgstr "Delete product"
 
@@ -5986,56 +6673,57 @@ msgstr "from %(from)s → %(to)s"
 msgid "Ver historial completo"
 msgstr "View full history"
 
-#: .\templates\orders\users\order_detail.html:758
-msgid "Enviar pedido"
-msgstr "Submit order"
-
-#: .\templates\orders\users\order_detail.html:760
+#: .\templates\orders\users\order_detail.html:754
+#: .\templates\orders\users\order_detail.html:801
 msgid "Cancelar pedido"
 msgstr "Cancel order"
 
-#: .\templates\orders\users\order_detail.html:762
+#: .\templates\orders\users\order_detail.html:764
+msgid "Enviar pedido"
+msgstr "Submit order"
+
+#: .\templates\orders\users\order_detail.html:766
 msgid "Aprobar diseño"
 msgstr "Approve design"
 
-#: .\templates\orders\users\order_detail.html:764
+#: .\templates\orders\users\order_detail.html:768
 msgid "Iniciar producción"
 msgstr "Start production"
 
-#: .\templates\orders\users\order_detail.html:766
+#: .\templates\orders\users\order_detail.html:770
 msgid "Marcar como entregada"
 msgstr "Mark as delivered"
 
-#: .\templates\orders\users\order_detail.html:769
+#: .\templates\orders\users\order_detail.html:773
 #, python-format
 msgid "Pasar a %(s)s"
 msgstr "Move to %(s)s"
 
-#: .\templates\orders\users\order_detail.html:779
+#: .\templates\orders\users\order_detail.html:784
 msgid "Resuelve los problemas señalados arriba"
 msgstr "Resolve the issues listed above"
 
-#: .\templates\orders\users\order_detail.html:779
+#: .\templates\orders\users\order_detail.html:784
 msgid "para poder avanzar."
 msgstr "to proceed."
 
-#: .\templates\orders\users\order_detail.html:784
+#: .\templates\orders\users\order_detail.html:789
 msgid "No hay acciones disponibles"
 msgstr "No actions available"
 
-#: .\templates\orders\users\order_detail.html:785
+#: .\templates\orders\users\order_detail.html:790
 msgid "Esta orden ha alcanzado su estado final"
 msgstr "This order has reached its final state"
 
-#: .\templates\orders\users\order_detail.html:805
+#: .\templates\orders\users\order_detail.html:840
 msgid "¿Eliminar"
 msgstr "Delete"
 
-#: .\templates\orders\users\order_detail.html:805
+#: .\templates\orders\users\order_detail.html:840
 msgid "de la orden?"
 msgstr "from the order?"
 
-#: .\templates\orders\users\order_detail.html:808
+#: .\templates\orders\users\order_detail.html:843
 msgid ""
 "Se eliminarán todos los atletas y medidas asociadas. Esta acción no se puede "
 "deshacer."

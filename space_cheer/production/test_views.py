@@ -231,6 +231,31 @@ class AdminJobDetailTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.context["job"], self.job)
 
+    def test_context_has_items_without_tasks_for_unconfigured_product(self):
+        """F8 (hallazgo 4.4): un item cuyo producto no tiene etapas
+        configuradas no genera ninguna task — el admin debe verlo en el
+        detalle del job, no solo en un warning de logs."""
+        from orders.tests.factories import ProductFactory
+
+        order = OrderFactory()
+        configured_item = OrderItemFactory(order=order)
+        stage = make_stage(name="Corte", slug="corte-f8", order=1)
+        ProductStageConfig.objects.create(
+            product=configured_item.product, stage=stage, display_order=1
+        )
+        unconfigured_product = ProductFactory(usage_type="GLOBAL", size_strategy="NONE")
+        unconfigured_item = OrderItemFactory(order=order, product=unconfigured_product)
+
+        with patch("production.services.notify_production_stage_complete"):
+            job = ProductionJobService.create_for_order(order)
+
+        self.client.force_login(self.admin)
+        url = reverse("production:admin_job_detail", kwargs={"pk": job.pk})
+        response = self.client.get(url)
+
+        self.assertIn(unconfigured_item, response.context["items_without_tasks"])
+        self.assertNotIn(configured_item, response.context["items_without_tasks"])
+
 
 # ---------------------------------------------------------------------------
 # Admin — toggle_urgent

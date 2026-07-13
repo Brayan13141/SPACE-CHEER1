@@ -14,6 +14,7 @@ Uso:
     python manage.py seed_all --only staff_roles
     python manage.py seed_all --only room_features
     python manage.py seed_all --only stage_responsibilities
+    python manage.py seed_all --only production_templates
 
 Idempotente: seguro de ejecutar múltiples veces.
 """
@@ -57,6 +58,11 @@ SEEDS = [
         "key": "stage_responsibilities",
         "command": "seed_stage_responsibilities",
         "label": "Responsables y auxiliares por etapa",
+    },
+    {
+        "key": "production_templates",
+        "command": "seed_production_templates",
+        "label": "Plantillas de producción por defecto",
     },
 ]
 

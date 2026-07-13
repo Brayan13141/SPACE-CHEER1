@@ -76,9 +76,18 @@ def admin_job_detail(request, pk):
     operarios = User.objects.filter(
         roles__name="OPERARIO", is_active=True
     ).distinct()
+
+    covered_item_ids = set(job.tasks.values_list("order_item_id", flat=True))
+    items_without_tasks = [
+        item
+        for item in job.order.items.select_related("product").all()
+        if item.id not in covered_item_ids
+    ]
+
     return render(request, "production/admin_job_detail.html", {
         "job": job,
         "operarios": operarios,
+        "items_without_tasks": items_without_tasks,
     })
 
 

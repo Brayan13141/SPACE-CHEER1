@@ -356,6 +356,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = config("CELERY_TIMEZONE")
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+# Acota el intento de conexión al broker al llamar .delay() desde una vista:
+# sin esto, una caída de Redis convierte notificaciones "fire and forget" en
+# un cuelgue de varios minutos del request (hallazgo 4.5).
+CELERY_BROKER_CONNECTION_TIMEOUT = 3
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 # =========================SMTP PARA ENVÍO DE CORREOS ================================
 EMAIL_BACKEND = config("EMAIL_BACKEND")
 EMAIL_HOST = config("EMAIL_HOST")

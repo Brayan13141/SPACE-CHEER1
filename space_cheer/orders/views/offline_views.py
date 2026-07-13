@@ -130,7 +130,10 @@ def register_payment(request, order_id):
             notes=request.POST.get("notes", ""),
         )
         messages.success(request, "Abono registrado.")
-    except (ValidationError, InvalidOperation, KeyError) as exc:
+    except ValidationError as exc:
+        detail = " ".join(exc.messages)
+        messages.error(request, f"No se pudo registrar el abono: {detail}")
+    except (InvalidOperation, KeyError) as exc:
         messages.error(request, f"No se pudo registrar el abono: {exc}")
     return redirect("orders:admin_order_detail", order.pk)
 

@@ -923,7 +923,8 @@
         </button>
     </div>
 
-    <div class="modal fade" id="scHelpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="scHelpModal" tabindex="-1" aria-hidden="true"
+         data-help-view="{{ page_help_view }}">
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content bg-dark border border-secondary">
           <div class="modal-header border-secondary py-2">
@@ -976,6 +977,24 @@
         </div>
       </div>
     </div>
+
+    <script nonce="{{ request.csp_nonce }}">
+    // Auto-abrir la ayuda la PRIMERA vez que el usuario visita cada página.
+    // Una llave en localStorage por view_name; si el usuario desactivó la
+    // ayuda (help_dismissed) este bloque ni se renderiza.
+    document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('scHelpModal');
+        if (!modalEl) return;
+        var view = modalEl.getAttribute('data-help-view');
+        if (!view) return;
+        var key = 'sc_help_seen:' + view;
+        try {
+            if (localStorage.getItem(key)) return;
+            localStorage.setItem(key, '1');
+        } catch (e) { return; }   // localStorage bloqueado → no molestar
+        new bootstrap.Modal(modalEl).show();
+    });
+    </script>
     {% endif %}
 
     {# ═══════════════════════════════════════════════════════ SCRIPTS #}

@@ -113,6 +113,23 @@ class OrderItemAthleteService:
             order_item, valid_athlete_ids, existing_athletes
         )
 
+        if created == 0 and updated == 0 and not errors:
+            pending_count = (
+                UserTeamMembership.objects.filter(
+                    team=order.owner_team,
+                    role_in_team="ATHLETE",
+                    is_active=True,
+                )
+                .exclude(status="accepted")
+                .count()
+            )
+            if pending_count:
+                errors.append(
+                    f"{pending_count} atleta(s) del equipo tienen la membresía "
+                    "pendiente de aceptar y no se importaron. Deben aceptar la "
+                    "invitación al equipo antes de poder asignarse al pedido."
+                )
+
         return {
             "created": created,
             "updated": updated,

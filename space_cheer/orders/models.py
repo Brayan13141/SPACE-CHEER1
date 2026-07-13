@@ -80,7 +80,7 @@ class Order(models.Model):
         "DRAFT": ["PENDING", "CANCELLED"],
         "PENDING": ["DESIGN_APPROVED", "CANCELLED", "IN_PRODUCTION"],
         "DESIGN_APPROVED": ["IN_PRODUCTION", "CANCELLED"],
-        "IN_PRODUCTION": ["DELIVERED"],
+        "IN_PRODUCTION": ["DELIVERED", "CANCELLED"],
         "DELIVERED": [],
         "CANCELLED": [],
     }
@@ -775,10 +775,15 @@ class OrderItemAthlete(models.Model):
                 raise ValidationError("Orden personal: atleta inválido")
 
     def has_complete_measurements(self):
+        product_fields = self.order_item.product.measurement_fields
+
+        # Producto MEASUREMENTS sin ningún campo configurado: mal configurado,
+        # no "completo" (evita el badge "Completo" vacío — hallazgo 4.3).
+        if not product_fields.exists():
+            return False
+
         required_fields = list(
-            self.order_item.product.measurement_fields.filter(
-                required=True
-            ).values_list("field_id", flat=True)
+            product_fields.filter(required=True).values_list("field_id", flat=True)
         )
 
         if not required_fields:
