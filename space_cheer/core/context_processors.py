@@ -9,6 +9,7 @@ def page_help(request):
     return {
         "page_help_cards": cards,                      # list[str] para el carousel del modal
         "page_help_text": cards[0] if cards else "",   # compat con los ⓘ inline existentes
+        "page_help_view": view_name or "",             # llave para auto-abrir 1 vez por página
     }
 
 
