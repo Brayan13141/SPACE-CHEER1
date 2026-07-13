@@ -5,10 +5,15 @@ Cobertura completa OPERARIO: 7 secciones
 """
 
 import base64
+import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+sys.path.insert(0, str(Path(__file__).parent))
+from highlight_utils import capture_with_button
+
 LOGO_PATH = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/space_cheer/static/IMAGES/Logo_sin_fondo_blanco.png")
+SCREENSHOTS_DIR = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_operario_screenshots")
 
 
 def logo_data_uri() -> str:
@@ -32,6 +37,19 @@ def img_tag(key: str, screenshots: dict) -> str:
     return f'<div class="placeholder-img">[Captura no disponible: {key}]</div>'
 
 
+def img_tag_with_button(key: str, screenshots: dict) -> str:
+    """Como img_tag(), pero antepone la captura con el botón resaltado (si existe)."""
+    button_key = f"{key}_boton"
+    button_html = ""
+    if button_key in screenshots and screenshots[button_key]:
+        button_html = (
+            '<p class="button-caption">&#128073; Así se llega a esta pantalla &mdash; '
+            'el botón resaltado en rojo:</p>'
+            f'<img src="data:image/png;base64,{screenshots[button_key]}" alt="Botón hacia {key}" class="screenshot-button">'
+        )
+    return button_html + img_tag(key, screenshots)
+
+
 def build_html(screenshots: dict) -> str:
     _logo_uri = logo_data_uri()
     logo_img = (
@@ -42,6 +60,9 @@ def build_html(screenshots: dict) -> str:
 
     def ss(key):
         return img_tag(key, screenshots)
+
+    def ssb(key):
+        return img_tag_with_button(key, screenshots)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -170,6 +191,44 @@ def build_html(screenshots: dict) -> str:
     color: #9ca3af;
     font-size: 9pt;
     margin: 16px 0;
+  }}
+
+  /* ---- botón resaltado / casos de uso ---- */
+  .button-caption {{
+    color: #b91c1c;
+    font-size: 9pt;
+    font-weight: 600;
+    margin: 14px 0 4px;
+  }}
+  .screenshot-button {{
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25), 0 0 0 2px #ef4444;
+  }}
+  .use-case {{
+    background: #f9f7ff;
+    border: 1px solid #c4b5fd;
+    border-left: 4px solid #7c3aed;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 18px 0;
+  }}
+  .use-case-title {{
+    color: #5b21b6;
+    font-weight: 700;
+    font-size: 10.5pt;
+    margin-bottom: 8px;
+  }}
+  .use-case ol {{
+    margin: 6px 0 0 18px;
+    padding: 0;
+  }}
+  .use-case li {{
+    color: #374151;
+    font-size: 9.5pt;
+    margin-bottom: 4px;
   }}
 
   /* ---- pasos numerados ---- */
@@ -461,7 +520,7 @@ def build_html(screenshots: dict) -> str:
   </p>
 
   <div class="screenshot-wrap">
-    {ss("mi_area")}
+    {ssb("mi_area")}
   </div>
   <p class="screenshot-caption">Mi Área — roles asignados y etapas de responsabilidad del operario</p>
 
@@ -477,6 +536,16 @@ def build_html(screenshots: dict) -> str:
     <strong>Nota:</strong> Si consideras que falta algún rol o que tus etapas asignadas
     son incorrectas, consulta con tu supervisor para que realice los ajustes necesarios.
     Los roles determinan qué tareas verás en el Dashboard.
+  </div>
+
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Completar una tarea asignada</div>
+    <ol>
+      <li>Entra al <strong>Dashboard</strong> y localiza la tarjeta de la tarea que tienes que hacer.</li>
+      <li>Haz clic en el botón &laquo;Completar&raquo; de esa tarjeta.</li>
+      <li>Confirma en la ventana emergente que la tarea está terminada.</li>
+      <li>Si algo salió mal durante la tarea, usa &laquo;Reportar Error&raquo; en vez de marcarla como completada.</li>
+    </ol>
   </div>
 </div>
 
@@ -497,7 +566,7 @@ def build_html(screenshots: dict) -> str:
   </p>
 
   <div class="screenshot-wrap">
-    {ss("reglamento")}
+    {ssb("reglamento")}
   </div>
   <p class="screenshot-caption">Sección de Reglamento — normas y políticas de operación del sistema de producción</p>
 
@@ -589,7 +658,7 @@ def build_html(screenshots: dict) -> str:
 
   <h3>Formulario de nuevo error</h3>
   <div class="screenshot-wrap">
-    {ss("errores_nuevo")}
+    {ssb("errores_nuevo")}
   </div>
   <p class="screenshot-caption">Formulario para reportar un nuevo error o incidencia de producción</p>
 
@@ -732,18 +801,37 @@ def main():
         # § 4 — Mi Área
         # ------------------------------------------------------------------
         print("  -> /production/mi-area/...")
-        page.goto(f"{BASE_URL}/production/mi-area/", wait_until="load")
-        page.wait_for_timeout(600)
-        screenshots["mi_area"] = img_to_b64(page.screenshot(full_page=True))
+        SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+        result = capture_with_button(
+            page, BASE_URL, SCREENSHOTS_DIR,
+            from_path="/production/", to_path="/production/mi-area/",
+            filename="mi_area", link_text_hint="Mi Área", wait_ms=600,
+        )
+        if result["ok"]:
+            with open(result["path"], "rb") as f:
+                screenshots["mi_area"] = img_to_b64(f.read())
+        if result["button_ok"]:
+            with open(result["button_path"], "rb") as f:
+                screenshots["mi_area_boton"] = img_to_b64(f.read())
+            print("  BOTON OK mi_area")
         print("  OK mi_area capturado")
 
         # ------------------------------------------------------------------
         # § 5 — Reglamento
         # ------------------------------------------------------------------
         print("  -> /production/reglamento/...")
-        page.goto(f"{BASE_URL}/production/reglamento/", wait_until="load")
-        page.wait_for_timeout(600)
-        screenshots["reglamento"] = img_to_b64(page.screenshot(full_page=True))
+        result = capture_with_button(
+            page, BASE_URL, SCREENSHOTS_DIR,
+            from_path="/production/", to_path="/production/reglamento/",
+            filename="reglamento", link_text_hint="Reglamento", wait_ms=600,
+        )
+        if result["ok"]:
+            with open(result["path"], "rb") as f:
+                screenshots["reglamento"] = img_to_b64(f.read())
+        if result["button_ok"]:
+            with open(result["button_path"], "rb") as f:
+                screenshots["reglamento_boton"] = img_to_b64(f.read())
+            print("  BOTON OK reglamento")
         print("  OK reglamento capturado")
 
         # ------------------------------------------------------------------
@@ -767,9 +855,18 @@ def main():
         # § 7 — Formulario de nuevo error
         # ------------------------------------------------------------------
         print("  -> /production/errores/nuevo/...")
-        page.goto(f"{BASE_URL}/production/errores/nuevo/", wait_until="load")
-        page.wait_for_timeout(600)
-        screenshots["errores_nuevo"] = img_to_b64(page.screenshot(full_page=True))
+        result = capture_with_button(
+            page, BASE_URL, SCREENSHOTS_DIR,
+            from_path="/production/", to_path="/production/errores/nuevo/",
+            filename="errores_nuevo", link_text_hint="Reportar Error", wait_ms=600,
+        )
+        if result["ok"]:
+            with open(result["path"], "rb") as f:
+                screenshots["errores_nuevo"] = img_to_b64(f.read())
+        if result["button_ok"]:
+            with open(result["button_path"], "rb") as f:
+                screenshots["errores_nuevo_boton"] = img_to_b64(f.read())
+            print("  BOTON OK errores_nuevo")
         print("  OK errores_nuevo capturado")
 
         # ------------------------------------------------------------------

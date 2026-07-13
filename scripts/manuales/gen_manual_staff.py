@@ -10,6 +10,9 @@ import base64
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+sys.path.insert(0, str(Path(__file__).parent))
+from highlight_utils import capture_with_button
+
 LOGO_PATH = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/space_cheer/static/IMAGES/Logo_sin_fondo_blanco.png")
 
 BASE_URL  = "http://127.0.0.1:8000"
@@ -18,34 +21,35 @@ PASSWORD  = "Test1234!"
 SCREENSHOTS_DIR = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_screenshots_staff")
 OUTPUT_PDF      = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_staff.pdf")
 
-# (url_path, filename, title, desc, section)
+# (url_path, filename, title, desc, section, origin)
+# origin = None (entrada, sin botón que señalar) o (from_path, link_text_hint)
 PAGES = [
     # § 1 Acceso al sistema  — se captura login_ok por separado
     # § 2 Gestión de Pedidos
-    ("/orders/admin/orders/",                   "pedidos_admin",    "Lista de Pedidos",               "Vista general de todos los pedidos del sistema",                       "orders"),
+    ("/orders/admin/orders/",                   "pedidos_admin",    "Lista de Pedidos",               "Vista general de todos los pedidos del sistema",                       "orders", None),
     # § 3 Módulo de Producción
-    ("/production/admin/",                      "produccion_panel", "Panel de Producción",            "Vista general de trabajos activos y su progreso",                      "production"),
-    ("/production/admin/job/2/",                "produccion_job2",  "Job #2 — Detalle",               "Detalle del job con tareas y operarios asignados (pedido #20, 5 tareas)","production"),
-    ("/production/reglamento/",                 "reglamento",       "Reglamento de Producción",       "Normas, etapas y responsabilidades del proceso de fabricación",         "production"),
-    ("/production/errores/",                    "errores_lista",    "Lista de Reportes de Error",     "Todos los incidentes reportados por operarios",                         "production"),
-    ("/production/errores/1/",                  "error_detalle",    "Reporte de Error #1",            "Detalle del reporte con historial y estado actual",                     "production"),
+    ("/production/admin/",                      "produccion_panel", "Panel de Producción",            "Vista general de trabajos activos y su progreso",                      "production", None),
+    ("/production/admin/job/2/",                "produccion_job2",  "Job #2 — Detalle",               "Detalle del job con tareas y operarios asignados (pedido #20, 5 tareas)","production", ("/production/admin/", "2")),
+    ("/production/reglamento/",                 "reglamento",       "Reglamento de Producción",       "Normas, etapas y responsabilidades del proceso de fabricación",         "production", ("/production/admin/", "Reglamento")),
+    ("/production/errores/",                    "errores_lista",    "Lista de Reportes de Error",     "Todos los incidentes reportados por operarios",                         "production", ("/production/admin/", "Error")),
+    ("/production/errores/1/",                  "error_detalle",    "Reporte de Error #1",            "Detalle del reporte con historial y estado actual",                     "production", ("/production/errores/", "1")),
     # § 4 Configuración de Producción
-    ("/production/config/stages/",              "config_etapas",    "Catálogo de Etapas",             "Etapas configurables del proceso de producción",                        "config"),
-    ("/production/config/roles/",               "config_roles",     "Roles de Producción",            "Roles asignables a operarios",                                          "config"),
-    ("/production/config/responsabilidades/",   "config_resp",      "Responsabilidades",              "Responsabilidades vinculadas a cada rol",                               "config"),
-    ("/production/config/operarios/",           "config_operarios", "Gestión de Operarios",           "Lista y datos de los operarios del taller",                             "config"),
+    ("/production/config/stages/",              "config_etapas",    "Catálogo de Etapas",             "Etapas configurables del proceso de producción",                        "config", ("/production/admin/", "Etapas")),
+    ("/production/config/roles/",               "config_roles",     "Roles de Producción",            "Roles asignables a operarios",                                          "config", ("/production/admin/", "Roles")),
+    ("/production/config/responsabilidades/",   "config_resp",      "Responsabilidades",              "Responsabilidades vinculadas a cada rol",                               "config", ("/production/admin/", "Responsabilidades")),
+    ("/production/config/operarios/",           "config_operarios", "Gestión de Operarios",           "Lista y datos de los operarios del taller",                             "config", ("/production/admin/", "Operarios")),
     # § 5 Competencias y Eventos
-    ("/events/",                                "eventos",          "Competencias",                   "Lista de eventos / competencias activas",                               "events"),
-    ("/events/8/",                              "evento_grandprix", "Evento Grand Prix",              "Detalle del evento #8",                                                "events"),
-    ("/events/8/registrations/",                "inscripciones",    "Inscripciones del Evento",       "Equipos e inscripciones del evento #8",                                "events"),
-    ("/events/8/staff/",                        "staff_evento",     "Staff del Evento",               "Personal asignado al evento #8",                                       "events"),
+    ("/events/",                                "eventos",          "Competencias",                   "Lista de eventos / competencias activas",                               "events", None),
+    ("/events/8/",                              "evento_grandprix", "Evento Grand Prix",              "Detalle del evento #8",                                                "events", ("/events/", "Grand Prix")),
+    ("/events/8/registrations/",                "inscripciones",    "Inscripciones del Evento",       "Equipos e inscripciones del evento #8",                                "events", ("/events/8/", "Inscripciones")),
+    ("/events/8/staff/",                        "staff_evento",     "Staff del Evento",               "Personal asignado al evento #8",                                       "events", ("/events/8/", "Staff")),
     # § 6 Hospitalidad
-    ("/hospitality/",                           "hospitalidad_index","Hospitalidad — Inicio",         "Índice general del módulo de hospitalidad",                            "hospitality"),
-    ("/hospitality/event/8/hotels/",            "hoteles",          "Hoteles del Evento",             "Opciones de alojamiento para el evento #8",                            "hospitality"),
-    ("/hospitality/event/8/stays/",             "reservaciones",    "Reservaciones",                  "Estancias confirmadas para el evento #8",                              "hospitality"),
+    ("/hospitality/",                           "hospitalidad_index","Hospitalidad — Inicio",         "Índice general del módulo de hospitalidad",                            "hospitality", None),
+    ("/hospitality/event/8/hotels/",            "hoteles",          "Hoteles del Evento",             "Opciones de alojamiento para el evento #8",                            "hospitality", ("/hospitality/", "Grand Prix")),
+    ("/hospitality/event/8/stays/",             "reservaciones",    "Reservaciones",                  "Estancias confirmadas para el evento #8",                              "hospitality", ("/hospitality/", "Reservaciones")),
     # § 7 Mi Perfil
-    ("/accounts/profile/edit/",                 "perfil_editar",    "Editar Perfil",                  "Datos personales y de contacto del staff",                             "profile"),
-    ("/accounts/profile/settings/",             "perfil_config",    "Configuración de Cuenta",        "Preferencias y seguridad de la cuenta",                                "profile"),
+    ("/accounts/profile/edit/",                 "perfil_editar",    "Editar Perfil",                  "Datos personales y de contacto del staff",                             "profile", None),
+    ("/accounts/profile/settings/",             "perfil_config",    "Configuración de Cuenta",        "Preferencias y seguridad de la cuenta",                                "profile", ("/accounts/profile/edit/", "Configuración")),
 ]
 
 
@@ -79,32 +83,6 @@ def login_capture(page, base_url):
     return result_url
 
 
-def capture_page_at(page, base_url, url_path, filename):
-    full_url = f"{base_url}{url_path}"
-    try:
-        response = page.goto(full_url, wait_until="load", timeout=30000)
-        time.sleep(0.9)
-        status = response.status if response else 0
-
-        if status in (404, 500):
-            return False, f"HTTP {status}"
-
-        if status == 403:
-            # Captura el 403 de todas formas (no es bloqueante para STAFF)
-            screenshot_path = SCREENSHOTS_DIR / f"{filename}.png"
-            page.screenshot(path=str(screenshot_path), full_page=True)
-            return "denied", str(screenshot_path)
-
-        if "/accounts/login/" in page.url or "/login/" in page.url:
-            return False, "Redirigido al login — sesion perdida"
-
-        screenshot_path = SCREENSHOTS_DIR / f"{filename}.png"
-        page.screenshot(path=str(screenshot_path), full_page=True)
-        return True, str(screenshot_path)
-    except Exception as e:
-        return False, str(e)[:150]
-
-
 def img_to_base64(path):
     with open(path, "rb") as f:
         data = base64.b64encode(f.read()).decode("utf-8")
@@ -128,6 +106,14 @@ def build_html(results, login_path):
         path  = data["path"]
         url   = data["url"]
 
+        button_html = ""
+        if data.get("button_ok") and data.get("button_path") and Path(data["button_path"]).exists():
+            button_img_src = img_to_base64(data["button_path"])
+            button_html = f"""
+            <p class="button-caption">&#128073; Así se llega a esta pantalla &mdash; el botón resaltado en rojo:</p>
+            <img src="{button_img_src}" alt="Botón hacia {title}" class="screenshot screenshot-button" />
+            """
+
         if ok in (True, "denied") and Path(path).exists():
             img_src  = img_to_base64(path)
             img_html = f'<img src="{img_src}" alt="{title}" class="screenshot" />'
@@ -141,6 +127,7 @@ def build_html(results, login_path):
           <h3>{title}</h3>
           <p class="page-desc">{desc}</p>
           <div class="url-badge"><code>{url}</code></div>
+          {button_html}
           {img_html}
         </div>"""
 
@@ -351,6 +338,39 @@ def build_html(results, login_path):
     font-size: 11px;
     margin-top: 8px;
     display: inline-block;
+  }}
+  .button-caption {{
+    color: #fca5a5;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 10px 0 4px;
+  }}
+  .screenshot-button {{
+    margin-bottom: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px #ef4444;
+  }}
+  .use-case {{
+    background: linear-gradient(135deg, #1a1030, #100a20);
+    border: 1px solid #7c3aed;
+    border-left: 4px solid #a855f7;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }}
+  .use-case-title {{
+    color: #d8b4fe;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }}
+  .use-case ol {{
+    margin: 6px 0 0 18px;
+    padding: 0;
+  }}
+  .use-case li {{
+    color: #e2e8f0;
+    font-size: 12px;
+    margin-bottom: 4px;
   }}
 
   /* ── INFO / WARN / STEPS BOXES ── */
@@ -617,6 +637,16 @@ def build_html(results, login_path):
     </ol>
   </div>
 
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Revisar si hay un Job urgente y su avance</div>
+    <ol>
+      <li>Entra al <strong>Panel de Producción</strong> (<code>/production/admin/</code>).</li>
+      <li>Filtra por &laquo;Urgentes&raquo; para ver los Jobs con prioridad.</li>
+      <li>Haz clic en el Job para ver el detalle: tareas, etapas completadas y operarios asignados.</li>
+      <li>Si hay un bloqueo, revisa <strong>Reportes de Error</strong> para ver si hay un incidente asociado.</li>
+    </ol>
+  </div>
+
   {"".join(render_screenshot(k, v) for k, v in production_pages)}
 </section>
 
@@ -660,6 +690,16 @@ def build_html(results, login_path):
       <li>Verifica las inscripciones de los equipos participantes.</li>
       <li>Confirma tu asignación como Staff del evento y los roles asignados.</li>
       <li>Coordina con hospitalidad para el alojamiento de equipos y jueces.</li>
+    </ol>
+  </div>
+
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Confirmar mi asignación de Staff en un evento</div>
+    <ol>
+      <li>Entra a <strong>Competencias</strong> y localiza el evento.</li>
+      <li>Abre el detalle del evento y entra a <strong>Staff del Evento</strong>.</li>
+      <li>Verifica que tu nombre aparezca con el rol asignado (coordinador, apoyo, etc.).</li>
+      <li>Si necesitas coordinar hospedaje, ve a la sección de Hospitalidad del mismo evento.</li>
     </ol>
   </div>
 
@@ -737,7 +777,7 @@ def main():
 
     # Clasificar páginas en diccionario indexado por filename
     section_map = {}
-    for url_path, filename, title, desc, section in PAGES:
+    for url_path, filename, title, desc, section, origin in PAGES:
         section_map[filename] = {
             "url": url_path,
             "title": title,
@@ -745,6 +785,8 @@ def main():
             "section": section,
             "ok": False,
             "path": "",
+            "button_ok": False,
+            "button_path": None,
         }
 
     ok_count     = 0
@@ -779,22 +821,43 @@ def main():
 
         # ── CAPTURAS ──
         print("\n[3] Capturando paginas...")
-        for url_path, filename, title, desc, section in PAGES:
+        for url_path, filename, title, desc, section, origin in PAGES:
             print(f"    -> {title} ({url_path})")
-            ok, result = capture_page_at(page, BASE_URL, url_path, filename)
+            from_path, link_hint = origin if origin else (None, None)
+            result = capture_with_button(
+                page, BASE_URL, SCREENSHOTS_DIR,
+                from_path=from_path, to_path=url_path, filename=filename,
+                link_text_hint=link_hint,
+            )
+            ok, path = result["ok"], result["path"]
+
+            if not ok and path == "HTTP 403":
+                # No es bloqueante para STAFF — se captura la pantalla de
+                # acceso denegado de todas formas, como hacía el script original.
+                denied_screenshot = SCREENSHOTS_DIR / f"{filename}.png"
+                page.screenshot(path=str(denied_screenshot), full_page=True)
+                ok, path = "denied", str(denied_screenshot)
+
             section_map[filename]["ok"] = ok
-            section_map[filename]["path"] = result
+            section_map[filename]["path"] = path
+            section_map[filename]["button_ok"] = result["button_ok"]
+            section_map[filename]["button_path"] = result["button_path"]
 
             if ok is True:
                 ok_count += 1
-                print(f"       OK: {result}")
+                print(f"       OK: {path}")
             elif ok == "denied":
                 denied_count += 1
-                print(f"       DENIED (403, capturado): {result}")
+                print(f"       DENIED (403, capturado): {path}")
             else:
                 error_count += 1
-                errors_detail.append((title, url_path, result))
-                print(f"       ERROR: {result}")
+                errors_detail.append((title, url_path, path))
+                print(f"       ERROR: {path}")
+
+            if result["button_ok"]:
+                print(f"       BOTON OK: {result['button_path']}")
+            elif from_path:
+                print(f"       BOTON no encontrado (origen: {from_path}, hint: {link_hint})")
 
         browser.close()
 

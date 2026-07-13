@@ -238,3 +238,9 @@ space_cheer/.playwright-cli/
 
 # Archivos temporales varios
 New Text Document.txt
+
+# Casos de uso PDF + screenshots de manuales por rol (generados)
+caso_uso_*.pdf
+manual_*_screenshots/
+.playwright-cli/
+after-login-admin.yml

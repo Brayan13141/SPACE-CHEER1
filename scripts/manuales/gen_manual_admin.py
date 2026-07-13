@@ -10,6 +10,9 @@ import base64
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+sys.path.insert(0, str(Path(__file__).parent))
+from highlight_utils import capture_with_button
+
 LOGO_PATH = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/space_cheer/static/IMAGES/Logo_sin_fondo_blanco.png")
 
 
@@ -29,59 +32,62 @@ SCREENSHOTS_DIR = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_screenshots
 OUTPUT_PDF = Path("C:/Users/Lenovo/Documents/SPACE-CHEER/manual_admin.pdf")
 
 PAGES = [
-    # (url_path, filename, título, descripción)
+    # (url_path, filename, título, descripción, origen)
+    # origen = None (pantalla de entrada, sin botón que señalar) o
+    #          (from_path, link_text_hint) — página donde vive el botón/link
+    #          que lleva a esta pantalla, y un texto para ayudar a ubicarlo.
 
     # ── ÓRDENES ──────────────────────────────────────────────────────────────
-    ("/orders/admin/orders/",          "orders_list",         "Lista de Pedidos",              "Vista general de todos los pedidos del sistema"),
-    ("/orders/admin/orders/18/",       "order_18_pending",    "Pedido #18 — PENDIENTE",        "Pedido en estado Pendiente con opciones de acción"),
-    ("/orders/admin/orders/19/",       "order_19_approved",   "Pedido #19 — DISEÑO APROBADO",  "Pedido con diseño aprobado listo para producción"),
-    ("/orders/admin/orders/20/",       "order_20_production", "Pedido #20 — EN PRODUCCIÓN",    "Pedido en producción activa"),
-    ("/orders/admin/orders/21/",       "order_21_delivered",  "Pedido #21 — ENTREGADO",        "Pedido ya entregado al equipo"),
-    ("/orders/admin/orders/17/",       "order_17_draft",      "Pedido #17 — BORRADOR",         "Pedido en estado borrador pendiente de confirmación"),
+    ("/orders/admin/orders/",          "orders_list",         "Lista de Pedidos",              "Vista general de todos los pedidos del sistema", None),
+    ("/orders/admin/orders/18/",       "order_18_pending",    "Pedido #18 — PENDIENTE",        "Pedido en estado Pendiente con opciones de acción", ("/orders/admin/orders/", "18")),
+    ("/orders/admin/orders/19/",       "order_19_approved",   "Pedido #19 — DISEÑO APROBADO",  "Pedido con diseño aprobado listo para producción", ("/orders/admin/orders/", "19")),
+    ("/orders/admin/orders/20/",       "order_20_production", "Pedido #20 — EN PRODUCCIÓN",    "Pedido en producción activa", ("/orders/admin/orders/", "20")),
+    ("/orders/admin/orders/21/",       "order_21_delivered",  "Pedido #21 — ENTREGADO",        "Pedido ya entregado al equipo", ("/orders/admin/orders/", "21")),
+    ("/orders/admin/orders/17/",       "order_17_draft",      "Pedido #17 — BORRADOR",         "Pedido en estado borrador pendiente de confirmación", ("/orders/admin/orders/", "17")),
 
     # ── PEDIDOS PERSONALES (OFFLINE) ────────────────────────────────────────
-    ("/orders/admin/orders/?type=OFFLINE", "orders_offline_filter", "Filtro — Pedidos Personales", "Lista de pedidos filtrada por tipo Personal (offline)"),
-    ("/orders/admin/offline/nuevo/",   "offline_order_create", "Nuevo Pedido Personal (Offline)", "Formulario de captura: cliente, productos y anticipo"),
-    ("/orders/admin/clientes/",        "customer_list",        "Clientes",                      "Directorio de clientes de pedidos personales"),
-    ("/orders/admin/orders/24/",       "order_24_offline",     "Pedido #24 — PERSONAL (Offline)", "Detalle de un pedido offline: cliente, pagos y medidas por producto"),
+    ("/orders/admin/orders/?type=OFFLINE", "orders_offline_filter", "Filtro — Pedidos Personales", "Lista de pedidos filtrada por tipo Personal (offline)", ("/orders/admin/orders/", "OFFLINE")),
+    ("/orders/admin/offline/nuevo/",   "offline_order_create", "Nuevo Pedido Personal (Offline)", "Formulario de captura: cliente, productos y anticipo", ("/orders/admin/orders/", "Pedido personal")),
+    ("/orders/admin/clientes/",        "customer_list",        "Clientes",                      "Directorio de clientes de pedidos personales", ("/orders/admin/orders/", "Clientes")),
+    ("/orders/admin/orders/24/",       "order_24_offline",     "Pedido #24 — PERSONAL (Offline)", "Detalle de un pedido offline: cliente, pagos y medidas por producto", ("/orders/admin/orders/", "24")),
 
     # ── PRODUCCIÓN ────────────────────────────────────────────────────────────
-    ("/production/admin/",             "production_panel",    "Panel de Producción",           "Vista general de estadísticas y jobs activos"),
-    ("/production/admin/job/2/",       "production_job2",     "Job #2 — Detalle",              "Detalle del job con tareas y operarios asignados"),
-    ("/production/reglamento/",        "production_reglamento","Reglamento de Operarios",      "Reglamento y políticas del área de producción"),
-    ("/production/errores/",           "errors_list",         "Reportes de Error",             "Lista de todos los reportes de error"),
-    ("/production/errores/1/",         "error_1_detail",      "Reporte de Error #1",           "Detalle del reporte con formulario de revisión integrado"),
+    ("/production/admin/",             "production_panel",    "Panel de Producción",           "Vista general de estadísticas y jobs activos", None),
+    ("/production/admin/job/2/",       "production_job2",     "Job #2 — Detalle",              "Detalle del job con tareas y operarios asignados", ("/production/admin/", "2")),
+    ("/production/reglamento/",        "production_reglamento","Reglamento de Operarios",      "Reglamento y políticas del área de producción", ("/production/admin/", "Reglamento")),
+    ("/production/errores/",           "errors_list",         "Reportes de Error",             "Lista de todos los reportes de error", ("/production/admin/", "Error")),
+    ("/production/errores/1/",         "error_1_detail",      "Reporte de Error #1",           "Detalle del reporte con formulario de revisión integrado", ("/production/errores/", "1")),
 
     # ── CONFIGURACIÓN PRODUCCIÓN ─────────────────────────────────────────────
-    ("/production/config/stages/",     "config_stages",       "Catálogo de Etapas",            "Configuración de etapas del proceso de producción"),
-    ("/production/config/roles/",      "config_roles",        "Roles de Producción",           "Gestión de roles asignables a operarios"),
-    ("/production/config/responsabilidades/", "config_resp",  "Responsabilidades",             "Configuración de responsabilidades por rol y etapa"),
-    ("/production/config/operarios/",  "config_operarios",    "Gestión de Operarios",          "Lista y gestión de operarios del sistema"),
-    ("/production/config/plantillas/", "config_plantillas",   "Plantillas de Producción",      "Plantillas de proceso reutilizables por tipo de producto"),
-    ("/production/config/product-stages/", "config_prod_stages", "Etapas por Producto",        "Etapas del proceso asociadas a cada tipo de producto"),
+    ("/production/config/stages/",     "config_stages",       "Catálogo de Etapas",            "Configuración de etapas del proceso de producción", ("/production/admin/", "Etapas")),
+    ("/production/config/roles/",      "config_roles",        "Roles de Producción",           "Gestión de roles asignables a operarios", ("/production/admin/", "Roles")),
+    ("/production/config/responsabilidades/", "config_resp",  "Responsabilidades",             "Configuración de responsabilidades por rol y etapa", ("/production/admin/", "Responsabilidades")),
+    ("/production/config/operarios/",  "config_operarios",    "Gestión de Operarios",          "Lista y gestión de operarios del sistema", ("/production/admin/", "Operarios")),
+    ("/production/config/plantillas/", "config_plantillas",   "Plantillas de Producción",      "Plantillas de proceso reutilizables por tipo de producto", ("/production/admin/", "Plantillas")),
+    ("/production/config/product-stages/", "config_prod_stages", "Etapas por Producto",        "Etapas del proceso asociadas a cada tipo de producto", ("/production/admin/", "Etapas por Producto")),
 
     # ── EVENTOS ──────────────────────────────────────────────────────────────
-    ("/events/",                       "events_list",         "Lista de Eventos",              "Vista general de todos los eventos/competencias"),
-    ("/events/8/",                     "event_8_detail",      "Evento #8 — Grand Prix Espacial","Detalle del evento Grand Prix Espacial (REGISTRATION_OPEN)"),
-    ("/events/8/registrations/",       "event_8_registrations","Inscripciones — Grand Prix",   "Equipos e individuos inscritos al Grand Prix Espacial"),
-    ("/events/8/staff/",               "event_8_staff",       "Staff — Grand Prix",            "Personal asignado al Grand Prix Espacial"),
-    ("/events/8/scores/",              "event_8_scores",      "Puntajes — Grand Prix",         "Registro de puntajes de participantes"),
-    ("/events/8/results/",             "event_8_results",     "Resultados — Grand Prix",       "Resultados finales del Grand Prix Espacial"),
+    ("/events/",                       "events_list",         "Lista de Eventos",              "Vista general de todos los eventos/competencias", None),
+    ("/events/8/",                     "event_8_detail",      "Evento #8 — Grand Prix Espacial","Detalle del evento Grand Prix Espacial (REGISTRATION_OPEN)", ("/events/", "Grand Prix")),
+    ("/events/8/registrations/",       "event_8_registrations","Inscripciones — Grand Prix",   "Equipos e individuos inscritos al Grand Prix Espacial", ("/events/8/", "Inscripciones")),
+    ("/events/8/staff/",               "event_8_staff",       "Staff — Grand Prix",            "Personal asignado al Grand Prix Espacial", ("/events/8/", "Staff")),
+    ("/events/8/scores/",              "event_8_scores",      "Puntajes — Grand Prix",         "Registro de puntajes de participantes", ("/events/8/", "Puntajes")),
+    ("/events/8/results/",             "event_8_results",     "Resultados — Grand Prix",       "Resultados finales del Grand Prix Espacial", ("/events/8/", "Resultados")),
 
     # ── HOSPITALIDAD ─────────────────────────────────────────────────────────
-    ("/hospitality/",                  "hospitality_panel",   "Panel de Hospitalidad",         "Vista general del módulo de hospitalidad"),
-    ("/hospitality/event/8/hotels/",   "hospitality_hotels",  "Hoteles — Grand Prix",          "Hoteles disponibles para el Grand Prix Espacial"),
-    ("/hospitality/event/8/stays/",    "hospitality_stays",   "Reservaciones — Grand Prix",    "Reservaciones de hospedaje del Grand Prix Espacial"),
+    ("/hospitality/",                  "hospitality_panel",   "Panel de Hospitalidad",         "Vista general del módulo de hospitalidad", None),
+    ("/hospitality/event/8/hotels/",   "hospitality_hotels",  "Hoteles — Grand Prix",          "Hoteles disponibles para el Grand Prix Espacial", ("/hospitality/", "Grand Prix")),
+    ("/hospitality/event/8/stays/",    "hospitality_stays",   "Reservaciones — Grand Prix",    "Reservaciones de hospedaje del Grand Prix Espacial", ("/hospitality/", "Reservaciones")),
 
     # ── PRODUCTOS Y EQUIPOS ───────────────────────────────────────────────────
-    ("/products/catalog/",             "products_catalog",    "Catálogo de Productos",         "Catálogo completo de productos disponibles"),
-    ("/teams/teams/",                  "teams_list",          "Gestión de Equipos",            "Lista y administración de todos los equipos"),
-    ("/teams/categories/",             "teams_categories",    "Categorías de Equipos",         "Categorías de competencia configurables"),
-    ("/teams/manage_athletes/",        "teams_athletes",      "Gestión de Atletas",            "Administración de atletas registrados en el sistema"),
+    ("/products/catalog/",             "products_catalog",    "Catálogo de Productos",         "Catálogo completo de productos disponibles", None),
+    ("/teams/teams/",                  "teams_list",          "Gestión de Equipos",            "Lista y administración de todos los equipos", None),
+    ("/teams/categories/",             "teams_categories",    "Categorías de Equipos",         "Categorías de competencia configurables", ("/teams/teams/", "Categorías")),
+    ("/teams/manage_athletes/",        "teams_athletes",      "Gestión de Atletas",            "Administración de atletas registrados en el sistema", ("/teams/teams/", "Atletas")),
 
     # ── PERFIL ────────────────────────────────────────────────────────────────
-    ("/accounts/profile/edit/",        "profile_edit",        "Editar Perfil",                 "Formulario de edición del perfil del administrador"),
-    ("/accounts/profile/settings/",    "profile_settings",    "Configuración de Cuenta",       "Ajustes de seguridad y preferencias de la cuenta"),
+    ("/accounts/profile/edit/",        "profile_edit",        "Editar Perfil",                 "Formulario de edición del perfil del administrador", None),
+    ("/accounts/profile/settings/",    "profile_settings",    "Configuración de Cuenta",       "Ajustes de seguridad y preferencias de la cuenta", ("/accounts/profile/edit/", "Configuración")),
 ]
 
 
@@ -118,11 +124,21 @@ def build_html(results):
     profile_pages     = [(r, results[r]) for r in results if results[r]["section"] == "profile"]
 
     def render_page_section(key, data):
-        title = data["title"]
-        desc  = data["desc"]
-        ok    = data["ok"]
-        path  = data["path"]
-        url   = data["url"]
+        title      = data["title"]
+        desc       = data["desc"]
+        ok         = data["ok"]
+        path       = data["path"]
+        url        = data["url"]
+        button_ok  = data.get("button_ok")
+        button_path = data.get("button_path")
+
+        button_html = ""
+        if button_ok and button_path and Path(button_path).exists():
+            button_img_src = img_to_base64(button_path)
+            button_html = f"""
+            <p class="button-caption">&#128073; Así se llega a esta pantalla &mdash; el botón resaltado en rojo:</p>
+            <img src="{button_img_src}" alt="Botón hacia {title}" class="screenshot screenshot-button" />
+            """
 
         if ok and Path(path).exists():
             img_src = img_to_base64(path)
@@ -135,6 +151,7 @@ def build_html(results):
             <h3>{title}</h3>
             <p class="page-desc">{desc}</p>
             <div class="url-badge"><code>{url}</code></div>
+            {button_html}
             {img_html}
         </div>
         """
@@ -190,6 +207,38 @@ def build_html(results):
     </div>
     """
 
+    orders_use_cases = """
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Capturar un pedido tomado en persona o por WhatsApp</div>
+        <ol>
+            <li>Ir a <code>/orders/admin/orders/</code> (Lista de Pedidos).</li>
+            <li>Hacer clic en el botón <strong>&laquo;Pedido personal&raquo;</strong> (esquina superior derecha).</li>
+            <li>En <strong>Cliente</strong>, elegir <em>Cliente nuevo</em> (nombre, teléfono, correo opcional) o <em>Cliente existente</em> (buscar por nombre/teléfono).</li>
+            <li>En <strong>Productos</strong>, elegir un producto interno ya existente o crear uno nuevo al vuelo (nombre y precio).</li>
+            <li>Llenar <strong>Precio acordado</strong> y, si el cliente dejó anticipo, el monto y método de pago.</li>
+            <li>Hacer clic en <strong>&laquo;Crear pedido&raquo;</strong>. El pedido queda en estado Pendiente, listo para producción.</li>
+        </ol>
+    </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; ¿Dónde agrego un cliente nuevo?</div>
+        <ol>
+            <li>Hay dos formas: (a) directamente al capturar un pedido personal, eligiendo <em>Cliente nuevo</em> en el formulario, o
+                (b) desde el directorio dedicado: <code>/orders/admin/clientes/</code>, botón <strong>&laquo;Clientes&raquo;</strong> junto a &laquo;Pedido personal&raquo; en la Lista de Pedidos.</li>
+            <li>En el directorio de Clientes se puede buscar por nombre/teléfono y dar de alta uno nuevo con el formulario de la misma pantalla (nombre, teléfono, correo, notas).</li>
+            <li>Un cliente puede o no tener cuenta de usuario vinculada en la plataforma &mdash; si no la tiene, el detalle del pedido lo muestra como &laquo;Sin cuenta&raquo;.</li>
+        </ol>
+    </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Registrar un abono y marcar un pedido personal como liquidado</div>
+        <ol>
+            <li>Abrir el pedido desde la lista (filtrar por <code>?type=OFFLINE</code> o el badge &laquo;Personal (offline)&raquo; para encontrarlo rápido).</li>
+            <li>En la tarjeta <strong>Pagos</strong>, llenar Monto, Método y Notas, y hacer clic en <strong>&laquo;Registrar abono&raquo;</strong>.</li>
+            <li>El saldo pendiente se recalcula automáticamente; cuando el pagado alcanza el precio acordado, el badge cambia a <strong>Liquidado</strong>.</li>
+            <li>Los abonos se pueden seguir registrando mientras el pedido no esté Entregado ni Cancelado.</li>
+        </ol>
+    </div>
+    """
+
     production_intro = """
     <p style="color:#94a3b8;margin-bottom:24px">
         El módulo de producción gestiona los Jobs (trabajos de fabricación) asociados a los pedidos aprobados.
@@ -204,6 +253,15 @@ def build_html(results):
             <li><strong>Etapa</strong>: Fase del proceso de producción (configurable en /config/stages/).</li>
             <li><strong>Reglamento</strong>: Políticas y normas que rigen el trabajo del área de producción.</li>
         </ul>
+    </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Revisar el avance de un pedido en producción</div>
+        <ol>
+            <li>Ir a <code>/production/admin/</code> (Panel de Producción).</li>
+            <li>Localizar el Job vinculado al pedido y hacer clic en él para ver el detalle.</li>
+            <li>Revisar las tareas por etapa y qué operario tiene asignada cada una, junto con su progreso.</li>
+            <li>Si una tarea está detenida, consultar Reportes de Error para ver si hay un incidente asociado.</li>
+        </ol>
     </div>
     """
 
@@ -291,6 +349,14 @@ def build_html(results):
             <li><strong>Room</strong>: Habitación individual dentro del hotel con capacidad y precio.</li>
         </ul>
     </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Asignar hospedaje a un equipo inscrito en un evento</div>
+        <ol>
+            <li>Ir al evento (<code>/events/[id]/</code>) y entrar a la sección de Hospitalidad, o directamente a <code>/hospitality/event/[id]/hotels/</code>.</li>
+            <li>Revisar hoteles y habitaciones disponibles para las fechas del evento.</li>
+            <li>Ir a Reservaciones (<code>/hospitality/event/[id]/stays/</code>) y registrar el stay del equipo: hotel, habitación y fechas.</li>
+        </ol>
+    </div>
     """
 
     products_teams_intro = """
@@ -307,6 +373,14 @@ def build_html(results):
             <li><strong>ATHLETE_CUSTOM</strong>: Fabricado con medidas individuales del atleta.</li>
         </ul>
     </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Consultar los equipos y atletas registrados</div>
+        <ol>
+            <li>Ir a <code>/teams/teams/</code> (Gestión de Equipos) para ver el listado completo.</li>
+            <li>Desde ahí, entrar a <strong>&laquo;Categorías&raquo;</strong> para revisar las categorías de competencia configuradas.</li>
+            <li>Entrar a <strong>&laquo;Atletas&raquo;</strong> para administrar a los atletas registrados en cualquier equipo.</li>
+        </ol>
+    </div>
     """
 
     profile_intro = """
@@ -318,6 +392,14 @@ def build_html(results):
     <div class="warning-box">
         <strong>Nota de seguridad:</strong> Los cambios de contraseña requieren confirmar la contraseña actual.
         Se recomienda usar contraseñas de al menos 12 caracteres con letras, números y símbolos.
+    </div>
+    <div class="use-case">
+        <div class="use-case-title">Caso de uso &mdash; Actualizar mis datos de cuenta</div>
+        <ol>
+            <li>Abrir el menú de usuario (esquina superior derecha de la barra de navegación, junto al nombre &laquo;Admin Sistema&raquo;).</li>
+            <li>Entrar a <strong>Editar Perfil</strong> (<code>/accounts/profile/edit/</code>) para nombre, foto y datos de contacto.</li>
+            <li>Entrar a <strong>Configuración de Cuenta</strong> (<code>/accounts/profile/settings/</code>) para cambiar contraseña y preferencias de seguridad.</li>
+        </ol>
     </div>
     """
 
@@ -533,6 +615,41 @@ def build_html(results):
     text-align: center;
     color: #64748b;
     font-size: 12px;
+  }}
+  .button-caption {{
+    color: #fca5a5;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 10px 0 4px;
+  }}
+  .screenshot-button {{
+    margin-bottom: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px #ef4444;
+  }}
+
+  /* ── CASOS DE USO ── */
+  .use-case {{
+    background: linear-gradient(135deg, #1a1030, #100a20);
+    border: 1px solid #7c3aed;
+    border-left: 4px solid #a855f7;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }}
+  .use-case-title {{
+    color: #d8b4fe;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }}
+  .use-case ol {{
+    margin: 6px 0 0 18px;
+    padding: 0;
+  }}
+  .use-case li {{
+    color: #e2e8f0;
+    font-size: 12px;
+    margin-bottom: 4px;
   }}
 
   /* ── INFO BOXES ── */
@@ -768,6 +885,7 @@ def build_html(results):
   </p>
   {flow_diagram}
   {approval_steps}
+  {orders_use_cases}
   {"".join(render_page_section(k, d) for k, d in orders_pages)}
 </section>
 
@@ -888,28 +1006,6 @@ def login_capture(page, base_url):
     return result_url
 
 
-def capture_page_at(page, base_url, url_path, filename):
-    """Captura una página del servidor en base_url y devuelve (ok, path_or_error)."""
-    full_url = f"{base_url}{url_path}"
-    try:
-        response = page.goto(full_url, wait_until="load", timeout=30000)
-        time.sleep(0.9)
-        status = response.status if response else 0
-
-        if status in (404, 403, 500):
-            return False, f"HTTP {status}"
-
-        # Verificar que no redirigió al login
-        if "/accounts/login/" in page.url or "/login/" in page.url:
-            return False, "Redirigido al login — sesion perdida"
-
-        screenshot_path = SCREENSHOTS_DIR / f"{filename}.png"
-        page.screenshot(path=str(screenshot_path), full_page=True)
-        return True, str(screenshot_path)
-    except Exception as e:
-        return False, str(e)[:150]
-
-
 def main():
     print("=" * 60)
     print("GENERADOR DE MANUAL ADMIN — SPACE CHEER v2.0")
@@ -918,7 +1014,7 @@ def main():
 
     # ── CLASIFICAR PÁGINAS ──────────────────────────────────────────────────
     section_map = {}
-    for url_path, filename, title, desc in PAGES:
+    for url_path, filename, title, desc, origin in PAGES:
         if url_path.startswith("/orders"):
             section = "orders"
         elif "errores" in url_path:
@@ -945,12 +1041,16 @@ def main():
             "title": title,
             "desc": desc,
             "section": section,
+            "origin": origin,
             "ok": False,
             "path": "",
+            "button_ok": False,
+            "button_path": None,
         }
 
     ok_count = 0
     error_count = 0
+    button_ok_count = 0
     errors_detail = []
 
     print("\n[1] Iniciando Playwright...")
@@ -976,19 +1076,32 @@ def main():
 
         # ── CAPTURAS ───────────────────────────────────────────────────────
         print(f"\n[3] Capturando {len(PAGES)} paginas...")
-        for url_path, filename, title, desc in PAGES:
+        for url_path, filename, title, desc, origin in PAGES:
             print(f"    -> {title} ({url_path})")
-            ok, result = capture_page_at(page, CAPTURE_BASE_URL, url_path, filename)
-            section_map[filename]["ok"] = ok
-            section_map[filename]["path"] = result
+            from_path, link_hint = origin if origin else (None, None)
+            result = capture_with_button(
+                page, CAPTURE_BASE_URL, SCREENSHOTS_DIR,
+                from_path=from_path, to_path=url_path, filename=filename,
+                link_text_hint=link_hint,
+            )
+            section_map[filename]["ok"] = result["ok"]
+            section_map[filename]["path"] = result["path"]
+            section_map[filename]["button_ok"] = result["button_ok"]
+            section_map[filename]["button_path"] = result["button_path"]
 
-            if ok:
+            if result["ok"]:
                 ok_count += 1
-                print(f"       OK: {result}")
+                print(f"       OK: {result['path']}")
             else:
                 error_count += 1
-                errors_detail.append((title, url_path, result))
-                print(f"       ERROR: {result}")
+                errors_detail.append((title, url_path, result["path"]))
+                print(f"       ERROR: {result['path']}")
+
+            if result["button_ok"]:
+                button_ok_count += 1
+                print(f"       BOTON OK: {result['button_path']}")
+            elif from_path:
+                print(f"       BOTON no encontrado (origen: {from_path}, hint: {link_hint})")
 
         browser.close()
 
@@ -1022,9 +1135,11 @@ def main():
     print("\n" + "=" * 60)
     print("REPORTE FINAL")
     print("=" * 60)
+    origins_expected = sum(1 for *_, origin in PAGES if origin)
     print(f"  Paginas totales       : {len(PAGES)}")
     print(f"  Paginas capturadas OK : {ok_count}")
     print(f"  Paginas con error     : {error_count}")
+    print(f"  Botones resaltados OK : {button_ok_count} / {origins_expected} (con origen definido)")
     if errors_detail:
         print("\n  Detalle de errores:")
         for t, u, e in errors_detail:

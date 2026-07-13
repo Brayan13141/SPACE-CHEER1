@@ -15,9 +15,13 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright, Page
 
+sys.path.insert(0, str(Path(__file__).parent))
+from highlight_utils import capture_with_button
+
 BASE_URL = "http://127.0.0.1:8000"
 OUTPUT_PDF = Path(__file__).parent.parent.parent / "manual_coach.pdf"
 LOGO_PATH = Path(__file__).parent.parent.parent / "space_cheer/static/IMAGES/Logo_sin_fondo_blanco.png"
+SCREENSHOTS_DIR = Path(__file__).parent.parent.parent / "manual_coach_screenshots"
 
 HEADCOACH_USER = "headcoach_test"
 HEADCOACH_PASS = "Test1234!"
@@ -81,16 +85,29 @@ def is_accessible(page: Page, intended_path: str) -> bool:
 
 
 def img(key: str, caption: str = "", width: str = "100%") -> str:
-    """Return <figure> HTML with embedded base64 image."""
+    """Return <figure> HTML with embedded base64 image. If a
+    "<key>_boton" screenshot exists (button highlighted en rojo), lo
+    antepone con su propio caption explicando cómo se llega ahí."""
+    button_key = f"{key}_boton"
+    button_html = ""
+    if button_key in shots:
+        button_html = (
+            '<p class="button-caption">&#128073; Así se llega a esta pantalla &mdash; '
+            'el botón resaltado en rojo:</p>'
+            f'<img src="data:image/png;base64,{shots[button_key]}" alt="Botón hacia {caption or key}" '
+            f'style="width:{width};border-radius:8px;margin-bottom:14px;'
+            f'box-shadow:0 4px 16px rgba(0,0,0,.35),0 0 0 2px #ef4444">'
+        )
+
     if key not in shots:
-        return f'<div class="placeholder">[Captura no disponible: {key}]</div>'
+        return button_html + f'<div class="placeholder">[Captura no disponible: {key}]</div>'
     tag = (
         f'<img src="data:image/png;base64,{shots[key]}" '
         f'alt="{caption}" style="width:{width};border-radius:8px;'
         f'box-shadow:0 4px 16px rgba(0,0,0,.35)">'
     )
     cap = f"<figcaption>{caption}</figcaption>" if caption else ""
-    return f'<figure class="sc">{tag}{cap}</figure>'
+    return button_html + f'<figure class="sc">{tag}{cap}</figure>'
 
 
 def login(page: Page, username: str, password: str) -> bool:
@@ -128,11 +145,50 @@ def logout(page: Page) -> None:
         pass
 
 
+def snap_button(page: Page, key: str, from_path: str, to_path: str, link_hint: str) -> None:
+    """Navega a from_path, resalta el link hacia to_path y guarda esa
+    captura extra como shots["<key>_boton"] (si lo encuentra). No navega
+    al destino — el goto()/snap() normal que sigue en el flujo existente
+    se encarga de eso."""
+    SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+    result = capture_with_button(
+        page, BASE_URL, SCREENSHOTS_DIR,
+        from_path=from_path, to_path=to_path, filename=key,
+        link_text_hint=link_hint,
+    )
+    if result["button_ok"]:
+        with open(result["button_path"], "rb") as f:
+            shots[f"{key}_boton"] = base64.b64encode(f.read()).decode()
+        print(f"  [snap] {key}_boton ({from_path} -> {to_path})")
+    else:
+        print(f"  [--] boton no encontrado (origen: {from_path}, hint: {link_hint})")
+
+
 # ─────────────────────────── capture helpers ──────────────────────────────────
 
-def capture_url(page: Page, prefix: str, path: str, label: str) -> bool:
-    """Navigate to path, snap if accessible. Returns True if accessible."""
+def capture_url(page: Page, prefix: str, path: str, label: str,
+                 origin: tuple[str, str] | None = None) -> bool:
+    """Navigate to path, snap if accessible. Returns True if accessible.
+    Si se pasa origin=(from_path, link_hint), primero navega a from_path,
+    resalta el link que lleva a path y guarda esa captura extra como
+    "<key>_boton" antes de navegar al destino."""
     key = f"{prefix}_{path.strip('/').replace('/', '_') or 'home'}"
+
+    if origin:
+        from_path, link_hint = origin
+        SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+        result = capture_with_button(
+            page, BASE_URL, SCREENSHOTS_DIR,
+            from_path=from_path, to_path=path, filename=key,
+            link_text_hint=link_hint,
+        )
+        if result["button_ok"]:
+            with open(result["button_path"], "rb") as f:
+                shots[f"{key}_boton"] = base64.b64encode(f.read()).decode()
+            print(f"    BOTON OK ({from_path} -> {path})")
+        elif from_path:
+            print(f"    BOTON no encontrado (origen: {from_path}, hint: {link_hint})")
+
     goto(page, path)
     ok = is_accessible(page, path)
     if ok:
@@ -173,6 +229,7 @@ def capture_headcoach(page: Page) -> dict:
 
     # ── § 2 Gestión de Equipos
     print("\n  -- Sección: Equipos --")
+    snap_button(page, "hc_teams_coach", "/", "/teams/coach/", "Equipos")
     goto(page, "/teams/coach/")
     access["teams_coach"] = is_accessible(page, "/teams/coach/")
     if access["teams_coach"]:
@@ -191,6 +248,7 @@ def capture_headcoach(page: Page) -> dict:
 
     # ── § 3 Pedidos
     print("\n  -- Sección: Pedidos --")
+    snap_button(page, "hc_orders_list", "/", "/orders/", "Pedidos")
     goto(page, "/orders/")
     access["orders"] = is_accessible(page, "/orders/")
     if access["orders"]:
@@ -202,6 +260,7 @@ def capture_headcoach(page: Page) -> dict:
         snap(page, "hc_orders_create")
 
     # Pedido DRAFT
+    snap_button(page, "hc_order_17_draft", "/orders/", "/orders/17/", "17")
     goto(page, "/orders/17/")
     access["orders_17"] = is_accessible(page, "/orders/17/")
     if access["orders_17"]:
@@ -227,11 +286,13 @@ def capture_headcoach(page: Page) -> dict:
 
     # ── § 4 Eventos / Competencias
     print("\n  -- Sección: Eventos --")
+    snap_button(page, "hc_events_list", "/", "/events/", "Competencias")
     goto(page, "/events/")
     access["events"] = is_accessible(page, "/events/")
     if access["events"]:
         snap(page, "hc_events_list")
 
+    snap_button(page, "hc_events_8_detail", "/events/", "/events/8/", "Grand Prix")
     goto(page, "/events/8/")
     access["events_8"] = is_accessible(page, "/events/8/")
     if access["events_8"]:
@@ -305,6 +366,7 @@ def capture_coach(page: Page) -> dict:
 
     # ── Equipos
     print("\n  -- Sección: Equipos --")
+    snap_button(page, "coach_teams_coach", "/", "/teams/coach/", "Equipos")
     goto(page, "/teams/coach/")
     access["teams_coach"] = is_accessible(page, "/teams/coach/")
     if access["teams_coach"]:
@@ -336,6 +398,7 @@ def capture_coach(page: Page) -> dict:
 
     # ── Pedidos
     print("\n  -- Sección: Pedidos --")
+    snap_button(page, "coach_orders_list", "/", "/orders/", "Pedidos")
     goto(page, "/orders/")
     access["orders"] = is_accessible(page, "/orders/")
     if access["orders"]:
@@ -348,11 +411,13 @@ def capture_coach(page: Page) -> dict:
 
     # ── Eventos
     print("\n  -- Sección: Eventos --")
+    snap_button(page, "coach_events_list", "/", "/events/", "Competencias")
     goto(page, "/events/")
     access["events"] = is_accessible(page, "/events/")
     if access["events"]:
         snap(page, "coach_events_list")
 
+    snap_button(page, "coach_events_8_detail", "/events/", "/events/8/", "Grand Prix")
     goto(page, "/events/8/")
     access["events_8"] = is_accessible(page, "/events/8/")
     if access["events_8"]:
@@ -509,6 +574,17 @@ figure.sc figcaption {
   padding: 24px; text-align: center; color: #475569; font-size: 12px;
   margin: 12px 0;
 }
+.button-caption {
+  color: #fca5a5; font-size: 11px; font-weight: 600; margin: 14px 0 4px;
+}
+.use-case {
+  background: linear-gradient(135deg, #1a1030, #100a20);
+  border: 1px solid #7c3aed; border-left: 4px solid #a855f7;
+  border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 14px 0;
+}
+.use-case-title { color: #d8b4fe; font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+.use-case ol { margin: 6px 0 0 18px; padding: 0; }
+.use-case li { color: #e2e8f0; font-size: 12px; margin-bottom: 4px; }
 
 /* ─── comparison grid (2 columns) ─── */
 .compare-grid {
@@ -738,6 +814,16 @@ def build_html(hc: dict, c: dict) -> str:
     El Coach ve únicamente los equipos en los que está asignado como entrenador.
   </p>
 
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Consultar los atletas de mi equipo</div>
+    <ol>
+      <li>Desde el Dashboard, entra a <strong>Equipos</strong>.</li>
+      <li>Selecciona el equipo que quieres revisar.</li>
+      <li>Entra a la lista de miembros del equipo para ver a los atletas registrados.</li>
+      <li>Si falta algún atleta, coordina con el administrador para agregarlo al equipo.</li>
+    </ol>
+  </div>
+
   <h3>3.3 Gestión de Atletas (HeadCoach)</h3>
   <span class="role-label-hc">HEADCOACH</span>
   {img("hc_teams_manage_athletes", "Pantalla de gestión de atletas — HeadCoach")}
@@ -843,6 +929,16 @@ def build_html(hc: dict, c: dict) -> str:
     <strong>Importante:</strong> Una vez que un pedido avanza a <em>DESIGN APPROVED</em>,
     las medidas quedan <strong>bloqueadas permanentemente</strong>. No podrás modificarlas
     sin contactar al administrador del sistema.
+  </div>
+
+  <div class="use-case">
+    <div class="use-case-title">Caso de uso &mdash; Crear y enviar un pedido de uniforme para mi equipo</div>
+    <ol>
+      <li>Desde el Dashboard, entra a <strong>Pedidos</strong> y haz clic en &laquo;Crear pedido&raquo;.</li>
+      <li>Agrega los productos del catálogo que necesita el equipo, con las medidas de cada atleta.</li>
+      <li>El pedido queda en DRAFT — revísalo y corrige lo necesario antes de enviarlo.</li>
+      <li>Envíalo para pasar a PENDING. El administrador revisará el diseño y lo aprobará o pedirá cambios.</li>
+    </ol>
   </div>
 
   <h3>4.3 Pedido en estado DRAFT (Borrador)</h3>
