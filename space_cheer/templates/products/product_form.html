@@ -225,9 +225,9 @@ function toggleOwnerTeam() {
   const scopeField = document.getElementById('id_scope');
 
   if (requiresTeam || (scopeField && scopeField.value === "TEAM_ONLY")) {
-    container.style.display = "block";
+    container.classList.remove('d-none');
   } else {
-    container.style.display = "none";
+    container.classList.add('d-none');
   }
 }
 
