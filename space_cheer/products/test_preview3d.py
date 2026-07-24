@@ -142,3 +142,18 @@ class ProductDetail3DRenderTests(TestCase):
         self.product.save()
         resp = self.client.get(f"/products/{self.product.pk}/")
         self.assertContains(resp, self.product.model_3d.url)
+
+    def test_no_unescaped_django_comment_leaks_into_html(self):
+        """El partial preview_3d.html usaba {# ... #} multilinea, que Django
+        NO reconoce como comentario (su regex no cruza saltos de linea) y
+        renderiza literal -- incluyendo un "<script>" de texto plano que el
+        parser HTML del navegador confunde con una etiqueta real, tragandose
+        todo el HTML hasta el proximo </script> (el de bootstrap.bundle.min.js)
+        y rompiendo el modal de confirmacion (toggle activo/inactivo y demas
+        botones data-confirm) en toda la pagina."""
+        resp = self.client.get(f"/products/{self.product.pk}/")
+        content = resp.content.decode()
+        self.assertNotIn("{#", content)
+        self.assertNotIn("#}", content)
+        # el <script> real de bootstrap debe llegar intacto al DOM
+        self.assertIn('<script src="/static/JS/Bootstrap5/js/bootstrap.bundle.min.js">', content)

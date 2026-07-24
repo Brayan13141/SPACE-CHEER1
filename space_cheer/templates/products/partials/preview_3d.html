@@ -1,12 +1,14 @@
 {% load i18n %}
-{# Partial: previsualización 3D del producto. Requiere `product` en contexto.
-   Los <script> van en el template padre (block extra_js) — ver product_detail.html.
+{% comment %}
+Partial: previsualización 3D del producto. Requiere `product` en contexto.
+Los <script> van en el template padre (block extra_js) — ver product_detail.html.
 
-   Pipeline para generar el GLB de un producto (guía para admin):
-   1. Fotos del producto real (1-4, fondo limpio).
-   2. Tripo AI (tripo3d.ai) o Meshy.ai → exportar GLB.
-   3. Opcional: npx @gltf-transform/cli optimize in.glb out.glb --no-compress
-   4. Subirlo en el formulario del producto (campo "Modelo 3D"). #}
+Pipeline para generar el GLB de un producto (guía para admin):
+1. Fotos del producto real (1-4, fondo limpio).
+2. Tripo AI (tripo3d.ai) o Meshy.ai → exportar GLB.
+3. Opcional: npx @gltf-transform/cli optimize in.glb out.glb --no-compress
+4. Subirlo en el formulario del producto (campo "Modelo 3D").
+{% endcomment %}
 
 <div class="card shadow-sm mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
