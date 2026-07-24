@@ -386,6 +386,72 @@ class ManageRolesTests(TestCase):
         )
         self.assertTrue(ProductionRole.objects.filter(name="Diseñador").exists())
 
+    def test_edit_updates_name_and_stages(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Original", created_by=self.admin)
+        other_stage = make_stage(name="Archivos", slug="archivos", order=2)
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"role_id": role.pk, "name": "Renombrado", "stages": [other_stage.pk]},
+        )
+        role.refresh_from_db()
+        self.assertEqual(role.name, "Renombrado")
+        self.assertEqual(list(role.stages.all()), [other_stage])
+
+    def test_create_rejects_duplicate_name_case_insensitive(self):
+        self.client.force_login(self.admin)
+        ProductionRole.objects.create(name="Diseñador", created_by=self.admin)
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"name": "diseñador", "stages": []},
+        )
+        self.assertEqual(
+            ProductionRole.objects.filter(name__iexact="diseñador").count(), 1
+        )
+
+    def test_edit_rejects_duplicate_name(self):
+        self.client.force_login(self.admin)
+        role_a = ProductionRole.objects.create(name="Cone", created_by=self.admin)
+        role_b = ProductionRole.objects.create(name="Chino", created_by=self.admin)
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"role_id": role_b.pk, "name": "Cone", "stages": []},
+        )
+        role_b.refresh_from_db()
+        self.assertEqual(role_b.name, "Chino")
+
+    def test_delete_role_without_blockers_succeeds(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Sobrante", created_by=self.admin)
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"action": "delete", "role_id": role.pk},
+        )
+        self.assertFalse(ProductionRole.objects.filter(pk=role.pk).exists())
+
+    def test_delete_blocked_when_operarios_assigned(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Cone", created_by=self.admin)
+        operario, _ = make_operario()
+        OperarioRoleAssignment.objects.create(
+            user=operario, role=role, assigned_by=self.admin
+        )
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"action": "delete", "role_id": role.pk},
+        )
+        self.assertTrue(ProductionRole.objects.filter(pk=role.pk).exists())
+
+    def test_delete_blocked_when_responsible_for_stage(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Costurero", created_by=self.admin)
+        StageResponsibility.objects.create(stage=self.stage, responsible_role=role)
+        self.client.post(
+            reverse("production:manage_roles"),
+            {"action": "delete", "role_id": role.pk},
+        )
+        self.assertTrue(ProductionRole.objects.filter(pk=role.pk).exists())
+
 
 # ---------------------------------------------------------------------------
 # Config — manage_operarios

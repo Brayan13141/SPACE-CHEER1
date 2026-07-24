@@ -92,27 +92,64 @@ def manage_stages(request):
 @role_required("ADMIN")
 def manage_roles(request):
     if request.method == "POST":
+        action = request.POST.get("action", "save")
+
+        if action == "delete":
+            role_id = request.POST.get("role_id")
+            role = get_object_or_404(ProductionRole, pk=role_id)
+            blockers = []
+            operarios_count = role.operarioroleassignment_set.count()
+            if operarios_count:
+                blockers.append(f"{operarios_count} operario(s) con este rol asignado")
+            responsible_stages = role.primary_stages.select_related("stage")
+            if responsible_stages.exists():
+                stage_names = ", ".join(r.stage.name for r in responsible_stages)
+                blockers.append(f"responsable principal de: {stage_names}")
+            if blockers:
+                messages.error(
+                    request,
+                    f"No se puede eliminar «{role.name}»: es {', '.join(blockers)}. "
+                    "Quítalo primero desde Operarios o Responsabilidades.",
+                )
+            else:
+                role.delete()
+                messages.success(request, f"Rol «{role.name}» eliminado.")
+            return redirect("production:manage_roles")
+
+        # save (crear o editar)
         name = request.POST.get("name", "").strip()
         stage_ids = request.POST.getlist("stages")
-        if name:
-            role_id = request.POST.get("role_id")
-            if role_id:
-                prod_role = get_object_or_404(ProductionRole, pk=role_id)
-                prod_role.name = name
-                prod_role.save()
-                prod_role.stages.set(stage_ids)
-                messages.success(request, "Rol actualizado.")
-            else:
-                prod_role = ProductionRole.objects.create(
-                    name=name, created_by=request.user
-                )
-                prod_role.stages.set(stage_ids)
-                messages.success(request, "Rol de producción creado.")
-        else:
+        role_id = request.POST.get("role_id")
+
+        if not name:
             messages.error(request, "El nombre es obligatorio.")
+            return redirect("production:manage_roles")
+
+        duplicate = ProductionRole.objects.filter(name__iexact=name)
+        if role_id:
+            duplicate = duplicate.exclude(pk=role_id)
+        if duplicate.exists():
+            messages.error(request, f"Ya existe un rol llamado «{name}».")
+            return redirect("production:manage_roles")
+
+        if role_id:
+            prod_role = get_object_or_404(ProductionRole, pk=role_id)
+            prod_role.name = name
+            prod_role.save()
+            prod_role.stages.set(stage_ids)
+            messages.success(request, "Rol actualizado.")
+        else:
+            prod_role = ProductionRole.objects.create(
+                name=name, created_by=request.user
+            )
+            prod_role.stages.set(stage_ids)
+            messages.success(request, "Rol de producción creado.")
         return redirect("production:manage_roles")
 
-    roles = ProductionRole.objects.prefetch_related("stages").all()
+    roles = ProductionRole.objects.prefetch_related("stages").annotate(
+        operarios_count=Count("operarioroleassignment", distinct=True),
+        responsible_count=Count("primary_stages", distinct=True),
+    )
     stages = ProductionStage.objects.all()
     return render(request, "production/config/roles.html", {
         "roles": roles,
