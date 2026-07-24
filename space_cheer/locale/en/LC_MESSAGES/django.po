@@ -2077,7 +2077,7 @@ msgstr "No templates configured."
 #: .\production\templates\production\config\product_stages_matrix.html:3
 #: .\production\templates\production\config\product_stages_matrix.html:10
 msgid "Matriz Productos × Etapas"
-msgstr ""
+msgstr "Products × Stages Matrix"
 
 #: .\production\templates\production\config\product_stages_matrix.html:13
 msgid "Gestionar plantillas"
@@ -2248,7 +2248,7 @@ msgstr "Slug"
 #: .\production\templates\production\config\stages.html:73
 #: .\production\templates\production\config\stages.html:149
 msgid "Icono"
-msgstr ""
+msgstr "Icon"
 
 #: .\production\templates\production\config\stages.html:72
 msgid "Ord."
@@ -2317,25 +2317,25 @@ msgstr "Image cannot weigh more than %(mb)s MB."
 
 #: .\social\models.py:101 .\templates\social\partials\post_card_v2.html:71
 msgid "Aplausos"
-msgstr ""
+msgstr "Applause"
 
 #: .\social\models.py:102 .\templates\social\partials\post_card_v2.html:72
 msgid "Fuego"
-msgstr ""
+msgstr "Fire"
 
 #: .\social\models.py:103 .\templates\social\partials\post_card_v2.html:73
 #: .\templates\social\partials\post_card_v2.html:81
 msgid "Increíble"
-msgstr ""
+msgstr "Amazing"
 
 #: .\social\models.py:104 .\templates\social\partials\post_card_v2.html:74
 #: .\templates\social\partials\post_card_v2.html:82
 msgid "Me encanta"
-msgstr ""
+msgstr "Love it"
 
 #: .\social\models.py:105 .\templates\social\partials\post_card_v2.html:75
 msgid "Ánimo"
-msgstr ""
+msgstr "Cheer"
 
 #: .\social\models.py:153
 msgid "Toda la plataforma"
@@ -2347,7 +2347,7 @@ msgstr "Only my team"
 
 #: .\social\models.py:157
 msgid "Cómoda"
-msgstr ""
+msgstr "Comfortable"
 
 #: .\social\models.py:158
 msgid "Compacta"
@@ -2417,12 +2417,12 @@ msgstr "This account is currently inactive."
 msgid ""
 "Si te registraste como entrenador, un administrador debe aprobar tu cuenta "
 "antes de que puedas ingresar. Te avisaremos por correo en cuanto esté lista."
-msgstr ""
+msgstr "If you registered as a coach, an administrator must approve your account before you can sign in. We'll email you as soon as it's ready."
 
 #: .\templates\account\account_inactive.html:29
 msgid ""
 "Si crees que es un error, contacta al administrador o al soporte técnico."
-msgstr ""
+msgstr "If you think this is a mistake, contact the administrator or technical support."
 
 #: .\templates\account\account_inactive.html:36
 msgid "Contactar soporte"
@@ -2620,7 +2620,7 @@ msgstr "No"
 msgid ""
 "Si el email ya existe en el sistema, se actualiza el ownership sin crear "
 "duplicado."
-msgstr ""
+msgstr "If the email already exists in the system, ownership is updated without creating a duplicate."
 
 #: .\templates\account\bulk_import\form.html:120
 msgid "Los atletas importados reciben el rol"
@@ -2691,7 +2691,7 @@ msgstr "Download template to correct"
 #: .\templates\account\bulk_import\result.html:127
 msgid ""
 "No se procesó ninguna fila nueva. Todos los atletas ya existían en tu grupo."
-msgstr ""
+msgstr "No new rows were processed. All athletes already existed in your group."
 
 #: .\templates\account\coach_pending.html:25
 #: .\templates\account\coach_rejected.html:32
@@ -2733,7 +2733,7 @@ msgstr "Email addresses"
 msgid ""
 "Las siguientes direcciones de correo electrónico están asociadas con tu "
 "cuenta:"
-msgstr ""
+msgstr "The following email addresses are associated with your account:"
 
 #: .\templates\account\email.html:30
 msgid "Verificado"
@@ -2761,7 +2761,7 @@ msgid ""
 "Actualmente no tienes ninguna dirección de correo electrónico configurada. "
 "Deberías agregar una dirección de correo electrónico para recibir "
 "notificaciones, restablecer tu contraseña, etc."
-msgstr ""
+msgstr "You currently have no email address configured. You should add an email address to receive notifications, reset your password, etc."
 
 #: .\templates\account\email.html:77
 msgid "Agregar dirección de correo electrónico"
@@ -2782,7 +2782,7 @@ msgstr "Back to account"
 #: .\templates\account\email.html:110
 msgid ""
 "¿Realmente deseas eliminar la dirección de correo electrónico seleccionada?"
-msgstr ""
+msgstr "Do you really want to remove the selected email address?"
 
 #: .\templates\account\email_confirm.html:5
 msgid "Confirmar Email"
@@ -2801,7 +2801,7 @@ msgid ""
 "            es el correo electrónico para el usuario \n"
 "            <strong class=\"text-primary\">%(user_display)s</strong>.\n"
 "            "
-msgstr ""
+msgstr "\n            Please confirm that \n            <strong class=\"text-primary\">%(email)s</strong> \n            is the email address for user \n            <strong class=\"text-primary\">%(user_display)s</strong>.\n            "
 
 #: .\templates\account\email_confirm.html:31
 #: .\templates\events\event_detail.html:109
@@ -2812,7 +2812,7 @@ msgstr "Confirm"
 #: .\templates\account\email_confirm.html:39
 msgid ""
 "Este enlace de confirmación de correo electrónico ha expirado o no es válido."
-msgstr ""
+msgstr "This email confirmation link has expired or is invalid."
 
 #: .\templates\account\email_confirm.html:43
 #, python-format
@@ -2822,7 +2822,7 @@ msgid ""
 "            <a class=\"sc-color-secondary\" href=\"%(email_url)s\">nuevo "
 "enlace de confirmación</a>.\n"
 "            "
-msgstr ""
+msgstr "\n            Please request a \n            <a class=\"sc-color-secondary\" href=\"%(email_url)s\">new confirmation link</a>.\n            "
 
 #: .\templates\account\email_confirm.html:54
 #: .\templates\account\verification_sent.html:51
@@ -2945,7 +2945,7 @@ msgstr "has no account"
 msgid ""
 "en el sistema, puedes enviarle una invitación por email. Cuando se registre "
 "y seleccione el rol"
-msgstr ""
+msgstr "in the system, you can send them an email invitation. When they register and select the role"
 
 #: .\templates\account\guardian\assign_guardian.html:179
 msgid "aparecerá en la lista de guardians disponibles."
@@ -2972,7 +2972,7 @@ msgid ""
 "Los atletas menores de edad necesitan un adulto responsable para "
 "autorizaciones, recogida de pedidos y comunicación oficial. El guardián "
 "puede ser padre, tutor o acompañante designado por el coach."
-msgstr ""
+msgstr "Minor athletes need a responsible adult for authorizations, order pickup, and official communication. The guardian can be a parent, legal guardian, or companion designated by the coach."
 
 #: .\templates\account\guardian\assign_guardian.html:219
 msgid "Otros menores pendientes"
@@ -2987,14 +2987,14 @@ msgstr "All minors have a guardian"
 msgid ""
 "¿Estás completamente seguro de que deseas <strong>remover a "
 "%(guardian_name)s</strong> como guardián de %(athlete_name)s?"
-msgstr ""
+msgstr "Are you completely sure you want to <strong>remove %(guardian_name)s</strong> as guardian of %(athlete_name)s?"
 
 #: .\templates\account\guardian\assign_guardian.html:265
 msgid ""
 "Esto dejará al atleta sin tutor legal registrado en el sistema. Debe "
 "realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se "
 "reasignará un tutor después."
-msgstr ""
+msgstr "This will leave the athlete without a legal guardian registered in the system. This should only be done if the athlete has already reached adulthood or if a guardian will be reassigned afterward."
 
 #: .\templates\account\guardian\assign_guardian.html:273
 msgid "Sí, Remover"
@@ -3057,8 +3057,8 @@ msgid ""
 msgid_plural ""
 "Hay <span class=\"badge bg-warning text-dark\">%(n)s</span> menores sin "
 "guardián asignado. Por favor, asigna uno a la brevedad."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "There is <span class=\"badge bg-warning text-dark\">%(n)s</span> minor without an assigned guardian. Please assign one as soon as possible."
+msgstr[1] "There are <span class=\"badge bg-warning text-dark\">%(n)s</span> minors without an assigned guardian. Please assign one as soon as possible."
 
 #: .\templates\account\guardian\headcoach_dashboard.html:30
 msgid "Todo en orden."
@@ -3101,7 +3101,7 @@ msgstr "Minors without Guardian"
 #: .\templates\account\guardian\minors_without_guardian.html:57
 msgid ""
 "Atletas menores de edad que aún no tienen un adulto responsable asignado."
-msgstr ""
+msgstr "Minor athletes who do not yet have a responsible adult assigned."
 
 #: .\templates\account\guardian\minors_without_guardian.html:58
 #: .\templates\events\event_detail.html:299
@@ -3157,7 +3157,7 @@ msgstr "Birth date:"
 msgid ""
 "Este atleta necesita un guardián para participar en competencias y realizar "
 "pedidos."
-msgstr ""
+msgstr "This athlete needs a guardian to participate in competitions and place orders."
 
 #: .\templates\account\guardian\minors_without_guardian.html:148
 msgid "Asignar ahora"
@@ -3200,7 +3200,7 @@ msgid ""
 "Asigna un guardián a cada menor antes de inscribirlo en competencias. Los "
 "guardians pueden autorizar la participación y recibir notificaciones "
 "importantes."
-msgstr ""
+msgstr "Assign a guardian to each minor before registering them for competitions. Guardians can authorize participation and receive important notifications."
 
 #: .\templates\account\login.html:5 .\templates\account\login.html:130
 #: .\templates\account\signup.html:131 .\templates\account\signup.html:141
@@ -3294,7 +3294,7 @@ msgstr "Contact support"
 msgid ""
 "Para mantener tu cuenta segura, elige una contraseña robusta que no uses en "
 "otros sitios."
-msgstr ""
+msgstr "To keep your account secure, choose a strong password that you don't use on other sites."
 
 #: .\templates\account\password_change.html:26
 msgid "Contraseña actual"
@@ -3308,7 +3308,7 @@ msgstr "Enter your current password"
 #: .\templates\account\password_set.html:38
 msgid ""
 "La contraseña debe tener al menos 8 caracteres y no ser demasiado común."
-msgstr ""
+msgstr "The password must be at least 8 characters long and not too common."
 
 #: .\templates\account\password_change.html:59
 msgid "Confirmar nueva contraseña"
@@ -3330,7 +3330,7 @@ msgstr "Recover your access"
 msgid ""
 "¿Olvidaste tu contraseña? Ingresa tu dirección de correo electrónico y te "
 "enviaremos un enlace para restablecerla."
-msgstr ""
+msgstr "Forgot your password? Enter your email address and we'll send you a link to reset it."
 
 #: .\templates\account\password_reset.html:32
 #: .\templates\account\signup.html:24 .\templates\social\send_invite.html:18
@@ -3357,7 +3357,7 @@ msgstr "Need help?"
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used. Please request a new password reset."
-msgstr ""
+msgstr "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
 
 #: .\templates\account\password_reset_from_key.html:34
 msgid "Ingresa tu nueva contraseña dos veces para verificar."
@@ -3369,7 +3369,7 @@ msgstr "Password is required"
 
 #: .\templates\account\password_reset_from_key.html:93
 msgid "Debe tener al menos 8 caracteres"
-msgstr ""
+msgstr "Must be at least 8 characters"
 
 #: .\templates\account\password_reset_from_key.html:96
 msgid "Confirma la contraseña"
@@ -3377,7 +3377,7 @@ msgstr "Confirm the password"
 
 #: .\templates\account\password_reset_from_key.html:97
 msgid "Las contraseñas no coinciden"
-msgstr ""
+msgstr "Passwords do not match"
 
 #: .\templates\account\password_reset_from_key_done.html:12
 msgid "¡Contraseña actualizada!"
@@ -3404,7 +3404,7 @@ msgstr "Set password"
 msgid ""
 "Tu cuenta aún no tiene una contraseña. Elige una para acceder también con "
 "este método."
-msgstr ""
+msgstr "Your account doesn't have a password yet. Choose one to also sign in with this method."
 
 #: .\templates\account\password_set.html:44 .\templates\account\signup.html:76
 msgid "Confirmar contraseña"
@@ -3431,7 +3431,7 @@ msgstr ""
 msgid ""
 "No se eliminarán tus datos. Para reactivarla, deberás contactar al "
 "administrador."
-msgstr ""
+msgstr "Your data will not be deleted. To reactivate it, you must contact the administrator."
 
 #: .\templates\account\profile\deactivate_confirm.html:43
 msgid "Esto ocurrirá al confirmar:"
@@ -3551,7 +3551,7 @@ msgstr "Danger zone"
 msgid ""
 "Desactivar tu cuenta es reversible, pero requerirá contactar al "
 "administrador."
-msgstr ""
+msgstr "Deactivating your account is reversible, but will require contacting the administrator."
 
 #: .\templates\account\profile\settings.html:4
 #: .\templates\account\profile\settings.html:15 .\templates\core\base.html:744
@@ -3577,7 +3577,7 @@ msgstr "Profile privacy"
 msgid ""
 "Público: visible para todos · Equipo: solo tu equipo · Privado: solo tú y tu "
 "coach"
-msgstr ""
+msgstr "Public: visible to everyone · Team: only your team · Private: only you and your coach"
 
 #: .\templates\account\profile\settings.html:111
 msgid "Sistema de ayuda"
@@ -3604,7 +3604,7 @@ msgstr "Disable help"
 #: .\templates\account\profile_setup.html:12
 msgid ""
 "¡Un paso más! Completa tus datos personales para acceder a la plataforma."
-msgstr ""
+msgstr "One more step! Complete your personal information to access the platform."
 
 #: .\templates\account\profile_setup.html:89
 msgid "¿Cuál es tu rol?"
@@ -3613,7 +3613,7 @@ msgstr "What is your role?"
 #: .\templates\account\profile_setup.html:92
 msgid ""
 "Selecciona tu perfil – define qué acciones podrás realizar en la plataforma."
-msgstr ""
+msgstr "Select your profile – this defines what actions you'll be able to perform on the platform."
 
 #: .\templates\account\profile_setup.html:132
 msgid "Perfil en revisión"
@@ -3623,7 +3623,7 @@ msgstr "Profile under review"
 msgid ""
 "El rol HEADCOACH requiere validación manual. Tu cuenta quedará inactiva "
 "hasta que sea aprobada."
-msgstr ""
+msgstr "The HEADCOACH role requires manual validation. Your account will remain inactive until it is approved."
 
 #: .\templates\account\profile_setup.html:148
 msgid "Guardar y Continuar"
@@ -3643,7 +3643,7 @@ msgstr "Continue"
 
 #: .\templates\account\select_role.html:26
 msgid "Debes seleccionar un rol para continuar"
-msgstr ""
+msgstr "You must select a role to continue"
 
 #: .\templates\account\signup.html:6
 msgid "Únete a SPACE CHEER"
@@ -3701,7 +3701,7 @@ msgstr "No new registrations are accepted at this time"
 msgid ""
 "Estamos realizando mejoras en la plataforma. Pronto volveremos a abrir el "
 "registro. Si ya tienes una cuenta, puedes iniciar sesión."
-msgstr ""
+msgstr "We are making improvements to the platform. Registration will reopen soon. If you already have an account, you can sign in."
 
 #: .\templates\account\verification_sent.html:4
 msgid "Verificación Enviada"
@@ -3722,7 +3722,7 @@ msgid ""
 "        Sigue el enlace proporcionado para finalizar el proceso de "
 "registro.\n"
 "        "
-msgstr ""
+msgstr "\n        We've sent you an email for verification. \n        Follow the provided link to finish the registration process.\n        "
 
 #: .\templates\account\verification_sent.html:30
 msgid "Importante:"
@@ -3811,7 +3811,7 @@ msgstr "New member data"
 msgid ""
 "Si el email ya está registrado en el sistema, se reutilizará ese usuario y "
 "se asignará al equipo. Solo se crea uno nuevo si el email no existe."
-msgstr ""
+msgstr "If the email is already registered in the system, that user will be reused and assigned to the team. A new one is only created if the email doesn't exist."
 
 #: .\templates\coach\crew\create_crew_member.html:57
 msgid "Datos personales"
@@ -3833,7 +3833,7 @@ msgstr "email@example.com"
 #: .\templates\coach\crew\create_crew_member.html:82
 msgid ""
 "Se usará para acceder al sistema. Si ya existe, se reutiliza el usuario."
-msgstr ""
+msgstr "It will be used to access the system. If it already exists, the user is reused."
 
 #: .\templates\coach\crew\create_crew_member.html:91
 msgid "Roles y permisos"
@@ -3868,7 +3868,7 @@ msgstr "Specific role within %(name)s."
 msgid ""
 "Se generará una contraseña temporal aleatoria. Aparecerá en el mensaje de "
 "confirmación — guárdala y compártela de forma segura con el miembro."
-msgstr ""
+msgstr "A random temporary password will be generated. It will appear in the confirmation message — save it and share it securely with the member."
 
 #: .\templates\coach\crew\create_crew_member.html:137
 msgid "Crear y asignar"
@@ -3876,19 +3876,19 @@ msgstr "Create and assign"
 
 #: .\templates\coach\crew\create_crew_member.html:160
 msgid "El nombre es obligatorio"
-msgstr ""
+msgstr "First name is required"
 
 #: .\templates\coach\crew\create_crew_member.html:161
 msgid "El apellido es obligatorio"
-msgstr ""
+msgstr "Last name is required"
 
 #: .\templates\coach\crew\create_crew_member.html:163
 msgid "El email es obligatorio"
-msgstr ""
+msgstr "Email is required"
 
 #: .\templates\coach\crew\create_crew_member.html:164
 msgid "Ingresa un email válido"
-msgstr ""
+msgstr "Enter a valid email"
 
 #: .\templates\coach\crew\create_crew_member.html:166
 msgid "Selecciona un rol global"
@@ -3940,7 +3940,7 @@ msgstr "The user will become the responsibility of the new HeadCoach."
 msgid ""
 "No tienes permisos para reasignar este usuario, o no hay otros HeadCoach "
 "disponibles."
-msgstr ""
+msgstr "You don't have permission to reassign this user, or there are no other HeadCoaches available."
 
 #: .\templates\core\base.html:7
 msgid "Competencias y Uniformes"
@@ -4249,12 +4249,12 @@ msgstr "Everything you need in one place"
 #: .\templates\core\home.html:56
 msgid ""
 "SPACE CHEER ofrece una plataforma completa para la comunidad de cheerleading"
-msgstr ""
+msgstr "SPACE CHEER offers a complete platform for the cheerleading community"
 
 #: .\templates\core\home.html:67
 msgid ""
 "Organiza, participa y sigue competencias de cheerleading en tiempo real."
-msgstr ""
+msgstr "Organize, participate in, and follow cheerleading competitions in real time."
 
 #: .\templates\core\home.html:68
 msgid "Explorar"
@@ -4279,7 +4279,7 @@ msgstr "Academy"
 #: .\templates\core\home.html:89
 msgid ""
 "Programas de entrenamiento, seguimiento de progreso y recursos educativos."
-msgstr ""
+msgstr "Training programs, progress tracking, and educational resources."
 
 #: .\templates\core\home.html:90
 msgid "Aprender"
@@ -4315,7 +4315,7 @@ msgstr "View Catalog"
 
 #: .\templates\core\home.html:175
 msgid "Próximamente destacaremos productos de nuestro catálogo."
-msgstr ""
+msgstr "We'll soon feature products from our catalog."
 
 #: .\templates\core\home.html:187
 msgid "Lo que dicen nuestros clientes"
@@ -4339,7 +4339,7 @@ msgstr "Learn More"
 
 #: .\templates\core\manage_landing.html:20
 msgid "Contenido general de la Landing"
-msgstr ""
+msgstr "General landing page content"
 
 #: .\templates\core\manage_landing.html:27
 msgid "Sección Hero"
@@ -4347,11 +4347,11 @@ msgstr "Hero Section"
 
 #: .\templates\core\manage_landing.html:30
 msgid "Badge"
-msgstr ""
+msgstr "Badge"
 
 #: .\templates\core\manage_landing.html:34
 msgid "Imagen del héroe"
-msgstr ""
+msgstr "Hero image"
 
 #: .\templates\core\manage_landing.html:37
 msgid "Actual"
@@ -4359,11 +4359,11 @@ msgstr "Current"
 
 #: .\templates\core\manage_landing.html:41
 msgid "Título"
-msgstr ""
+msgstr "Title"
 
 #: .\templates\core\manage_landing.html:45
 msgid "Párrafo"
-msgstr ""
+msgstr "Paragraph"
 
 #: .\templates\core\manage_landing.html:50
 msgid "Estadísticas"
@@ -4371,7 +4371,7 @@ msgstr "Statistics"
 
 #: .\templates\core\manage_landing.html:53
 msgid "Stat 1 - Número"
-msgstr ""
+msgstr "Stat 1 - Number"
 
 #: .\templates\core\manage_landing.html:57
 msgid "Stat 1 - Etiqueta"
@@ -4379,7 +4379,7 @@ msgstr "Stat 1 - Label"
 
 #: .\templates\core\manage_landing.html:61
 msgid "Stat 2 - Número"
-msgstr ""
+msgstr "Stat 2 - Number"
 
 #: .\templates\core\manage_landing.html:65
 msgid "Stat 2 - Etiqueta"
@@ -4387,7 +4387,7 @@ msgstr "Stat 2 - Label"
 
 #: .\templates\core\manage_landing.html:69
 msgid "Stat 3 - Número"
-msgstr ""
+msgstr "Stat 3 - Number"
 
 #: .\templates\core\manage_landing.html:73
 msgid "Stat 3 - Etiqueta"
@@ -4395,15 +4395,15 @@ msgstr "Stat 3 - Label"
 
 #: .\templates\core\manage_landing.html:78
 msgid "Llamado a la acción final"
-msgstr ""
+msgstr "Final call to action"
 
 #: .\templates\core\manage_landing.html:81
 msgid "Título CTA"
-msgstr ""
+msgstr "CTA title"
 
 #: .\templates\core\manage_landing.html:85
 msgid "Párrafo CTA"
-msgstr ""
+msgstr "CTA paragraph"
 
 #: .\templates\core\manage_landing.html:97
 msgid "Próximas Competencias destacadas"
@@ -4412,7 +4412,7 @@ msgstr "Featured Upcoming Competitions"
 #: .\templates\core\manage_landing.html:107
 #: .\templates\core\manage_landing.html:152
 msgid "Destacar"
-msgstr ""
+msgstr "Featured"
 
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
@@ -4427,7 +4427,7 @@ msgstr "No competitions registered."
 
 #: .\templates\core\manage_landing.html:135
 msgid "Guardar selección de competencias"
-msgstr ""
+msgstr "Save competition selection"
 
 #: .\templates\core\manage_landing.html:142
 msgid "Productos destacados"
@@ -4452,11 +4452,11 @@ msgstr "Terms and Conditions"
 
 #: .\templates\core\terminos.html:56
 msgid "Vigentes desde"
-msgstr ""
+msgstr "In effect since"
 
 #: .\templates\core\terminos.html:56
 msgid "de junio de"
-msgstr ""
+msgstr "June"
 
 #: .\templates\core\terminos.html:59
 msgid ""
@@ -4465,11 +4465,11 @@ msgid ""
 "Términos y Condiciones en su totalidad.\n"
 "        Por favor léelos detenidamente antes de continuar.\n"
 "        "
-msgstr ""
+msgstr "\n        By registering or using the SPACE CHEER platform, you accept these Terms and Conditions in full.\n        Please read them carefully before continuing.\n        "
 
 #: .\templates\core\terminos.html:68
 msgid "Aceptación de los Términos"
-msgstr ""
+msgstr "Acceptance of the Terms"
 
 #: .\templates\core\terminos.html:70
 msgid ""
@@ -4482,7 +4482,7 @@ msgid ""
 "con alguna disposición,\n"
 "        debes abstenerte de usar la Plataforma.\n"
 "        "
-msgstr ""
+msgstr "\n        Access to and use of the <strong class=\"sc-color-light\">SPACE CHEER</strong> platform\n        (hereinafter \"the Platform\") implies full and unreserved acceptance of these\n        Terms and Conditions (\"T&C\"). If you do not agree with any provision,\n        you must refrain from using the Platform.\n        "
 
 #: .\templates\core\terminos.html:78
 msgid ""
@@ -4493,7 +4493,7 @@ msgid ""
 "uso continuado tras la\n"
 "        publicación constituye aceptación de los nuevos términos.\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER reserves the right to modify these T&C at any time. Changes\n        will take effect upon publication on the Platform. Continued use after\n        publication constitutes acceptance of the new terms.\n        "
 
 #: .\templates\core\terminos.html:88
 msgid "Descripción del Servicio"
@@ -4506,11 +4506,11 @@ msgid ""
 "integral de equipos de porrismo\n"
 "        (cheerleading). Los servicios disponibles incluyen:\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER is a digital platform focused on the comprehensive management of cheerleading\n        teams. Available services include:\n        "
 
 #: .\templates\core\terminos.html:96
 msgid "Gestión de equipos: membresías, roles de atleta, coach y staff."
-msgstr ""
+msgstr "Team management: memberships, athlete, coach, and staff roles."
 
 #: .\templates\core\terminos.html:97
 msgid "Pedidos de uniformes personalizados y productos relacionados."
@@ -4518,19 +4518,19 @@ msgstr "Custom uniform orders and related products."
 
 #: .\templates\core\terminos.html:98
 msgid "Registro y administración de medidas corporales de atletas."
-msgstr ""
+msgstr "Registration and management of athletes' body measurements."
 
 #: .\templates\core\terminos.html:99
 msgid "Calendario y seguimiento de competencias y eventos de cheerleading."
-msgstr ""
+msgstr "Calendar and tracking of cheerleading competitions and events."
 
 #: .\templates\core\terminos.html:100
 msgid "Comunicación interna entre miembros del equipo."
-msgstr ""
+msgstr "Internal communication between team members."
 
 #: .\templates\core\terminos.html:101
 msgid "Acceso a contenido social del equipo (feed, publicaciones, galería)."
-msgstr ""
+msgstr "Access to team social content (feed, posts, gallery)."
 
 #: .\templates\core\terminos.html:104
 msgid ""
@@ -4540,11 +4540,11 @@ msgid ""
 "        (ADMIN, HEADCOACH, COACH, STAFF, ATLETA, ACOMPAÑANTE) y de la "
 "suscripción activa del equipo.\n"
 "        "
-msgstr ""
+msgstr "\n        Access to the different features depends on the role assigned to the user\n        (ADMIN, HEADCOACH, COACH, STAFF, ATHLETE, COMPANION) and the team's active subscription.\n        "
 
 #: .\templates\core\terminos.html:113
 msgid "Registro y Responsabilidades de la Cuenta"
-msgstr ""
+msgstr "Registration and Account Responsibilities"
 
 #: .\templates\core\terminos.html:115
 msgid ""
@@ -4553,11 +4553,11 @@ msgid ""
 "información veraz, completa y actualizada.\n"
 "        El usuario es el único responsable de:\n"
 "        "
-msgstr ""
+msgstr "\n        To access the Platform, you must create an account with truthful, complete, and up-to-date information.\n        The user is solely responsible for:\n        "
 
 #: .\templates\core\terminos.html:121
 msgid "Mantener la confidencialidad de sus credenciales de acceso."
-msgstr ""
+msgstr "Maintaining the confidentiality of their access credentials."
 
 #: .\templates\core\terminos.html:122
 msgid "Todas las actividades realizadas bajo su cuenta."
@@ -4565,11 +4565,11 @@ msgstr "All activities carried out under their account."
 
 #: .\templates\core\terminos.html:123
 msgid "Notificar a SPACE CHEER de inmediato ante cualquier uso no autorizado."
-msgstr ""
+msgstr "Notifying SPACE CHEER immediately of any unauthorized use."
 
 #: .\templates\core\terminos.html:124
 msgid "Proporcionar información veraz y mantenerla actualizada."
-msgstr ""
+msgstr "Providing truthful information and keeping it up to date."
 
 #: .\templates\core\terminos.html:127
 msgid ""
@@ -4579,7 +4579,7 @@ msgid ""
 "        proporcionen información falsa o realicen actividades que "
 "perjudiquen a otros usuarios o a la Plataforma.\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER reserves the right to suspend or cancel accounts that violate these T&C,\n        provide false information, or engage in activities that harm other users or the Platform.\n        "
 
 #: .\templates\core\terminos.html:133
 msgid ""
@@ -4589,11 +4589,11 @@ msgid ""
 "        incluyendo la asignación de roles y el control de acceso a la "
 "información del equipo.\n"
 "        "
-msgstr ""
+msgstr "\n        Users with the HEADCOACH role are responsible for properly managing their team's members,\n        including role assignment and access control over the team's information.\n        "
 
 #: .\templates\core\terminos.html:142
 msgid "Pedidos de Uniformes: Proceso, Pagos y Cancelaciones"
-msgstr ""
+msgstr "Uniform Orders: Process, Payments, and Cancellations"
 
 #: .\templates\core\terminos.html:144
 msgid "Proceso de pedido"
@@ -4607,25 +4607,25 @@ msgid ""
 "APROBADO → EN PRODUCCIÓN → ENTREGADO</strong>.\n"
 "        El pedido puede cancelarse antes de que entre en producción.\n"
 "        "
-msgstr ""
+msgstr "\n        Uniform orders follow a defined flow of statuses:\n        <strong class=\"sc-color-light\">DRAFT → PENDING → DESIGN APPROVED → IN PRODUCTION → DELIVERED</strong>.\n        The order can be cancelled before it enters production.\n        "
 
 #: .\templates\core\terminos.html:153
 msgid ""
 "Las medidas de los atletas deben registrarse dentro del plazo indicado por "
 "el HEADCOACH."
-msgstr ""
+msgstr "Athletes' measurements must be recorded within the deadline set by the HEADCOACH."
 
 #: .\templates\core\terminos.html:154
 msgid ""
 "Una vez aprobado el diseño, las medidas quedan bloqueadas y no pueden "
 "modificarse."
-msgstr ""
+msgstr "Once the design is approved, measurements are locked and cannot be modified."
 
 #: .\templates\core\terminos.html:155
 msgid ""
 "El usuario recibirá notificaciones por correo electrónico en cada cambio de "
 "estado."
-msgstr ""
+msgstr "The user will receive email notifications for every status change."
 
 #: .\templates\core\terminos.html:158
 #: .\templates\orders\admin\order_detail.html:130
@@ -4642,7 +4642,7 @@ msgid ""
 "        cada pedido. SPACE CHEER no almacena datos de tarjetas de crédito o "
 "débito.\n"
 "        "
-msgstr ""
+msgstr "\n        Prices for uniforms and products are shown in Mexican pesos (MXN) and include VAT\n        when applicable. Available payment methods and payment terms will be specified for\n        each order. SPACE CHEER does not store credit or debit card data.\n        "
 
 #: .\templates\core\terminos.html:167
 msgid "Cancelaciones"
@@ -4658,11 +4658,11 @@ msgid ""
 "        no se aceptarán cancelaciones ni reembolsos, salvo defecto de "
 "fabricación comprobable.\n"
 "        "
-msgstr ""
+msgstr "\n        Cancellations are only accepted before the order enters the\n        <strong class=\"sc-color-light\">IN PRODUCTION</strong> status. Once production has started,\n        no cancellations or refunds will be accepted, except for a demonstrable manufacturing defect.\n        "
 
 #: .\templates\core\terminos.html:176
 msgid "Garantías"
-msgstr ""
+msgstr "Warranties"
 
 #: .\templates\core\terminos.html:178
 msgid ""
@@ -4677,11 +4677,11 @@ msgid ""
 "solución apropiada (reposición,\n"
 "        reparación o crédito).\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER guarantees that delivered products will match the specifications\n        of the approved order. In case of a manufacturing defect, the user must report it\n        within 7 calendar days after receiving the order, attaching photographic\n        evidence. SPACE CHEER will evaluate each case and determine the appropriate solution (replacement,\n        repair, or credit).\n        "
 
 #: .\templates\core\terminos.html:190
 msgid "Protección de Datos de Menores de Edad"
-msgstr ""
+msgstr "Protection of Minors' Data"
 
 #: .\templates\core\terminos.html:193
 msgid ""
@@ -4693,7 +4693,7 @@ msgid ""
 "Posesión de los\n"
 "        Particulares (LFPDPPP)</strong>.\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER handles data of minors in accordance with the\n        <strong>General Law on the Rights of Girls, Boys, and Adolescents (LGDNNA)</strong>\n        and the <strong>Federal Law on the Protection of Personal Data Held by\n        Private Parties (LFPDPPP)</strong>.\n        "
 
 #: .\templates\core\terminos.html:201
 msgid ""
@@ -4706,28 +4706,28 @@ msgid ""
 "menor en la Plataforma,\n"
 "        el Tutor declara:\n"
 "        "
-msgstr ""
+msgstr "\n        The registration and processing of personal data of athletes under 18 years old\n        requires the <strong class=\"sc-color-light\">express consent of the parent or\n        legal guardian</strong> (hereinafter \"the Guardian\"). By registering a minor on the Platform,\n        the Guardian declares:\n        "
 
 #: .\templates\core\terminos.html:209
 msgid "Ser el padre, madre o tutor legal del menor."
-msgstr ""
+msgstr "Being the minor's parent or legal guardian."
 
 #: .\templates\core\terminos.html:210
 msgid ""
 "Autorizar el tratamiento de los datos personales del menor, incluyendo "
 "nombre, fecha de nacimiento, CURP y medidas corporales, para los fines de la "
 "Plataforma."
-msgstr ""
+msgstr "Authorizing the processing of the minor's personal data, including name, date of birth, CURP, and body measurements, for the Platform's purposes."
 
 #: .\templates\core\terminos.html:211
 msgid "Que la información proporcionada es veraz y está actualizada."
-msgstr ""
+msgstr "That the information provided is truthful and up to date."
 
 #: .\templates\core\terminos.html:212
 msgid ""
 "Comprender que puede revocar este consentimiento en cualquier momento, "
 "solicitándolo a space.cheer.space@gmail.com."
-msgstr ""
+msgstr "Understanding that this consent may be revoked at any time by requesting it at space.cheer.space@gmail.com."
 
 #: .\templates\core\terminos.html:215
 msgid ""
@@ -4738,7 +4738,7 @@ msgid ""
 "COACH, STAFF) y el propio\n"
 "        Tutor vinculado podrán consultar esta información.\n"
 "        "
-msgstr ""
+msgstr "\n        Minors' data is subject to additional access controls within the\n        Platform. Only authorized team personnel (HEADCOACH, COACH, STAFF) and the\n        linked Guardian may access this information.\n        "
 
 #: .\templates\core\terminos.html:222
 msgid ""
@@ -4751,11 +4751,11 @@ msgid ""
 "        <a href=\"mailto:space.cheer.space@gmail.com\" class=\"sc-color-"
 "cyan\">space.cheer.space@gmail.com</a>.\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER will not share minors' data with third parties, except when expressly required by law.\n        Guardians may exercise their ARCO rights (Access, Rectification, Cancellation, and\n        Objection) by sending a request to\n        <a href=\"mailto:space.cheer.space@gmail.com\" class=\"sc-color-cyan\">space.cheer.space@gmail.com</a>.\n        "
 
 #: .\templates\core\terminos.html:233
 msgid "Propiedad Intelectual"
-msgstr ""
+msgstr "Intellectual Property"
 
 #: .\templates\core\terminos.html:235
 msgid ""
@@ -4768,7 +4768,7 @@ msgid ""
 "internacionales de propiedad\n"
 "        intelectual y derechos de autor.\n"
 "        "
-msgstr ""
+msgstr "\n        All content on the Platform — including, without limitation, the source code, design,\n        logos, text, images, and features — is the exclusive property of SPACE CHEER or\n        its licensors, and is protected by Mexican and international intellectual property\n        and copyright laws.\n        "
 
 #: .\templates\core\terminos.html:243
 msgid ""
@@ -4781,7 +4781,7 @@ msgid ""
 "de la Plataforma con el\n"
 "        único fin de prestar el servicio.\n"
 "        "
-msgstr ""
+msgstr "\n        Users retain ownership of the content they upload to the Platform (photographs,\n        uniform designs, etc.), but grant SPACE CHEER a non-exclusive, royalty-free\n        license to host, reproduce, and display such content within the Platform for the\n        sole purpose of providing the service.\n        "
 
 #: .\templates\core\terminos.html:251
 msgid ""
@@ -4790,11 +4790,11 @@ msgid ""
 "cualquier elemento de la\n"
 "        Plataforma sin autorización escrita previa de SPACE CHEER.\n"
 "        "
-msgstr ""
+msgstr "\n        The reproduction, distribution, or commercial use of any element of the\n        Platform is prohibited without SPACE CHEER's prior written authorization.\n        "
 
 #: .\templates\core\terminos.html:260
 msgid "Limitación de Responsabilidad"
-msgstr ""
+msgstr "Limitation of Liability"
 
 #: .\templates\core\terminos.html:262
 msgid ""
@@ -4802,33 +4802,33 @@ msgid ""
 "        En la medida permitida por la ley aplicable, SPACE CHEER no será "
 "responsable de:\n"
 "        "
-msgstr ""
+msgstr "\n        To the extent permitted by applicable law, SPACE CHEER will not be liable for:\n        "
 
 #: .\templates\core\terminos.html:267
 msgid ""
 "Daños directos, indirectos, incidentales o consecuentes derivados del uso o "
 "imposibilidad de uso de la Plataforma."
-msgstr ""
+msgstr "Direct, indirect, incidental, or consequential damages arising from the use or inability to use the Platform."
 
 #: .\templates\core\terminos.html:268
 msgid ""
 "Interrupciones del servicio por mantenimiento, fallas técnicas o causas de "
 "fuerza mayor."
-msgstr ""
+msgstr "Service interruptions due to maintenance, technical failures, or force majeure."
 
 #: .\templates\core\terminos.html:269
 msgid "Pérdida de datos causada por el usuario o por terceros no autorizados."
-msgstr ""
+msgstr "Data loss caused by the user or by unauthorized third parties."
 
 #: .\templates\core\terminos.html:270
 msgid ""
 "Inexactitudes en medidas proporcionadas por el usuario que afecten la "
 "confección de uniformes."
-msgstr ""
+msgstr "Inaccuracies in measurements provided by the user that affect uniform manufacturing."
 
 #: .\templates\core\terminos.html:271
 msgid "El contenido publicado por usuarios en el feed social de la Plataforma."
-msgstr ""
+msgstr "Content posted by users on the Platform's social feed."
 
 #: .\templates\core\terminos.html:274
 msgid ""
@@ -4839,11 +4839,11 @@ msgid ""
 "al evento que originó\n"
 "        la reclamación.\n"
 "        "
-msgstr ""
+msgstr "\n        SPACE CHEER's maximum liability to the user, in any case, will not exceed\n        the amount paid by the user during the three (3) months prior to the event that gave rise to\n        the claim.\n        "
 
 #: .\templates\core\terminos.html:284
 msgid "Ley Aplicable y Jurisdicción"
-msgstr ""
+msgstr "Applicable Law and Jurisdiction"
 
 #: .\templates\core\terminos.html:286
 msgid ""
@@ -4860,7 +4860,7 @@ msgid ""
 "corresponderles por razón de\n"
 "        su domicilio presente o futuro.\n"
 "        "
-msgstr ""
+msgstr "\n        These T&C are governed by and interpreted in accordance with the laws in force in the\n        <strong class=\"sc-color-light\">United Mexican States</strong>. For the resolution of\n        any dispute arising from their interpretation or performance, the parties submit\n        to the jurisdiction of the competent courts of the State of Guanajuato, Mexico,\n        expressly waiving any other venue that might correspond to them by reason of\n        their present or future domicile.\n        "
 
 #: .\templates\core\terminos.html:296
 msgid ""
@@ -4875,7 +4875,7 @@ msgid ""
 "de Niñas, Niños y\n"
 "        Adolescentes (LGDNNA)</strong>.\n"
 "        "
-msgstr ""
+msgstr "\n        Regarding the protection of personal data, processing is governed by the\n        <strong class=\"sc-color-light\">Federal Law on the Protection of Personal Data Held\n        by Private Parties (LFPDPPP)</strong> and its Regulations, and with respect to minors,\n        by the <strong class=\"sc-color-light\">General Law on the Rights of Girls, Boys, and\n        Adolescents (LGDNNA)</strong>.\n        "
 
 #: .\templates\core\terminos.html:310
 msgid ""
@@ -4884,11 +4884,11 @@ msgid ""
 "relacionados con estos\n"
 "        Términos y Condiciones, puedes comunicarte con nosotros a:\n"
 "        "
-msgstr ""
+msgstr "\n        For any inquiry, claim, or exercise of rights related to these\n        Terms and Conditions, you can contact us at:\n        "
 
 #: .\templates\core\terminos.html:321
 msgid "Responderemos en un plazo máximo de 10 días hábiles."
-msgstr ""
+msgstr "We will respond within a maximum of 10 business days."
 
 #: .\templates\core\terminos.html:327
 msgid "Política de Privacidad"
@@ -4903,7 +4903,7 @@ msgid ""
 "Tu cuenta está activa, pero necesitas que tu entrenador asigne un tutor "
 "antes de continuar. Una vez asignado, tendrás acceso completo a la "
 "plataforma."
-msgstr ""
+msgstr "Your account is active, but you need your coach to assign a guardian before continuing. Once assigned, you will have full access to the platform."
 
 #: .\templates\custody\minor_blocked.html:18
 msgid "Si crees que esto es un error, contacta a tu entrenador."
@@ -5118,7 +5118,7 @@ msgstr "View open events"
 msgid ""
 "No tienes equipos activos. Crea o activa tu equipo para poder registrarte en "
 "eventos."
-msgstr ""
+msgstr "You have no active teams. Create or activate your team to register for events."
 
 #: .\templates\events\coach\my_registrations.html:36
 msgid "Fecha inscripción"
@@ -5131,7 +5131,7 @@ msgstr "Cancel registration"
 #: .\templates\events\coach\my_registrations.html:98
 msgid ""
 "Este registro ya fue aceptado. Al cancelarlo perderás el lugar en el evento."
-msgstr ""
+msgstr "This registration was already accepted. Cancelling it will lose your spot in the event."
 
 #: .\templates\events\coach\my_registrations.html:108
 msgid "Sí, cancelar registro"
@@ -5171,7 +5171,7 @@ msgid ""
 "              Tu equipo competirá automáticamente en la categoría "
 "<strong>%(cat)s</strong>.\n"
 "            "
-msgstr ""
+msgstr "\n              Your team will automatically compete in the <strong>%(cat)s</strong> category.\n            "
 
 #: .\templates\events\coach\register_team.html:104
 #: .\templates\events\coach\register_team.html:130
@@ -5219,7 +5219,7 @@ msgstr "Confirm status change"
 msgid ""
 "¿Estás seguro de que deseas realizar este cambio? Esta acción no se puede "
 "deshacer."
-msgstr ""
+msgstr "Are you sure you want to make this change? This action cannot be undone."
 
 #: .\templates\events\event_detail.html:127
 msgid "Información del evento"
@@ -5318,7 +5318,7 @@ msgstr "When registrations close"
 
 #: .\templates\events\event_form.html:124
 msgid "El nombre del evento es obligatorio"
-msgstr ""
+msgstr "The event name is required"
 
 #: .\templates\events\event_form.html:125
 #: .\templates\events\event_form.html:151
@@ -5331,15 +5331,15 @@ msgstr "Select an event type"
 
 #: .\templates\events\event_form.html:131
 msgid "La fecha de inicio es obligatoria"
-msgstr ""
+msgstr "The start date is required"
 
 #: .\templates\events\event_form.html:132
 msgid "La fecha de inicio no puede ser futura"
-msgstr ""
+msgstr "The start date cannot be in the future"
 
 #: .\templates\events\event_form.html:135
 msgid "La fecha de fin es obligatoria"
-msgstr ""
+msgstr "The end date is required"
 
 #: .\templates\events\event_form.html:136
 msgid "La fecha de fin debe ser posterior a la de inicio"
@@ -5355,11 +5355,11 @@ msgstr "Closing must be after opening"
 
 #: .\templates\events\event_form.html:143
 msgid "El cierre debe ser posterior al inicio del evento"
-msgstr ""
+msgstr "The closing date must be after the event start"
 
 #: .\templates\events\event_form.html:146
 msgid "El nombre de la sede es obligatorio"
-msgstr ""
+msgstr "The venue name is required"
 
 #: .\templates\events\event_form.html:147
 msgid "Máximo 150 caracteres"
@@ -5368,7 +5368,7 @@ msgstr "Maximum 150 characters"
 #: .\templates\events\event_form.html:150
 #: .\templates\hospitality\hotel_form.html:109
 msgid "La ciudad es obligatoria"
-msgstr ""
+msgstr "City is required"
 
 #: .\templates\events\event_list.html:12
 msgid "Explora eventos y competencias disponibles"
@@ -5421,11 +5421,11 @@ msgstr "View detail"
 
 #: .\templates\hospitality\bed_form.html:64
 msgid "El tipo de cama es obligatorio"
-msgstr ""
+msgstr "Bed type is required"
 
 #: .\templates\hospitality\bed_form.html:67
 msgid "La etiqueta es obligatoria"
-msgstr ""
+msgstr "Label is required"
 
 #: .\templates\hospitality\bed_form.html:68
 msgid "Máximo 20 caracteres"
@@ -5433,15 +5433,15 @@ msgstr "Maximum 20 characters"
 
 #: .\templates\hospitality\hotel_form.html:101
 msgid "El nombre del hotel es obligatorio"
-msgstr ""
+msgstr "Hotel name is required"
 
 #: .\templates\hospitality\hotel_form.html:102
 msgid "El nombre no puede exceder 100 caracteres"
-msgstr ""
+msgstr "Name cannot exceed 100 characters"
 
 #: .\templates\hospitality\hotel_form.html:105
 msgid "La dirección es obligatoria"
-msgstr ""
+msgstr "Address is required"
 
 #: .\templates\hospitality\hotel_form.html:106
 msgid "La dirección no puede exceder 200 caracteres"
@@ -5449,19 +5449,19 @@ msgstr "Address cannot exceed 200 characters"
 
 #: .\templates\hospitality\hotel_form.html:110
 msgid "La ciudad no puede exceder 100 caracteres"
-msgstr ""
+msgstr "City cannot exceed 100 characters"
 
 #: .\templates\hospitality\hotel_form.html:113
 msgid "Ingresa un teléfono válido"
-msgstr ""
+msgstr "Enter a valid phone number"
 
 #: .\templates\hospitality\hotel_form.html:116
 msgid "La URL debe comenzar con http:// o https://"
-msgstr ""
+msgstr "URL must start with http:// or https://"
 
 #: .\templates\hospitality\room_feature_form.html:79
 msgid "El nombre de la característica es obligatorio"
-msgstr ""
+msgstr "Feature name is required"
 
 #: .\templates\hospitality\room_feature_form.html:80
 msgid "Máximo 50 caracteres"
@@ -5469,15 +5469,15 @@ msgstr "Maximum 50 characters"
 
 #: .\templates\hospitality\room_feature_form.html:83
 msgid "El icono es obligatorio"
-msgstr ""
+msgstr "Icon is required"
 
 #: .\templates\hospitality\room_feature_form.html:84
 msgid "Formato inválido. Usa clase Bootstrap Icons, ej: bi-wifi"
-msgstr ""
+msgstr "Invalid format. Use a Bootstrap Icons class, e.g.: bi-wifi"
 
 #: .\templates\hospitality\room_form.html:75
 msgid "El número de habitación es obligatorio"
-msgstr ""
+msgstr "Room number is required"
 
 #: .\templates\hospitality\room_form.html:78
 msgid "El piso es obligatorio"
@@ -5836,7 +5836,7 @@ msgstr "Operational dates"
 #: .\templates\orders\admin\order_detail.html:337
 msgid ""
 "Esta orden solo contiene productos simples. No requiere fechas adicionales."
-msgstr ""
+msgstr "This order contains only simple products. No additional dates required."
 
 #: .\templates\orders\admin\order_detail.html:346
 msgid "Guardar fechas"
@@ -5888,7 +5888,7 @@ msgid ""
 "\n"
 "        %(complete)s de %(total)s atletas completos\n"
 "        "
-msgstr ""
+msgstr "\n        %(complete)s of %(total)s athletes complete\n        "
 
 #: .\templates\orders\admin\order_detail.html:506
 #, python-format
@@ -5896,7 +5896,7 @@ msgid ""
 "\n"
 "      %(pending)s atleta sin medidas completas\n"
 "      "
-msgstr ""
+msgstr "\n      %(pending)s athlete without complete measurements\n      "
 
 #: .\templates\orders\admin\order_detail.html:512
 msgid "Todas las medidas están completas"
@@ -6076,7 +6076,7 @@ msgid ""
 "        Mostrando %(start)s–%(end)s\n"
 "        de %(total)s órdenes\n"
 "        "
-msgstr ""
+msgstr "\n        Showing %(start)s–%(end)s\n        of %(total)s orders\n        "
 
 #: .\templates\orders\admin\order_list.html:22
 msgid "Pedido personal"
@@ -6206,7 +6206,7 @@ msgstr "Delete <strong>%(name)s</strong> from the order?"
 #: .\templates\orders\items\item_detail.html:344
 msgid ""
 "Esta acción eliminará atletas y medidas asociadas. No se puede deshacer."
-msgstr ""
+msgstr "This action will delete athletes and associated measurements. It cannot be undone."
 
 #: .\templates\orders\items\item_measurements.html:10
 msgid "Medidas de"
@@ -6240,7 +6240,7 @@ msgid ""
 "            a <strong>%(end)s</strong>\n"
 "            de <strong>%(total)s</strong> resultados\n"
 "            "
-msgstr ""
+msgstr "\n            Showing <strong>%(start)s</strong>\n            to <strong>%(end)s</strong>\n            of <strong>%(total)s</strong> results\n            "
 
 #: .\templates\orders\partials\pagination.html:18
 msgid "Primera"
@@ -6399,7 +6399,7 @@ msgstr "Select a team"
 msgid ""
 "No tienes equipos disponibles. Crea un equipo para poder hacer órdenes de "
 "equipo."
-msgstr ""
+msgstr "You have no available teams. Create a team to place team orders."
 
 #: .\templates\orders\users\order_detail.html:27
 msgid "Creada el dia:"
@@ -6727,7 +6727,7 @@ msgstr "from the order?"
 msgid ""
 "Se eliminarán todos los atletas y medidas asociadas. Esta acción no se puede "
 "deshacer."
-msgstr ""
+msgstr "All athletes and associated measurements will be deleted. This action cannot be undone."
 
 #: .\templates\orders\users\order_edit.html:9
 #, python-format
@@ -7053,7 +7053,7 @@ msgid ""
 "                  Este producto está siendo usado en <strong>%(count)s "
 "orden</strong>\n"
 "                "
-msgstr ""
+msgstr "\n                  This product is being used in <strong>%(count)s order</strong>\n                "
 
 #: .\templates\products\product_detail.html:218
 msgid "activa"
@@ -7063,7 +7063,7 @@ msgstr "active"
 msgid ""
 "No puedes modificar su estructura (scope, usage_type, size_strategy) ni "
 "eliminarlo."
-msgstr ""
+msgstr "You cannot modify its structure (scope, usage_type, size_strategy) or delete it."
 
 #: .\templates\products\product_detail.html:235
 msgid "Editar información"
@@ -7077,7 +7077,7 @@ msgstr "Locked fields"
 msgid ""
 "Tipo de producto, Tipo de uso, Estrategia de tallas, Alcance y Equipo "
 "propietario no pueden modificarse porque este producto ya está en órdenes."
-msgstr ""
+msgstr "Product type, Usage type, Size strategy, Scope, and Owner team cannot be modified because this product is already in orders."
 
 #: .\templates\products\product_detail.html:284
 #: .\templates\products\product_detail.html:298
@@ -7369,15 +7369,15 @@ msgstr "View all activity"
 #, python-format
 msgid "Falta %(days)s día."
 msgid_plural "Faltan %(days)s días."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(days)s day left."
+msgstr[1] "%(days)s days left."
 
 #: .\templates\social\base_social_v2.html:89
 #, python-format
 msgid "%(teams)s equipo de tu red compite."
 msgid_plural "%(teams)s equipos de tu red compiten."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(teams)s team from your network is competing."
+msgstr[1] "%(teams)s teams from your network are competing."
 
 #: .\templates\social\feed.html:12
 msgid "Tu perfil"
@@ -7385,7 +7385,7 @@ msgstr "Your profile"
 
 #: .\templates\social\feed.html:27
 msgid "Las publicaciones de tu equipo aparecerán aquí ✨"
-msgstr ""
+msgstr "Your team's posts will appear here ✨"
 
 #: .\templates\social\feed.html:39
 #, python-format
@@ -7408,11 +7408,11 @@ msgstr "No posts yet!"
 msgid ""
 "Sé el primero en compartir tu rutina con el equipo 🎉 Una foto del entreno "
 "basta para arrancar."
-msgstr ""
+msgstr "Be the first to share your routine with the team 🎉 One photo from practice is enough to get started."
 
 #: .\templates\social\feed.html:65
 msgid "O descubre equipos para seguir →"
-msgstr ""
+msgstr "Or discover teams to follow →"
 
 #: .\templates\social\feed.html:76 .\templates\social\post_detail.html:23
 msgid "Compartir publicación"
@@ -7430,7 +7430,7 @@ msgstr "Share"
 
 #: .\templates\social\feed.html:97
 msgid "Personas que quizás conozcas"
-msgstr ""
+msgstr "People you may know"
 
 #: .\templates\social\feed.html:104
 msgid "Compañero de equipo"
@@ -7447,7 +7447,7 @@ msgstr "Team ranking"
 #: .\templates\social\feed.html:125
 #, python-format
 msgid "%(c)s comp. aceptadas · %(a)s atletas"
-msgstr ""
+msgstr "%(c)s comps. accepted · %(a)s athletes"
 
 #: .\templates\social\feed.html:131
 msgid "Ver ranking completo"
@@ -7494,15 +7494,15 @@ msgstr[1] "%(count)s comments"
 
 #: .\templates\social\partials\post_card_v2.html:80
 msgid "¡Fuego!"
-msgstr ""
+msgstr "Fire!"
 
 #: .\templates\social\partials\post_card_v2.html:83
 msgid "¡Ánimo!"
-msgstr ""
+msgstr "Cheer!"
 
 #: .\templates\social\partials\post_card_v2.html:84
 msgid "Aplaudiste"
-msgstr ""
+msgstr "You applauded"
 
 #: .\templates\social\partials\post_card_v2.html:86
 msgid "Reaccionar"
@@ -7572,7 +7572,7 @@ msgstr "Social space settings"
 msgid ""
 "Tu visibilidad está en 'Solo mi equipo' pero no perteneces a ningún equipo "
 "activo: solo tú y los administradores verán tu contenido."
-msgstr ""
+msgstr "Your visibility is set to 'Only my team' but you don't belong to any active team: only you and administrators will see your content."
 
 #: .\templates\social\settings.html:12
 msgid "Perfil social"
@@ -7720,7 +7720,7 @@ msgid ""
 "                                                ¿Seguro que deseas eliminar "
 "la categoría <strong>%(nombre)s</strong>?\n"
 "                                            "
-msgstr ""
+msgstr "\n                                                Are you sure you want to delete the category <strong>%(nombre)s</strong>?\n                                            "
 
 #: .\templates\teams\manage_categories.html:107
 msgid "No hay categorías registradas."
@@ -7840,7 +7840,7 @@ msgid ""
 "                                Estás a punto de eliminar el equipo "
 "<strong>\"%(nombre)s\"</strong>.\n"
 "                            "
-msgstr ""
+msgstr "\n                                You are about to delete the team <strong>\"%(nombre)s\"</strong>.\n                            "
 
 #: .\templates\teams\manage_teams.html:414
 msgid "Esta acción no se puede deshacer."
