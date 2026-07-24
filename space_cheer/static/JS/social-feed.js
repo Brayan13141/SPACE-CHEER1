@@ -12,6 +12,8 @@
     // ── Like toggle ──
     document.querySelectorAll('[data-like-url]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        if (btn.disabled) return; // ya hay una petición en curso, ignorar doble click
+        btn.disabled = true;
         fetch(btn.dataset.likeUrl, {
           method: 'POST',
           headers: { 'X-CSRFToken': getCookie('csrftoken') },
@@ -22,7 +24,8 @@
             icon.className = data.liked ? 'bi bi-heart-fill text-danger' : 'bi bi-heart';
             btn.querySelector('[data-like-count]').textContent = data.like_count;
           })
-          .catch(function () { /* silencioso: el contador simplemente no cambia */ });
+          .catch(function () { /* silencioso: el contador simplemente no cambia */ })
+          .finally(function () { btn.disabled = false; });
       });
     });
 

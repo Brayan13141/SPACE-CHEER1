@@ -179,6 +179,7 @@
 .sc-h-10        { height: 10px; }
 .cursor-pointer { cursor: pointer; }
 .sc-progress-thin { height: 8px; }
+.sc-btn-loading { opacity: 0.65; cursor: not-allowed; }
 
 /* ── Feed social ─────────────────────────────────────────── */
 .sc-avatar-40 {

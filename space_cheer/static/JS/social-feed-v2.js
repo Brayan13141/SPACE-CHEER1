@@ -28,6 +28,8 @@
   }
 
   function sendReaction(wrap, reaction) {
+    if (wrap.dataset.reacting === '1') return; // petición en curso, ignorar doble click
+    wrap.dataset.reacting = '1';
     var url = wrap.dataset.likeUrl;
     fetch(url, {
       method: 'POST',
@@ -46,7 +48,8 @@
           if (countEl) countEl.textContent = data.like_count;
         }
       })
-      .catch(function () { /* silencioso: el contador simplemente no cambia */ });
+      .catch(function () { /* silencioso: el contador simplemente no cambia */ })
+      .finally(function () { delete wrap.dataset.reacting; });
   }
 
   function wireReactionPicker(wrap) {

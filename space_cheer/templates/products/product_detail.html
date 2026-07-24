@@ -719,6 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
       bodyEl.innerHTML = this.dataset.body || '¿Estás seguro?';
       pendingFormId = this.dataset.form;
 
+      confirmBtn.disabled = false;
       confirmBtn.className = `btn btn-${variant}`;
       confirmBtn.innerHTML = variant === 'success'
         ? '<i class="bi bi-play-circle me-1"></i>Confirmar'
@@ -728,9 +729,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   confirmBtn.addEventListener('click', function () {
+    if (confirmBtn.disabled) return; // ya se envió, ignorar doble click
     if (pendingFormId) {
       const form = document.getElementById(pendingFormId);
-      if (form) form.submit();
+      if (form) {
+        confirmBtn.disabled = true; // form.submit() no dispara 'submit', hay que bloquear a mano
+        form.submit();
+      }
     }
     modal.hide();
   });

@@ -392,12 +392,15 @@ document.addEventListener('DOMContentLoaded', function () {
       titleEl.textContent = this.dataset.title || 'Confirmar';
       bodyEl.innerHTML    = this.dataset.body  || '¿Estás seguro?';
       pendingFormId       = this.dataset.form;
+      confirmBtn.disabled = false;
       modal.show();
     });
   });
 
   confirmBtn.addEventListener('click', function () {
+    if (confirmBtn.disabled) return; // ya se envió, ignorar doble click
     if (pendingFormId) {
+      confirmBtn.disabled = true; // form.submit() no dispara 'submit', hay que bloquear a mano
       document.getElementById(pendingFormId)?.submit();
     }
     modal.hide();
