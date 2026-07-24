@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
+from accounts.decorators import role_required
 from django.db.models import Count
 from products.models import Product, Season
 from products.forms import ProductForm
@@ -87,8 +88,7 @@ def product_list(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-@login_required
-@permission_required("products.add_product", raise_exception=True)
+@role_required("ADMIN")
 def product_create_select_type(request):
 
     return render(
@@ -105,8 +105,7 @@ def product_create_select_type(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-@login_required
-@permission_required("products.add_product", raise_exception=True)
+@role_required("ADMIN")
 def product_create(request):
     template_key = request.GET.get("template") or request.POST.get("template")
     template = PRODUCT_TEMPLATES.get(template_key)
@@ -149,8 +148,7 @@ def product_create(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-@login_required
-@permission_required("products.change_product", raise_exception=True)
+@role_required("ADMIN")
 def product_detail(request, product_id):
     # Obtenemos el producto con relaciones optimizadas
     product = get_object_or_404(
@@ -427,8 +425,7 @@ def product_detail(request, product_id):
 
 # ─── DEV/TEST ONLY: página de QA manual del módulo Preview3D ───
 # Scripts: static/JS/vendor/ (three.min.js, GLTFLoader, OrbitControls) + static/JS/preview3d.js
-@login_required
-@permission_required("products.view_product", raise_exception=True)
+@role_required("ADMIN")
 def preview3d_test_view(request):
     """Página de QA manual del módulo Preview3D. El feature real vive en product_detail.html gateado por PREVIEW_3D_ENABLED."""
     return render(request, "products/partials/preview3d_test.html")

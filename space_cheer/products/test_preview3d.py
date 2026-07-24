@@ -106,13 +106,14 @@ class FeatureFlagTests(TestCase):
 class ProductDetail3DRenderTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        from django.contrib.auth.models import Permission
+        from accounts.models import Role
         from products.models import Product, Season
 
-        cls.user = User.objects.create_user(username="render_test", password="Test1234!")
-        cls.user.user_permissions.add(
-            Permission.objects.get(codename="change_product")
+        cls.user = User.objects.create_user(
+            username="render_test", password="Test1234!", profile_completed=True
         )
+        admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        cls.user.roles.add(admin_role)
         season = Season.objects.create(name="Render 2026")
         cls.product = Product.objects.create(
             name="Producto Render",
