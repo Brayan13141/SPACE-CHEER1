@@ -452,6 +452,28 @@ class ManageRolesTests(TestCase):
         )
         self.assertTrue(ProductionRole.objects.filter(pk=role.pk).exists())
 
+    def test_role_with_operarios_shows_disabled_delete(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Cone", created_by=self.admin)
+        operario, _ = make_operario()
+        OperarioRoleAssignment.objects.create(
+            user=operario, role=role, assigned_by=self.admin
+        )
+        response = self.client.get(reverse("production:manage_roles"))
+        self.assertContains(response, "No se puede eliminar")
+
+    def test_role_without_blockers_shows_delete_form(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Libre", created_by=self.admin)
+        response = self.client.get(reverse("production:manage_roles"))
+        self.assertContains(response, f'id="delRole{role.pk}"')
+
+    def test_role_edit_collapse_present(self):
+        self.client.force_login(self.admin)
+        role = ProductionRole.objects.create(name="Editable", created_by=self.admin)
+        response = self.client.get(reverse("production:manage_roles"))
+        self.assertContains(response, f'id="editRole{role.pk}"')
+
 
 # ---------------------------------------------------------------------------
 # Config — manage_operarios

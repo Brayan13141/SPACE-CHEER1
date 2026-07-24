@@ -11,6 +11,14 @@
     </a>
   </div>
 
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
   <div class="card shadow-sm mb-4">
     <div class="card-header">
       <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>{% trans "Nuevo rol" %}</h5>
@@ -18,6 +26,7 @@
     <div class="card-body">
       <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="action" value="save">
         <div class="row g-3 align-items-start">
           <div class="col-md-4">
             <label class="form-label small fw-semibold">{% trans "Nombre del rol" %}</label>
@@ -47,7 +56,15 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-          <div class="fw-semibold fs-6 mb-1">{{ role.name }}</div>
+          <div class="fw-semibold fs-6 mb-1">
+            {{ role.name }}
+            {% if role.operarios_count %}
+              <span class="badge bg-info text-dark ms-1">{{ role.operarios_count }} {% trans "operario(s)" %}</span>
+            {% endif %}
+            {% if role.responsible_count %}
+              <span class="badge bg-warning text-dark ms-1">{% trans "Responsable de" %} {{ role.responsible_count }} {% trans "etapa(s)" %}</span>
+            {% endif %}
+          </div>
           <div>
             {% for s in role.stages.all %}
               <span class="badge bg-secondary me-1">{{ s.icon }} {{ s.name }}</span>
@@ -56,9 +73,70 @@
             {% endfor %}
           </div>
         </div>
-        <a href="{% url 'production:manage_role_operarios' role.pk %}" class="btn btn-sm btn-outline-info">
-          <i class="bi bi-people me-1"></i>{% trans "Operarios" %}
-        </a>
+        <div class="d-flex gap-1">
+          <a href="{% url 'production:manage_role_operarios' role.pk %}" class="btn btn-sm btn-outline-info">
+            <i class="bi bi-people me-1"></i>{% trans "Operarios" %}
+          </a>
+          <button class="btn btn-sm btn-outline-secondary"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#editRole{{ role.pk }}"
+                  title="{% trans 'Editar' %}">
+            <i class="bi bi-pencil"></i>
+          </button>
+          {% if role.operarios_count or role.responsible_count %}
+          <button type="button" class="btn btn-sm btn-outline-danger" disabled
+                  title="{% trans 'No se puede eliminar: tiene operarios asignados o es responsable de una etapa.' %}">
+            <i class="bi bi-trash3"></i>
+          </button>
+          {% else %}
+          <form id="delRole{{ role.pk }}" method="post" class="d-none">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="role_id" value="{{ role.pk }}">
+          </form>
+          <button type="button" class="btn btn-sm btn-outline-danger"
+                  data-confirm
+                  data-title="{% trans 'Eliminar rol' %}"
+                  data-body="¿Eliminar «{{ role.name }}»?"
+                  data-form="delRole{{ role.pk }}"
+                  data-variant="danger"
+                  title="{% trans 'Eliminar' %}">
+            <i class="bi bi-trash3"></i>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="collapse" id="editRole{{ role.pk }}">
+      <div class="card-body border-top">
+        <form method="post" class="row g-3 align-items-start">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save">
+          <input type="hidden" name="role_id" value="{{ role.pk }}">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Nombre del rol" %}</label>
+            <input name="name" class="form-control" value="{{ role.name }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Etapas" %}</label>
+            <div class="d-flex flex-wrap gap-2">
+              {% for stage in stages %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="stages" value="{{ stage.pk }}"
+                       id="stage_{{ role.pk }}_{{ stage.pk }}"
+                       {% if stage in role.stages.all %}checked{% endif %}>
+                <label class="form-check-label small" for="stage_{{ role.pk }}_{{ stage.pk }}">{{ stage.icon }} {{ stage.name }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-success w-100">
+              <i class="bi bi-check-lg me-1"></i>{% trans "Guardar" %}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -67,4 +145,63 @@
   {% endfor %}
 
 </div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="confirmModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2 pb-1">
+        <p class="text-muted mb-0" id="confirmModalBody"></p>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>{% trans "Cancelar" %}
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmModalBtn">
+          <i class="bi bi-trash3 me-1"></i>{% trans "Eliminar" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl    = document.getElementById('confirmModal');
+  const modal      = new bootstrap.Modal(modalEl);
+  const titleEl    = document.getElementById('confirmModalTitle');
+  const bodyEl     = document.getElementById('confirmModalBody');
+  const confirmBtn = document.getElementById('confirmModalBtn');
+  let pendingFormId = null;
+
+  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      titleEl.textContent = this.dataset.title || 'Confirmar acción';
+      bodyEl.textContent = this.dataset.body || '¿Estás seguro?';
+      pendingFormId = this.dataset.form;
+      confirmBtn.disabled = false;
+      modal.show();
+    });
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    if (confirmBtn.disabled) return;
+    if (pendingFormId) {
+      const form = document.getElementById(pendingFormId);
+      if (form) {
+        confirmBtn.disabled = true;
+        form.submit();
+      }
+    }
+    modal.hide();
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', function () { pendingFormId = null; });
+});
+</script>
 {% endblock %}
