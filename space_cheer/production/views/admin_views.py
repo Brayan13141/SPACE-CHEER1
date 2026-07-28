@@ -14,10 +14,17 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+ACTIVE_JOB_STATUSES_EXCLUDED = (ProductionJob.Status.COMPLETED, ProductionJob.Status.CANCELLED)
+
+
 @role_required("ADMIN")
 def admin_overview(request):
     today = timezone.now().date()
-    jobs = (
+    filter_by = request.GET.get("filter", "all")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+
+    base_qs = (
         ProductionJob.objects.select_related("order")
         .prefetch_related("tasks__stage", "tasks__assigned_to", "order__items__product")
         .annotate(
@@ -26,20 +33,31 @@ def admin_overview(request):
                 "tasks", filter=Q(tasks__status=ProductionTask.Status.COMPLETED)
             ),
         )
-        .order_by("-is_urgent", "order__uniform_delivery_date")
     )
 
-    filter_by = request.GET.get("filter", "all")
-    if filter_by == "urgent":
-        jobs = jobs.filter(is_urgent=True)
-    elif filter_by == "unassigned":
-        jobs = jobs.filter(
-            tasks__assigned_to__isnull=True,
-            tasks__status=ProductionTask.Status.PENDING,
-        ).distinct()
+    if filter_by == "completed":
+        jobs = base_qs.filter(status=ProductionJob.Status.COMPLETED).order_by(
+            "-completed_at"
+        )
+        if date_from:
+            jobs = jobs.filter(completed_at__date__gte=date_from)
+        if date_to:
+            jobs = jobs.filter(completed_at__date__lte=date_to)
+    else:
+        jobs = base_qs.exclude(status__in=ACTIVE_JOB_STATUSES_EXCLUDED).order_by(
+            "-is_urgent", "order__uniform_delivery_date"
+        )
+        if filter_by == "urgent":
+            jobs = jobs.filter(is_urgent=True)
+        elif filter_by == "unassigned":
+            jobs = jobs.filter(
+                tasks__assigned_to__isnull=True,
+                tasks__status=ProductionTask.Status.PENDING,
+            ).distinct()
 
     jobs = list(jobs)
 
+    active_jobs = ProductionJob.objects.exclude(status__in=ACTIVE_JOB_STATUSES_EXCLUDED)
     pending_tasks = ProductionTask.objects.filter(
         status=ProductionTask.Status.PENDING
     ).count()
@@ -48,8 +66,8 @@ def admin_overview(request):
     ).count()
 
     stats = {
-        "in_production": len(jobs),
-        "urgent": sum(1 for j in jobs if j.is_urgent),
+        "in_production": active_jobs.count(),
+        "urgent": active_jobs.filter(is_urgent=True).count(),
         "pending_tasks": pending_tasks,
         "completed_today": completed_today,
     }
@@ -58,6 +76,8 @@ def admin_overview(request):
         "jobs": jobs,
         "stats": stats,
         "filter_by": filter_by,
+        "date_from": date_from,
+        "date_to": date_to,
     })
 
 

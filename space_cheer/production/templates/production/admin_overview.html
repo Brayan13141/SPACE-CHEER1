@@ -54,30 +54,50 @@
   </div>
 
   <!-- Filtros -->
-  <div class="d-flex gap-2 mb-3">
+  <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
     <a href="?filter=all" class="btn btn-sm {% if filter_by == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "Todas" %}</a>
     <a href="?filter=urgent" class="btn btn-sm {% if filter_by == 'urgent' %}btn-danger{% else %}btn-outline-secondary{% endif %}">{% trans "Urgentes" %}</a>
     <a href="?filter=unassigned" class="btn btn-sm {% if filter_by == 'unassigned' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">{% trans "Sin asignar" %}</a>
+    <a href="?filter=completed" class="btn btn-sm {% if filter_by == 'completed' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "Completadas" %}</a>
+
+    {% if filter_by == "completed" %}
+    <form method="get" class="d-flex gap-2 align-items-center ms-2">
+      <input type="hidden" name="filter" value="completed">
+      <label class="text-muted small mb-0">{% trans "Del" %}</label>
+      <input type="date" name="date_from" value="{{ date_from }}" class="form-control form-control-sm bg-dark text-light" style="width: auto;">
+      <label class="text-muted small mb-0">{% trans "al" %}</label>
+      <input type="date" name="date_to" value="{{ date_to }}" class="form-control form-control-sm bg-dark text-light" style="width: auto;">
+      <button type="submit" class="btn btn-sm btn-outline-info">{% trans "Filtrar" %}</button>
+      {% if date_from or date_to %}
+      <a href="?filter=completed" class="btn btn-sm btn-outline-secondary">{% trans "Limpiar" %}</a>
+      {% endif %}
+    </form>
+    {% endif %}
   </div>
 
   <!-- Jobs -->
   {% for job in jobs %}
-  <div class="card bg-dark border-{% if job.is_urgent %}danger{% else %}secondary{% endif %} mb-3">
+  <div class="card bg-dark border-{% if job.is_urgent %}danger{% elif job.status == 'COMPLETED' %}success{% else %}secondary{% endif %} mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
       <span class="fw-semibold">
         {% trans "Orden" %} #{{ job.order.id }}
         {% if job.is_urgent %}<span class="badge bg-danger ms-2">{% trans "Urgente" %}</span>{% endif %}
+        {% if job.status == "COMPLETED" %}
+          <span class="badge bg-success ms-2">{% trans "Completado" %} — {{ job.completed_at|date:"d/m/Y H:i" }}</span>
+        {% endif %}
       </span>
       <div class="d-flex gap-2">
         <a href="{% url 'production:admin_job_detail' job.pk %}" class="btn btn-sm btn-outline-info">
           <i class="bi bi-eye me-1"></i>{% trans "Detalle" %}
         </a>
+        {% if job.status != "COMPLETED" %}
         <form method="post" action="{% url 'production:toggle_urgent' job.pk %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-sm {% if job.is_urgent %}btn-danger{% else %}btn-outline-secondary{% endif %}">
             {% if job.is_urgent %}{% trans "Quitar urgente" %}{% else %}{% trans "Marcar urgente" %}{% endif %}
           </button>
         </form>
+        {% endif %}
       </div>
     </div>
     <div class="card-body pb-2">
@@ -95,7 +115,10 @@
     </div>
   </div>
   {% empty %}
-  <p class="text-muted">{% trans "No hay órdenes en producción." %}</p>
+  <p class="text-muted">
+    {% if filter_by == "completed" %}{% trans "No hay órdenes completadas en ese rango de fechas." %}
+    {% else %}{% trans "No hay órdenes en producción." %}{% endif %}
+  </p>
   {% endfor %}
 
 </div>

@@ -263,6 +263,87 @@ class AdminOverviewTests(TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Admin — admin_overview: jobs completados no se mueven, ni se ven por fecha
+# ---------------------------------------------------------------------------
+
+class AdminOverviewCompletedJobsTests(TestCase):
+    """Al completar todas las tareas de un job, el job pasa a status
+    COMPLETED (confirmado en test_state_machine.py) pero admin_overview
+    consultaba TODOS los jobs sin filtrar por status: el job completado
+    se quedaba mezclado para siempre en la misma lista de "En producción",
+    y no existía ninguna forma de ver completados de otro día que no fuera
+    el contador fijo "Completadas hoy"."""
+
+    def setUp(self):
+        self.client = Client()
+        self.admin = make_superuser()
+
+        stage = make_stage(name="Única", slug="unica-comp", order=1)
+
+        pending_order = OrderFactory()
+        pending_item = OrderItemFactory(order=pending_order)
+        ProductStageConfig.objects.create(
+            product=pending_item.product, stage=stage, display_order=1
+        )
+        with patch("production.services.notify_production_stage_complete"):
+            self.pending_job = ProductionJobService.create_for_order(pending_order)
+
+        completed_order = OrderFactory()
+        completed_item = OrderItemFactory(order=completed_order)
+        ProductStageConfig.objects.create(
+            product=completed_item.product, stage=stage, display_order=1
+        )
+        with patch("production.services.notify_production_stage_complete"):
+            self.completed_job = ProductionJobService.create_for_order(completed_order)
+        completed_task = self.completed_job.tasks.first()
+        with patch("production.services.notify_production_stage_complete"), \
+             patch("production.services.notify_job_ready"):
+            ProductionJobService.complete_task(
+                completed_task, self.admin, self.completed_job.created_at, ""
+            )
+        self.completed_job.refresh_from_db()
+        self.assertEqual(self.completed_job.status, ProductionJob.Status.COMPLETED)
+
+    def test_default_view_excludes_completed_jobs(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("production:admin_overview"))
+        job_ids = [j.pk for j in response.context["jobs"]]
+        self.assertIn(self.pending_job.pk, job_ids)
+        self.assertNotIn(self.completed_job.pk, job_ids)
+
+    def test_in_production_stat_excludes_completed_jobs(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("production:admin_overview"))
+        self.assertEqual(response.context["stats"]["in_production"], 1)
+
+    def test_completed_filter_shows_only_completed_jobs(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("production:admin_overview"), {"filter": "completed"})
+        job_ids = [j.pk for j in response.context["jobs"]]
+        self.assertIn(self.completed_job.pk, job_ids)
+        self.assertNotIn(self.pending_job.pk, job_ids)
+
+    def test_completed_filter_respects_date_range(self):
+        old_date = self.completed_job.completed_at - timezone.timedelta(days=10)
+        ProductionJob.objects.filter(pk=self.completed_job.pk).update(completed_at=old_date)
+
+        self.client.force_login(self.admin)
+        response = self.client.get(
+            reverse("production:admin_overview"),
+            {"filter": "completed", "date_from": timezone.now().date().isoformat()},
+        )
+        job_ids = [j.pk for j in response.context["jobs"]]
+        self.assertNotIn(self.completed_job.pk, job_ids)
+
+        response = self.client.get(
+            reverse("production:admin_overview"),
+            {"filter": "completed", "date_from": old_date.date().isoformat()},
+        )
+        job_ids = [j.pk for j in response.context["jobs"]]
+        self.assertIn(self.completed_job.pk, job_ids)
+
+
+# ---------------------------------------------------------------------------
 # Admin — admin_job_detail
 # ---------------------------------------------------------------------------
 
