@@ -244,3 +244,5 @@ caso_uso_*.pdf
 manual_*_screenshots/
 .playwright-cli/
 after-login-admin.yml
+
+graphify-out/
