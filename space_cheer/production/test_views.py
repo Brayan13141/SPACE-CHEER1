@@ -106,6 +106,68 @@ class OperarioDashboardTests(TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Operario — dashboard blocked_by indicator
+# ---------------------------------------------------------------------------
+
+class OperarioDashboardBlockedByTests(TestCase):
+    """El dashboard debe avisar cuando una tarea está bloqueada por una etapa
+    anterior pendiente (Regla de Oro en ProductionJobService.complete_task),
+    en vez de dejar el botón "Completar" disponible sin explicación."""
+
+    def setUp(self):
+        self.client = Client()
+        self.operario, _ = make_operario()
+        self.stage1 = make_stage(name="Corte", slug="corte-blk", order=1)
+        self.stage2 = make_stage(name="Costura", slug="costura-blk", order=2)
+
+        order = OrderFactory()
+        item = OrderItemFactory(order=order)
+        ProductStageConfig.objects.create(
+            product=item.product, stage=self.stage1, display_order=1
+        )
+        ProductStageConfig.objects.create(
+            product=item.product, stage=self.stage2, display_order=2
+        )
+        with patch("production.services.notify_production_stage_complete"):
+            ProductionJobService.create_for_order(order)
+        self.job = ProductionJob.objects.get(order=order)
+        self.task1 = self.job.tasks.get(stage=self.stage1)
+        self.task2 = self.job.tasks.get(stage=self.stage2)
+
+        # El operario solo cubre la segunda etapa (Costura)
+        prod_role = ProductionRole.objects.create(name="Costurero_blk")
+        prod_role.stages.add(self.stage2)
+        OperarioRoleAssignment.objects.create(
+            user=self.operario, role=prod_role, assigned_by=self.operario
+        )
+
+    def test_task_blocked_by_earlier_pending_stage(self):
+        self.client.force_login(self.operario)
+        response = self.client.get(reverse("production:dashboard"))
+        [task] = response.context["tasks"]
+        self.assertEqual(task.pk, self.task2.pk)
+        self.assertEqual(task.blocked_by, self.stage1.name)
+
+    def test_task_not_blocked_once_earlier_stage_completed(self):
+        with patch("production.services.notify_production_stage_complete"), \
+             patch("production.services.notify_job_ready"):
+            ProductionJobService.complete_task(
+                self.task1, self.operario, self.job.created_at, ""
+            )
+        self.client.force_login(self.operario)
+        response = self.client.get(reverse("production:dashboard"))
+        [task] = response.context["tasks"]
+        self.assertIsNone(task.blocked_by)
+
+    def test_complete_button_disabled_when_blocked(self):
+        self.client.force_login(self.operario)
+        response = self.client.get(reverse("production:dashboard"))
+        content = response.content.decode()
+        self.assertIn("disabled", content)
+        self.assertNotIn(f'data-bs-target="#completeModal{self.task2.pk}"', content)
+
+
+# ---------------------------------------------------------------------------
 # Operario — task_complete
 # ---------------------------------------------------------------------------
 

@@ -1,11 +1,23 @@
 # accounts/urls.py
 from django.urls import path
-from accounts.views import views_accounts, views_profile
+from accounts.views import views_accounts, views_profile, views_notifications
 from accounts.views.views_admin_approvals import headcoach_approvals
 
 app_name = "accounts"
 
 urlpatterns = [
+    # 0. NOTIFICACIONES (gestión — excluye sociales, ver social:notifications)
+    path("notificaciones/", views_notifications.notifications, name="notifications"),
+    path(
+        "notificaciones/<int:pk>/leer/",
+        views_notifications.notification_read,
+        name="notification_read",
+    ),
+    path(
+        "notificaciones/leer-todas/",
+        views_notifications.notifications_read_all,
+        name="notifications_read_all",
+    ),
     # 1. ONBOARDING
     path("complete-profile/", views_accounts.profile_setup_view, name="profile_setup"),
     path("coach/pending/", views_accounts.coach_pending_approval, name="coach_pending_approval"),

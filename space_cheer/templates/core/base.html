@@ -617,14 +617,16 @@
                     </a>
                     {% endif %}{# end if not is_only_operario (carrito) #}
 
-                    {# Notificaciones — badge contador #}
-                    {% if unread_notifications_count %}
-                    <span class="badge bg-danger rounded-pill"
-                          title="{{ unread_notifications_count }} notificación{% if unread_notifications_count != 1 %}es{% endif %} sin leer"
-                          data-bs-toggle="tooltip">
-                        <i class="bi bi-bell-fill me-1" style="font-size:0.75rem;"></i>{{ unread_notifications_count }}
-                    </span>
-                    {% endif %}
+                    {# Notificaciones — enlaza a la lista de gestión #}
+                    <a href="{% url 'accounts:notifications' %}"
+                       class="btn btn-sm btn-outline-secondary position-relative"
+                       title="{% if unread_notifications_count %}{{ unread_notifications_count }} notificación{% if unread_notifications_count != 1 %}es{% endif %} sin leer{% else %}Notificaciones{% endif %}"
+                       data-bs-toggle="tooltip">
+                        <i class="bi bi-bell-fill"></i>
+                        {% if unread_notifications_count %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill sc-nav-cart-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
 
 {# Avatar + menú de usuario #}
                     <div class="dropdown">

@@ -62,10 +62,17 @@
               {% endif %}
 
               <div class="d-flex gap-2 mt-2">
+                {% if task.blocked_by %}
+                <button type="button" class="btn btn-success btn-sm" disabled
+                  title="Bloqueada hasta que se complete «{{ task.blocked_by }}»">
+                  Completar
+                </button>
+                {% else %}
                 <button type="button" class="btn btn-success btn-sm"
                   data-bs-toggle="modal" data-bs-target="#completeModal{{ task.pk }}">
                   Completar
                 </button>
+                {% endif %}
                 {% if task.job.order.design_images.filter %}
                   <a href="{% url 'production:order_design' task.job.pk %}"
                      class="btn btn-outline-secondary btn-sm">Ver diseño</a>

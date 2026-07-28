@@ -25,10 +25,42 @@ def _get_allowed_stages(user):
     )
 
 
+def _annotate_blocked_by(tasks):
+    """Marca en cada task si una etapa anterior (mismo job+order_item) sigue
+    pendiente — la misma condición que ProductionJobService.complete_task
+    usa para rechazar el completado (Regla de Oro)."""
+    item_ids = {task.order_item_id for task in tasks}
+    pending_by_item = {}
+    if item_ids:
+        for pending_task in (
+            ProductionTask.objects.filter(
+                order_item_id__in=item_ids,
+                status=ProductionTask.Status.PENDING,
+            )
+            .select_related("stage")
+            .order_by("stage__display_order")
+        ):
+            pending_by_item.setdefault(pending_task.order_item_id, []).append(
+                pending_task
+            )
+
+    for task in tasks:
+        blocker = next(
+            (
+                pending_task
+                for pending_task in pending_by_item.get(task.order_item_id, [])
+                if pending_task.stage.display_order < task.stage.display_order
+            ),
+            None,
+        )
+        task.blocked_by = blocker.stage.name if blocker else None
+    return tasks
+
+
 @role_required("OPERARIO")
 def dashboard(request):
     allowed_stages = _get_allowed_stages(request.user)
-    tasks = (
+    tasks = list(
         ProductionTask.objects.filter(
             status=ProductionTask.Status.PENDING,
             stage__in=allowed_stages,
@@ -37,6 +69,7 @@ def dashboard(request):
         .select_related("job__order", "order_item__product", "stage")
         .order_by("-job__is_urgent", "stage__display_order")
     )
+    _annotate_blocked_by(tasks)
     prod_roles = OperarioRoleAssignment.objects.filter(
         user=request.user
     ).select_related("role")
