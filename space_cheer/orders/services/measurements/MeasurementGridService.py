@@ -6,6 +6,8 @@ Vistas y templates solo consumen el resultado.
 
 from dataclasses import dataclass, field as dataclass_field
 
+from django.core.exceptions import PermissionDenied
+
 
 @dataclass(frozen=True)
 class GridCell:
@@ -80,7 +82,10 @@ class MeasurementGridService:
         errors = errors or {}
 
         columns = MeasurementGridService.columns_for(item.product)
-        athlete_items = MeasurementGridService.athlete_items_for(item)
+        athlete_items = MeasurementGridService.visible_athlete_items(item, viewer)
+        editable_ids = MeasurementGridService.editable_athlete_item_ids(
+            item, viewer, athlete_items
+        )
 
         rows = []
         for athlete_item in athlete_items:
@@ -104,7 +109,7 @@ class MeasurementGridService:
                         required=product_field.required,
                         value=value,
                         is_modified=bool(stored and stored.is_modified),
-                        editable=False,
+                        editable=athlete_item.id in editable_ids,
                         input_name=input_name,
                         error=errors.get(input_name, ""),
                     )
@@ -128,7 +133,7 @@ class MeasurementGridService:
             item=item,
             columns=columns,
             rows=rows,
-            can_edit=False,
+            can_edit=bool(editable_ids),
             complete_count=sum(1 for row in rows if row.is_complete),
             total_count=len(rows),
         )
@@ -144,3 +149,76 @@ class MeasurementGridService:
         if not columns:
             return False
         return all(cell.has_value for cell in cells if cell.required)
+
+    @staticmethod
+    def _is_guardian_of(viewer, athlete_item):
+        from accounts.models import AthleteProfile
+
+        try:
+            profile = athlete_item.athlete.athleteprofile
+        except AthleteProfile.DoesNotExist:
+            return False
+        return profile.guardian_id == viewer.id and athlete_item.athlete.is_minor
+
+    @staticmethod
+    def _is_assigned_operario(item, viewer):
+        # Import local: production importa orders, un import a nivel de módulo
+        # en sentido contrario cerraría el ciclo.
+        from production.models import ProductionTask
+
+        return ProductionTask.objects.filter(
+            order_item=item,
+            assigned_to=viewer,
+            stage__productionrole__operarioroleassignment__user=viewer,
+        ).exists()
+
+    @staticmethod
+    def _sees_every_row(item, viewer):
+        from orders.models import Order
+
+        if Order.objects.visible_for_user(viewer).filter(pk=item.order_id).exists():
+            return True
+        return MeasurementGridService._is_assigned_operario(item, viewer)
+
+    @staticmethod
+    def visible_athlete_items(item, viewer):
+        """Filas que este viewer puede ver. PermissionDenied si no puede ver ninguna."""
+        athlete_items = MeasurementGridService.athlete_items_for(item)
+
+        if MeasurementGridService._sees_every_row(item, viewer):
+            return athlete_items
+
+        own = [
+            athlete_item
+            for athlete_item in athlete_items
+            if MeasurementGridService._is_guardian_of(viewer, athlete_item)
+        ]
+        if own:
+            return own
+
+        raise PermissionDenied
+
+    @staticmethod
+    def editable_athlete_item_ids(item, viewer, athlete_items):
+        """Ids de filas que este viewer puede ESCRIBIR.
+
+        El operario nunca cae en ninguna rama: no es creador, no es ADMIN y no
+        es guardián, así que recibe el conjunto vacío.
+        """
+        order = item.order
+        if not (order.can_edit_general() and order.can_edit_measurements()):
+            return set()
+
+        is_privileged = (
+            viewer.is_superuser
+            or order.created_by_id == viewer.id
+            or viewer.roles.filter(name="ADMIN").exists()
+        )
+        if is_privileged:
+            return {athlete_item.id for athlete_item in athlete_items}
+
+        return {
+            athlete_item.id
+            for athlete_item in athlete_items
+            if MeasurementGridService._is_guardian_of(viewer, athlete_item)
+        }

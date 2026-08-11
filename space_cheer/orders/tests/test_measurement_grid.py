@@ -251,3 +251,85 @@ class MeasurementGridStructureTests(TestCase):
 
         self.assertEqual(grid.rows[0].cells[0].value, "95")
         self.assertEqual(grid.rows[0].cells[0].error, "Ups")
+
+
+from django.core.exceptions import PermissionDenied
+
+from orders.tests.factories import RoleFactory, UserFactory
+
+
+@pytest.mark.django_db
+class MeasurementGridPermissionTests(TestCase):
+
+    def test_coach_creator_sees_all_rows_and_can_edit(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(item, team, first_name="Ana")
+        add_athlete(item, team, first_name="Beto")
+
+        grid = MeasurementGridService.build(item, coach)
+
+        self.assertEqual(len(grid.rows), 2)
+        self.assertTrue(grid.can_edit)
+        self.assertTrue(all(c.editable for r in grid.rows for c in r.cells))
+
+    def test_guardian_sees_only_their_own_athlete(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        guardian = UserFactory()
+        mine = add_minor_with_guardian(item, team, guardian, first_name="Hijo")
+        add_athlete(item, team, first_name="Ajeno")
+
+        grid = MeasurementGridService.build(item, guardian)
+
+        self.assertEqual(len(grid.rows), 1)
+        self.assertEqual(grid.rows[0].athlete_item_id, mine.id)
+
+    def test_stranger_is_denied(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(item, team)
+        stranger = UserFactory()
+
+        with self.assertRaises(PermissionDenied):
+            MeasurementGridService.build(item, stranger)
+
+    def test_admin_can_edit(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(item, team)
+        admin = UserFactory()
+        admin.roles.add(RoleFactory(name="ADMIN"))
+
+        grid = MeasurementGridService.build(item, admin)
+
+        self.assertTrue(grid.can_edit)
+
+    def test_cannot_edit_when_measurements_locked(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(item, team)
+        order.measurements_locked = True
+        order.save()
+
+        grid = MeasurementGridService.build(reload_item(item), coach)
+
+        self.assertFalse(grid.can_edit)
+        self.assertFalse(any(c.editable for r in grid.rows for c in r.cells))
+
+    def test_cannot_edit_when_measurements_closed(self):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(item, team)
+        order.measurements_open = False
+        order.save()
+
+        grid = MeasurementGridService.build(reload_item(item), coach)
+
+        self.assertFalse(grid.can_edit)
