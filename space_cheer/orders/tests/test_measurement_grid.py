@@ -343,3 +343,168 @@ class PiiAccessTypeTests(TestCase):
 
         codes = [code for code, _label in PiiAccessLog.ACCESS_TYPES]
         self.assertIn("EDIT_MEASUREMENTS", codes)
+
+
+@pytest.mark.django_db
+class MeasurementGridSaveTests(TestCase):
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Notas", 20, False)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.notas = self.item.product.measurement_fields.get(
+            field__name="Notas"
+        ).field
+
+    def _name(self, athlete_item, field):
+        return f"m-{athlete_item.id}-{field.id}"
+
+    def test_saves_submitted_values(self):
+        result = MeasurementGridService.save(
+            self.item,
+            self.coach,
+            {self._name(self.athlete_item, self.pecho): "92"},
+        )
+
+        self.assertTrue(result.ok)
+        measurement = OrderItemMeasurement.objects.get(
+            athlete_item=self.athlete_item, field=self.pecho
+        )
+        self.assertEqual(measurement.value, "92")
+
+    def test_missing_required_field_writes_nothing(self):
+        """El error NO debe dejar escrituras parciales."""
+        result = MeasurementGridService.save(
+            self.item,
+            self.coach,
+            {
+                self._name(self.athlete_item, self.pecho): "",
+                self._name(self.athlete_item, self.notas): "algo",
+            },
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn(self._name(self.athlete_item, self.pecho), result.errors)
+        self.assertEqual(
+            OrderItemMeasurement.objects.filter(
+                athlete_item=self.athlete_item
+            ).count(),
+            0,
+        )
+
+    def test_guardian_cannot_write_other_athletes_cells(self):
+        """Test de seguridad central: se asevera contra la BD, no contra el status."""
+        guardian = UserFactory()
+        mine = add_minor_with_guardian(
+            self.item, self.team, guardian, first_name="Hijo"
+        )
+        other = add_athlete(self.item, self.team, first_name="Ajeno")
+
+        MeasurementGridService.save(
+            self.item,
+            guardian,
+            {
+                self._name(mine, self.pecho): "90",
+                self._name(other, self.pecho): "199",
+            },
+        )
+
+        self.assertEqual(
+            OrderItemMeasurement.objects.filter(athlete_item=other).count(), 0
+        )
+        self.assertTrue(
+            OrderItemMeasurement.objects.filter(
+                athlete_item=mine, value="90"
+            ).exists()
+        )
+
+    def test_operario_cannot_write(self):
+        operario = UserFactory()
+        operario.roles.add(RoleFactory(name="OPERARIO"))
+
+        with self.assertRaises(PermissionDenied):
+            MeasurementGridService.save(
+                self.item,
+                operario,
+                {self._name(self.athlete_item, self.pecho): "90"},
+            )
+
+    def test_locked_measurements_reject_save(self):
+        self.order.measurements_locked = True
+        self.order.save()
+
+        with self.assertRaises(PermissionDenied):
+            MeasurementGridService.save(
+                reload_item(self.item),
+                self.coach,
+                {self._name(self.athlete_item, self.pecho): "90"},
+            )
+        self.assertEqual(
+            OrderItemMeasurement.objects.filter(
+                athlete_item=self.athlete_item
+            ).count(),
+            0,
+        )
+
+    def test_is_modified_only_when_original_existed(self):
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.athlete_item,
+            field=self.pecho,
+            field_name=self.pecho.name,
+            field_unit=self.pecho.unit,
+            value_original="90",
+            value="90",
+        )
+
+        MeasurementGridService.save(
+            self.item,
+            self.coach,
+            {self._name(self.athlete_item, self.pecho): "95"},
+        )
+
+        measurement = OrderItemMeasurement.objects.get(
+            athlete_item=self.athlete_item, field=self.pecho
+        )
+        self.assertEqual(measurement.value, "95")
+        self.assertTrue(measurement.is_modified)
+
+    def test_new_measurement_is_not_marked_modified(self):
+        MeasurementGridService.save(
+            self.item,
+            self.coach,
+            {self._name(self.athlete_item, self.pecho): "95"},
+        )
+
+        measurement = OrderItemMeasurement.objects.get(
+            athlete_item=self.athlete_item, field=self.pecho
+        )
+        self.assertFalse(measurement.is_modified)
+
+    def test_logs_pii_only_for_changed_athletes(self):
+        from accounts.models import PiiAccessLog
+
+        other = add_athlete(self.item, self.team, first_name="Beto")
+        OrderItemMeasurement.objects.create(
+            athlete_item=other,
+            field=self.pecho,
+            field_name=self.pecho.name,
+            field_unit=self.pecho.unit,
+            value="80",
+        )
+
+        result = MeasurementGridService.save(
+            self.item,
+            self.coach,
+            {
+                self._name(self.athlete_item, self.pecho): "92",
+                self._name(other, self.pecho): "80",
+            },
+        )
+
+        self.assertTrue(result.ok)
+        changed_ids = [a.id for a in result.changed_athlete_items]
+        self.assertEqual(changed_ids, [self.athlete_item.id])

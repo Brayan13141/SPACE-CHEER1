@@ -7,6 +7,7 @@ Vistas y templates solo consumen el resultado.
 from dataclasses import dataclass, field as dataclass_field
 
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,13 @@ class MeasurementGrid:
     can_edit: bool = False
     complete_count: int = 0
     total_count: int = 0
+
+
+@dataclass
+class SaveResult:
+    ok: bool
+    errors: dict = dataclass_field(default_factory=dict)
+    changed_athlete_items: list = dataclass_field(default_factory=list)
 
 
 class MeasurementGridService:
@@ -222,3 +230,80 @@ class MeasurementGridService:
             for athlete_item in athlete_items
             if MeasurementGridService._is_guardian_of(viewer, athlete_item)
         }
+
+    @staticmethod
+    def save(item, viewer, post_data):
+        """Guarda las celdas posteadas que el viewer tiene derecho a escribir.
+
+        SEGURIDAD: se itera sobre las filas editables calculadas desde cero,
+        nunca sobre las claves de post_data. Una celda ajena posteada a mano
+        simplemente nunca se lee.
+        """
+        athlete_items = MeasurementGridService.visible_athlete_items(item, viewer)
+        editable_ids = MeasurementGridService.editable_athlete_item_ids(
+            item, viewer, athlete_items
+        )
+        if not editable_ids:
+            raise PermissionDenied("No puedes editar estas medidas.")
+
+        columns = MeasurementGridService.columns_for(item.product)
+
+        # ── Paso 1: validar TODO antes de tocar la base de datos ───────────
+        submitted = {}
+        errors = {}
+        for athlete_item in athlete_items:
+            if athlete_item.id not in editable_ids:
+                continue
+            for product_field in columns:
+                input_name = f"m-{athlete_item.id}-{product_field.field_id}"
+                if input_name not in post_data:
+                    continue
+                value = (post_data.get(input_name) or "").strip()
+                if product_field.required and not value:
+                    errors[input_name] = (
+                        f"'{product_field.field.name}' es obligatorio."
+                    )
+                submitted[(athlete_item.id, product_field.field_id)] = value
+
+        if errors:
+            return SaveResult(ok=False, errors=errors, changed_athlete_items=[])
+
+        # ── Paso 2: guardar todo o nada ────────────────────────────────────
+        changed = []
+        with transaction.atomic():
+            for athlete_item in athlete_items:
+                if athlete_item.id not in editable_ids:
+                    continue
+
+                existing = {
+                    m.field_id: m for m in athlete_item.measurements.all()
+                }
+                row_changed = False
+
+                for product_field in columns:
+                    key = (athlete_item.id, product_field.field_id)
+                    if key not in submitted:
+                        continue
+                    value = submitted[key]
+                    measurement = existing.get(product_field.field_id)
+
+                    if measurement:
+                        if measurement.value != value:
+                            measurement.value = value
+                            measurement.save()
+                            row_changed = True
+                    elif value:
+                        # Una celda vacía sin fila previa no crea registro:
+                        # "" ya significa "sin medida".
+                        athlete_item.measurements.create(
+                            field_id=product_field.field_id,
+                            field_name=product_field.field.name,
+                            field_unit=product_field.field.unit,
+                            value=value,
+                        )
+                        row_changed = True
+
+                if row_changed:
+                    changed.append(athlete_item)
+
+        return SaveResult(ok=True, errors={}, changed_athlete_items=changed)
