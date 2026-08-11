@@ -405,6 +405,7 @@ class PiiAccessLog(models.Model):
         ("VIEW_CURP", "Ver CURP"),
         ("VIEW_MEDICAL", "Ver datos médicos"),
         ("VIEW_MEASUREMENTS", "Ver medidas corporales"),
+        ("EDIT_MEASUREMENTS", "Editar medidas corporales"),
         ("VIEW_ADDRESS", "Ver dirección"),
         ("EXPORT_DATA", "Exportar datos"),
         ("EDIT_PROFILE", "Editar perfil"),

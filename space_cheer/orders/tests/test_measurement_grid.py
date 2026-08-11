@@ -333,3 +333,13 @@ class MeasurementGridPermissionTests(TestCase):
         grid = MeasurementGridService.build(reload_item(item), coach)
 
         self.assertFalse(grid.can_edit)
+
+
+@pytest.mark.django_db
+class PiiAccessTypeTests(TestCase):
+
+    def test_edit_measurements_access_type_exists(self):
+        from accounts.models import PiiAccessLog
+
+        codes = [code for code, _label in PiiAccessLog.ACCESS_TYPES]
+        self.assertIn("EDIT_MEASUREMENTS", codes)
