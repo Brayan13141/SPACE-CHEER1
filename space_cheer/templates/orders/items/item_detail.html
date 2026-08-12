@@ -159,6 +159,22 @@
     {% endif %}
   </div>
 
+  {% if grid %}
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-rulers me-1"></i>{% trans "Medidas del equipo" %}</span>
+      {% if grid.can_edit %}
+        <a href="{% url 'orders:item_measurements_grid' item_id=item.id %}" class="btn btn-sm btn-primary">
+          {% trans "Editar medidas" %}
+        </a>
+      {% endif %}
+    </div>
+    <div class="card-body p-0">
+      {% include "orders/items/_measurements_grid.html" with grid=grid readonly=True %}
+    </div>
+  </div>
+  {% endif %}
+
 
   {% if athlete_items %}
 

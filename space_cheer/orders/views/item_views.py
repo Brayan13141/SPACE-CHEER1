@@ -7,6 +7,9 @@ from orders.models import OrderItem, Order, OrderItemAthlete
 from orders.services.servicesItems.order_item_athlete_service import (
     OrderItemAthleteService,
 )
+from orders.services.measurements.MeasurementGridService import (
+    MeasurementGridService,
+)
 from teams.models import UserTeamMembership
 from django.views.decorators.http import require_POST
 from products.models import ProductMeasurementField
@@ -47,6 +50,12 @@ def order_item_detail(request, item_id):
             .select_related("athlete")
             .prefetch_related("measurements", "customization")
         )
+
+    # Tabla consolidada de medidas: solo tiene sentido si el item ya tiene
+    # atletas asignados y el producto usa medidas.
+    grid = None
+    if requires_measurements and athlete_items:
+        grid = MeasurementGridService.build(item, request.user)
 
     # -------------------------------------------------
     # MEDIDAS REQUERIDAS
@@ -92,6 +101,7 @@ def order_item_detail(request, item_id):
         "item": item,
         "product": product,
         "athlete_items": athlete_items,
+        "grid": grid,
         "measurement_fields": measurement_fields,
         "requires_athlete": requires_athlete,
         "requires_team": requires_team,

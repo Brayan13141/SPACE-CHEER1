@@ -614,3 +614,25 @@ class SingleWritePathTests(TestCase):
                 "orders:item_measurements_order_add",
                 kwargs={"athlete_item_id": 1},
             )
+
+
+@pytest.mark.django_db
+class ItemDetailGridEmbedTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+
+    def test_item_detail_shows_grid_with_athlete_name(self):
+        self.client.force_login(self.coach)
+        url = reverse("orders:order_item_detail", kwargs={"item_id": self.item.id})
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["grid"])
+        self.assertContains(response, "Ana")
+        self.assertContains(response, "Pecho")
