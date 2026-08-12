@@ -39,6 +39,9 @@ class GridCell:
 class GridRow:
     athlete_item_id: int
     athlete_name: str
+    # Instancia User de la fila: evita que las vistas vuelvan a la base de
+    # datos por cada atleta para registrar el acceso PII.
+    athlete: object = None
     cells: list = dataclass_field(default_factory=list)
     is_complete: bool = False
 
@@ -78,8 +81,10 @@ class MeasurementGridService:
 
     @staticmethod
     def athlete_items_for(item):
+        # athlete__athleteprofile es obligatorio: _is_guardian_of() lo consulta
+        # por fila, y sin el select_related el conteo crece con los atletas.
         return list(
-            item.athletes.select_related("athlete")
+            item.athletes.select_related("athlete", "athlete__athleteprofile")
             .prefetch_related("measurements")
             .order_by("athlete__first_name", "athlete__last_name", "id")
         )
@@ -126,6 +131,7 @@ class MeasurementGridService:
             rows.append(
                 GridRow(
                     athlete_item_id=athlete_item.id,
+                    athlete=athlete_item.athlete,
                     athlete_name=(
                         athlete_item.athlete.get_full_name()
                         or athlete_item.athlete.email

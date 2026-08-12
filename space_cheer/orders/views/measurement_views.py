@@ -156,7 +156,7 @@ def item_measurements_grid(request, item_id):
     for row in grid.rows:
         PiiAuditService.log(
             request=request,
-            target_user=item.athletes.get(pk=row.athlete_item_id).athlete,
+            target_user=row.athlete,
             access_type="VIEW_MEASUREMENTS",
             field_accessed="measurements",
             notes=f"Grid OrderItem pk={item.pk}",

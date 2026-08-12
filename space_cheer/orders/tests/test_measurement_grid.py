@@ -670,3 +670,93 @@ class AdminAndOperarioGridTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "92")
         self.assertIn(self.item.id, response.context["grids"])
+
+
+@pytest.mark.django_db
+class MeasurementGridQueryCountTests(TestCase):
+
+    def _guardian_item_with(self, athlete_count):
+        """Item visto por un GUARDIAN.
+
+        Es el viewer que dispara el N+1 de verdad: `_sees_every_row` devuelve
+        False, asi que `_is_guardian_of` se evalua sobre TODAS las filas y toca
+        `athlete.athleteprofile` una por una. Con un coach el conteo ya sale
+        plano porque `_sees_every_row` corta antes, y el test no probaria nada.
+        """
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Cintura", 20, True)]
+        )
+        guardian = UserFactory()
+        add_minor_with_guardian(item, team, guardian, first_name="Hijo")
+        for index in range(athlete_count - 1):
+            add_athlete(item, team, first_name=f"Atleta{index}")
+        return guardian, item
+
+    def _coach_item_with(self, athlete_count):
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Cintura", 20, True)]
+        )
+        for index in range(athlete_count):
+            add_athlete(item, team, first_name=f"Atleta{index}")
+        return coach, item
+
+    def test_query_count_is_flat_for_guardian(self):
+        """build() hace las mismas consultas con 2 atletas que con 10.
+
+        Se comparan dos tamanos en vez de fijar un numero magico: un numero
+        exacto se rompe con cualquier refactor legitimo y no dice nada sobre
+        si el costo escala, que es lo unico que importa aqui.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        guardian_small, small_item = self._guardian_item_with(2)
+        guardian_big, big_item = self._guardian_item_with(10)
+
+        with CaptureQueriesContext(connection) as small:
+            MeasurementGridService.build(small_item, guardian_small)
+        with CaptureQueriesContext(connection) as big:
+            MeasurementGridService.build(big_item, guardian_big)
+
+        self.assertEqual(len(small.captured_queries), len(big.captured_queries))
+
+    def test_grid_view_query_count_is_flat(self):
+        """La vista completa, con el logging de PII incluido, tampoco escala.
+
+        El log de PII SI crece con el numero de atletas (un INSERT por sujeto,
+        exigido por la auditoria). Este test mide solo las consultas de LECTURA.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        coach_small, small_item = self._coach_item_with(2)
+        coach_big, big_item = self._coach_item_with(10)
+
+        client = Client()
+
+        client.force_login(coach_small)
+        with CaptureQueriesContext(connection) as small:
+            client.get(
+                reverse(
+                    "orders:item_measurements_grid",
+                    kwargs={"item_id": small_item.id},
+                )
+            )
+
+        client.force_login(coach_big)
+        with CaptureQueriesContext(connection) as big:
+            client.get(
+                reverse(
+                    "orders:item_measurements_grid",
+                    kwargs={"item_id": big_item.id},
+                )
+            )
+
+        def reads(context):
+            return [
+                q
+                for q in context.captured_queries
+                if not q["sql"].lstrip().upper().startswith("INSERT")
+            ]
+
+        self.assertEqual(len(reads(small)), len(reads(big)))
