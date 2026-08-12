@@ -15,6 +15,9 @@ from orders.models import (
     OrderDesignImage,
 )
 from orders.services.state import OrderStateService
+from orders.services.measurements.MeasurementGridService import (
+    MeasurementGridService,
+)
 from orders.services.file_validation import FileValidator
 from orders.forms import OrderDatesForm
 from django.core.exceptions import ValidationError
@@ -267,6 +270,14 @@ def admin_order_detail(request, order_id):
             ),
         }
 
+    # ── Tabla consolidada de medidas por item ─────────────────────────────
+    grids = {}
+    for order_item in items:
+        if order_item.product.requires_measurements:
+            grids[order_item.id] = MeasurementGridService.build(
+                order_item, request.user
+            )
+
     dates_form = OrderDatesForm(instance=order)
     available_transitions = OrderStateService.get_available_transitions(
         order, request.user
@@ -289,6 +300,7 @@ def admin_order_detail(request, order_id):
             "available_transitions": available_transitions,
             "order_flags": order_flags,
             "measurements_summary": measurements_summary,
+            "grids": grids,
             "measurement_actions": measurement_actions,  # 👈 AÑADE ESTO
         },
     )

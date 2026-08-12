@@ -413,6 +413,18 @@
                           </li>
                         {% endfor %}
                       </ul>
+                      {% with grid=grids|dict_get:item.id %}
+                        {% if grid %}
+                          <div class="mt-2">
+                            {% include "orders/items/_measurements_grid.html" with grid=grid readonly=True %}
+                            {% if grid.can_edit %}
+                              <a href="{% url 'orders:item_measurements_grid' item_id=item.id %}" class="btn btn-sm btn-primary mt-2">
+                                {% trans "Editar medidas" %}
+                              </a>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endwith %}
                     </div>
                   </td>
                 </tr>

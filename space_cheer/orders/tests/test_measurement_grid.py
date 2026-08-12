@@ -636,3 +636,37 @@ class ItemDetailGridEmbedTests(TestCase):
         self.assertIsNotNone(response.context["grid"])
         self.assertContains(response, "Ana")
         self.assertContains(response, "Pecho")
+
+
+@pytest.mark.django_db
+class AdminAndOperarioGridTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        pecho = self.item.product.measurement_fields.get(field__name="Pecho").field
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.athlete_item,
+            field=pecho,
+            field_name=pecho.name,
+            field_unit=pecho.unit,
+            value="92",
+        )
+        self.admin = UserFactory(profile_completed=True)
+        self.admin.roles.add(RoleFactory(name="ADMIN"))
+
+    def test_admin_order_detail_shows_measurement_values(self):
+        """Hoy el admin solo ve badges: ni un solo valor."""
+        self.client.force_login(self.admin)
+        url = reverse(
+            "orders:admin_order_detail", kwargs={"order_id": self.order.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "92")
+        self.assertIn(self.item.id, response.context["grids"])

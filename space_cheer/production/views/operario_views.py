@@ -164,18 +164,22 @@ def item_measurements(request, pk):
         production_tasks__assigned_to=request.user,
         production_tasks__stage__in=allowed_stages,
     )
-    athletes = list(
-        item.athletes.select_related("athlete").prefetch_related("measurements__field").all()
+    from orders.services.measurements.MeasurementGridService import (
+        MeasurementGridService,
     )
-    for oia in athletes:
+
+    grid = MeasurementGridService.build(item, request.user)
+
+    for athlete_item in item.athletes.select_related("athlete").all():
         PiiAuditService.log(
             request=request,
-            target_user=oia.athlete,
+            target_user=athlete_item.athlete,
             access_type="VIEW_MEASUREMENTS",
             field_accessed="measurements",
             notes=f"OrderItem pk={pk}",
         )
+
     return render(request, "production/item_measurements.html", {
         "item": item,
-        "athletes": athletes,
+        "grid": grid,
     })
