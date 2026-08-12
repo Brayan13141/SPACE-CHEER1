@@ -167,8 +167,13 @@ def item_measurements_grid(request, item_id):
             # guardianes, asi que una tutora guardaba bien y caia en un 404.
             return redirect("orders:item_measurements_grid", item_id=item.id)
 
+        # Un error global (__all__) no tiene celda donde pintarse, asi que se
+        # muestra tal cual; si no, el usuario leeria "revisa los campos
+        # marcados" sin que ninguno lo este.
         messages.error(
-            request, "Revisa los campos marcados. No se guardó ningún cambio."
+            request,
+            result.errors.get("__all__")
+            or "Revisa los campos marcados. No se guardó ningún cambio.",
         )
         grid = MeasurementGridService.build(
             item, request.user, values=request.POST, errors=result.errors

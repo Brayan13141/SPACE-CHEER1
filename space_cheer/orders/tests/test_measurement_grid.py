@@ -859,3 +859,46 @@ class FinalReviewFindingsTests(TestCase):
         self.assertEqual(len(response.context["grid"].rows), 1)
         self.assertEqual(response.context["grid"].rows[0].athlete_item_id, self.ana.id)
         self.assertEqual(self._log_count(), 1)
+
+
+@pytest.mark.django_db
+class SaveValidationErrorSurfacingTests(TestCase):
+    """El error global del except ValidationError debe llegar al usuario.
+
+    Sin esto el usuario lee "Revisa los campos marcados" sin que ninguna celda
+    este marcada, porque el template solo pinta errores por celda.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.input_name = f"m-{self.athlete_item.id}-{self.pecho.id}"
+
+    def test_model_validation_error_becomes_a_visible_message(self):
+        from unittest.mock import patch
+
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        self.client.force_login(self.coach)
+
+        with patch(
+            "orders.models.OrderItemMeasurement.save",
+            side_effect=DjangoValidationError("Las medidas no pueden editarse"),
+        ):
+            response = self.client.post(
+                reverse(
+                    "orders:item_measurements_grid",
+                    kwargs={"item_id": self.item.id},
+                ),
+                {self.input_name: "92"},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+        self.assertContains(response, "Las medidas no pueden editarse")
