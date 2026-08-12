@@ -46,6 +46,11 @@ urlpatterns = [
         views.item_measurements_order_add,
         name="item_measurements_order_add",
     ),
+    path(
+        "items/<int:item_id>/measurements/grid/",
+        views.item_measurements_grid,
+        name="item_measurements_grid",
+    ),
     # ================================== Transition order status ============================
     path(
         "<int:order_id>/transition/<str:to_status>/",

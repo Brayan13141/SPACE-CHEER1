@@ -1,0 +1,57 @@
+{% load i18n %}
+{# Espera en el contexto: grid (MeasurementGrid). Opcional: readonly (bool). #}
+{# El scroll horizontal vive en este contenedor, nunca en el body de la pagina. #}
+<div class="table-responsive">
+  <table class="table table-sm table-dark align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col" class="position-sticky start-0 bg-dark">{% trans "Alumno" %}</th>
+        {% for column in grid.columns %}
+          <th scope="col">
+            {{ column.field.name }}
+            {% if column.field.unit %}<small class="text-muted">({{ column.field.unit }})</small>{% endif %}
+            {% if column.required %}<span class="text-danger">*</span>{% endif %}
+          </th>
+        {% endfor %}
+        <th scope="col">{% trans "Estado" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in grid.rows %}
+        <tr>
+          <th scope="row" class="position-sticky start-0 bg-dark fw-normal">{{ row.athlete_name }}</th>
+          {% for cell in row.cells %}
+            <td>
+              {% if cell.editable and not readonly %}
+                <input type="text"
+                       class="form-control form-control-sm {% if cell.error %}is-invalid{% endif %}"
+                       name="{{ cell.input_name }}"
+                       value="{{ cell.value }}"
+                       aria-label="{{ row.athlete_name }} — {{ cell.field_name }}">
+                {% if cell.error %}<div class="invalid-feedback d-block">{{ cell.error }}</div>{% endif %}
+              {% else %}
+                {{ cell.display_value }}
+                {% if cell.is_modified %}
+                  <span class="badge bg-info text-dark" title="{% trans 'Editada respecto del perfil del atleta' %}">{% trans "editada" %}</span>
+                {% endif %}
+              {% endif %}
+            </td>
+          {% endfor %}
+          <td>
+            {% if row.is_complete %}
+              <span class="badge bg-success">{% trans "Completo" %}</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">{% trans "Pendiente" %}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{{ grid.columns|length|add:2 }}" class="text-muted">
+            {% trans "No hay atletas asignados a este item." %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

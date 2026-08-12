@@ -1,7 +1,8 @@
 # orders/tests/test_measurement_grid.py
 
 import pytest
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from orders.models import OrderItemMeasurement
 from orders.services.measurements.MeasurementGridService import (
@@ -508,3 +509,95 @@ class MeasurementGridSaveTests(TestCase):
         self.assertTrue(result.ok)
         changed_ids = [a.id for a in result.changed_athlete_items]
         self.assertEqual(changed_ids, [self.athlete_item.id])
+
+
+@pytest.mark.django_db
+class MeasurementGridViewTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.url = reverse(
+            "orders:item_measurements_grid", kwargs={"item_id": self.item.id}
+        )
+        self.input_name = f"m-{self.athlete_item.id}-{self.pecho.id}"
+
+    def test_get_renders_grid(self):
+        self.client.force_login(self.coach)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.input_name)
+
+    def test_get_logs_pii_per_athlete(self):
+        from accounts.models import PiiAccessLog
+
+        add_athlete(self.item, self.team, first_name="Beto")
+        self.client.force_login(self.coach)
+        self.client.get(self.url)
+
+        self.assertEqual(
+            PiiAccessLog.objects.filter(access_type="VIEW_MEASUREMENTS").count(),
+            2,
+        )
+
+    def test_post_saves_and_redirects(self):
+        self.client.force_login(self.coach)
+        response = self.client.post(self.url, {self.input_name: "92"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            OrderItemMeasurement.objects.filter(
+                athlete_item=self.athlete_item, value="92"
+            ).exists()
+        )
+
+    def test_post_logs_edit_pii(self):
+        from accounts.models import PiiAccessLog
+
+        self.client.force_login(self.coach)
+        self.client.post(self.url, {self.input_name: "92"})
+
+        self.assertEqual(
+            PiiAccessLog.objects.filter(
+                access_type="EDIT_MEASUREMENTS",
+                target_user=self.athlete_item.athlete,
+            ).count(),
+            1,
+        )
+
+    def test_post_with_error_keeps_typed_values(self):
+        """El bug que este trabajo arregla: un error no debe tirar lo tecleado."""
+        add_athlete(self.item, self.team, first_name="Beto")
+        beto_item = self.item.athletes.get(athlete__first_name="Beto")
+        beto_name = f"m-{beto_item.id}-{self.pecho.id}"
+
+        self.client.force_login(self.coach)
+        response = self.client.post(
+            self.url, {self.input_name: "", beto_name: "88"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="88"')
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+
+    def test_operario_post_is_forbidden(self):
+        operario = UserFactory()
+        operario.roles.add(RoleFactory(name="OPERARIO"))
+        self.client.force_login(operario)
+
+        response = self.client.post(self.url, {self.input_name: "92"})
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_stranger_get_is_forbidden(self):
+        self.client.force_login(UserFactory())
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)

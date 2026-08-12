@@ -8,10 +8,13 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from accounts.decorators import role_required
 from accounts.models import AthleteProfile
 from accounts.services.pii_audit_service import PiiAuditService
-from orders.models import Order, OrderItemAthlete
+from orders.models import Order, OrderItem, OrderItemAthlete
 from django.db import transaction
 from orders.services.measurements.MeasurementLifecycleService import (
     MeasurementLifecycleService,
+)
+from orders.services.measurements.MeasurementGridService import (
+    MeasurementGridService,
 )
 
 logger = logging.getLogger(__name__)
@@ -214,6 +217,56 @@ def reopen_measurements(request, order_id):
         messages.error(request, "Error interno al reabrir medidas. Contacta al soporte.")
 
     return redirect("orders:admin_order_detail", order_id=order.id)
+
+
+@login_required
+def item_measurements_grid(request, item_id):
+    """Tabla consolidada de medidas del item: filas = alumnos, columnas = campos.
+
+    GET  -> pagina de captura.
+    POST -> guarda; si hay errores, re-renderiza conservando lo tecleado.
+    """
+    item = get_object_or_404(
+        OrderItem.objects.select_related("order", "product"), pk=item_id
+    )
+
+    if request.method == "POST":
+        result = MeasurementGridService.save(item, request.user, request.POST)
+
+        if result.ok:
+            for athlete_item in result.changed_athlete_items:
+                PiiAuditService.log(
+                    request=request,
+                    target_user=athlete_item.athlete,
+                    access_type="EDIT_MEASUREMENTS",
+                    field_accessed="measurements",
+                    notes=f"Grid OrderItem pk={item.pk}",
+                )
+            messages.success(request, "Medidas guardadas correctamente.")
+            return redirect("orders:order_item_detail", item_id=item.id)
+
+        messages.error(
+            request, "Revisa los campos marcados. No se guardó ningún cambio."
+        )
+        grid = MeasurementGridService.build(
+            item, request.user, values=request.POST, errors=result.errors
+        )
+        return render(
+            request, "orders/items/measurements_grid.html", {"grid": grid}
+        )
+
+    grid = MeasurementGridService.build(item, request.user)
+
+    for row in grid.rows:
+        PiiAuditService.log(
+            request=request,
+            target_user=item.athletes.get(pk=row.athlete_item_id).athlete,
+            access_type="VIEW_MEASUREMENTS",
+            field_accessed="measurements",
+            notes=f"Grid OrderItem pk={item.pk}",
+        )
+
+    return render(request, "orders/items/measurements_grid.html", {"grid": grid})
 
 
 @role_required("ADMIN")
