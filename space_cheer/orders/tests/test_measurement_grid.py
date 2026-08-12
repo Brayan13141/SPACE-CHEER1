@@ -601,3 +601,16 @@ class MeasurementGridViewTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 403)
+
+@pytest.mark.django_db
+class SingleWritePathTests(TestCase):
+
+    def test_old_write_endpoint_is_gone(self):
+        """Un segundo camino de escritura sin auditar reabriria el hueco de PII."""
+        from django.urls import NoReverseMatch
+
+        with self.assertRaises(NoReverseMatch):
+            reverse(
+                "orders:item_measurements_order_add",
+                kwargs={"athlete_item_id": 1},
+            )

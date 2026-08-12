@@ -21,97 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-@require_POST
-def item_measurements_order_add(request, athlete_item_id):
-
-    athlete_item = get_object_or_404(
-        OrderItemAthlete.objects.select_related(
-            "order_item__order",
-            "order_item__product",
-            "athlete",
-            "athlete__athleteprofile",
-            "athlete__athleteprofile__guardian",
-        ),
-        pk=athlete_item_id,
-    )
-
-    order = athlete_item.order_item.order
-    user = request.user
-
-    # Permiso: creador de la orden O guardian del atleta menor
-    is_creator = order.created_by == user
-    is_guardian = False
-    try:
-        profile = athlete_item.athlete.athleteprofile
-        if profile.guardian == user and athlete_item.athlete.is_minor:
-            is_guardian = True
-    except AthleteProfile.DoesNotExist:
-        pass
-
-    if not is_creator and not is_guardian:
-        raise PermissionDenied
-
-    product = athlete_item.order_item.product
-
-    if not order.can_edit_general():
-        messages.error(request, "La orden no permite modificar medidas.")
-        return redirect(
-            "orders:order_item_detail",
-            item_id=athlete_item.order_item.id,
-        )
-
-    if not order.can_edit_measurements():
-        messages.error(request, "Las medidas están bloqueadas.")
-        return redirect(
-            "orders:order_item_detail",
-            item_id=athlete_item.order_item.id,
-        )
-
-    product_fields = product.measurement_fields.select_related("field")
-
-    existing_measurements = {m.field_id: m for m in athlete_item.measurements.all()}
-
-    # ── Paso 1: validar todo ANTES de tocar la DB ───────────────────
-    values = {}
-
-    for pmf in product_fields:
-        field = pmf.field
-        value = request.POST.get(f"field_{field.id}", "").strip()
-
-        if pmf.required and not value:
-            messages.error(request, f"El campo '{field.name}' es obligatorio.")
-            return redirect(
-                "orders:order_item_measurements",
-                athlete_item_id=athlete_item_id,
-            )
-
-        values[field.id] = (pmf, field, value)
-
-    # ── Paso 2: guardar todo o nada ─────────────────────────────────
-    with transaction.atomic():
-        for field_id, (pmf, field, value) in values.items():
-            measurement = existing_measurements.get(field_id)
-
-            if measurement:
-                measurement.value = value
-                measurement.save()
-            else:
-                athlete_item.measurements.create(
-                    field_id=field_id,
-                    field_name=field.name,
-                    field_unit=field.unit,
-                    value=value,
-                )
-
-    messages.success(request, "Medidas guardadas correctamente.")
-
-    return redirect(
-        "orders:order_item_detail",
-        item_id=athlete_item.order_item.id,
-    )
-
-
-@login_required
 def order_item_measurements(request, athlete_item_id):
 
     athlete_item = get_object_or_404(
@@ -160,27 +69,14 @@ def order_item_measurements(request, athlete_item_id):
             item_id=athlete_item.order_item.id,
         )
 
-    can_edit = order.can_edit_general() and order.can_edit_measurements()
-
-    product_fields = list(product.measurement_fields.select_related("field"))
-
-    # ── Una sola query, construida antes del loop ───────────────────
-    existing = {m.field_id: m.value for m in athlete_item.measurements.all()}
-
-    for pf in product_fields:
-        pf.current_value = existing.get(pf.field_id, "")
-
-    filled_count = sum(1 for pf in product_fields if existing.get(pf.field_id))
+    grid = MeasurementGridService.build(athlete_item.order_item, request.user)
 
     return render(
         request,
         "orders/items/item_measurements.html",
         {
             "athlete_item": athlete_item,
-            "product_fields": product_fields,
-            "filled_count": filled_count,
-            "total_fields": len(product_fields),
-            "can_edit": can_edit,
+            "grid": grid,
         },
     )
 

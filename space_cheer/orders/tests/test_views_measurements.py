@@ -88,12 +88,13 @@ class OrderItemMeasurementsViewTests(TestCase):
         self.assertEqual(response.context["athlete_item"].id, self.athlete_item.id)
 
     def test_context_has_can_edit_flag(self):
+        """can_edit ahora vive en el grid, unica fuente de verdad."""
         url = reverse(
             "orders:order_item_measurements",
             kwargs={"athlete_item_id": self.athlete_item.id},
         )
         response = self.client.get(url)
-        self.assertIn("can_edit", response.context)
+        self.assertIn("grid", response.context)
 
     def test_can_edit_true_when_order_is_draft(self):
         url = reverse(
@@ -101,7 +102,7 @@ class OrderItemMeasurementsViewTests(TestCase):
             kwargs={"athlete_item_id": self.athlete_item.id},
         )
         response = self.client.get(url)
-        self.assertTrue(response.context["can_edit"])
+        self.assertTrue(response.context["grid"].can_edit)
 
     def test_can_edit_false_when_measurements_locked(self):
         self.order.measurements_locked = True
@@ -112,7 +113,7 @@ class OrderItemMeasurementsViewTests(TestCase):
             kwargs={"athlete_item_id": self.athlete_item.id},
         )
         response = self.client.get(url)
-        self.assertFalse(response.context["can_edit"])
+        self.assertFalse(response.context["grid"].can_edit)
 
 
 @pytest.mark.django_db
@@ -147,37 +148,30 @@ class ItemMeasurementsAddViewTests(TestCase):
         )
         self.client.force_login(self.coach)
 
+    def _url(self):
+        return reverse(
+            "orders:item_measurements_grid", kwargs={"item_id": self.item.id}
+        )
+
     def _get_post_data(self):
-        """Construye el POST data con los campos del producto."""
+        """Construye el POST data con los campos del producto.
+
+        El endpoint viejo usaba `field_<id>` sobre un solo atleta; el grid usa
+        `m-<athlete_item_id>-<field_id>`, que es lo que permite decidir celda
+        por celda si el viewer puede escribirla.
+        """
         data = {}
         for pmf in self.product.measurement_fields.select_related("field"):
-            data[f"field_{pmf.field.id}"] = "95"
+            data[f"m-{self.athlete_item.id}-{pmf.field.id}"] = "95"
         return data
-
-    def test_add_measurements_requires_post(self):
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 405)
 
     def test_add_measurements_requires_login(self):
         self.client.logout()
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        response = self.client.post(url, {})
+        response = self.client.post(self._url(), {})
         self.assertEqual(response.status_code, 302)
 
     def test_add_measurements_saves_values(self):
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        data = self._get_post_data()
-        response = self.client.post(url, data)
+        response = self.client.post(self._url(), self._get_post_data())
         self.assertEqual(response.status_code, 302)
 
         # Verificar que se guardaron
@@ -185,12 +179,7 @@ class ItemMeasurementsAddViewTests(TestCase):
         self.assertTrue(saved.exists())
 
     def test_add_measurements_redirects_to_item_detail(self):
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        data = self._get_post_data()
-        response = self.client.post(url, data)
+        response = self.client.post(self._url(), self._get_post_data())
         expected = reverse("orders:order_item_detail", kwargs={"item_id": self.item.id})
         self.assertRedirects(response, expected)
 
@@ -198,14 +187,9 @@ class ItemMeasurementsAddViewTests(TestCase):
         self.order.measurements_locked = True
         self.order.save(update_fields=["measurements_locked"])
 
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        data = self._get_post_data()
-        response = self.client.post(url, data)
-        # Redirige con mensaje de error, no guarda
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post(self._url(), self._get_post_data())
+        # El grid rechaza la escritura de plano en vez de redirigir con mensaje
+        self.assertEqual(response.status_code, 403)
         self.assertFalse(
             OrderItemMeasurement.objects.filter(athlete_item=self.athlete_item).exists()
         )
@@ -213,11 +197,7 @@ class ItemMeasurementsAddViewTests(TestCase):
     def test_other_user_cannot_add_measurements(self):
         other = CoachFactory()
         self.client.force_login(other)
-        url = reverse(
-            "orders:item_measurements_order_add",
-            kwargs={"athlete_item_id": self.athlete_item.id},
-        )
-        response = self.client.post(url, self._get_post_data())
+        response = self.client.post(self._url(), self._get_post_data())
         self.assertEqual(response.status_code, 403)
 
 

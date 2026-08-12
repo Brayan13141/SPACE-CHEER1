@@ -42,11 +42,6 @@ urlpatterns = [
         name="order_item_measurements",
     ),
     path(
-        "items/athlete/<int:athlete_item_id>/measurements/add",
-        views.item_measurements_order_add,
-        name="item_measurements_order_add",
-    ),
-    path(
         "items/<int:item_id>/measurements/grid/",
         views.item_measurements_grid,
         name="item_measurements_grid",
