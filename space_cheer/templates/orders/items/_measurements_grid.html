@@ -27,6 +27,7 @@
                        class="form-control form-control-sm {% if cell.error %}is-invalid{% endif %}"
                        name="{{ cell.input_name }}"
                        value="{{ cell.value }}"
+                       maxlength="50"
                        aria-label="{{ row.athlete_name }} — {{ cell.field_name }}">
                 {% if cell.error %}<div class="invalid-feedback d-block">{{ cell.error }}</div>{% endif %}
               {% else %}

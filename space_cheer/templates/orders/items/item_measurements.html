@@ -5,9 +5,11 @@
 
 {% block content %}
 <div class="container py-4">
-  <a href="{% url 'orders:order_item_detail' item_id=athlete_item.order_item.id %}" class="btn btn-outline-secondary btn-sm mb-3">
-    &larr; {% trans "Volver al item" %}
-  </a>
+  {% if can_view_item_detail %}
+    <a href="{% url 'orders:order_item_detail' item_id=athlete_item.order_item.id %}" class="btn btn-outline-secondary btn-sm mb-3">
+      &larr; {% trans "Volver al item" %}
+    </a>
+  {% endif %}
 
   <h3>{% trans "Medidas" %} — {{ athlete_item.athlete.get_full_name }}</h3>
 

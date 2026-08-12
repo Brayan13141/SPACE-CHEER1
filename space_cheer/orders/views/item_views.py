@@ -10,6 +10,7 @@ from orders.services.servicesItems.order_item_athlete_service import (
 from orders.services.measurements.MeasurementGridService import (
     MeasurementGridService,
 )
+from accounts.services.pii_audit_service import PiiAuditService
 from teams.models import UserTeamMembership
 from django.views.decorators.http import require_POST
 from products.models import ProductMeasurementField
@@ -56,6 +57,16 @@ def order_item_detail(request, item_id):
     grid = None
     if requires_measurements and athlete_items:
         grid = MeasurementGridService.build(item, request.user)
+        # Esta pagina expone medidas corporales de menores: se registra el
+        # acceso por sujeto, como en el resto de las superficies.
+        for row in grid.rows:
+            PiiAuditService.log(
+                request=request,
+                target_user=row.athlete,
+                access_type="VIEW_MEASUREMENTS",
+                field_accessed="measurements",
+                notes=f"Item detail pk={item.pk}",
+            )
 
     # -------------------------------------------------
     # MEDIDAS REQUERIDAS

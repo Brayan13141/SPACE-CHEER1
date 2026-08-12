@@ -178,10 +178,15 @@ class ItemMeasurementsAddViewTests(TestCase):
         saved = OrderItemMeasurement.objects.filter(athlete_item=self.athlete_item)
         self.assertTrue(saved.exists())
 
-    def test_add_measurements_redirects_to_item_detail(self):
+    def test_add_measurements_redirects_back_to_grid(self):
+        """Vuelve al propio grid, no a order_item_detail.
+
+        order_item_detail filtra por Order.objects.visible_for_user(), que no
+        incluye a los guardianes: redirigir ahi mandaba a la tutora a un 404
+        despues de un guardado exitoso.
+        """
         response = self.client.post(self._url(), self._get_post_data())
-        expected = reverse("orders:order_item_detail", kwargs={"item_id": self.item.id})
-        self.assertRedirects(response, expected)
+        self.assertRedirects(response, self._url())
 
     def test_cannot_add_measurements_to_locked_order(self):
         self.order.measurements_locked = True

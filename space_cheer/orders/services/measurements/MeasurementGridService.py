@@ -6,7 +6,7 @@ Vistas y templates solo consumen el resultado.
 
 from dataclasses import dataclass, field as dataclass_field
 
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
 
@@ -65,6 +65,9 @@ class SaveResult:
 
 class MeasurementGridService:
 
+    # Espeja OrderItemMeasurement.value = CharField(max_length=50).
+    MAX_VALUE_LENGTH = 50
+
     @staticmethod
     def columns_for(product):
         """Campos del producto en orden determinista.
@@ -90,12 +93,25 @@ class MeasurementGridService:
         )
 
     @staticmethod
-    def build(item, viewer, values=None, errors=None):
+    def build(item, viewer, values=None, errors=None, only_athlete_item_id=None):
+        """Arma el grid del item.
+
+        only_athlete_item_id restringe el grid a una sola fila. Lo usa la
+        pagina "Medidas de <atleta>", cuyo titulo habla de un alumno: sin esto
+        renderiaba a todo el equipo y solo auditaba a uno.
+        """
         values = values or {}
         errors = errors or {}
 
         columns = MeasurementGridService.columns_for(item.product)
         athlete_items = MeasurementGridService.visible_athlete_items(item, viewer)
+
+        if only_athlete_item_id is not None:
+            athlete_items = [
+                athlete_item
+                for athlete_item in athlete_items
+                if athlete_item.id == only_athlete_item_id
+            ]
         editable_ids = MeasurementGridService.editable_athlete_item_ids(
             item, viewer, athlete_items
         )
@@ -269,47 +285,68 @@ class MeasurementGridService:
                     errors[input_name] = (
                         f"'{product_field.field.name}' es obligatorio."
                     )
+                elif len(value) > MeasurementGridService.MAX_VALUE_LENGTH:
+                    # OrderItemMeasurement.value es CharField(max_length=50) y
+                    # save() llama full_clean(): sin este chequeo, una celda
+                    # larga revienta con ValidationError dentro del atomic y
+                    # tumba el POST del roster entero con un 500.
+                    errors[input_name] = (
+                        f"'{product_field.field.name}': maximo "
+                        f"{MeasurementGridService.MAX_VALUE_LENGTH} caracteres."
+                    )
                 submitted[(athlete_item.id, product_field.field_id)] = value
 
         if errors:
             return SaveResult(ok=False, errors=errors, changed_athlete_items=[])
 
         # ── Paso 2: guardar todo o nada ────────────────────────────────────
+        # El try envuelve al atomic: OrderItemMeasurement.save() llama
+        # full_clean(), asi que cualquier regla del modelo que el paso 1 no
+        # anticipe (o un lock de medidas que entre en medio) llegaria como
+        # ValidationError. Sin capturarla, el usuario pierde todo lo tecleado
+        # con un 500 en vez de ver el error en su celda.
         changed = []
-        with transaction.atomic():
-            for athlete_item in athlete_items:
-                if athlete_item.id not in editable_ids:
-                    continue
-
-                existing = {
-                    m.field_id: m for m in athlete_item.measurements.all()
-                }
-                row_changed = False
-
-                for product_field in columns:
-                    key = (athlete_item.id, product_field.field_id)
-                    if key not in submitted:
+        try:
+            with transaction.atomic():
+                for athlete_item in athlete_items:
+                    if athlete_item.id not in editable_ids:
                         continue
-                    value = submitted[key]
-                    measurement = existing.get(product_field.field_id)
 
-                    if measurement:
-                        if measurement.value != value:
-                            measurement.value = value
-                            measurement.save()
+                    existing = {
+                        m.field_id: m for m in athlete_item.measurements.all()
+                    }
+                    row_changed = False
+
+                    for product_field in columns:
+                        key = (athlete_item.id, product_field.field_id)
+                        if key not in submitted:
+                            continue
+                        value = submitted[key]
+                        measurement = existing.get(product_field.field_id)
+
+                        if measurement:
+                            if measurement.value != value:
+                                measurement.value = value
+                                measurement.save()
+                                row_changed = True
+                        elif value:
+                            # Una celda vacía sin fila previa no crea registro:
+                            # "" ya significa "sin medida".
+                            athlete_item.measurements.create(
+                                field_id=product_field.field_id,
+                                field_name=product_field.field.name,
+                                field_unit=product_field.field.unit,
+                                value=value,
+                            )
                             row_changed = True
-                    elif value:
-                        # Una celda vacía sin fila previa no crea registro:
-                        # "" ya significa "sin medida".
-                        athlete_item.measurements.create(
-                            field_id=product_field.field_id,
-                            field_name=product_field.field.name,
-                            field_unit=product_field.field.unit,
-                            value=value,
-                        )
-                        row_changed = True
 
-                if row_changed:
-                    changed.append(athlete_item)
+                    if row_changed:
+                        changed.append(athlete_item)
+        except ValidationError as exc:
+            return SaveResult(
+                ok=False,
+                errors={"__all__": "; ".join(exc.messages)},
+                changed_athlete_items=[],
+            )
 
         return SaveResult(ok=True, errors={}, changed_athlete_items=changed)

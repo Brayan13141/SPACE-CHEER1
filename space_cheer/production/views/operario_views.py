@@ -170,10 +170,12 @@ def item_measurements(request, pk):
 
     grid = MeasurementGridService.build(item, request.user)
 
-    for athlete_item in item.athletes.select_related("athlete").all():
+    # Se recorre grid.rows y no item.athletes: asi se audita exactamente a los
+    # sujetos que la pagina muestra, sin una consulta extra.
+    for row in grid.rows:
         PiiAuditService.log(
             request=request,
-            target_user=athlete_item.athlete,
+            target_user=row.athlete,
             access_type="VIEW_MEASUREMENTS",
             field_accessed="measurements",
             notes=f"OrderItem pk={pk}",

@@ -760,3 +760,102 @@ class MeasurementGridQueryCountTests(TestCase):
             ]
 
         self.assertEqual(len(reads(small)), len(reads(big)))
+
+
+@pytest.mark.django_db
+class FinalReviewFindingsTests(TestCase):
+    """Hallazgos de la revision final de rama (2026-08-11)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Notas", 20, False)]
+        )
+        self.ana = add_athlete(self.item, self.team, first_name="Ana")
+        self.beto = add_athlete(self.item, self.team, first_name="Beto")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.notas = self.item.product.measurement_fields.get(
+            field__name="Notas"
+        ).field
+
+    def _log_count(self):
+        from accounts.models import PiiAccessLog
+
+        return PiiAccessLog.objects.filter(
+            access_type="VIEW_MEASUREMENTS"
+        ).count()
+
+    def test_c1_admin_order_detail_logs_pii_per_athlete(self):
+        """C1: el admin ve medidas de menores; debe quedar rastro por sujeto."""
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        self.client.force_login(admin)
+
+        self.client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": self.order.id})
+        )
+
+        self.assertEqual(self._log_count(), 2)
+
+    def test_i2_item_detail_logs_pii_per_athlete(self):
+        """I2: el coach ve el roster completo en el detalle del item."""
+        self.client.force_login(self.coach)
+
+        self.client.get(
+            reverse("orders:order_item_detail", kwargs={"item_id": self.item.id})
+        )
+
+        self.assertEqual(self._log_count(), 2)
+
+    def test_i3_guardian_post_lands_on_a_reachable_page(self):
+        """I3: la tutora guardaba bien y caia en un 404."""
+        guardian = UserFactory()
+        mine = add_minor_with_guardian(
+            self.item, self.team, guardian, first_name="Hija"
+        )
+        self.client.force_login(guardian)
+
+        response = self.client.post(
+            reverse("orders:item_measurements_grid", kwargs={"item_id": self.item.id}),
+            {f"m-{mine.id}-{self.pecho.id}": "90"},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            OrderItemMeasurement.objects.filter(athlete_item=mine, value="90").exists()
+        )
+
+    def test_i4_too_long_value_is_a_cell_error_not_a_500(self):
+        """I4: value es CharField(max_length=50); 62 caracteres tumbaban el POST."""
+        self.client.force_login(self.coach)
+
+        response = self.client.post(
+            reverse("orders:item_measurements_grid", kwargs={"item_id": self.item.id}),
+            {
+                f"m-{self.ana.id}-{self.pecho.id}": "90",
+                f"m-{self.ana.id}-{self.notas.id}": "x" * 62,
+                f"m-{self.beto.id}-{self.pecho.id}": "88",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+        self.assertContains(response, "88")
+
+    def test_i5_athlete_page_shows_only_that_athlete(self):
+        """I5: la pagina 'Medidas de Ana' mostraba a todo el equipo."""
+        self.client.force_login(self.coach)
+
+        response = self.client.get(
+            reverse(
+                "orders:order_item_measurements",
+                kwargs={"athlete_item_id": self.ana.id},
+            )
+        )
+
+        self.assertEqual(len(response.context["grid"].rows), 1)
+        self.assertEqual(response.context["grid"].rows[0].athlete_item_id, self.ana.id)
+        self.assertEqual(self._log_count(), 1)

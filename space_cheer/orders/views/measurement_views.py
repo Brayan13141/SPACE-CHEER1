@@ -69,7 +69,14 @@ def order_item_measurements(request, athlete_item_id):
             item_id=athlete_item.order_item.id,
         )
 
-    grid = MeasurementGridService.build(athlete_item.order_item, request.user)
+    # Esta pagina se titula "Medidas de <atleta>": el grid se restringe a esa
+    # fila. Sin el filtro renderizaba a todo el equipo mientras el log de PII
+    # de arriba registraba un solo sujeto.
+    grid = MeasurementGridService.build(
+        athlete_item.order_item,
+        request.user,
+        only_athlete_item_id=athlete_item.id,
+    )
 
     return render(
         request,
@@ -77,6 +84,9 @@ def order_item_measurements(request, athlete_item_id):
         {
             "athlete_item": athlete_item,
             "grid": grid,
+            "can_view_item_detail": _can_view_item_detail(
+                request, athlete_item.order_item
+            ),
         },
     )
 
@@ -115,6 +125,19 @@ def reopen_measurements(request, order_id):
     return redirect("orders:admin_order_detail", order_id=order.id)
 
 
+def _can_view_item_detail(request, item):
+    """El guardian puede abrir el grid pero NO order_item_detail.
+
+    order_item_detail filtra por Order.objects.visible_for_user(), que no
+    contempla guardianes; ofrecerle el enlace seria mandarlo a un 404.
+    """
+    return (
+        Order.objects.visible_for_user(request.user)
+        .filter(pk=item.order_id)
+        .exists()
+    )
+
+
 @login_required
 def item_measurements_grid(request, item_id):
     """Tabla consolidada de medidas del item: filas = alumnos, columnas = campos.
@@ -139,7 +162,10 @@ def item_measurements_grid(request, item_id):
                     notes=f"Grid OrderItem pk={item.pk}",
                 )
             messages.success(request, "Medidas guardadas correctamente.")
-            return redirect("orders:order_item_detail", item_id=item.id)
+            # Se vuelve al propio grid, no a order_item_detail: esa vista filtra
+            # por Order.objects.visible_for_user(), que NO incluye a los
+            # guardianes, asi que una tutora guardaba bien y caia en un 404.
+            return redirect("orders:item_measurements_grid", item_id=item.id)
 
         messages.error(
             request, "Revisa los campos marcados. No se guardó ningún cambio."
@@ -148,7 +174,9 @@ def item_measurements_grid(request, item_id):
             item, request.user, values=request.POST, errors=result.errors
         )
         return render(
-            request, "orders/items/measurements_grid.html", {"grid": grid}
+            request,
+            "orders/items/measurements_grid.html",
+            {"grid": grid, "can_view_item_detail": _can_view_item_detail(request, item)},
         )
 
     grid = MeasurementGridService.build(item, request.user)
@@ -162,7 +190,11 @@ def item_measurements_grid(request, item_id):
             notes=f"Grid OrderItem pk={item.pk}",
         )
 
-    return render(request, "orders/items/measurements_grid.html", {"grid": grid})
+    return render(
+        request,
+        "orders/items/measurements_grid.html",
+        {"grid": grid, "can_view_item_detail": _can_view_item_detail(request, item)},
+    )
 
 
 @role_required("ADMIN")

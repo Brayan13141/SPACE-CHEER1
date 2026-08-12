@@ -18,6 +18,7 @@ from orders.services.state import OrderStateService
 from orders.services.measurements.MeasurementGridService import (
     MeasurementGridService,
 )
+from accounts.services.pii_audit_service import PiiAuditService
 from orders.services.file_validation import FileValidator
 from orders.forms import OrderDatesForm
 from django.core.exceptions import ValidationError
@@ -276,6 +277,19 @@ def admin_order_detail(request, order_id):
         if order_item.product.requires_measurements:
             grids[order_item.id] = MeasurementGridService.build(
                 order_item, request.user
+            )
+
+    # Este panel muestra medidas corporales de menores: el acceso se registra
+    # por sujeto, igual que en las demas superficies. Se reusa row.athlete para
+    # no volver a la base de datos por cada atleta.
+    for grid in grids.values():
+        for row in grid.rows:
+            PiiAuditService.log(
+                request=request,
+                target_user=row.athlete,
+                access_type="VIEW_MEASUREMENTS",
+                field_accessed="measurements",
+                notes=f"Admin order detail pk={order.pk}",
             )
 
     dates_form = OrderDatesForm(instance=order)
