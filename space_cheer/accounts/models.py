@@ -406,6 +406,8 @@ class PiiAccessLog(models.Model):
         ("VIEW_MEDICAL", "Ver datos médicos"),
         ("VIEW_MEASUREMENTS", "Ver medidas corporales"),
         ("EDIT_MEASUREMENTS", "Editar medidas corporales"),
+        ("VIEW_SIZE", "Ver talla"),
+        ("EDIT_SIZE", "Editar talla"),
         ("VIEW_ADDRESS", "Ver dirección"),
         ("EXPORT_DATA", "Exportar datos"),
         ("EDIT_PROFILE", "Editar perfil"),
