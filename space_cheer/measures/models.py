@@ -54,3 +54,39 @@ class MeasurementValue(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.field.slug}: {self.value}"
+
+
+class AthleteStandardSize(models.Model):
+    """Talla estándar del alumno. Es un dato del ALUMNO, no del pedido.
+
+    Modelo aparte y no un campo en User por dos razones: updated_at/updated_by
+    son lo que hace auditable el dato, y con OneToOne "sin talla capturada" es
+    ausencia de fila, no un "" que se confunde con "capturada vacía".
+    """
+
+    SIZE_CHOICES = [
+        ("XS", "XS"),
+        ("S", "S"),
+        ("M", "M"),
+        ("L", "L"),
+        ("XL", "XL"),
+        ("XXL", "XXL"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="standard_size",
+    )
+    size = models.CharField(max_length=10, choices=SIZE_CHOICES)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+
+    def __str__(self):
+        return f"{self.user.username}: {self.size}"

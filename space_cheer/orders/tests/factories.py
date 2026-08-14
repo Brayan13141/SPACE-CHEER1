@@ -8,7 +8,7 @@ from decimal import Decimal
 from accounts.models import User, Role
 from teams.models import Team, TeamCategory, UserTeamMembership
 from products.models import Product, Season, ProductSizeVariant, ProductMeasurementField
-from measures.models import MeasurementField
+from measures.models import MeasurementField, AthleteStandardSize
 from orders.models import (
     Order,
     OrderItem,
@@ -390,3 +390,11 @@ class CustomerFactory(DjangoModelFactory):
     phone = factory.Sequence(lambda n: f"477000{n:04d}")
     user = None
     created_by = factory.SubFactory(UserFactory)
+
+
+class AthleteStandardSizeFactory(DjangoModelFactory):
+    class Meta:
+        model = AthleteStandardSize
+
+    user = factory.SubFactory(AthleteFactory)
+    size = "M"
