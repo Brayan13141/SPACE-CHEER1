@@ -114,7 +114,7 @@ class MeasurementGridStructureTests(TestCase):
         grid = MeasurementGridService.build(item, coach)
 
         self.assertEqual(
-            [c.field.name for c in grid.columns],
+            [c.name for c in grid.columns],
             ["Pecho", "Cintura", "Cadera"],
         )
 
@@ -435,15 +435,24 @@ class MeasurementGridSaveTests(TestCase):
             )
 
     def test_locked_measurements_reject_save(self):
+        """Rechaza la escritura, pero como estado -- no como falta de permiso.
+
+        Ver LockedOrderTests: el 403 pelado le hacia perder al usuario todo lo
+        que habia tecleado.
+        """
         self.order.measurements_locked = True
         self.order.save()
 
-        with self.assertRaises(PermissionDenied):
-            MeasurementGridService.save(
-                reload_item(self.item),
-                self.coach,
-                {self._name(self.athlete_item, self.pecho): "90"},
-            )
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            {self._name(self.athlete_item, self.pecho): "90"},
+        )
+
+        self.assertFalse(result.ok)
+        self.assertEqual(
+            result.errors["__all__"], MeasurementGridService.LOCKED_MESSAGE
+        )
         self.assertEqual(
             OrderItemMeasurement.objects.filter(
                 athlete_item=self.athlete_item
@@ -573,14 +582,18 @@ class MeasurementGridViewTests(TestCase):
         )
 
     def test_post_with_error_keeps_typed_values(self):
-        """El bug que este trabajo arregla: un error no debe tirar lo tecleado."""
+        """El bug que este trabajo arregla: un error no debe tirar lo tecleado.
+
+        La celda de Ana lleva un valor invalido (no vacio): una celda vacia en
+        una fila que nadie toco ya no es error, es una fila sin capturar.
+        """
         add_athlete(self.item, self.team, first_name="Beto")
         beto_item = self.item.athletes.get(athlete__first_name="Beto")
         beto_name = f"m-{beto_item.id}-{self.pecho.id}"
 
         self.client.force_login(self.coach)
         response = self.client.post(
-            self.url, {self.input_name: "", beto_name: "88"}
+            self.url, {self.input_name: "x" * 62, beto_name: "88"}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -902,3 +915,663 @@ class SaveValidationErrorSurfacingTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(OrderItemMeasurement.objects.count(), 0)
         self.assertContains(response, "Las medidas no pueden editarse")
+
+
+@pytest.mark.django_db
+class PermCacheTests(TestCase):
+    """El panel admin arma un grid por item de la misma orden.
+
+    Sin cache compartido repetia las consultas de permisos (roles del viewer y
+    visibilidad de la orden) una vez por item.
+    """
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.item2 = OrderItemFactory(order=self.order, product=self.item.product)
+        add_athlete(self.item, self.team, first_name="Ana")
+        add_athlete(self.item2, self.team, first_name="Beto")
+        # ADMIN que NO creo la orden: asi `is_privileged` no corta antes de
+        # consultar los roles y el cache tiene algo real que ahorrar.
+        self.admin = UserFactory(profile_completed=True)
+        self.admin.roles.add(RoleFactory(name="ADMIN"))
+
+    def _second_build_queries(self, shared_cache):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        first_cache = {} if shared_cache else None
+        MeasurementGridService.build(
+            reload_item(self.item), self.admin, perm_cache=first_cache
+        )
+        with CaptureQueriesContext(connection) as ctx:
+            MeasurementGridService.build(
+                reload_item(self.item2),
+                self.admin,
+                perm_cache=first_cache if shared_cache else None,
+            )
+        return len(ctx.captured_queries)
+
+    def test_shared_cache_saves_permission_queries(self):
+        cached = self._second_build_queries(shared_cache=True)
+        uncached = self._second_build_queries(shared_cache=False)
+
+        self.assertLess(cached, uncached)
+
+    def test_shared_cache_does_not_change_the_result(self):
+        shared = {}
+        with_cache = MeasurementGridService.build(
+            reload_item(self.item2), self.admin, perm_cache=shared
+        )
+        without_cache = MeasurementGridService.build(
+            reload_item(self.item2), self.admin
+        )
+
+        self.assertEqual(with_cache.can_edit, without_cache.can_edit)
+        self.assertEqual(
+            [row.athlete_item_id for row in with_cache.rows],
+            [row.athlete_item_id for row in without_cache.rows],
+        )
+
+
+@pytest.mark.django_db
+class PiiLogVolumeTests(TestCase):
+    """Una bitacora que se duplica en cada F5 deja de servir para investigar."""
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.ana = add_athlete(self.item, self.team, first_name="Ana")
+        self.beto = add_athlete(self.item, self.team, first_name="Beto")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.url = reverse(
+            "orders:item_measurements_grid", kwargs={"item_id": self.item.id}
+        )
+
+    def _view_logs(self):
+        from accounts.models import PiiAccessLog
+
+        return PiiAccessLog.objects.filter(access_type="VIEW_MEASUREMENTS")
+
+    def test_refresh_within_window_does_not_duplicate_logs(self):
+        self.client.force_login(self.coach)
+
+        self.client.get(self.url)
+        self.client.get(self.url)
+        self.client.get(self.url)
+
+        self.assertEqual(self._view_logs().count(), 2)
+
+    def test_first_view_still_logs_every_subject(self):
+        self.client.force_login(self.coach)
+
+        self.client.get(self.url)
+
+        self.assertEqual(
+            set(self._view_logs().values_list("target_user_id", flat=True)),
+            {self.ana.athlete_id, self.beto.athlete_id},
+        )
+
+    def test_a_different_viewer_gets_its_own_log(self):
+        """La deduplicacion es por actor: otro usuario deja su propio rastro."""
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+
+        self.client.force_login(self.coach)
+        self.client.get(self.url)
+        self.client.force_login(admin)
+        self.client.get(self.url)
+
+        self.assertEqual(self._view_logs().count(), 4)
+
+    def test_expired_window_logs_again(self):
+        from accounts.models import PiiAccessLog
+
+        self.client.force_login(self.coach)
+        self.client.get(self.url)
+        # Envejece los registros mas alla de la ventana de deduplicacion.
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        PiiAccessLog.objects.update(
+            timestamp=timezone.now() - timedelta(hours=2)
+        )
+
+        self.client.get(self.url)
+
+        self.assertEqual(self._view_logs().count(), 4)
+
+    def test_failed_post_without_previous_get_audits_the_roster(self):
+        """El POST fallido re-renderiza el grid completo: se ve, se audita.
+
+        Sin GET previo a proposito: es el caso donde antes se mostraba el
+        roster entero sin dejar ningun rastro.
+        """
+        self.client.force_login(self.coach)
+
+        # Valor invalido, no celda vacia: una fila que nadie toco ya no falla.
+        response = self.client.post(
+            self.url, {f"m-{self.ana.id}-{self.pecho.id}": "x" * 62}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+        self.assertEqual(self._view_logs().count(), 2)
+
+    def test_get_then_failed_post_coalesces_into_one_record(self):
+        """Documenta la interaccion entre las dos reglas.
+
+        En el flujo real (abrir la pagina, guardar mal) el GET ya auditó a
+        todos, asi que el re-render NO agrega un segundo registro. El acceso
+        queda asentado una vez, que es lo que la ventana busca; no es que el
+        re-render se quede sin auditar.
+        """
+        self.client.force_login(self.coach)
+
+        self.client.get(self.url)
+        self.client.post(self.url, {f"m-{self.ana.id}-{self.pecho.id}": "x" * 62})
+
+        self.assertEqual(self._view_logs().count(), 2)
+
+    def test_a_different_surface_leaves_its_own_record(self):
+        """`notes` entra en la clave: el panel admin y el grid no colapsan."""
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        self.client.force_login(admin)
+
+        self.client.get(self.url)
+        self.client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": self.order.id})
+        )
+
+        self.assertEqual(self._view_logs().count(), 4)
+        self.assertEqual(
+            self._view_logs().values("notes").distinct().count(), 2
+        )
+
+
+@pytest.mark.django_db
+class LockedOrderTests(TestCase):
+    """Orden bloqueada != sin permiso. Lo primero es un mensaje, no un 403."""
+
+    def setUp(self):
+        self.client = Client()
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.url = reverse(
+            "orders:item_measurements_grid", kwargs={"item_id": self.item.id}
+        )
+        self.input_name = f"m-{self.athlete_item.id}-{self.pecho.id}"
+
+    def _lock(self):
+        self.order.measurements_locked = True
+        self.order.save(update_fields=["measurements_locked"])
+
+    def test_saving_a_locked_order_is_a_message_not_a_403(self):
+        self._lock()
+        self.client.force_login(self.coach)
+
+        response = self.client.post(self.url, {self.input_name: "92"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "cerradas o bloqueadas")
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+
+    def test_service_reports_locked_instead_of_raising(self):
+        self._lock()
+
+        result = MeasurementGridService.save(
+            reload_item(self.item), self.coach, {self.input_name: "92"}
+        )
+
+        self.assertFalse(result.ok)
+        self.assertEqual(
+            result.errors["__all__"], MeasurementGridService.LOCKED_MESSAGE
+        )
+
+    def test_a_stranger_still_gets_403_on_a_locked_order(self):
+        """El bloqueo no debe convertirse en un canal de informacion."""
+        self._lock()
+        stranger = CoachFactory()
+
+        with self.assertRaises(PermissionDenied):
+            MeasurementGridService.save(
+                reload_item(self.item), stranger, {self.input_name: "92"}
+            )
+
+    def test_grid_marks_the_order_as_locked(self):
+        self._lock()
+
+        grid = MeasurementGridService.build(reload_item(self.item), self.coach)
+
+        self.assertFalse(grid.can_edit)
+        self.assertTrue(grid.is_locked)
+
+    def test_open_order_without_write_rights_is_not_locked(self):
+        """El coach del equipo ve la orden pero no la creo: no puede escribir.
+
+        La pantalla le decia "cerradas o bloqueadas", que es falso.
+        """
+        other_coach = CoachFactory()
+        self.team.coach = other_coach
+        self.team.save(update_fields=["coach"])
+
+        grid = MeasurementGridService.build(reload_item(self.item), other_coach)
+
+        self.assertFalse(grid.can_edit)
+        self.assertFalse(grid.is_locked)
+
+
+@pytest.mark.django_db
+class OrphanColumnTests(TestCase):
+    """Quitar un campo del producto no debe borrar de la vista lo capturado."""
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Cintura", 20, False)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.cintura = self.item.product.measurement_fields.get(
+            field__name="Cintura"
+        ).field
+        for field, value in ((self.pecho, "90"), (self.cintura, "70")):
+            OrderItemMeasurement.objects.create(
+                athlete_item=self.athlete_item,
+                field=field,
+                field_name=field.name,
+                field_unit=field.unit,
+                value=value,
+            )
+
+    def _detach_cintura(self):
+        self.item.product.measurement_fields.filter(field=self.cintura).delete()
+
+    def test_detached_field_still_shows_its_value(self):
+        self._detach_cintura()
+
+        grid = MeasurementGridService.build(reload_item(self.item), self.coach)
+
+        orphans = [c for c in grid.columns if c.is_orphan]
+        self.assertEqual([c.name for c in orphans], ["Cintura"])
+        cell = grid.rows[0].cells[-1]
+        self.assertEqual(cell.value, "70")
+
+    def test_orphan_cells_are_never_editable(self):
+        """OrderItemMeasurement.clean() rechaza campos ajenos al producto."""
+        self._detach_cintura()
+
+        grid = MeasurementGridService.build(reload_item(self.item), self.coach)
+
+        orphan_cells = [
+            cell
+            for row in grid.rows
+            for cell in row.cells
+            if cell.field_name == "Cintura"
+        ]
+        self.assertTrue(orphan_cells)
+        self.assertFalse(any(cell.editable for cell in orphan_cells))
+
+    def test_posting_an_orphan_cell_is_ignored(self):
+        self._detach_cintura()
+
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            {
+                f"m-{self.athlete_item.id}-{self.pecho.id}": "91",
+                f"m-{self.athlete_item.id}-{self.cintura.id}": "999",
+            },
+        )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(
+            OrderItemMeasurement.objects.get(
+                athlete_item=self.athlete_item, field=self.cintura
+            ).value,
+            "70",
+        )
+
+    def test_an_empty_detached_field_adds_no_column(self):
+        """Solo se rescata lo que tiene dato; una huerfana vacia es ruido."""
+        OrderItemMeasurement.objects.filter(field=self.cintura).update(value="")
+        self._detach_cintura()
+
+        grid = MeasurementGridService.build(reload_item(self.item), self.coach)
+
+        self.assertFalse([c for c in grid.columns if c.is_orphan])
+
+    def test_orphans_do_not_make_a_fieldless_product_complete(self):
+        """Un producto sin campos configurados nunca cuenta como completo."""
+        self.item.product.measurement_fields.all().delete()
+
+        grid = MeasurementGridService.build(reload_item(self.item), self.coach)
+
+        self.assertTrue([c for c in grid.columns if c.is_orphan])
+        self.assertFalse(grid.rows[0].is_complete)
+
+
+@pytest.mark.django_db
+class GridPrefetchReuseTests(TestCase):
+    """El grid rehacia la consulta de atletas e invalidaba el prefetch."""
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        add_athlete(self.item, self.team, first_name="Ana")
+        add_athlete(self.item, self.team, first_name="Beto")
+
+    def test_prefetched_athletes_are_reused(self):
+        from django.db import connection
+        from django.db.models import Prefetch
+        from django.test.utils import CaptureQueriesContext
+
+        from orders.models import OrderItem, OrderItemAthlete
+
+        item = OrderItem.objects.select_related("order", "product").prefetch_related(
+            Prefetch(
+                "athletes",
+                queryset=OrderItemAthlete.objects.select_related(
+                    "athlete", "athlete__athleteprofile"
+                ).prefetch_related("measurements"),
+            )
+        ).get(pk=self.item.pk)
+
+        with CaptureQueriesContext(connection) as ctx:
+            athlete_items = MeasurementGridService.athlete_items_for(item)
+
+        self.assertEqual(len(athlete_items), 2)
+        self.assertEqual(len(ctx.captured_queries), 0)
+
+    def test_order_is_the_same_with_and_without_prefetch(self):
+        from django.db.models import Prefetch
+
+        from orders.models import OrderItem, OrderItemAthlete
+
+        without = MeasurementGridService.athlete_items_for(reload_item(self.item))
+        prefetched = OrderItem.objects.prefetch_related(
+            Prefetch(
+                "athletes",
+                # Orden deliberadamente invertido: el servicio debe imponer el suyo.
+                queryset=OrderItemAthlete.objects.select_related("athlete").order_by(
+                    "-athlete__first_name"
+                ),
+            )
+        ).get(pk=self.item.pk)
+        with_prefetch = MeasurementGridService.athlete_items_for(prefetched)
+
+        self.assertEqual(
+            [a.id for a in without], [a.id for a in with_prefetch]
+        )
+
+
+@pytest.mark.django_db
+class NonMeasurementProductTests(TestCase):
+    """El grid perdio el guard que order_item_measurements si conserva."""
+
+    def test_grid_redirects_for_a_product_without_measurements(self):
+        """Producto de catalogo normal: no usa medidas, el grid no aplica.
+
+        Ojo: no se puede tomar un producto MEASUREMENTS y degradarlo, porque
+        `Product.clean()` exige talla o medidas en los personalizados y ademas
+        congela `size_strategy` una vez usado en una orden.
+        """
+        from orders.tests.factories import ProductFactory
+
+        coach = CoachFactory()
+        order = OrderFactory(created_by=coach, owner_user=coach)
+        product = ProductFactory(usage_type="GLOBAL", size_strategy="NONE")
+        item = OrderItemFactory(order=order, product=product)
+
+        client = Client()
+        client.force_login(coach)
+        response = client.post(
+            reverse("orders:item_measurements_grid", kwargs={"item_id": item.id}),
+            {"cualquier": "cosa"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+
+
+@pytest.mark.django_db
+class PartialCaptureTests(TestCase):
+    """El grid vive en un solo <form>: el navegador postea TODAS las celdas.
+
+    Exigir los obligatorios por celda posteada hacia imposible capturar de a
+    poco: llenar 5 alumnos de 30 y guardar devolvia el roster entero en rojo y
+    no escribia nada.
+    """
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True), ("Notas", 20, False)]
+        )
+        self.ana = add_athlete(self.item, self.team, first_name="Ana")
+        self.beto = add_athlete(self.item, self.team, first_name="Beto")
+        self.cami = add_athlete(self.item, self.team, first_name="Cami")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.notas = self.item.product.measurement_fields.get(
+            field__name="Notas"
+        ).field
+
+    def _name(self, athlete_item, field):
+        return f"m-{athlete_item.id}-{field.id}"
+
+    def _full_post(self, **filled):
+        """Postea TODAS las celdas del roster, como hace el navegador."""
+        post = {}
+        for athlete_item in (self.ana, self.beto, self.cami):
+            for field in (self.pecho, self.notas):
+                post[self._name(athlete_item, field)] = ""
+        post.update(filled)
+        return post
+
+    def test_filling_one_row_of_three_saves_it(self):
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(**{self._name(self.ana, self.pecho): "90"}),
+        )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.errors, {})
+        self.assertEqual(
+            [a.id for a in result.changed_athlete_items], [self.ana.id]
+        )
+        self.assertEqual(OrderItemMeasurement.objects.count(), 1)
+
+    def test_empty_rows_do_not_raise_required_errors(self):
+        """Beto y Cami van vacios: son filas sin capturar, no filas invalidas."""
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(**{self._name(self.ana, self.pecho): "90"}),
+        )
+
+        self.assertNotIn(self._name(self.beto, self.pecho), result.errors)
+        self.assertNotIn(self._name(self.cami, self.pecho), result.errors)
+        self.assertFalse(
+            OrderItemMeasurement.objects.filter(
+                athlete_item__in=[self.beto.id, self.cami.id]
+            ).exists()
+        )
+
+    def test_touched_row_must_complete_its_required_cells(self):
+        """Si tocaste la fila, el obligatorio de ESA fila si se exige."""
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(**{self._name(self.beto, self.notas): "solo notas"}),
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn(self._name(self.beto, self.pecho), result.errors)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)
+
+    def test_clearing_a_required_cell_that_had_a_value_is_an_error(self):
+        """Vaciar cuenta como tocar: no se deja a medias una fila ya capturada."""
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.ana,
+            field=self.pecho,
+            field_name=self.pecho.name,
+            field_unit=self.pecho.unit,
+            value="90",
+        )
+
+        result = MeasurementGridService.save(
+            reload_item(self.item), self.coach, self._full_post()
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn(self._name(self.ana, self.pecho), result.errors)
+        self.assertEqual(
+            OrderItemMeasurement.objects.get(athlete_item=self.ana).value, "90"
+        )
+
+    def test_clearing_an_optional_cell_works(self):
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.ana,
+            field=self.notas,
+            field_name=self.notas.name,
+            field_unit=self.notas.unit,
+            value="algo",
+        )
+
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(**{self._name(self.ana, self.pecho): "90"}),
+        )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(
+            OrderItemMeasurement.objects.get(
+                athlete_item=self.ana, field=self.notas
+            ).value,
+            "",
+        )
+
+    def test_reposting_the_same_values_changes_nothing(self):
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.ana,
+            field=self.pecho,
+            field_name=self.pecho.name,
+            field_unit=self.pecho.unit,
+            value="90",
+        )
+
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(**{self._name(self.ana, self.pecho): "90"}),
+        )
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.changed_athlete_items, [])
+
+    def test_progressive_capture_across_two_saves(self):
+        """El caso real: hoy llegaron 1 y 2, manana el tercero."""
+        item = reload_item(self.item)
+        MeasurementGridService.save(
+            item,
+            self.coach,
+            self._full_post(**{self._name(self.ana, self.pecho): "90"}),
+        )
+        result = MeasurementGridService.save(
+            reload_item(self.item),
+            self.coach,
+            self._full_post(
+                **{
+                    self._name(self.ana, self.pecho): "90",
+                    self._name(self.beto, self.pecho): "88",
+                }
+            ),
+        )
+
+        self.assertTrue(result.ok)
+        self.assertEqual([a.id for a in result.changed_athlete_items], [self.beto.id])
+        self.assertEqual(OrderItemMeasurement.objects.count(), 2)
+
+
+@pytest.mark.django_db
+class ConcurrentSaveTests(TestCase):
+    """Dos capturas simultaneas del mismo roster no deben dar 500."""
+
+    def setUp(self):
+        self.coach, self.team, self.order, self.item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        self.athlete_item = add_athlete(self.item, self.team, first_name="Ana")
+        self.pecho = self.item.product.measurement_fields.get(
+            field__name="Pecho"
+        ).field
+        self.input_name = f"m-{self.athlete_item.id}-{self.pecho.id}"
+
+    def _stale_athlete_items(self):
+        """Filas leidas ANTES de que la otra sesion escriba: prefetch vacio."""
+        athlete_items = MeasurementGridService.visible_athlete_items(
+            reload_item(self.item), self.coach
+        )
+        for athlete_item in athlete_items:
+            list(athlete_item.measurements.all())
+        return athlete_items
+
+    def test_row_created_by_someone_else_is_updated_not_duplicated(self):
+        from unittest.mock import patch
+
+        stale = self._stale_athlete_items()
+
+        # La otra sesion crea la fila que `stale` cree inexistente.
+        OrderItemMeasurement.objects.create(
+            athlete_item=self.athlete_item,
+            field=self.pecho,
+            field_name=self.pecho.name,
+            field_unit=self.pecho.unit,
+            value="70",
+        )
+
+        with patch.object(
+            MeasurementGridService, "visible_athlete_items", return_value=stale
+        ):
+            result = MeasurementGridService.save(
+                reload_item(self.item), self.coach, {self.input_name: "92"}
+            )
+
+        self.assertTrue(result.ok)
+        rows = OrderItemMeasurement.objects.filter(athlete_item=self.athlete_item)
+        self.assertEqual(rows.count(), 1)
+        self.assertEqual(rows.get().value, "92")
+
+    def test_integrity_error_becomes_a_visible_message_not_a_500(self):
+        from unittest.mock import patch
+
+        from django.db import IntegrityError
+
+        with patch(
+            "orders.models.OrderItemMeasurement.save",
+            side_effect=IntegrityError("duplicate key"),
+        ):
+            result = MeasurementGridService.save(
+                reload_item(self.item), self.coach, {self.input_name: "92"}
+            )
+
+        self.assertFalse(result.ok)
+        self.assertIn("__all__", result.errors)
+        self.assertEqual(OrderItemMeasurement.objects.count(), 0)

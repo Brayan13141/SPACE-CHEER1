@@ -3,6 +3,7 @@ from django.contrib import messages
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from orders.models import OrderItem, Order, OrderItemAthlete
 from orders.services.servicesItems.order_item_athlete_service import (
     OrderItemAthleteService,
@@ -25,7 +26,19 @@ def order_item_detail(request, item_id):
     item = get_object_or_404(
         OrderItem.objects.select_related(
             "order", "product", "product__owner_team", "product__season"
-        ).filter(order__in=Order.objects.visible_for_user(request.user)),
+        )
+        # El prefetch cuelga del item para que el grid lo reuse: antes esta
+        # pagina leia los atletas una vez para el template y el grid los volvia
+        # a leer por su cuenta.
+        .prefetch_related(
+            Prefetch(
+                "athletes",
+                queryset=OrderItemAthlete.objects.select_related(
+                    "athlete", "athlete__athleteprofile"
+                ).prefetch_related("measurements", "customization"),
+            )
+        )
+        .filter(order__in=Order.objects.visible_for_user(request.user)),
         id=item_id,
     )
 
@@ -46,11 +59,7 @@ def order_item_detail(request, item_id):
     athlete_items = []
 
     if requires_athlete:
-        athlete_items = (
-            OrderItemAthlete.objects.filter(order_item=item)
-            .select_related("athlete")
-            .prefetch_related("measurements", "customization")
-        )
+        athlete_items = list(item.athletes.all())
 
     # Tabla consolidada de medidas: solo tiene sentido si el item ya tiene
     # atletas asignados y el producto usa medidas.
@@ -59,14 +68,13 @@ def order_item_detail(request, item_id):
         grid = MeasurementGridService.build(item, request.user)
         # Esta pagina expone medidas corporales de menores: se registra el
         # acceso por sujeto, como en el resto de las superficies.
-        for row in grid.rows:
-            PiiAuditService.log(
-                request=request,
-                target_user=row.athlete,
-                access_type="VIEW_MEASUREMENTS",
-                field_accessed="measurements",
-                notes=f"Item detail pk={item.pk}",
-            )
+        PiiAuditService.log_many(
+            request=request,
+            target_users=[row.athlete for row in grid.rows],
+            access_type="VIEW_MEASUREMENTS",
+            field_accessed="measurements",
+            notes=f"Item detail pk={item.pk}",
+        )
 
     # -------------------------------------------------
     # MEDIDAS REQUERIDAS

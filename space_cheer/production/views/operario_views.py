@@ -172,14 +172,13 @@ def item_measurements(request, pk):
 
     # Se recorre grid.rows y no item.athletes: asi se audita exactamente a los
     # sujetos que la pagina muestra, sin una consulta extra.
-    for row in grid.rows:
-        PiiAuditService.log(
-            request=request,
-            target_user=row.athlete,
-            access_type="VIEW_MEASUREMENTS",
-            field_accessed="measurements",
-            notes=f"OrderItem pk={pk}",
-        )
+    PiiAuditService.log_many(
+        request=request,
+        target_users=[row.athlete for row in grid.rows],
+        access_type="VIEW_MEASUREMENTS",
+        field_accessed="measurements",
+        notes=f"OrderItem pk={pk}",
+    )
 
     return render(request, "production/item_measurements.html", {
         "item": item,

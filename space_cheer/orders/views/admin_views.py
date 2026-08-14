@@ -220,8 +220,11 @@ def admin_order_detail(request, order_id):
                 ).prefetch_related(
                     Prefetch(
                         "athletes",
+                        # athlete__athleteprofile lo consume _is_guardian_of()
+                        # del grid, que ahora reusa este prefetch en vez de
+                        # rehacer la consulta por item.
                         queryset=OrderItemAthlete.objects.select_related(
-                            "athlete"
+                            "athlete", "athlete__athleteprofile"
                         ).prefetch_related(
                             Prefetch(
                                 "measurements",
@@ -272,25 +275,28 @@ def admin_order_detail(request, order_id):
         }
 
     # ── Tabla consolidada de medidas por item ─────────────────────────────
+    # perm_cache compartido: los grids son todos de la MISMA orden, asi que
+    # los permisos del viewer se resuelven una vez y no una por item.
     grids = {}
+    perm_cache = {}
     for order_item in items:
         if order_item.product.requires_measurements:
             grids[order_item.id] = MeasurementGridService.build(
-                order_item, request.user
+                order_item, request.user, perm_cache=perm_cache
             )
 
     # Este panel muestra medidas corporales de menores: el acceso se registra
-    # por sujeto, igual que en las demas superficies. Se reusa row.athlete para
-    # no volver a la base de datos por cada atleta.
-    for grid in grids.values():
-        for row in grid.rows:
-            PiiAuditService.log(
-                request=request,
-                target_user=row.athlete,
-                access_type="VIEW_MEASUREMENTS",
-                field_accessed="measurements",
-                notes=f"Admin order detail pk={order.pk}",
-            )
+    # por sujeto, igual que en las demas superficies. Un mismo atleta puede
+    # aparecer en varios items de la orden, y log_many lo registra una sola
+    # vez en lugar de una por item. Se reusa row.athlete para no volver a la
+    # base de datos por cada atleta.
+    PiiAuditService.log_many(
+        request=request,
+        target_users=[row.athlete for grid in grids.values() for row in grid.rows],
+        access_type="VIEW_MEASUREMENTS",
+        field_accessed="measurements",
+        notes=f"Admin order detail pk={order.pk}",
+    )
 
     dates_form = OrderDatesForm(instance=order)
     available_transitions = OrderStateService.get_available_transitions(

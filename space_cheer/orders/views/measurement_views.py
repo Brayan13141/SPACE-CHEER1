@@ -125,6 +125,25 @@ def reopen_measurements(request, order_id):
     return redirect("orders:admin_order_detail", order_id=order.id)
 
 
+def _log_grid_view(request, grid, item):
+    """Audita a los sujetos que el grid realmente muestra.
+
+    Se llama en TODA rama que renderiza el grid (GET y POST fallido). En el
+    flujo normal -- abrir la pagina y luego guardar -- el GET ya registro a
+    todos y log_many coalesce el re-render dentro de su ventana: el acceso
+    queda asentado una vez, no dos. Lo que esto cierra es el POST que falla
+    SIN GET previo (envio directo, o vuelta despues de que expiro la ventana),
+    donde antes se renderizaba el roster completo sin dejar ningun rastro.
+    """
+    PiiAuditService.log_many(
+        request=request,
+        target_users=[row.athlete for row in grid.rows],
+        access_type="VIEW_MEASUREMENTS",
+        field_accessed="measurements",
+        notes=f"Grid OrderItem pk={item.pk}",
+    )
+
+
 def _can_view_item_detail(request, item):
     """El guardian puede abrir el grid pero NO order_item_detail.
 
@@ -148,6 +167,16 @@ def item_measurements_grid(request, item_id):
     item = get_object_or_404(
         OrderItem.objects.select_related("order", "product"), pk=item_id
     )
+
+    # Mismo guard que order_item_measurements: sin el, un producto que no usa
+    # medidas abria una tabla sin columnas pero con formulario, y al postear el
+    # error salia como un "__all__" generico desde OrderItemMeasurement.clean().
+    if not item.product.requires_measurements:
+        messages.error(request, "Este producto no requiere medidas.")
+        if _can_view_item_detail(request, item):
+            return redirect("orders:order_item_detail", item_id=item.id)
+        # El guardian no puede abrir order_item_detail: mandarlo alli seria un 404.
+        return redirect("core:landing")
 
     if request.method == "POST":
         result = MeasurementGridService.save(item, request.user, request.POST)
@@ -178,6 +207,10 @@ def item_measurements_grid(request, item_id):
         grid = MeasurementGridService.build(
             item, request.user, values=request.POST, errors=result.errors
         )
+        # Un guardado fallido re-renderiza el roster COMPLETO: se ven las
+        # medidas igual que en un GET, asi que se audita igual. Sin esto habia
+        # un camino para mirar el grid sin dejar rastro.
+        _log_grid_view(request, grid, item)
         return render(
             request,
             "orders/items/measurements_grid.html",
@@ -185,15 +218,7 @@ def item_measurements_grid(request, item_id):
         )
 
     grid = MeasurementGridService.build(item, request.user)
-
-    for row in grid.rows:
-        PiiAuditService.log(
-            request=request,
-            target_user=row.athlete,
-            access_type="VIEW_MEASUREMENTS",
-            field_accessed="measurements",
-            notes=f"Grid OrderItem pk={item.pk}",
-        )
+    _log_grid_view(request, grid, item)
 
     return render(
         request,

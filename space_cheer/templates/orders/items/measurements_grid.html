@@ -24,9 +24,14 @@
       <div class="mt-3">
         <button type="submit" class="btn btn-primary">{% trans "Guardar medidas" %}</button>
       </div>
-    {% else %}
+    {% elif grid.is_locked %}
       <div class="alert alert-secondary mt-3 mb-0">
         {% trans "Las medidas están cerradas o bloqueadas para esta orden." %}
+      </div>
+    {% else %}
+      {# La orden admite ediciones; es este usuario quien no tiene filas suyas. #}
+      <div class="alert alert-secondary mt-3 mb-0">
+        {% trans "No tienes permiso para editar estas medidas." %}
       </div>
     {% endif %}
   </form>

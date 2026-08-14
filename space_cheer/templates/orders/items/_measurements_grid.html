@@ -8,9 +8,12 @@
         <th scope="col" class="position-sticky start-0 bg-dark">{% trans "Alumno" %}</th>
         {% for column in grid.columns %}
           <th scope="col">
-            {{ column.field.name }}
-            {% if column.field.unit %}<small class="text-muted">({{ column.field.unit }})</small>{% endif %}
+            {{ column.name }}
+            {% if column.unit %}<small class="text-muted">({{ column.unit }})</small>{% endif %}
             {% if column.required %}<span class="text-danger">*</span>{% endif %}
+            {% if column.is_orphan %}
+              <span class="badge bg-secondary" title="{% trans 'Este campo ya no forma parte del producto. La medida se conserva pero no puede editarse.' %}">{% trans "retirada" %}</span>
+            {% endif %}
           </th>
         {% endfor %}
         <th scope="col">{% trans "Estado" %}</th>

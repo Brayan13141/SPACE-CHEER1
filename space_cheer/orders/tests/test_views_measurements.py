@@ -193,8 +193,10 @@ class ItemMeasurementsAddViewTests(TestCase):
         self.order.save(update_fields=["measurements_locked"])
 
         response = self.client.post(self._url(), self._get_post_data())
-        # El grid rechaza la escritura de plano en vez de redirigir con mensaje
-        self.assertEqual(response.status_code, 403)
+        # Orden bloqueada = estado, no falta de permiso: se re-renderiza el grid
+        # con el mensaje. El 403 pelado perdia todo lo tecleado.
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "cerradas o bloqueadas")
         self.assertFalse(
             OrderItemMeasurement.objects.filter(athlete_item=self.athlete_item).exists()
         )
