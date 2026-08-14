@@ -242,6 +242,30 @@ class ProductWithMeasurementsFactory(ProductFactory):
         ProductMeasurementFieldFactory(product=self, field=field2)
 
 
+class TeamProductWithSizesFactory(ProductFactory):
+    """TEAM_CUSTOM + STANDARD: la unica combinacion que usa Pieza A.
+
+    ProductWithSizesFactory NO sirve: es GLOBAL, que es el caso excluido.
+    Las variantes se declaran explicitamente porque ensure_domain_consistency
+    crea CH/M/G/XG, que no es la escala XS-XXL del alumno.
+    """
+
+    class Meta:
+        model = Product
+        skip_postgeneration_save = True
+
+    usage_type = "TEAM_CUSTOM"
+    size_strategy = "STANDARD"
+
+    @factory.post_generation
+    def sizes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        self.size_variants.all().delete()
+        for size in extracted or ["XS", "S", "M", "L", "XL", "XXL"]:
+            ProductSizeVariantFactory(product=self, size=size)
+
+
 class ProductSizeVariantFactory(DjangoModelFactory):
     class Meta:
         model = ProductSizeVariant

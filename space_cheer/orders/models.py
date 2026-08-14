@@ -756,7 +756,14 @@ class OrderItemAthlete(models.Model):
         if product.usage_type == "GLOBAL":
             raise ValidationError("Producto GLOBAL no usa asignación por atleta")
 
-        if not product.requires_athletes:
+        # Pieza A: TEAM_CUSTOM + STANDARD asigna alumnos para saber a quien le
+        # toca cada talla. La validacion de GLOBAL de arriba NO se toca: es lo
+        # que mantiene los productos de catalogo fuera de este flujo.
+        allows_athletes = product.requires_athletes or (
+            product.usage_type == "TEAM_CUSTOM"
+            and product.size_strategy == "STANDARD"
+        )
+        if not allows_athletes:
             raise ValidationError("Este producto no permite asignación por atleta")
 
         if order.order_type == "TEAM":
