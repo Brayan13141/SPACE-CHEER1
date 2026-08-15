@@ -201,6 +201,24 @@ class TestConciliacion:
         assert a2.id in result.errors
         assert order.items.get(size_variant__size="M").quantity == 1
 
+    def test_reconcile_no_duplica_items_de_la_misma_talla(self):
+        """Documenta el invariante del lock a nivel de Order: llamar reconcile()
+        dos veces seguidas con la misma asignacion nunca produce dos OrderItem
+        para la misma talla. El caso concurrente real (dos coaches creando la
+        misma talla por primera vez al mismo tiempo) no es probable con threads
+        aqui; lo cierra el select_for_update sobre Order en reconcile()."""
+        order, product, (a1, a2, a3) = self._setup()
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+
+        assert order.items.filter(size_variant__size="M").count() == 1
+        assert order.items.get(size_variant__size="M").quantity == 2
+
 
 @pytest.mark.django_db
 class TestWriteBackAlPerfil:
@@ -229,11 +247,17 @@ class TestWriteBackAlPerfil:
         assert result.profile_updates == []
         assert AthleteStandardSize.objects.get(user=a1).updated_at == antes
 
-    def test_una_talla_invalida_no_toca_el_perfil(self):
-        order, product, (a1, a2, a3) = setup_team_roster(sizes=["S", "M"])
+    def test_una_talla_valida_del_producto_pero_fuera_de_la_escala_no_toca_el_perfil(self):
+        """Un 42 de calzado es una talla legitima del producto y NO pertenece a
+        la escala XS-XXL del alumno: nunca debe escribirse en su perfil."""
+        order, product, (a1, a2, a3) = setup_team_roster(sizes=["S", "M", "42"])
 
-        OrderItemSizeAssignmentService.reconcile(
-            order, product, {a1.id: "XXL"}, viewer=order.created_by
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "42"}, viewer=order.created_by
         )
 
+        assert result.ok
+        assert result.profile_updates == []
         assert not AthleteStandardSize.objects.filter(user=a1).exists()
+        # La asignacion en el pedido SI ocurre: el producto ofrece esa talla.
+        assert order.items.get(size_variant__size="42").athletes.count() == 1

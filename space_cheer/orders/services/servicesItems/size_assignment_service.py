@@ -11,7 +11,7 @@ from dataclasses import dataclass, field as dataclass_field
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from orders.models import OrderItem, OrderItemAthlete
+from orders.models import Order, OrderItem, OrderItemAthlete
 
 
 @dataclass
@@ -43,6 +43,14 @@ class OrderItemSizeAssignmentService:
 
         if not order.can_edit_general():
             raise ValidationError("La orden no es editable")
+
+        # Lock a nivel de la ORDEN, no de los items: select_for_update sobre los
+        # items existentes no puede bloquear una fila que todavia no existe, asi
+        # que dos coaches creando la misma talla por primera vez creaban DOS
+        # OrderItem para (order, product, size_variant) y partian la cantidad en
+        # silencio. Serializar por orden cierra ese hueco sin migracion; un
+        # UniqueConstraint exigiria una y ademas no aplicaria a size_variant NULL.
+        Order.objects.select_for_update().get(pk=order.pk)
 
         # Lock: dos coaches del mismo equipo capturando a la vez es real.
         items = {
@@ -76,7 +84,6 @@ class OrderItemSizeAssignmentService:
 
             targets.setdefault(size, []).append(athlete_id)
 
-        assigned_ids = {aid for ids in targets.values() for aid in ids}
         changed = []
 
         # 1. Quitar filas que ya no corresponden (cambio de talla, vaciado, baja).
