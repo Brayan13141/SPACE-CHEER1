@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 from django.core.exceptions import PermissionDenied
+from django.urls import reverse
 
 from accounts.models import AthleteProfile, PiiAccessLog
 from orders.services.sizes.SizeGridService import SizeGridService
@@ -148,3 +149,63 @@ class TestSizeGridBuild:
         )
 
         assert assignments == {a1.id: "M"}
+
+
+def setup_view_case(client):
+    """Helper A NIVEL DE MODULO — lo usan TestSizeGridView, la clase de
+    auditoria y la del detalle del item. No instanciar una clase de test
+    desde otra."""
+    order, product, athletes = setup_team_roster(athlete_count=2)
+    client.force_login(order.created_by)
+    url = reverse(
+        "orders:order_product_sizes_grid",
+        args=[order.id, product.id],
+    )
+    return order, product, athletes, url
+
+
+@pytest.mark.django_db
+class TestSizeGridView:
+
+    def _setup(self, client):
+        return setup_view_case(client)
+
+    def test_get_renderiza_el_roster(self, client):
+        order, product, athletes, url = self._setup(client)
+
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert len(response.context["grid"].rows) == 2
+
+    def test_post_guarda_y_redirige_al_propio_grid(self, client):
+        order, product, (a1, a2), url = self._setup(client)
+
+        response = client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+
+        assert response.status_code == 302
+        assert response.url == url
+        assert order.items.count() == 2
+
+    def test_post_con_una_talla_invalida_rerenderiza_sin_perder_lo_tecleado(self, client):
+        order, product, (a1, a2), url = self._setup(client)
+        product.size_variants.filter(size="XXL").delete()
+
+        response = client.post(url, {f"size_{a1.id}": "XXL", f"size_{a2.id}": "L"})
+
+        assert response.status_code == 200
+        grid = response.context["grid"]
+        row = next(r for r in grid.rows if r.athlete_id == a1.id)
+        assert row.error
+        # La captura del otro alumno SI se guardo: fallo por fila, no por POST.
+        assert order.items.filter(size_variant__size="L").exists()
+
+    def test_post_sobre_orden_bloqueada_avisa_en_vez_de_reventar(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        order.measurements_locked = True
+        order.save()
+
+        response = client.post(url, {f"size_{a1.id}": "M"})
+
+        assert response.status_code == 200      # no 500, no 403 pelado
+        assert not order.items.exists()         # nada se guardo

@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="h4 mb-3">{% trans "Tallas" %} — {{ grid.product.name }}</h1>
+  <p class="text-secondary">
+    {% blocktrans with done=grid.assigned_count total=grid.total_count %}
+      {{ done }} de {{ total }} alumnos con talla asignada.
+    {% endblocktrans %}
+  </p>
+
+  {% comment %}
+    El mensaje va literal aqui: LOCKED_MESSAGE es un atributo de clase de
+    SizeGridService, NO del dataclass SizeGrid, asi que {{ grid.LOCKED_MESSAGE }}
+    renderizaria vacio y la pantalla no diria nada estando bloqueada.
+  {% endcomment %}
+  {% if grid.is_locked %}
+    <div class="alert alert-warning">
+      {% trans "Las tallas están cerradas o bloqueadas para esta orden." %}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle">
+        <thead>
+          <tr><th>{% trans "Alumno" %}</th><th>{% trans "Talla" %}</th></tr>
+        </thead>
+        <tbody>
+        {% for row in grid.rows %}
+          <tr>
+            <td>{{ row.athlete_name }}</td>
+            <td>
+              {% if row.editable %}
+                <select name="{{ row.input_name }}"
+                        class="form-select {% if row.error %}is-invalid{% endif %}">
+                  <option value="">—</option>
+                  {% for size in grid.sizes %}
+                    <option value="{{ size }}" {% if size == row.size %}selected{% endif %}>{{ size }}</option>
+                  {% endfor %}
+                </select>
+                {% if row.error %}<div class="invalid-feedback">{{ row.error }}</div>{% endif %}
+              {% else %}
+                {{ row.size|default:"—" }}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if grid.can_edit %}
+      <button type="submit" class="btn btn-primary">{% trans "Guardar tallas" %}</button>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
