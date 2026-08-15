@@ -54,6 +54,12 @@ class SizeGridService:
         if not OrderItemSizeAssignmentService.applies_to(product):
             raise PermissionDenied
 
+        if order.order_type != "TEAM":
+            # Espeja la guarda de reconcile(). Sin esto, _team_athletes() filtra
+            # por team=None, devuelve [] y la pantalla sale VACIA en vez de
+            # fallar: parece que el equipo no tiene alumnos.
+            raise PermissionDenied
+
         sizes = list(
             product.size_variants.order_by("size").values_list("size", flat=True)
         )

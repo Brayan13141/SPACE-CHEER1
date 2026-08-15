@@ -111,6 +111,13 @@ class TestSizeGridBuild:
         assert grid.can_edit is False
         assert grid.is_locked is True
 
+    def test_una_orden_que_no_es_de_equipo_no_arma_grid(self):
+        order, product, athletes = self._setup()
+        order.order_type = "PERSONAL"
+
+        with pytest.raises(PermissionDenied):
+            SizeGridService.build(order, product, order.created_by)
+
     def test_assignments_from_post_ignora_las_filas_ajenas(self):
         """SEGURIDAD: el tutor postea la celda de otro menor a mano y no pasa."""
         order, product, (a1, a2, a3) = self._setup()
