@@ -1,9 +1,14 @@
+from decimal import Decimal
+
 import pytest
 from django.core.exceptions import ValidationError
 
 from measures.models import AthleteStandardSize
 from orders.tests.factories import AthleteFactory
-from orders.models import OrderItemAthlete
+from orders.models import OrderItem, OrderItemAthlete
+from orders.services.servicesItems.size_assignment_service import (
+    OrderItemSizeAssignmentService,
+)
 from orders.tests.factories import (
     OrderItemFactory,
     ProductWithSizesFactory,
@@ -73,3 +78,124 @@ class TestOrderItemAthleteConTallaEstandar:
 
         with pytest.raises(ValidationError):
             OrderItemAthlete(order_item=item, athlete=athlete).full_clean()
+
+
+def setup_team_roster(sizes=None):
+    """Helper A NIVEL DE MODULO. Las demas clases de test de este archivo lo
+    llaman directamente: instanciar una clase de test desde otra
+    (TestX()._setup()) funciona por accidente en pytest y es lo que un reviewer
+    marca."""
+    order = TeamOrderFactory()
+    product = TeamProductWithSizesFactory(sizes=sizes)
+    athletes = [AthleteFactory() for _ in range(3)]
+    for athlete in athletes:
+        UserTeamMembershipFactory(user=athlete, team=order.owner_team)
+    return order, product, athletes
+
+
+@pytest.mark.django_db
+class TestConciliacion:
+
+    def _setup(self, sizes=None):
+        return setup_team_roster(sizes=sizes)
+
+    def test_crea_un_item_por_talla_con_su_cantidad(self):
+        order, product, (a1, a2, a3) = self._setup()
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product,
+            {a1.id: "M", a2.id: "M", a3.id: "L"},
+            viewer=order.created_by,
+        )
+
+        assert result.ok
+        items = {i.size_variant.size: i for i in order.items.all()}
+        assert set(items) == {"M", "L"}
+        assert items["M"].quantity == 2
+        assert items["L"].quantity == 1
+        assert set(items["M"].athletes.values_list("athlete_id", flat=True)) == {a1.id, a2.id}
+
+    def test_mover_de_talla_reubica_al_alumno_y_ajusta_cantidades(self):
+        order, product, (a1, a2, a3) = self._setup()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "L", a2.id: "M"}, viewer=order.created_by
+        )
+
+        items = {i.size_variant.size: i for i in order.items.all()}
+        assert items["M"].quantity == 1
+        assert items["L"].quantity == 1
+        assert items["L"].athletes.get().athlete_id == a1.id
+
+    def test_el_item_que_se_queda_sin_alumnos_se_elimina(self):
+        order, product, (a1, a2, a3) = self._setup()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M"}, viewer=order.created_by
+        )
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "L"}, viewer=order.created_by
+        )
+
+        assert not order.items.filter(size_variant__size="M").exists()
+
+    def test_captura_parcial_talla_vacia_no_bloquea_a_los_demas(self):
+        order, product, (a1, a2, a3) = self._setup()
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product,
+            {a1.id: "M", a2.id: "", a3.id: "L"},
+            viewer=order.created_by,
+        )
+
+        assert result.ok
+        assert order.items.count() == 2
+        assert not order.items.filter(athletes__athlete_id=a2.id).exists()
+
+    def test_talla_que_el_producto_no_ofrece_falla_solo_esa_fila(self):
+        order, product, (a1, a2, a3) = self._setup(sizes=["S", "M", "L"])
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product,
+            {a1.id: "M", a2.id: "XXL", a3.id: "L"},
+            viewer=order.created_by,
+        )
+
+        assert not result.ok
+        assert a2.id in result.errors
+        assert "XXL" in result.errors[a2.id]
+        # Las otras dos SI se guardaron: un valor malo no tumba la captura.
+        assert order.items.count() == 2
+
+    def test_el_precio_suma_los_adicionales_de_cada_talla(self):
+        order, product, (a1, a2, a3) = self._setup()
+        variant = product.size_variants.get(size="XL")
+        variant.additional_price = Decimal("100.00")
+        variant.save()
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "XL"}, viewer=order.created_by
+        )
+
+        items = {i.size_variant.size: i for i in order.items.all()}
+        assert items["M"].unit_price == product.base_price
+        assert items["XL"].unit_price == product.base_price + Decimal("100.00")
+
+    def test_alumno_que_ya_no_es_del_equipo_pierde_su_fila(self):
+        order, product, (a1, a2, a3) = self._setup()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+        membership = a2.team_memberships.get(team=order.owner_team)
+        membership.is_active = False
+        membership.save()
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+
+        assert a2.id in result.errors
+        assert order.items.get(size_variant__size="M").quantity == 1
