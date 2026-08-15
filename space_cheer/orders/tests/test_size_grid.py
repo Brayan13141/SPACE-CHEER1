@@ -11,6 +11,7 @@ from orders.tests.factories import (
     CoachFactory,
     TeamOrderFactory,
     TeamProductWithSizesFactory,
+    UserFactory,
     UserTeamMembershipFactory,
 )
 
@@ -110,6 +111,23 @@ class TestSizeGridBuild:
 
         assert grid.can_edit is False
         assert grid.is_locked is True
+
+    def test_el_coach_del_equipo_ve_todo_pero_no_escribe_si_no_creo_el_pedido(self):
+        """La rama es alcanzable cuando un ADMIN crea el pedido a nombre del
+        coach: el coach del equipo ve el roster completo (es Team.coach, asi que
+        visible_for_user lo incluye) pero no es created_by ni ADMIN, y por eso
+        can_write queda en False. Sin este test un refactor vuelve ese elif un
+        `True` plano y nada chilla."""
+        order, product, athletes = self._setup()
+        order.created_by = UserFactory()
+        order.save()
+        coach_del_equipo = order.owner_team.coach
+
+        grid = SizeGridService.build(order, product, coach_del_equipo)
+
+        assert len(grid.rows) == 3          # ve todas las filas
+        assert grid.can_edit is False       # y no puede escribir ninguna
+        assert grid.is_locked is False      # y NO es porque la orden este bloqueada
 
     def test_una_orden_que_no_es_de_equipo_no_arma_grid(self):
         order, product, athletes = self._setup()
