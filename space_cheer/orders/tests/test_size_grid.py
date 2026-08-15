@@ -209,3 +209,39 @@ class TestSizeGridView:
 
         assert response.status_code == 200      # no 500, no 403 pelado
         assert not order.items.exists()         # nada se guardo
+
+
+@pytest.mark.django_db
+class TestSizeGridAuditoria:
+
+    def test_ver_el_grid_deja_un_registro_por_alumno(self, client):
+        order, product, athletes, url = setup_view_case(client)
+
+        client.get(url)
+
+        logs = PiiAccessLog.objects.filter(access_type="VIEW_SIZE")
+        assert logs.count() == 2
+
+    def test_recargar_no_duplica_la_bitacora(self, client):
+        order, product, athletes, url = setup_view_case(client)
+
+        client.get(url)
+        client.get(url)
+
+        assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").count() == 2
+
+    def test_guardar_deja_edit_size_por_alumno_tocado(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": ""})
+
+        logs = PiiAccessLog.objects.filter(access_type="EDIT_SIZE")
+        assert list(logs.values_list("target_user_id", flat=True)) == [a1.id]
+
+    def test_un_post_rechazado_tambien_deja_rastro(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        product.size_variants.filter(size="XXL").delete()
+
+        client.post(url, {f"size_{a1.id}": "XXL"})
+
+        assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").exists()
