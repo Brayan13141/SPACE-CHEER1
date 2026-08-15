@@ -19,6 +19,7 @@ class SizeAssignmentResult:
     ok: bool
     errors: dict = dataclass_field(default_factory=dict)   # {athlete_id: mensaje}
     changed_athletes: list = dataclass_field(default_factory=list)
+    profile_updates: list = dataclass_field(default_factory=list)
 
 
 class OrderItemSizeAssignmentService:
@@ -118,12 +119,17 @@ class OrderItemSizeAssignmentService:
                 item.quantity = count
                 item.save()
 
+        profile_updates = OrderItemSizeAssignmentService._sync_profile_sizes(
+            targets, viewer
+        )
+
         order.invalidate_cache()
 
         return SizeAssignmentResult(
             ok=not errors,
             errors=errors,
             changed_athletes=changed,
+            profile_updates=profile_updates,
         )
 
     @staticmethod
@@ -138,3 +144,36 @@ class OrderItemSizeAssignmentService:
                 role_in_team="ATHLETE",
             ).values_list("user_id", flat=True)
         )
+
+    @staticmethod
+    def _sync_profile_sizes(targets, viewer):
+        """La talla capturada en el pedido actualiza la del alumno (Decision 5).
+
+        Solo si cambio: un guardado que no mueve la talla no debe tocar
+        updated_at ni dejar auditoria, o la bitacora se llena de ruido y deja
+        de servir para investigar.
+        """
+        from measures.models import AthleteStandardSize
+
+        valid_sizes = {code for code, _ in AthleteStandardSize.SIZE_CHOICES}
+        updated = []
+
+        for size, athlete_ids in targets.items():
+            if size not in valid_sizes:
+                # El producto ofrece una talla fuera de la escala del alumno
+                # (p. ej. calzado numerico): no se adivina nada.
+                continue
+
+            for athlete_id in athlete_ids:
+                current = AthleteStandardSize.objects.filter(
+                    user_id=athlete_id
+                ).first()
+                if current is not None and current.size == size:
+                    continue
+                AthleteStandardSize.objects.update_or_create(
+                    user_id=athlete_id,
+                    defaults={"size": size, "updated_by": viewer},
+                )
+                updated.append(athlete_id)
+
+        return updated

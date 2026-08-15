@@ -10,6 +10,7 @@ from orders.services.servicesItems.size_assignment_service import (
     OrderItemSizeAssignmentService,
 )
 from orders.tests.factories import (
+    AthleteStandardSizeFactory,
     OrderItemFactory,
     ProductWithSizesFactory,
     TeamOrderFactory,
@@ -199,3 +200,40 @@ class TestConciliacion:
 
         assert a2.id in result.errors
         assert order.items.get(size_variant__size="M").quantity == 1
+
+
+@pytest.mark.django_db
+class TestWriteBackAlPerfil:
+
+    def test_guardar_el_roster_actualiza_la_talla_del_alumno(self):
+        order, product, (a1, a2, a3) = setup_team_roster()
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "L"}, viewer=order.created_by
+        )
+
+        a1.refresh_from_db()
+        assert a1.standard_size.size == "L"
+        assert a1.standard_size.updated_by_id == order.created_by.id
+        assert a1.id in result.profile_updates
+
+    def test_no_escribe_cuando_la_talla_no_cambio(self):
+        order, product, (a1, a2, a3) = setup_team_roster()
+        AthleteStandardSizeFactory(user=a1, size="M")
+        antes = AthleteStandardSize.objects.get(user=a1).updated_at
+
+        result = OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M"}, viewer=order.created_by
+        )
+
+        assert result.profile_updates == []
+        assert AthleteStandardSize.objects.get(user=a1).updated_at == antes
+
+    def test_una_talla_invalida_no_toca_el_perfil(self):
+        order, product, (a1, a2, a3) = setup_team_roster(sizes=["S", "M"])
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "XXL"}, viewer=order.created_by
+        )
+
+        assert not AthleteStandardSize.objects.filter(user=a1).exists()
