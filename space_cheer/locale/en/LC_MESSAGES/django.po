@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-12 22:44-0600\n"
+"POT-Creation-Date: 2026-08-17 22:46-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -527,13 +527,17 @@ msgstr ""
 msgid ""
 "Página pública de Space Cheer: conoce nuestros servicios, competencias y "
 "uniformes."
-msgstr "Space Cheer's public page: learn about our services, competitions and uniforms."
+msgstr ""
+"Space Cheer's public page: learn about our services, competitions and "
+"uniforms."
 
 #: .\core\help_registry.py:201
 msgid ""
 "Usa el menú superior para volver a tu panel o navegar a la tienda y "
 "competencias."
-msgstr "Use the top menu to return to your dashboard or browse the store and competitions."
+msgstr ""
+"Use the top menu to return to your dashboard or browse the store and "
+"competitions."
 
 #: .\core\help_registry.py:204
 msgid ""
@@ -544,19 +548,23 @@ msgstr "Edit the public page content: the texts and images visitors see."
 #: .\core\help_registry.py:205
 msgid ""
 "Los cambios se publican de inmediato — revisa la landing después de guardar."
-msgstr "Changes are published immediately — review the landing page after saving."
+msgstr ""
+"Changes are published immediately — review the landing page after saving."
 
 #: .\core\help_registry.py:208
 msgid ""
 "¿Tienes dudas o problemas? Escríbenos con este formulario y te responderemos "
 "por correo."
-msgstr "Questions or problems? Write to us with this form and we'll reply by email."
+msgstr ""
+"Questions or problems? Write to us with this form and we'll reply by email."
 
 #: .\core\help_registry.py:209
 msgid ""
 "Incluye todos los detalles posibles (pedido, equipo, pantalla) para ayudarte "
 "más rápido."
-msgstr "Include as many details as possible (order, team, screen) so we can help you faster."
+msgstr ""
+"Include as many details as possible (order, team, screen) so we can help you "
+"faster."
 
 #: .\core\help_registry.py:214
 msgid "Configura las preferencias de tu cuenta desde esta pantalla."
@@ -566,31 +574,38 @@ msgstr "Configure your account preferences from this screen."
 msgid ""
 "Si desactivaste los consejos de ayuda (el botón ? flotante), aquí puedes "
 "reactivarlos."
-msgstr "If you turned off the help tips (the floating ? button), you can re-enable them here."
+msgstr ""
+"If you turned off the help tips (the floating ? button), you can re-enable "
+"them here."
 
 #: .\core\help_registry.py:218
 msgid ""
 "Tus direcciones guardadas. Se usan como datos de contacto y entrega en tus "
 "pedidos."
-msgstr "Your saved addresses. They are used as contact and delivery details on your orders."
+msgstr ""
+"Your saved addresses. They are used as contact and delivery details on your "
+"orders."
 
 #: .\core\help_registry.py:219
 msgid ""
 "Mantén al menos una dirección completa y actualizada para evitar retrasos en "
 "envíos."
-msgstr "Keep at least one complete, up-to-date address to avoid shipping delays."
+msgstr ""
+"Keep at least one complete, up-to-date address to avoid shipping delays."
 
 #: .\core\help_registry.py:222
 msgid ""
 "Captura tu dirección completa: calle, número, colonia, ciudad y código "
 "postal."
-msgstr "Enter your full address: street, number, neighborhood, city and zip code."
+msgstr ""
+"Enter your full address: street, number, neighborhood, city and zip code."
 
 #: .\core\help_registry.py:223
 msgid ""
 "Verifica bien los datos — esta dirección puede usarse para la entrega de "
 "pedidos."
-msgstr "Double-check the details — this address may be used for order delivery."
+msgstr ""
+"Double-check the details — this address may be used for order delivery."
 
 #: .\core\help_registry.py:226
 msgid "Corrige o actualiza los datos de esta dirección."
@@ -604,25 +619,31 @@ msgstr "New orders will use the updated information."
 msgid ""
 "La CURP se solicita por requisito legal para atletas. Verifica que coincida "
 "con tu documento oficial."
-msgstr "The CURP is required by law for athletes. Make sure it matches your official document."
+msgstr ""
+"The CURP is required by law for athletes. Make sure it matches your official "
+"document."
 
 #: .\core\help_registry.py:231
 msgid ""
 "Tus datos están protegidos: el acceso a esta información queda registrado y "
 "auditado."
-msgstr "Your data is protected: access to this information is logged and audited."
+msgstr ""
+"Your data is protected: access to this information is logged and audited."
 
 #: .\core\help_registry.py:234
 msgid ""
 "Importa varios atletas a la vez: descarga la plantilla, llénala y súbela "
 "aquí."
-msgstr "Import several athletes at once: download the template, fill it in and upload it here."
+msgstr ""
+"Import several athletes at once: download the template, fill it in and "
+"upload it here."
 
 #: .\core\help_registry.py:235
 msgid ""
 "Al terminar verás un resumen con las filas aceptadas y los errores a "
 "corregir."
-msgstr "When finished you'll see a summary with accepted rows and errors to fix."
+msgstr ""
+"When finished you'll see a summary with accepted rows and errors to fix."
 
 #: .\core\help_registry.py:238
 msgid "Tu solicitud de HeadCoach está en revisión por el administrador."
@@ -632,7 +653,9 @@ msgstr "Your HeadCoach application is under review by the administrator."
 msgid ""
 "Recibirás un correo cuando sea aprobada y podrás acceder a todas las "
 "funciones."
-msgstr "You'll receive an email once it's approved and you'll get access to all features."
+msgstr ""
+"You'll receive an email once it's approved and you'll get access to all "
+"features."
 
 #: .\core\help_registry.py:242
 msgid "Tu solicitud de HeadCoach fue rechazada."
@@ -642,31 +665,41 @@ msgstr "Your HeadCoach application was rejected."
 msgid ""
 "Si crees que es un error, contáctanos desde la página de contacto para "
 "revisarlo."
-msgstr "If you think this is a mistake, contact us from the contact page so we can review it."
+msgstr ""
+"If you think this is a mistake, contact us from the contact page so we can "
+"review it."
 
 #: .\core\help_registry.py:246
 msgid ""
 "Al desactivar tu cuenta perderás acceso a tus pedidos, equipos y datos de la "
 "plataforma."
-msgstr "Deactivating your account means losing access to your orders, teams and platform data."
+msgstr ""
+"Deactivating your account means losing access to your orders, teams and "
+"platform data."
 
 #: .\core\help_registry.py:247
 msgid ""
 "Si solo quieres dejar de recibir avisos, mejor ajusta tu configuración de "
 "perfil."
-msgstr "If you only want to stop receiving notifications, adjust your profile settings instead."
+msgstr ""
+"If you only want to stop receiving notifications, adjust your profile "
+"settings instead."
 
 #: .\core\help_registry.py:252
 msgid ""
 "Vincula un tutor al atleta menor de edad. Es requisito para que el menor use "
 "la plataforma."
-msgstr "Link a guardian to the underage athlete. It's required for the minor to use the platform."
+msgstr ""
+"Link a guardian to the underage athlete. It's required for the minor to use "
+"the platform."
 
 #: .\core\help_registry.py:253
 msgid ""
 "El tutor podrá ver los pedidos y datos del atleta, y autorizar su "
 "información."
-msgstr "The guardian can view the athlete's orders and data, and authorize their information."
+msgstr ""
+"The guardian can view the athlete's orders and data, and authorize their "
+"information."
 
 #: .\core\help_registry.py:256
 msgid "Tu cuenta está bloqueada porque aún no tienes un tutor vinculado."
@@ -676,31 +709,40 @@ msgstr "Your account is blocked because you don't have a linked guardian yet."
 msgid ""
 "Pide a tu coach o headcoach que vincule a tu papá, mamá o tutor para "
 "continuar."
-msgstr "Ask your coach or headcoach to link your parent or guardian to continue."
+msgstr ""
+"Ask your coach or headcoach to link your parent or guardian to continue."
 
 #: .\core\help_registry.py:260
 msgid ""
 "Crea un pedido en nombre de tu atleta a cargo, eligiendo productos del "
 "catálogo."
-msgstr "Create an order on behalf of the athlete in your care, choosing products from the catalog."
+msgstr ""
+"Create an order on behalf of the athlete in your care, choosing products "
+"from the catalog."
 
 #: .\core\help_registry.py:261
 msgid ""
 "Después podrás capturar sus medidas y dar seguimiento al pedido desde tu "
 "panel."
-msgstr "Afterwards you can enter their measurements and track the order from your dashboard."
+msgstr ""
+"Afterwards you can enter their measurements and track the order from your "
+"dashboard."
 
 #: .\core\help_registry.py:266
 msgid ""
 "Edita las medidas corporales del atleta. Se usan en productos con tallas por "
 "medidas."
-msgstr "Edit the athlete's body measurements. They are used in measurement-sized products."
+msgstr ""
+"Edit the athlete's body measurements. They are used in measurement-sized "
+"products."
 
 #: .\core\help_registry.py:267
 msgid ""
 "Captura con cinta métrica y verifica dos veces — de esto depende que el "
 "uniforme quede bien."
-msgstr "Measure with a tape measure and double-check — a well-fitting uniform depends on this."
+msgstr ""
+"Measure with a tape measure and double-check — a well-fitting uniform "
+"depends on this."
 
 #: .\core\help_registry.py:270
 msgid ""
@@ -719,7 +761,9 @@ msgstr "Add support staff (crew) to your team with their basic information."
 msgid ""
 "El crew participa en la operación del equipo pero no captura medidas de "
 "atleta."
-msgstr "Crew members take part in team operations but don't enter athlete measurements."
+msgstr ""
+"Crew members take part in team operations but don't enter athlete "
+"measurements."
 
 #: .\core\help_registry.py:280
 msgid "Los equipos donde participas como coach."
@@ -750,13 +794,16 @@ msgstr "Categories are also used when registering teams for competitions."
 msgid ""
 "Miembros del equipo: acepta o rechaza solicitudes, cambia roles o retira "
 "miembros."
-msgstr "Team members: accept or reject requests, change roles or remove members."
+msgstr ""
+"Team members: accept or reject requests, change roles or remove members."
 
 #: .\core\help_registry.py:293
 msgid ""
 "Si el código de invitación se filtró, puedes regenerarlo — el anterior deja "
 "de funcionar."
-msgstr "If the invitation code leaked, you can regenerate it — the old one stops working."
+msgstr ""
+"If the invitation code leaked, you can regenerate it — the old one stops "
+"working."
 
 #: .\core\help_registry.py:298
 msgid "Edita los datos generales del pedido mientras siga siendo editable."
@@ -766,7 +813,8 @@ msgstr "Edit the order's general details while it is still editable."
 msgid ""
 "Una vez enviado a revisión, los cambios mayores los gestiona el "
 "administrador."
-msgstr "Once submitted for review, major changes are handled by the administrator."
+msgstr ""
+"Once submitted for review, major changes are handled by the administrator."
 
 #: .\core\help_registry.py:302
 msgid "Captura los datos de contacto y entrega del pedido."
@@ -775,29 +823,38 @@ msgstr "Enter the order's contact and delivery details."
 #: .\core\help_registry.py:303
 msgid ""
 "Con esta información te avisamos de avances y coordinamos la entrega final."
-msgstr "We use this information to notify you of progress and coordinate the final delivery."
+msgstr ""
+"We use this information to notify you of progress and coordinate the final "
+"delivery."
 
 #: .\core\help_registry.py:306
 msgid "Detalle del artículo: los atletas asignados y el estado de sus medidas."
-msgstr "Item detail: the assigned athletes and the status of their measurements."
+msgstr ""
+"Item detail: the assigned athletes and the status of their measurements."
 
 #: .\core\help_registry.py:307
 msgid ""
 "Puedes importar de golpe a los atletas del equipo en lugar de agregarlos uno "
 "por uno."
-msgstr "You can import the team's athletes in one go instead of adding them one by one."
+msgstr ""
+"You can import the team's athletes in one go instead of adding them one by "
+"one."
 
 #: .\core\help_registry.py:310
 msgid ""
 "Este producto es personalizado por equipo: elige a qué equipo pertenece "
 "antes de agregarlo."
-msgstr "This product is team-customized: choose which team it belongs to before adding it."
+msgstr ""
+"This product is team-customized: choose which team it belongs to before "
+"adding it."
 
 #: .\core\help_registry.py:311
 msgid ""
 "Así el pedido queda ligado al equipo correcto y sus atletas podrán capturar "
 "medidas."
-msgstr "This links the order to the right team so its athletes can enter their measurements."
+msgstr ""
+"This links the order to the right team so its athletes can enter their "
+"measurements."
 
 #: .\core\help_registry.py:316
 msgid "Clientes de mostrador para pedidos offline (fuera de la plataforma)."
@@ -811,7 +868,9 @@ msgstr "Create the customer here before placing their offline order."
 msgid ""
 "Levanta un pedido de mostrador: elige cliente, productos internos y "
 "plantilla de producción."
-msgstr "Place a walk-in order: choose the customer, internal products and a production template."
+msgstr ""
+"Place a walk-in order: choose the customer, internal products and a "
+"production template."
 
 #: .\core\help_registry.py:321
 msgid ""
@@ -822,17 +881,22 @@ msgstr "Payments and deposits are recorded later, from the order detail."
 msgid ""
 "Tu área de trabajo: los roles que tienes asignados y las etapas donde eres "
 "responsable o auxiliar."
-msgstr "Your work area: your assigned roles and the stages where you are responsible or auxiliary."
+msgstr ""
+"Your work area: your assigned roles and the stages where you are responsible "
+"or auxiliary."
 
 #: .\core\help_registry.py:327
 msgid "También ves aquí los reportes de error que has generado y su estado."
-msgstr "You can also see the error reports you have created and their status here."
+msgstr ""
+"You can also see the error reports you have created and their status here."
 
 #: .\core\help_registry.py:330
 msgid ""
 "El reglamento de producción: quién es responsable de cada etapa y quiénes "
 "son auxiliares."
-msgstr "The production rulebook: who is responsible for each stage and who the auxiliaries are."
+msgstr ""
+"The production rulebook: who is responsible for each stage and who the "
+"auxiliaries are."
 
 #: .\core\help_registry.py:331
 msgid ""
@@ -848,27 +912,35 @@ msgstr "The order's production job: all its tasks by item and stage."
 msgid ""
 "Asigna operarios a cada tarea, márcala urgente o reasigna en bloque si hace "
 "falta."
-msgstr "Assign workers to each task, mark it urgent or bulk-reassign if needed."
+msgstr ""
+"Assign workers to each task, mark it urgent or bulk-reassign if needed."
 
 #: .\core\help_registry.py:338
 msgid ""
 "Detalle del reporte de error: qué pasó, en qué etapa y las acciones "
 "correctivas."
-msgstr "Error report detail: what happened, at which stage, and the corrective actions."
+msgstr ""
+"Error report detail: what happened, at which stage, and the corrective "
+"actions."
 
 #: .\core\help_registry.py:339
 msgid "El administrador lo revisa y decide si la prenda requiere reposición."
-msgstr "The administrator reviews it and decides whether the garment needs a replacement."
+msgstr ""
+"The administrator reviews it and decides whether the garment needs a "
+"replacement."
 
 #: .\core\help_registry.py:342
 msgid ""
 "Las medidas capturadas de este artículo, tal como las verá el piso de "
 "producción."
-msgstr "The measurements captured for this item, as the production floor will see them."
+msgstr ""
+"The measurements captured for this item, as the production floor will see "
+"them."
 
 #: .\core\help_registry.py:343
 msgid "Si algo no cuadra con la prenda física, genera un reporte de error."
-msgstr "If something doesn't match the physical garment, create an error report."
+msgstr ""
+"If something doesn't match the physical garment, create an error report."
 
 #: .\core\help_registry.py:346
 msgid "El diseño aprobado de la orden, para consulta durante la producción."
@@ -877,31 +949,40 @@ msgstr "The order's approved design, for reference during production."
 #: .\core\help_registry.py:347
 msgid ""
 "Produce siempre contra este diseño — es el que autorizó el administrador."
-msgstr "Always produce against this design — it's the one the administrator authorized."
+msgstr ""
+"Always produce against this design — it's the one the administrator "
+"authorized."
 
 #: .\core\help_registry.py:350
 msgid ""
 "Define el responsable primario y los auxiliares de cada etapa — esto es el "
 "reglamento."
-msgstr "Define the primary responsible and auxiliaries for each stage — this is the rulebook."
+msgstr ""
+"Define the primary responsible and auxiliaries for each stage — this is the "
+"rulebook."
 
 #: .\core\help_registry.py:351
 msgid ""
 "Los cambios se reflejan de inmediato en la vista de reglamento y en Mi Área "
 "de los operarios."
-msgstr "Changes are reflected immediately in the rulebook view and in the workers' My Area."
+msgstr ""
+"Changes are reflected immediately in the rulebook view and in the workers' "
+"My Area."
 
 #: .\core\help_registry.py:354
 msgid ""
 "Plantillas de producción: conjuntos de etapas predefinidos para crear "
 "pedidos más rápido."
-msgstr "Production templates: predefined sets of stages to create orders faster."
+msgstr ""
+"Production templates: predefined sets of stages to create orders faster."
 
 #: .\core\help_registry.py:355
 msgid ""
 "Se usan al levantar pedidos offline para no configurar las etapas una por "
 "una."
-msgstr "They are used when placing offline orders so you don't configure stages one by one."
+msgstr ""
+"They are used when placing offline orders so you don't configure stages one "
+"by one."
 
 #: .\core\help_registry.py:358
 msgid "Matriz producto × etapa: marca qué etapas aplican a cada producto."
@@ -910,7 +991,9 @@ msgstr "Product × stage matrix: mark which stages apply to each product."
 #: .\core\help_registry.py:359
 msgid ""
 "Al enviar un pedido a producción, esta matriz define qué tareas se generan."
-msgstr "When an order is sent to production, this matrix defines which tasks are generated."
+msgstr ""
+"When an order is sent to production, this matrix defines which tasks are "
+"generated."
 
 #: .\core\help_registry.py:362
 msgid ""
@@ -930,29 +1013,37 @@ msgstr "Add or remove workers from this production role."
 msgid ""
 "Las tareas ya asignadas no cambian solas: reasígnalas desde el detalle del "
 "trabajo."
-msgstr "Already-assigned tasks don't change on their own: reassign them from the job detail."
+msgstr ""
+"Already-assigned tasks don't change on their own: reassign them from the job "
+"detail."
 
 #: .\core\help_registry.py:372
 msgid ""
 "Configura el producto: tipo de uso (global, por equipo o por atleta), tallas "
 "y alcance."
-msgstr "Configure the product: usage type (global, per team or per athlete), sizes and scope."
+msgstr ""
+"Configure the product: usage type (global, per team or per athlete), sizes "
+"and scope."
 
 #: .\core\help_registry.py:373
 msgid ""
 "Ojo: una vez usado en un pedido, el tipo de uso y la estrategia de tallas "
 "quedan fijos."
-msgstr "Note: once used in an order, the usage type and size strategy become fixed."
+msgstr ""
+"Note: once used in an order, the usage type and size strategy become fixed."
 
 #: .\core\help_registry.py:376
 msgid ""
 "Elige una plantilla base para crear el producto con su configuración "
 "precargada."
-msgstr "Choose a base template to create the product with its configuration preloaded."
+msgstr ""
+"Choose a base template to create the product with its configuration "
+"preloaded."
 
 #: .\core\help_registry.py:377
 msgid "Después podrás ajustar nombre, precio, tallas y campos de medida."
-msgstr "Afterwards you can adjust the name, price, sizes and measurement fields."
+msgstr ""
+"Afterwards you can adjust the name, price, sizes and measurement fields."
 
 #: .\core\help_registry.py:382
 msgid "Edita los datos del evento: fechas, sede y categorías disponibles."
@@ -962,17 +1053,22 @@ msgstr "Edit the event's details: dates, venue and available categories."
 msgid ""
 "Si el evento ya tiene registros, avisa a los equipos de cualquier cambio "
 "importante."
-msgstr "If the event already has registrations, notify the teams of any important change."
+msgstr ""
+"If the event already has registrations, notify the teams of any important "
+"change."
 
 #: .\core\help_registry.py:386
 msgid ""
 "Los registros de tus equipos en competencias y su estado (pendiente, "
 "aceptado, rechazado)."
-msgstr "Your teams' competition registrations and their status (pending, accepted, rejected)."
+msgstr ""
+"Your teams' competition registrations and their status (pending, accepted, "
+"rejected)."
 
 #: .\core\help_registry.py:387
 msgid "Puedes retirar un registro si tu equipo ya no participará."
-msgstr "You can withdraw a registration if your team will no longer participate."
+msgstr ""
+"You can withdraw a registration if your team will no longer participate."
 
 #: .\core\help_registry.py:390
 msgid "Registra a tu equipo en este evento eligiendo la categoría adecuada."
@@ -982,7 +1078,9 @@ msgstr "Register your team for this event by choosing the right category."
 msgid ""
 "Hazlo antes del cierre de inscripciones — el organizador aceptará o "
 "rechazará el registro."
-msgstr "Do it before registration closes — the organizer will accept or reject the registration."
+msgstr ""
+"Do it before registration closes — the organizer will accept or reject the "
+"registration."
 
 #: .\core\help_registry.py:394
 msgid "Los equipos registrados en el evento. Acepta o rechaza cada solicitud."
@@ -991,7 +1089,8 @@ msgstr "The teams registered for the event. Accept or reject each request."
 #: .\core\help_registry.py:395
 msgid ""
 "Solo los registros aceptados participan y aparecen en el panel de jueces."
-msgstr "Only accepted registrations participate and appear in the judges' panel."
+msgstr ""
+"Only accepted registrations participate and appear in the judges' panel."
 
 #: .\core\help_registry.py:398
 msgid "Asigna jueces y staff al evento con su función específica."
@@ -1009,7 +1108,9 @@ msgstr "Define the event's scoring criteria and their weighting."
 msgid ""
 "Los jueces calificarán cada rutina criterio por criterio según esta "
 "configuración."
-msgstr "Judges will score each routine criterion by criterion according to this setup."
+msgstr ""
+"Judges will score each routine criterion by criterion according to this "
+"setup."
 
 #: .\core\help_registry.py:406
 msgid "Captura o corrige calificaciones de los equipos participantes."
@@ -1019,7 +1120,9 @@ msgstr "Enter or correct scores for the participating teams."
 msgid ""
 "Úsalo para ajustes administrativos; los jueces capturan desde su propio "
 "panel."
-msgstr "Use it for administrative adjustments; judges enter scores from their own panel."
+msgstr ""
+"Use it for administrative adjustments; judges enter scores from their own "
+"panel."
 
 #: .\core\help_registry.py:410
 msgid "Revisa y publica los resultados finales del evento."
@@ -1033,7 +1136,8 @@ msgstr "Once published, teams can view them on the event page."
 #: .\core\help_registry.py:414
 msgid ""
 "Tu panel de juez: califica cada rutina según los criterios configurados."
-msgstr "Your judge panel: score each routine according to the configured criteria."
+msgstr ""
+"Your judge panel: score each routine according to the configured criteria."
 
 #: .\core\help_registry.py:415
 msgid ""
@@ -1133,7 +1237,8 @@ msgstr "Stay detail: guest, dates, assigned room and bed."
 msgid ""
 "Desde aquí confirmas, asignas habitación/cama y registras check-in y check-"
 "out."
-msgstr "From here you confirm, assign room/bed and record check-in and check-out."
+msgstr ""
+"From here you confirm, assign room/bed and record check-in and check-out."
 
 #: .\core\help_registry.py:464
 msgid "Confirma la estancia para apartar el lugar del huésped."
@@ -1164,11 +1269,14 @@ msgstr "Take into account the preferences registered by the guest."
 msgid ""
 "Registra tus preferencias de hospedaje: con quién compartir y qué "
 "características necesitas."
-msgstr "Register your lodging preferences: who to share with and what features you need."
+msgstr ""
+"Register your lodging preferences: who to share with and what features you "
+"need."
 
 #: .\core\help_registry.py:477
 msgid "El organizador las toma en cuenta al asignarte habitación y cama."
-msgstr "The organizer takes them into account when assigning your room and bed."
+msgstr ""
+"The organizer takes them into account when assigning your room and bed."
 
 #: .\core\help_registry.py:480
 msgid ""
@@ -1205,8 +1313,8 @@ msgstr "Rejection reason"
 
 #: .\events\models.py:23 .\templates\events\admin\results_manage.html:93
 #: .\templates\events\event_detail.html:430
-#: .\templates\orders\admin\order_detail.html:661
-#: .\templates\orders\users\order_detail.html:684
+#: .\templates\orders\admin\order_detail.html:708
+#: .\templates\orders\users\order_detail.html:763
 #: .\templates\orders\users\order_list.html:124
 msgid "Borrador"
 msgstr "Draft"
@@ -1224,6 +1332,7 @@ msgid "En progreso"
 msgstr "In Progress"
 
 #: .\events\models.py:27
+#: .\production\templates\production\admin_overview.html:86
 msgid "Completado"
 msgstr "Completed"
 
@@ -1302,6 +1411,7 @@ msgstr "Event type"
 #: .\templates\events\coach\my_registrations.html:36
 #: .\templates\orders\admin\order_list.html:63
 #: .\templates\orders\admin\order_list.html:112
+#: .\templates\orders\items\_measurements_grid.html:19
 #: .\templates\orders\users\order_list.html:90
 #: .\templates\products\product_list.html:46
 #: .\templates\products\product_list.html:81
@@ -1388,7 +1498,7 @@ msgid "Categoría de equipo"
 msgstr "Team category"
 
 #: .\events\models.py:135 .\events\models.py:377
-#: .\production\templates\production\admin_overview.html:68
+#: .\production\templates\production\admin_overview.html:83
 #: .\production\templates\production\config\operario_detail.html:233
 #: .\production\templates\production\config\plantillas.html:134
 #: .\production\templates\production\config\product_stages_matrix.html:162
@@ -1412,7 +1522,8 @@ msgstr "Event categories"
 
 #: .\events\models.py:165 .\templates\events\admin\registrations.html:37
 #: .\templates\events\coach\my_registrations.html:55
-#: .\templates\orders\admin\order_detail.html:395
+#: .\templates\orders\admin\order_detail.html:426
+#: .\templates\orders\items\_measurements_grid.html:48
 #: .\templates\orders\users\order_list.html:128
 #: .\templates\teams\athlete_team.html:63
 msgid "Pendiente"
@@ -1451,8 +1562,8 @@ msgstr "Category"
 #: .\templates\orders\admin\order_detail.html:118
 #: .\templates\orders\admin\order_detail.html:165
 #: .\templates\orders\admin\order_detail.html:202
-#: .\templates\orders\admin\order_detail.html:433
-#: .\templates\orders\admin\order_detail.html:823
+#: .\templates\orders\admin\order_detail.html:480
+#: .\templates\orders\admin\order_detail.html:870
 msgid "Notas"
 msgstr "Notes"
 
@@ -1545,7 +1656,7 @@ msgstr "Staff roles"
 #: .\templates\account\profile\edit.html:74
 #: .\templates\coach\crew\edit_owned_user.html:39
 #: .\templates\events\admin\staff_manage.html:89
-#: .\templates\orders\admin\order_detail.html:821
+#: .\templates\orders\admin\order_detail.html:868
 msgid "Usuario"
 msgstr "User"
 
@@ -1590,10 +1701,10 @@ msgstr "Preliminary"
 #: .\events\models.py:416 .\events\models.py:488
 #: .\templates\events\admin\results_manage.html:44
 #: .\templates\events\judge\panel.html:46
-#: .\templates\orders\admin\order_detail.html:628
-#: .\templates\orders\admin\order_detail.html:659
-#: .\templates\orders\users\order_detail.html:655
-#: .\templates\orders\users\order_detail.html:682
+#: .\templates\orders\admin\order_detail.html:675
+#: .\templates\orders\admin\order_detail.html:706
+#: .\templates\orders\users\order_detail.html:734
+#: .\templates\orders\users\order_detail.html:761
 msgid "Final"
 msgstr "Final"
 
@@ -1674,28 +1785,29 @@ msgid "El lugar debe ser 1 o mayor."
 msgstr "The place must be 1 or greater."
 
 #: .\production\templates\production\admin_overview.html:8
-#: .\templates\core\base.html:773
+#: .\templates\core\base.html:775
 msgid "Panel de Producción"
 msgstr "Production Panel"
 
 #: .\production\templates\production\admin_overview.html:17
 #: .\production\templates\production\config\operario_detail.html:160
-#: .\production\templates\production\config\roles.html:27
-#: .\templates\core\base.html:798
+#: .\production\templates\production\config\roles.html:36
+#: .\production\templates\production\config\roles.html:122
+#: .\templates\core\base.html:800
 msgid "Etapas"
 msgstr "Stages"
 
 #: .\production\templates\production\admin_overview.html:20
 #: .\production\templates\production\config\operarios.html:10
 #: .\production\templates\production\config\stages.html:11
-#: .\templates\core\base.html:801
+#: .\templates\core\base.html:803
 msgid "Roles"
 msgstr "Roles"
 
 #: .\production\templates\production\admin_overview.html:23
 #: .\production\templates\production\config\operario_detail.html:9
-#: .\production\templates\production\config\roles.html:60
-#: .\templates\core\base.html:795
+#: .\production\templates\production\config\roles.html:78
+#: .\templates\core\base.html:797
 msgid "Operarios"
 msgstr "Workers"
 
@@ -1730,27 +1842,58 @@ msgstr "All"
 msgid "Sin asignar"
 msgstr "Unassigned"
 
-#: .\production\templates\production\admin_overview.html:69
+#: .\production\templates\production\admin_overview.html:61
+#, fuzzy
+#| msgid "Completada"
+msgid "Completadas"
+msgstr "Completed"
+
+#: .\production\templates\production\admin_overview.html:66
+#, fuzzy
+#| msgid "Detalle"
+msgid "Del"
+msgstr "Detail"
+
+#: .\production\templates\production\admin_overview.html:68
+msgid "al"
+msgstr "to"
+
+#: .\production\templates\production\admin_overview.html:70
+#, fuzzy
+#| msgid "Filtros"
+msgid "Filtrar"
+msgstr "Filters"
+
+#: .\production\templates\production\admin_overview.html:72
+#: .\templates\products\product_list.html:59
+msgid "Limpiar"
+msgstr "Clear"
+
+#: .\production\templates\production\admin_overview.html:84
 msgid "Urgente"
 msgstr "Urgent"
 
-#: .\production\templates\production\admin_overview.html:73
+#: .\production\templates\production\admin_overview.html:91
 msgid "Detalle"
 msgstr "Detail"
 
-#: .\production\templates\production\admin_overview.html:78
+#: .\production\templates\production\admin_overview.html:97
 msgid "Quitar urgente"
 msgstr "Remove urgent"
 
-#: .\production\templates\production\admin_overview.html:78
+#: .\production\templates\production\admin_overview.html:97
 msgid "Marcar urgente"
 msgstr "Mark urgent"
 
-#: .\production\templates\production\admin_overview.html:94
+#: .\production\templates\production\admin_overview.html:114
 msgid "etapas completadas"
 msgstr "completed stages"
 
-#: .\production\templates\production\admin_overview.html:98
+#: .\production\templates\production\admin_overview.html:119
+msgid "No hay órdenes completadas en ese rango de fechas."
+msgstr "No completed orders in that date range."
+
+#: .\production\templates\production\admin_overview.html:120
 msgid "No hay órdenes en producción."
 msgstr "No orders in production."
 
@@ -1788,9 +1931,9 @@ msgstr "No workers registered in the system."
 
 #: .\production\templates\production\config\operario_detail.html:15
 #: .\production\templates\production\config\operarios.html:111
-#: .\templates\orders\admin\order_detail.html:379
+#: .\templates\orders\admin\order_detail.html:410
 #: .\templates\orders\products\add_product.html:166
-#: .\templates\orders\users\order_detail.html:413
+#: .\templates\orders\users\order_detail.html:479
 #: .\templates\products\product_list.html:151
 msgid "Inactivo"
 msgstr "Inactive"
@@ -1877,7 +2020,7 @@ msgid "Roles de producción"
 msgstr "Production roles"
 
 #: .\production\templates\production\config\operario_detail.html:173
-#: .\production\templates\production\config\roles.html:55
+#: .\production\templates\production\config\roles.html:72
 msgid "Sin etapas"
 msgstr "No stages"
 
@@ -1903,7 +2046,7 @@ msgstr "Stage"
 
 #: .\production\templates\production\config\operario_detail.html:232
 #: .\templates\orders\admin\offline_create.html:107
-#: .\templates\orders\admin\order_detail.html:366
+#: .\templates\orders\admin\order_detail.html:397
 msgid "Producto"
 msgstr "Product"
 
@@ -1976,6 +2119,8 @@ msgid "Operarios desactivados"
 msgstr "Deactivated workers"
 
 #: .\production\templates\production\config\operarios.html:210
+#: .\templates\accounts\notifications.html:25
+#: .\templates\accounts\notifications.html:28
 #: .\templates\orders\users\order_list.html:175
 #: .\templates\social\notifications.html:22
 #: .\templates\social\notifications.html:25
@@ -2010,7 +2155,7 @@ msgid "Opcional"
 msgstr "Optional"
 
 #: .\production\templates\production\config\plantillas.html:44
-#: .\production\templates\production\config\roles.html:38
+#: .\production\templates\production\config\roles.html:47
 #: .\production\templates\production\config\stages.html:55
 #: .\templates\measures\manage_fields.html:166
 msgid "Crear"
@@ -2029,11 +2174,13 @@ msgid "¿Eliminar esta plantilla?"
 msgstr "Delete this template?"
 
 #: .\production\templates\production\config\plantillas.html:74
+#: .\production\templates\production\config\roles.html:104
+#: .\production\templates\production\config\roles.html:164
 #: .\production\templates\production\config\stages.html:128
 #: .\production\templates\production\config\stages.html:199
 #: .\templates\account\addresses\list_address.html:65
 #: .\templates\account\email.html:61 .\templates\measures\manage_fields.html:52
-#: .\templates\orders\users\order_detail.html:446
+#: .\templates\orders\users\order_detail.html:515
 #: .\templates\social\partials\comment_row.html:17
 #: .\templates\social\partials\comment_row_v2.html:15
 #: .\templates\social\partials\post_card.html:22
@@ -2086,10 +2233,10 @@ msgstr "Manage templates"
 #: .\production\templates\production\config\product_stages_matrix.html:21
 #: .\templates\account\guardian\minors_without_guardian.html:149
 #: .\templates\coach\athlete\edit_measures.html:71
-#: .\templates\core\base.html:936 .\templates\core\base.html:974
-#: .\templates\orders\admin\order_detail.html:646
-#: .\templates\orders\admin\order_detail.html:753
-#: .\templates\orders\admin\order_detail.html:777
+#: .\templates\core\base.html:938 .\templates\core\base.html:976
+#: .\templates\orders\admin\order_detail.html:693
+#: .\templates\orders\admin\order_detail.html:800
+#: .\templates\orders\admin\order_detail.html:824
 #: .\templates\teams\manage_teams.html:302
 #: .\templates\teams\manage_teams.html:358
 #: .\templates\teams\manage_teams.html:400
@@ -2179,6 +2326,7 @@ msgid "Ninguno"
 msgstr "None"
 
 #: .\production\templates\production\config\responsabilidades.html:48
+#: .\production\templates\production\config\roles.html:84
 #: .\production\templates\production\config\stages.html:114
 #: .\templates\account\addresses\form.html:111
 #: .\templates\account\addresses\list_address.html:61
@@ -2196,11 +2344,12 @@ msgid "— Seleccionar —"
 msgstr "— Select —"
 
 #: .\production\templates\production\config\responsabilidades.html:84
+#: .\production\templates\production\config\roles.html:136
 #: .\production\templates\production\config\stages.html:162
 #: .\templates\account\profile\settings.html:50
 #: .\templates\account\profile\settings.html:98
 #: .\templates\coach\athlete\edit_measures.html:25
-#: .\templates\orders\admin\order_detail.html:444
+#: .\templates\orders\admin\order_detail.html:491
 #: .\templates\social\settings.html:26 .\templates\social\settings.html:46
 #: .\templates\social\settings.html:62 .\templates\social\settings.html:76
 #: .\templates\teams\manage_categories.html:140
@@ -2216,17 +2365,82 @@ msgstr "No stages configured."
 msgid "Roles de Producción"
 msgstr "Production Roles"
 
-#: .\production\templates\production\config\roles.html:16
+#: .\production\templates\production\config\roles.html:24
 msgid "Nuevo rol"
 msgstr "New role"
 
-#: .\production\templates\production\config\roles.html:23
+#: .\production\templates\production\config\roles.html:32
+#: .\production\templates\production\config\roles.html:118
 msgid "Nombre del rol"
 msgstr "Role name"
 
-#: .\production\templates\production\config\roles.html:66
+#: .\production\templates\production\config\roles.html:62
+#, fuzzy
+#| msgid "Operarios"
+msgid "operario(s)"
+msgstr "Workers"
+
+#: .\production\templates\production\config\roles.html:65
+#, fuzzy
+#| msgid "Responsabilidades"
+msgid "Responsable de"
+msgstr "Responsibilities"
+
+#: .\production\templates\production\config\roles.html:65
+#, fuzzy
+#| msgid "etapas"
+msgid "etapa(s)"
+msgstr "stages"
+
+#: .\production\templates\production\config\roles.html:89
+msgid ""
+"No se puede eliminar: tiene operarios asignados o es responsable de una "
+"etapa."
+msgstr "Cannot be deleted: it has assigned workers or is responsible for a stage."
+
+#: .\production\templates\production\config\roles.html:100
+#, fuzzy
+#| msgid "Eliminar foto"
+msgid "Eliminar rol"
+msgstr "Delete photo"
+
+#: .\production\templates\production\config\roles.html:144
 msgid "Sin roles configurados."
 msgstr "No roles configured."
+
+#: .\production\templates\production\config\roles.html:161
+#: .\production\templates\production\config\stages.html:196
+#: .\templates\account\addresses\confirm_delete.html:18
+#: .\templates\account\addresses\form.html:228
+#: .\templates\account\guardian\assign_guardian.html:269
+#: .\templates\account\profile\deactivate_confirm.html:72
+#: .\templates\coach\athlete\edit_measures.html:111
+#: .\templates\coach\crew\create_crew_member.html:141
+#: .\templates\coach\crew\edit_owned_user.html:114
+#: .\templates\events\admin\registrations.html:68
+#: .\templates\events\coach\register_team.html:111
+#: .\templates\events\coach\register_team.html:137
+#: .\templates\events\event_detail.html:103
+#: .\templates\events\event_form.html:111
+#: .\templates\measures\manage_fields.html:124
+#: .\templates\orders\admin\offline_create.html:210
+#: .\templates\orders\admin\order_detail.html:806
+#: .\templates\orders\items\item_detail.html:392
+#: .\templates\orders\users\order_contact_info.html:111
+#: .\templates\orders\users\order_detail.html:929
+#: .\templates\orders\users\order_edit.html:14
+#: .\templates\orders\users\order_edit.html:35
+#: .\templates\products\product_detail.html:693
+#: .\templates\products\product_form.html:183 .\templates\social\feed.html:84
+#: .\templates\social\post_detail.html:31
+#: .\templates\teams\manage_categories.html:93
+#: .\templates\teams\manage_categories.html:141
+#: .\templates\teams\manage_categories.html:172
+#: .\templates\teams\manage_teams.html:330
+#: .\templates\teams\manage_teams.html:371
+#: .\templates\teams\manage_teams.html:426
+msgid "Cancelar"
+msgstr "Cancel"
 
 #: .\production\templates\production\config\stages.html:3
 #: .\production\templates\production\config\stages.html:9
@@ -2259,7 +2473,7 @@ msgid "Prods."
 msgstr "Prods."
 
 #: .\production\templates\production\config\stages.html:77
-#: .\templates\core\base.html:807
+#: .\templates\core\base.html:809
 msgid "Plantillas"
 msgstr "Templates"
 
@@ -2276,39 +2490,32 @@ msgstr "Delete stage"
 msgid "No hay etapas configuradas. Crea la primera arriba."
 msgstr "No stages configured. Create the first one above."
 
-#: .\production\templates\production\config\stages.html:196
-#: .\templates\account\addresses\confirm_delete.html:18
-#: .\templates\account\addresses\form.html:228
-#: .\templates\account\guardian\assign_guardian.html:269
-#: .\templates\account\profile\deactivate_confirm.html:72
-#: .\templates\coach\athlete\edit_measures.html:96
-#: .\templates\coach\crew\create_crew_member.html:141
-#: .\templates\coach\crew\edit_owned_user.html:114
-#: .\templates\events\admin\registrations.html:68
-#: .\templates\events\coach\register_team.html:111
-#: .\templates\events\coach\register_team.html:137
-#: .\templates\events\event_detail.html:103
-#: .\templates\events\event_form.html:111
-#: .\templates\measures\manage_fields.html:124
-#: .\templates\orders\admin\offline_create.html:210
-#: .\templates\orders\admin\order_detail.html:759
-#: .\templates\orders\items\item_detail.html:349
-#: .\templates\orders\items\item_measurements.html:98
-#: .\templates\orders\users\order_contact_info.html:111
-#: .\templates\orders\users\order_detail.html:850
-#: .\templates\orders\users\order_edit.html:14
-#: .\templates\orders\users\order_edit.html:35
-#: .\templates\products\product_detail.html:693
-#: .\templates\products\product_form.html:183 .\templates\social\feed.html:84
-#: .\templates\social\post_detail.html:31
-#: .\templates\teams\manage_categories.html:93
-#: .\templates\teams\manage_categories.html:141
-#: .\templates\teams\manage_categories.html:172
-#: .\templates\teams\manage_teams.html:330
-#: .\templates\teams\manage_teams.html:371
-#: .\templates\teams\manage_teams.html:426
-msgid "Cancelar"
-msgstr "Cancel"
+#: .\production\templates\production\item_measurements.html:4
+#: .\production\templates\production\item_measurements.html:11
+#: .\templates\orders\items\item_detail.html:294
+#: .\templates\orders\items\item_measurements.html:4
+#: .\templates\orders\items\item_measurements.html:14
+#: .\templates\orders\items\measurements_grid.html:4
+#: .\templates\orders\items\measurements_grid.html:14
+msgid "Medidas"
+msgstr "Measurements"
+
+#: .\production\templates\production\item_measurements.html:9
+#: .\templates\coach\athlete\edit_measures.html:22
+#: .\templates\coach\crew\create_crew_member.html:20
+#: .\templates\coach\crew\edit_owned_user.html:20
+#: .\templates\events\coach\my_registrations.html:103
+#: .\templates\events\event_detail.html:23
+#: .\templates\orders\admin\offline_create.html:19
+#: .\templates\orders\admin\order_detail.html:29
+#: .\templates\orders\users\order_contact_info.html:14
+#: .\templates\orders\users\order_create.html:14
+#: .\templates\orders\users\order_detail.html:32
+#: .\templates\orders\users\order_detail.html:895
+#: .\templates\products\product_detail.html:67
+#: .\templates\products\product_form.html:18
+msgid "Volver"
+msgstr "Back"
 
 #: .\social\models.py:15
 #, python-format
@@ -2417,12 +2624,16 @@ msgstr "This account is currently inactive."
 msgid ""
 "Si te registraste como entrenador, un administrador debe aprobar tu cuenta "
 "antes de que puedas ingresar. Te avisaremos por correo en cuanto esté lista."
-msgstr "If you registered as a coach, an administrator must approve your account before you can sign in. We'll email you as soon as it's ready."
+msgstr ""
+"If you registered as a coach, an administrator must approve your account "
+"before you can sign in. We'll email you as soon as it's ready."
 
 #: .\templates\account\account_inactive.html:29
 msgid ""
 "Si crees que es un error, contacta al administrador o al soporte técnico."
-msgstr "If you think this is a mistake, contact the administrator or technical support."
+msgstr ""
+"If you think this is a mistake, contact the administrator or technical "
+"support."
 
 #: .\templates\account\account_inactive.html:36
 msgid "Contactar soporte"
@@ -2438,7 +2649,7 @@ msgstr "Create a new account?"
 
 #: .\templates\account\account_inactive.html:51
 #: .\templates\account\login.html:192 .\templates\account\signup.html:4
-#: .\templates\core\base.html:837
+#: .\templates\core\base.html:839
 msgid "Registrarse"
 msgstr "Sign Up"
 
@@ -2457,8 +2668,8 @@ msgstr ""
 "Are you sure you want to delete the address <strong>%(label)s</strong>?"
 
 #: .\templates\account\addresses\confirm_delete.html:15
-#: .\templates\orders\items\item_detail.html:353
-#: .\templates\orders\users\order_detail.html:855
+#: .\templates\orders\items\item_detail.html:396
+#: .\templates\orders\users\order_detail.html:934
 msgid "Sí, eliminar"
 msgstr "Yes, delete"
 
@@ -2512,7 +2723,7 @@ msgid "Guardar dirección"
 msgstr "Save address"
 
 #: .\templates\account\addresses\list_address.html:12
-#: .\templates\core\base.html:739
+#: .\templates\core\base.html:741
 msgid "Mis Direcciones"
 msgstr "My Addresses"
 
@@ -2620,7 +2831,9 @@ msgstr "No"
 msgid ""
 "Si el email ya existe en el sistema, se actualiza el ownership sin crear "
 "duplicado."
-msgstr "If the email already exists in the system, ownership is updated without creating a duplicate."
+msgstr ""
+"If the email already exists in the system, ownership is updated without "
+"creating a duplicate."
 
 #: .\templates\account\bulk_import\form.html:120
 msgid "Los atletas importados reciben el rol"
@@ -2691,7 +2904,8 @@ msgstr "Download template to correct"
 #: .\templates\account\bulk_import\result.html:127
 msgid ""
 "No se procesó ninguna fila nueva. Todos los atletas ya existían en tu grupo."
-msgstr "No new rows were processed. All athletes already existed in your group."
+msgstr ""
+"No new rows were processed. All athletes already existed in your group."
 
 #: .\templates\account\coach_pending.html:25
 #: .\templates\account\coach_rejected.html:32
@@ -2761,7 +2975,9 @@ msgid ""
 "Actualmente no tienes ninguna dirección de correo electrónico configurada. "
 "Deberías agregar una dirección de correo electrónico para recibir "
 "notificaciones, restablecer tu contraseña, etc."
-msgstr "You currently have no email address configured. You should add an email address to receive notifications, reset your password, etc."
+msgstr ""
+"You currently have no email address configured. You should add an email "
+"address to receive notifications, reset your password, etc."
 
 #: .\templates\account\email.html:77
 msgid "Agregar dirección de correo electrónico"
@@ -2801,7 +3017,13 @@ msgid ""
 "            es el correo electrónico para el usuario \n"
 "            <strong class=\"text-primary\">%(user_display)s</strong>.\n"
 "            "
-msgstr "\n            Please confirm that \n            <strong class=\"text-primary\">%(email)s</strong> \n            is the email address for user \n            <strong class=\"text-primary\">%(user_display)s</strong>.\n            "
+msgstr ""
+"\n"
+"            Please confirm that \n"
+"            <strong class=\"text-primary\">%(email)s</strong> \n"
+"            is the email address for user \n"
+"            <strong class=\"text-primary\">%(user_display)s</strong>.\n"
+"            "
 
 #: .\templates\account\email_confirm.html:31
 #: .\templates\events\event_detail.html:109
@@ -2822,7 +3044,12 @@ msgid ""
 "            <a class=\"sc-color-secondary\" href=\"%(email_url)s\">nuevo "
 "enlace de confirmación</a>.\n"
 "            "
-msgstr "\n            Please request a \n            <a class=\"sc-color-secondary\" href=\"%(email_url)s\">new confirmation link</a>.\n            "
+msgstr ""
+"\n"
+"            Please request a \n"
+"            <a class=\"sc-color-secondary\" href=\"%(email_url)s\">new "
+"confirmation link</a>.\n"
+"            "
 
 #: .\templates\account\email_confirm.html:54
 #: .\templates\account\verification_sent.html:51
@@ -2945,7 +3172,9 @@ msgstr "has no account"
 msgid ""
 "en el sistema, puedes enviarle una invitación por email. Cuando se registre "
 "y seleccione el rol"
-msgstr "in the system, you can send them an email invitation. When they register and select the role"
+msgstr ""
+"in the system, you can send them an email invitation. When they register and "
+"select the role"
 
 #: .\templates\account\guardian\assign_guardian.html:179
 msgid "aparecerá en la lista de guardians disponibles."
@@ -2972,7 +3201,10 @@ msgid ""
 "Los atletas menores de edad necesitan un adulto responsable para "
 "autorizaciones, recogida de pedidos y comunicación oficial. El guardián "
 "puede ser padre, tutor o acompañante designado por el coach."
-msgstr "Minor athletes need a responsible adult for authorizations, order pickup, and official communication. The guardian can be a parent, legal guardian, or companion designated by the coach."
+msgstr ""
+"Minor athletes need a responsible adult for authorizations, order pickup, "
+"and official communication. The guardian can be a parent, legal guardian, or "
+"companion designated by the coach."
 
 #: .\templates\account\guardian\assign_guardian.html:219
 msgid "Otros menores pendientes"
@@ -2987,14 +3219,19 @@ msgstr "All minors have a guardian"
 msgid ""
 "¿Estás completamente seguro de que deseas <strong>remover a "
 "%(guardian_name)s</strong> como guardián de %(athlete_name)s?"
-msgstr "Are you completely sure you want to <strong>remove %(guardian_name)s</strong> as guardian of %(athlete_name)s?"
+msgstr ""
+"Are you completely sure you want to <strong>remove %(guardian_name)s</"
+"strong> as guardian of %(athlete_name)s?"
 
 #: .\templates\account\guardian\assign_guardian.html:265
 msgid ""
 "Esto dejará al atleta sin tutor legal registrado en el sistema. Debe "
 "realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se "
 "reasignará un tutor después."
-msgstr "This will leave the athlete without a legal guardian registered in the system. This should only be done if the athlete has already reached adulthood or if a guardian will be reassigned afterward."
+msgstr ""
+"This will leave the athlete without a legal guardian registered in the "
+"system. This should only be done if the athlete has already reached "
+"adulthood or if a guardian will be reassigned afterward."
 
 #: .\templates\account\guardian\assign_guardian.html:273
 msgid "Sí, Remover"
@@ -3057,8 +3294,12 @@ msgid ""
 msgid_plural ""
 "Hay <span class=\"badge bg-warning text-dark\">%(n)s</span> menores sin "
 "guardián asignado. Por favor, asigna uno a la brevedad."
-msgstr[0] "There is <span class=\"badge bg-warning text-dark\">%(n)s</span> minor without an assigned guardian. Please assign one as soon as possible."
-msgstr[1] "There are <span class=\"badge bg-warning text-dark\">%(n)s</span> minors without an assigned guardian. Please assign one as soon as possible."
+msgstr[0] ""
+"There is <span class=\"badge bg-warning text-dark\">%(n)s</span> minor "
+"without an assigned guardian. Please assign one as soon as possible."
+msgstr[1] ""
+"There are <span class=\"badge bg-warning text-dark\">%(n)s</span> minors "
+"without an assigned guardian. Please assign one as soon as possible."
 
 #: .\templates\account\guardian\headcoach_dashboard.html:30
 msgid "Todo en orden."
@@ -3077,7 +3318,7 @@ msgid "Guardián Actual"
 msgstr "Current Guardian"
 
 #: .\templates\account\guardian\headcoach_dashboard.html:51
-#: .\templates\orders\admin\order_detail.html:822
+#: .\templates\orders\admin\order_detail.html:869
 msgid "Acción"
 msgstr "Action"
 
@@ -3157,7 +3398,9 @@ msgstr "Birth date:"
 msgid ""
 "Este atleta necesita un guardián para participar en competencias y realizar "
 "pedidos."
-msgstr "This athlete needs a guardian to participate in competitions and place orders."
+msgstr ""
+"This athlete needs a guardian to participate in competitions and place "
+"orders."
 
 #: .\templates\account\guardian\minors_without_guardian.html:148
 msgid "Asignar ahora"
@@ -3200,11 +3443,13 @@ msgid ""
 "Asigna un guardián a cada menor antes de inscribirlo en competencias. Los "
 "guardians pueden autorizar la participación y recibir notificaciones "
 "importantes."
-msgstr "Assign a guardian to each minor before registering them for competitions. Guardians can authorize participation and receive important notifications."
+msgstr ""
+"Assign a guardian to each minor before registering them for competitions. "
+"Guardians can authorize participation and receive important notifications."
 
 #: .\templates\account\login.html:5 .\templates\account\login.html:130
 #: .\templates\account\signup.html:131 .\templates\account\signup.html:141
-#: .\templates\core\base.html:834
+#: .\templates\core\base.html:836
 msgid "Iniciar Sesión"
 msgstr "Sign In"
 
@@ -3253,7 +3498,7 @@ msgstr "Having trouble signing in?"
 msgid "Recuperar contraseña"
 msgstr "Recover password"
 
-#: .\templates\account\logout.html:4 .\templates\core\base.html:827
+#: .\templates\account\logout.html:4 .\templates\core\base.html:829
 msgid "Cerrar Sesión"
 msgstr "Sign Out"
 
@@ -3294,7 +3539,9 @@ msgstr "Contact support"
 msgid ""
 "Para mantener tu cuenta segura, elige una contraseña robusta que no uses en "
 "otros sitios."
-msgstr "To keep your account secure, choose a strong password that you don't use on other sites."
+msgstr ""
+"To keep your account secure, choose a strong password that you don't use on "
+"other sites."
 
 #: .\templates\account\password_change.html:26
 msgid "Contraseña actual"
@@ -3330,7 +3577,9 @@ msgstr "Recover your access"
 msgid ""
 "¿Olvidaste tu contraseña? Ingresa tu dirección de correo electrónico y te "
 "enviaremos un enlace para restablecerla."
-msgstr "Forgot your password? Enter your email address and we'll send you a link to reset it."
+msgstr ""
+"Forgot your password? Enter your email address and we'll send you a link to "
+"reset it."
 
 #: .\templates\account\password_reset.html:32
 #: .\templates\account\signup.html:24 .\templates\social\send_invite.html:18
@@ -3357,7 +3606,9 @@ msgstr "Need help?"
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used. Please request a new password reset."
-msgstr "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
+msgstr ""
+"The password reset link was invalid, possibly because it has already been "
+"used. Please request a new password reset."
 
 #: .\templates\account\password_reset_from_key.html:34
 msgid "Ingresa tu nueva contraseña dos veces para verificar."
@@ -3404,7 +3655,9 @@ msgstr "Set password"
 msgid ""
 "Tu cuenta aún no tiene una contraseña. Elige una para acceder también con "
 "este método."
-msgstr "Your account doesn't have a password yet. Choose one to also sign in with this method."
+msgstr ""
+"Your account doesn't have a password yet. Choose one to also sign in with "
+"this method."
 
 #: .\templates\account\password_set.html:44 .\templates\account\signup.html:76
 msgid "Confirmar contraseña"
@@ -3431,7 +3684,9 @@ msgstr ""
 msgid ""
 "No se eliminarán tus datos. Para reactivarla, deberás contactar al "
 "administrador."
-msgstr "Your data will not be deleted. To reactivate it, you must contact the administrator."
+msgstr ""
+"Your data will not be deleted. To reactivate it, you must contact the "
+"administrator."
 
 #: .\templates\account\profile\deactivate_confirm.html:43
 msgid "Esto ocurrirá al confirmar:"
@@ -3466,7 +3721,7 @@ msgstr "to continue"
 msgid "Desactivar cuenta"
 msgstr "Deactivate account"
 
-#: .\templates\account\profile\edit.html:4 .\templates\core\base.html:693
+#: .\templates\account\profile\edit.html:4 .\templates\core\base.html:695
 #: .\templates\core\dashboard.html:179 .\templates\core\dashboard.html:208
 #: .\templates\core\dashboard.html:253 .\templates\core\dashboard.html:274
 msgid "Mi Perfil"
@@ -3498,13 +3753,14 @@ msgid "Perfil"
 msgstr "Profile"
 
 #: .\templates\account\profile\edit.html:84
-#: .\templates\orders\admin\order_detail.html:393
-#: .\templates\orders\items\item_detail.html:183
+#: .\templates\orders\admin\order_detail.html:424
+#: .\templates\orders\items\_measurements_grid.html:46
+#: .\templates\orders\items\item_detail.html:226
 msgid "Completo"
 msgstr "Complete"
 
 #: .\templates\account\profile\edit.html:86
-#: .\templates\orders\items\item_detail.html:187
+#: .\templates\orders\items\item_detail.html:230
 msgid "Incompleto"
 msgstr "Incomplete"
 
@@ -3551,11 +3807,13 @@ msgstr "Danger zone"
 msgid ""
 "Desactivar tu cuenta es reversible, pero requerirá contactar al "
 "administrador."
-msgstr "Deactivating your account is reversible, but will require contacting the administrator."
+msgstr ""
+"Deactivating your account is reversible, but will require contacting the "
+"administrator."
 
 #: .\templates\account\profile\settings.html:4
-#: .\templates\account\profile\settings.html:15 .\templates\core\base.html:744
-#: .\templates\orders\admin\order_detail.html:370
+#: .\templates\account\profile\settings.html:15 .\templates\core\base.html:746
+#: .\templates\orders\admin\order_detail.html:401
 #: .\templates\social\base_social.html:39
 #: .\templates\social\base_social_v2.html:79 .\templates\social\settings.html:3
 msgid "Configuración"
@@ -3577,7 +3835,9 @@ msgstr "Profile privacy"
 msgid ""
 "Público: visible para todos · Equipo: solo tu equipo · Privado: solo tú y tu "
 "coach"
-msgstr "Public: visible to everyone · Team: only your team · Private: only you and your coach"
+msgstr ""
+"Public: visible to everyone · Team: only your team · Private: only you and "
+"your coach"
 
 #: .\templates\account\profile\settings.html:111
 msgid "Sistema de ayuda"
@@ -3604,7 +3864,8 @@ msgstr "Disable help"
 #: .\templates\account\profile_setup.html:12
 msgid ""
 "¡Un paso más! Completa tus datos personales para acceder a la plataforma."
-msgstr "One more step! Complete your personal information to access the platform."
+msgstr ""
+"One more step! Complete your personal information to access the platform."
 
 #: .\templates\account\profile_setup.html:89
 msgid "¿Cuál es tu rol?"
@@ -3613,7 +3874,9 @@ msgstr "What is your role?"
 #: .\templates\account\profile_setup.html:92
 msgid ""
 "Selecciona tu perfil – define qué acciones podrás realizar en la plataforma."
-msgstr "Select your profile – this defines what actions you'll be able to perform on the platform."
+msgstr ""
+"Select your profile – this defines what actions you'll be able to perform on "
+"the platform."
 
 #: .\templates\account\profile_setup.html:132
 msgid "Perfil en revisión"
@@ -3623,7 +3886,9 @@ msgstr "Profile under review"
 msgid ""
 "El rol HEADCOACH requiere validación manual. Tu cuenta quedará inactiva "
 "hasta que sea aprobada."
-msgstr "The HEADCOACH role requires manual validation. Your account will remain inactive until it is approved."
+msgstr ""
+"The HEADCOACH role requires manual validation. Your account will remain "
+"inactive until it is approved."
 
 #: .\templates\account\profile_setup.html:148
 msgid "Guardar y Continuar"
@@ -3681,7 +3946,7 @@ msgstr "Already have an account?"
 msgid "Al registrarte, aceptas nuestros"
 msgstr "By registering, you accept our"
 
-#: .\templates\account\signup.html:139 .\templates\core\base.html:895
+#: .\templates\account\signup.html:139 .\templates\core\base.html:897
 msgid "Términos"
 msgstr "Terms"
 
@@ -3701,7 +3966,9 @@ msgstr "No new registrations are accepted at this time"
 msgid ""
 "Estamos realizando mejoras en la plataforma. Pronto volveremos a abrir el "
 "registro. Si ya tienes una cuenta, puedes iniciar sesión."
-msgstr "We are making improvements to the platform. Registration will reopen soon. If you already have an account, you can sign in."
+msgstr ""
+"We are making improvements to the platform. Registration will reopen soon. "
+"If you already have an account, you can sign in."
 
 #: .\templates\account\verification_sent.html:4
 msgid "Verificación Enviada"
@@ -3722,7 +3989,11 @@ msgid ""
 "        Sigue el enlace proporcionado para finalizar el proceso de "
 "registro.\n"
 "        "
-msgstr "\n        We've sent you an email for verification. \n        Follow the provided link to finish the registration process.\n        "
+msgstr ""
+"\n"
+"        We've sent you an email for verification. \n"
+"        Follow the provided link to finish the registration process.\n"
+"        "
 
 #: .\templates\account\verification_sent.html:30
 msgid "Importante:"
@@ -3744,48 +4015,56 @@ msgstr "Problems with verification?"
 msgid "Contacta a registro"
 msgstr "Contact registration"
 
+#: .\templates\accounts\notifications.html:3
+#: .\templates\accounts\notifications.html:7
+#: .\templates\social\base_social_v2.html:37
+#: .\templates\social\base_social_v2.html:43
+#: .\templates\social\notifications.html:3
+#: .\templates\social\notifications.html:6
+#: .\templates\social\partials\social_bell.html:3
+#: .\templates\social\settings.html:53
+msgid "Notificaciones"
+msgstr "Notifications"
+
+#: .\templates\accounts\notifications.html:10
+#: .\templates\social\notifications.html:9
+msgid "Marcar todas como leídas"
+msgstr "Mark all as read"
+
+#: .\templates\accounts\notifications.html:33
+#: .\templates\social\notifications.html:30
+msgid "No tienes notificaciones."
+msgstr "You have no notifications."
+
 #: .\templates\coach\athlete\edit_measures.html:14
 msgid "Medidas Corporales"
 msgstr "Body Measurements"
-
-#: .\templates\coach\athlete\edit_measures.html:22
-#: .\templates\coach\crew\create_crew_member.html:20
-#: .\templates\coach\crew\edit_owned_user.html:20
-#: .\templates\events\coach\my_registrations.html:103
-#: .\templates\events\event_detail.html:23
-#: .\templates\orders\admin\offline_create.html:19
-#: .\templates\orders\admin\order_detail.html:29
-#: .\templates\orders\items\item_measurements.html:22
-#: .\templates\orders\users\order_contact_info.html:14
-#: .\templates\orders\users\order_create.html:14
-#: .\templates\orders\users\order_detail.html:32
-#: .\templates\orders\users\order_detail.html:816
-#: .\templates\products\product_detail.html:67
-#: .\templates\products\product_form.html:18
-msgid "Volver"
-msgstr "Back"
 
 #: .\templates\coach\athlete\edit_measures.html:57
 msgid "Actual:"
 msgstr "Current:"
 
-#: .\templates\coach\athlete\edit_measures.html:99
+#: .\templates\coach\athlete\edit_measures.html:96
+msgid "Talla estándar"
+msgstr "Standard size"
+
+#: .\templates\coach\athlete\edit_measures.html:114
 msgid "Guardar todas las medidas"
 msgstr "Save all measurements"
 
-#: .\templates\coach\athlete\edit_measures.html:115
+#: .\templates\coach\athlete\edit_measures.html:130
 msgid "Cómo completar las medidas"
 msgstr "How to complete measurements"
 
-#: .\templates\coach\athlete\edit_measures.html:117
+#: .\templates\coach\athlete\edit_measures.html:132
 msgid "Usa números decimales con punto (ej: 1.75)"
 msgstr "Use decimal numbers with a period (e.g. 1.75)"
 
-#: .\templates\coach\athlete\edit_measures.html:118
+#: .\templates\coach\athlete\edit_measures.html:133
 msgid "Todas las medidas están en centímetros"
 msgstr "All measurements are in centimeters"
 
-#: .\templates\coach\athlete\edit_measures.html:119
+#: .\templates\coach\athlete\edit_measures.html:134
 msgid "Deja vacío si no conoces la medida"
 msgstr "Leave blank if you don't know the measurement"
 
@@ -3811,7 +4090,10 @@ msgstr "New member data"
 msgid ""
 "Si el email ya está registrado en el sistema, se reutilizará ese usuario y "
 "se asignará al equipo. Solo se crea uno nuevo si el email no existe."
-msgstr "If the email is already registered in the system, that user will be reused and assigned to the team. A new one is only created if the email doesn't exist."
+msgstr ""
+"If the email is already registered in the system, that user will be reused "
+"and assigned to the team. A new one is only created if the email doesn't "
+"exist."
 
 #: .\templates\coach\crew\create_crew_member.html:57
 msgid "Datos personales"
@@ -3833,7 +4115,9 @@ msgstr "email@example.com"
 #: .\templates\coach\crew\create_crew_member.html:82
 msgid ""
 "Se usará para acceder al sistema. Si ya existe, se reutiliza el usuario."
-msgstr "It will be used to access the system. If it already exists, the user is reused."
+msgstr ""
+"It will be used to access the system. If it already exists, the user is "
+"reused."
 
 #: .\templates\coach\crew\create_crew_member.html:91
 msgid "Roles y permisos"
@@ -3868,7 +4152,9 @@ msgstr "Specific role within %(name)s."
 msgid ""
 "Se generará una contraseña temporal aleatoria. Aparecerá en el mensaje de "
 "confirmación — guárdala y compártela de forma segura con el miembro."
-msgstr "A random temporary password will be generated. It will appear in the confirmation message — save it and share it securely with the member."
+msgstr ""
+"A random temporary password will be generated. It will appear in the "
+"confirmation message — save it and share it securely with the member."
 
 #: .\templates\coach\crew\create_crew_member.html:137
 msgid "Crear y asignar"
@@ -3940,14 +4226,16 @@ msgstr "The user will become the responsibility of the new HeadCoach."
 msgid ""
 "No tienes permisos para reasignar este usuario, o no hay otros HeadCoach "
 "disponibles."
-msgstr "You don't have permission to reassign this user, or there are no other HeadCoaches available."
+msgstr ""
+"You don't have permission to reassign this user, or there are no other "
+"HeadCoaches available."
 
 #: .\templates\core\base.html:7
 msgid "Competencias y Uniformes"
 msgstr "Competitions and Uniforms"
 
 #: .\templates\core\base.html:393 .\templates\core\base.html:472
-#: .\templates\core\base.html:885 .\templates\core\home.html:4
+#: .\templates\core\base.html:887 .\templates\core\home.html:4
 #: .\templates\social\base_social_v2.html:75
 #: .\templates\social\base_social_v2.html:113
 msgid "Inicio"
@@ -3966,29 +4254,29 @@ msgstr "Landing"
 msgid "Administrar Landing"
 msgstr "Manage Landing"
 
-#: .\templates\core\base.html:414 .\templates\core\base.html:755
+#: .\templates\core\base.html:414 .\templates\core\base.html:757
 #: .\templates\core\dashboard.html:88 .\templates\core\dashboard.html:171
 msgid "Producción"
 msgstr "Production"
 
-#: .\templates\core\base.html:418 .\templates\core\base.html:762
+#: .\templates\core\base.html:418 .\templates\core\base.html:764
 #: .\templates\core\dashboard.html:266
 msgid "Mis Tareas"
 msgstr "My Tasks"
 
-#: .\templates\core\base.html:421 .\templates\core\base.html:765
+#: .\templates\core\base.html:421 .\templates\core\base.html:767
 msgid "Mi Área"
 msgstr "My Area"
 
-#: .\templates\core\base.html:424 .\templates\core\base.html:776
+#: .\templates\core\base.html:424 .\templates\core\base.html:778
 msgid "Reglamento"
 msgstr "Rulebook"
 
-#: .\templates\core\base.html:427 .\templates\core\base.html:768
+#: .\templates\core\base.html:427 .\templates\core\base.html:770
 msgid "Reportar Error"
 msgstr "Report Error"
 
-#: .\templates\core\base.html:437 .\templates\core\base.html:887
+#: .\templates\core\base.html:437 .\templates\core\base.html:889
 #: .\templates\core\home.html:66 .\templates\events\event_list.html:4
 #: .\templates\events\event_list.html:11
 msgid "Competencias"
@@ -4073,7 +4361,7 @@ msgstr "Custody"
 msgid "Menores sin guardian"
 msgstr "Minors without guardian"
 
-#: .\templates\core\base.html:558 .\templates\core\base.html:886
+#: .\templates\core\base.html:558 .\templates\core\base.html:888
 msgid "Tienda"
 msgstr "Store"
 
@@ -4097,7 +4385,7 @@ msgstr "Offers"
 msgid "Administrar pedidos"
 msgstr "Manage orders"
 
-#: .\templates\core\base.html:583 .\templates\core\base.html:733
+#: .\templates\core\base.html:583 .\templates\core\base.html:735
 #: .\templates\core\dashboard.html:150 .\templates\core\dashboard.html:200
 msgid "Mis Pedidos"
 msgstr "My Orders"
@@ -4108,55 +4396,55 @@ msgstr "My Orders"
 msgid "Comunidad"
 msgstr "Community"
 
-#: .\templates\core\base.html:687
+#: .\templates\core\base.html:689
 msgid "Mi Dashboard"
 msgstr "My Dashboard"
 
-#: .\templates\core\base.html:701
+#: .\templates\core\base.html:703
 msgid "Idioma"
 msgstr "Language"
 
-#: .\templates\core\base.html:729 .\templates\core\dashboard.html:163
+#: .\templates\core\base.html:731 .\templates\core\dashboard.html:163
 msgid "Administrar Pedidos"
 msgstr "Manage Orders"
 
-#: .\templates\core\base.html:779
+#: .\templates\core\base.html:781
 msgid "Errores"
 msgstr "Errors"
 
-#: .\templates\core\base.html:789
+#: .\templates\core\base.html:791
 msgid "Config. Producción"
 msgstr "Production Config."
 
-#: .\templates\core\base.html:804
+#: .\templates\core\base.html:806
 msgid "Responsabilidades"
 msgstr "Responsibilities"
 
-#: .\templates\core\base.html:810
+#: .\templates\core\base.html:812
 msgid "Etapas por producto"
 msgstr "Stages per product"
 
-#: .\templates\core\base.html:821
+#: .\templates\core\base.html:823
 msgid "Panel Admin"
 msgstr "Admin Panel"
 
-#: .\templates\core\base.html:880
+#: .\templates\core\base.html:882
 msgid "Especialistas en competencias de cheerleading y venta de uniformes."
 msgstr "Specialists in cheerleading competitions and uniform sales."
 
-#: .\templates\core\base.html:883
+#: .\templates\core\base.html:885
 msgid "Enlaces"
 msgstr "Links"
 
-#: .\templates\core\base.html:891
+#: .\templates\core\base.html:893
 msgid "Soporte"
 msgstr "Support"
 
-#: .\templates\core\base.html:893
+#: .\templates\core\base.html:895
 msgid "Ayuda"
 msgstr "Help"
 
-#: .\templates\core\base.html:894 .\templates\core\terminos.html:308
+#: .\templates\core\base.html:896 .\templates\core\terminos.html:308
 #: .\templates\core\terminos.html:335
 #: .\templates\orders\admin\order_detail.html:230
 #: .\templates\orders\users\order_detail.html:311
@@ -4164,39 +4452,39 @@ msgstr "Help"
 msgid "Contacto"
 msgstr "Contact"
 
-#: .\templates\core\base.html:899
+#: .\templates\core\base.html:901
 msgid "Contáctanos"
 msgstr "Contact us"
 
-#: .\templates\core\base.html:912
+#: .\templates\core\base.html:914
 msgid "Todos los derechos reservados."
 msgstr "All rights reserved."
 
-#: .\templates\core\base.html:921 .\templates\core\base.html:933
+#: .\templates\core\base.html:923 .\templates\core\base.html:935
 msgid "¿Cómo funciona esta página?"
 msgstr "How does this page work?"
 
-#: .\templates\core\base.html:945
+#: .\templates\core\base.html:947
 msgid "Consejo"
 msgstr "Tip"
 
-#: .\templates\core\base.html:954
+#: .\templates\core\base.html:956
 #: .\templates\orders\partials\pagination.html:31
 #: .\templates\orders\users\order_list.html:229
 msgid "Anterior"
 msgstr "Previous"
 
-#: .\templates\core\base.html:959
+#: .\templates\core\base.html:961
 #: .\templates\orders\partials\pagination.html:59
 #: .\templates\orders\users\order_list.html:243
 msgid "Siguiente"
 msgstr "Next"
 
-#: .\templates\core\base.html:970
+#: .\templates\core\base.html:972
 msgid "No volver a mostrar"
 msgstr "Don't show again"
 
-#: .\templates\core\base.html:1023
+#: .\templates\core\base.html:1026
 msgid "PRÓXIMO"
 msgstr "UPCOMING"
 
@@ -4254,7 +4542,8 @@ msgstr "SPACE CHEER offers a complete platform for the cheerleading community"
 #: .\templates\core\home.html:67
 msgid ""
 "Organiza, participa y sigue competencias de cheerleading en tiempo real."
-msgstr "Organize, participate in, and follow cheerleading competitions in real time."
+msgstr ""
+"Organize, participate in, and follow cheerleading competitions in real time."
 
 #: .\templates\core\home.html:68
 msgid "Explorar"
@@ -4417,7 +4706,7 @@ msgstr "Featured"
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
 #: .\templates\orders\admin\order_detail.html:161
-#: .\templates\orders\admin\order_detail.html:820
+#: .\templates\orders\admin\order_detail.html:867
 msgid "Fecha"
 msgstr "Date"
 
@@ -4465,7 +4754,12 @@ msgid ""
 "Términos y Condiciones en su totalidad.\n"
 "        Por favor léelos detenidamente antes de continuar.\n"
 "        "
-msgstr "\n        By registering or using the SPACE CHEER platform, you accept these Terms and Conditions in full.\n        Please read them carefully before continuing.\n        "
+msgstr ""
+"\n"
+"        By registering or using the SPACE CHEER platform, you accept these "
+"Terms and Conditions in full.\n"
+"        Please read them carefully before continuing.\n"
+"        "
 
 #: .\templates\core\terminos.html:68
 msgid "Aceptación de los Términos"
@@ -4482,7 +4776,16 @@ msgid ""
 "con alguna disposición,\n"
 "        debes abstenerte de usar la Plataforma.\n"
 "        "
-msgstr "\n        Access to and use of the <strong class=\"sc-color-light\">SPACE CHEER</strong> platform\n        (hereinafter \"the Platform\") implies full and unreserved acceptance of these\n        Terms and Conditions (\"T&C\"). If you do not agree with any provision,\n        you must refrain from using the Platform.\n        "
+msgstr ""
+"\n"
+"        Access to and use of the <strong class=\"sc-color-light\">SPACE "
+"CHEER</strong> platform\n"
+"        (hereinafter \"the Platform\") implies full and unreserved "
+"acceptance of these\n"
+"        Terms and Conditions (\"T&C\"). If you do not agree with any "
+"provision,\n"
+"        you must refrain from using the Platform.\n"
+"        "
 
 #: .\templates\core\terminos.html:78
 msgid ""
@@ -4493,7 +4796,14 @@ msgid ""
 "uso continuado tras la\n"
 "        publicación constituye aceptación de los nuevos términos.\n"
 "        "
-msgstr "\n        SPACE CHEER reserves the right to modify these T&C at any time. Changes\n        will take effect upon publication on the Platform. Continued use after\n        publication constitutes acceptance of the new terms.\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER reserves the right to modify these T&C at any time. "
+"Changes\n"
+"        will take effect upon publication on the Platform. Continued use "
+"after\n"
+"        publication constitutes acceptance of the new terms.\n"
+"        "
 
 #: .\templates\core\terminos.html:88
 msgid "Descripción del Servicio"
@@ -4506,7 +4816,12 @@ msgid ""
 "integral de equipos de porrismo\n"
 "        (cheerleading). Los servicios disponibles incluyen:\n"
 "        "
-msgstr "\n        SPACE CHEER is a digital platform focused on the comprehensive management of cheerleading\n        teams. Available services include:\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER is a digital platform focused on the comprehensive "
+"management of cheerleading\n"
+"        teams. Available services include:\n"
+"        "
 
 #: .\templates\core\terminos.html:96
 msgid "Gestión de equipos: membresías, roles de atleta, coach y staff."
@@ -4540,7 +4855,13 @@ msgid ""
 "        (ADMIN, HEADCOACH, COACH, STAFF, ATLETA, ACOMPAÑANTE) y de la "
 "suscripción activa del equipo.\n"
 "        "
-msgstr "\n        Access to the different features depends on the role assigned to the user\n        (ADMIN, HEADCOACH, COACH, STAFF, ATHLETE, COMPANION) and the team's active subscription.\n        "
+msgstr ""
+"\n"
+"        Access to the different features depends on the role assigned to the "
+"user\n"
+"        (ADMIN, HEADCOACH, COACH, STAFF, ATHLETE, COMPANION) and the team's "
+"active subscription.\n"
+"        "
 
 #: .\templates\core\terminos.html:113
 msgid "Registro y Responsabilidades de la Cuenta"
@@ -4553,7 +4874,12 @@ msgid ""
 "información veraz, completa y actualizada.\n"
 "        El usuario es el único responsable de:\n"
 "        "
-msgstr "\n        To access the Platform, you must create an account with truthful, complete, and up-to-date information.\n        The user is solely responsible for:\n        "
+msgstr ""
+"\n"
+"        To access the Platform, you must create an account with truthful, "
+"complete, and up-to-date information.\n"
+"        The user is solely responsible for:\n"
+"        "
 
 #: .\templates\core\terminos.html:121
 msgid "Mantener la confidencialidad de sus credenciales de acceso."
@@ -4579,7 +4905,13 @@ msgid ""
 "        proporcionen información falsa o realicen actividades que "
 "perjudiquen a otros usuarios o a la Plataforma.\n"
 "        "
-msgstr "\n        SPACE CHEER reserves the right to suspend or cancel accounts that violate these T&C,\n        provide false information, or engage in activities that harm other users or the Platform.\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER reserves the right to suspend or cancel accounts that "
+"violate these T&C,\n"
+"        provide false information, or engage in activities that harm other "
+"users or the Platform.\n"
+"        "
 
 #: .\templates\core\terminos.html:133
 msgid ""
@@ -4589,7 +4921,13 @@ msgid ""
 "        incluyendo la asignación de roles y el control de acceso a la "
 "información del equipo.\n"
 "        "
-msgstr "\n        Users with the HEADCOACH role are responsible for properly managing their team's members,\n        including role assignment and access control over the team's information.\n        "
+msgstr ""
+"\n"
+"        Users with the HEADCOACH role are responsible for properly managing "
+"their team's members,\n"
+"        including role assignment and access control over the team's "
+"information.\n"
+"        "
 
 #: .\templates\core\terminos.html:142
 msgid "Pedidos de Uniformes: Proceso, Pagos y Cancelaciones"
@@ -4607,19 +4945,28 @@ msgid ""
 "APROBADO → EN PRODUCCIÓN → ENTREGADO</strong>.\n"
 "        El pedido puede cancelarse antes de que entre en producción.\n"
 "        "
-msgstr "\n        Uniform orders follow a defined flow of statuses:\n        <strong class=\"sc-color-light\">DRAFT → PENDING → DESIGN APPROVED → IN PRODUCTION → DELIVERED</strong>.\n        The order can be cancelled before it enters production.\n        "
+msgstr ""
+"\n"
+"        Uniform orders follow a defined flow of statuses:\n"
+"        <strong class=\"sc-color-light\">DRAFT → PENDING → DESIGN APPROVED → "
+"IN PRODUCTION → DELIVERED</strong>.\n"
+"        The order can be cancelled before it enters production.\n"
+"        "
 
 #: .\templates\core\terminos.html:153
 msgid ""
 "Las medidas de los atletas deben registrarse dentro del plazo indicado por "
 "el HEADCOACH."
-msgstr "Athletes' measurements must be recorded within the deadline set by the HEADCOACH."
+msgstr ""
+"Athletes' measurements must be recorded within the deadline set by the "
+"HEADCOACH."
 
 #: .\templates\core\terminos.html:154
 msgid ""
 "Una vez aprobado el diseño, las medidas quedan bloqueadas y no pueden "
 "modificarse."
-msgstr "Once the design is approved, measurements are locked and cannot be modified."
+msgstr ""
+"Once the design is approved, measurements are locked and cannot be modified."
 
 #: .\templates\core\terminos.html:155
 msgid ""
@@ -4642,7 +4989,14 @@ msgid ""
 "        cada pedido. SPACE CHEER no almacena datos de tarjetas de crédito o "
 "débito.\n"
 "        "
-msgstr "\n        Prices for uniforms and products are shown in Mexican pesos (MXN) and include VAT\n        when applicable. Available payment methods and payment terms will be specified for\n        each order. SPACE CHEER does not store credit or debit card data.\n        "
+msgstr ""
+"\n"
+"        Prices for uniforms and products are shown in Mexican pesos (MXN) "
+"and include VAT\n"
+"        when applicable. Available payment methods and payment terms will be "
+"specified for\n"
+"        each order. SPACE CHEER does not store credit or debit card data.\n"
+"        "
 
 #: .\templates\core\terminos.html:167
 msgid "Cancelaciones"
@@ -4658,7 +5012,14 @@ msgid ""
 "        no se aceptarán cancelaciones ni reembolsos, salvo defecto de "
 "fabricación comprobable.\n"
 "        "
-msgstr "\n        Cancellations are only accepted before the order enters the\n        <strong class=\"sc-color-light\">IN PRODUCTION</strong> status. Once production has started,\n        no cancellations or refunds will be accepted, except for a demonstrable manufacturing defect.\n        "
+msgstr ""
+"\n"
+"        Cancellations are only accepted before the order enters the\n"
+"        <strong class=\"sc-color-light\">IN PRODUCTION</strong> status. Once "
+"production has started,\n"
+"        no cancellations or refunds will be accepted, except for a "
+"demonstrable manufacturing defect.\n"
+"        "
 
 #: .\templates\core\terminos.html:176
 msgid "Garantías"
@@ -4677,7 +5038,18 @@ msgid ""
 "solución apropiada (reposición,\n"
 "        reparación o crédito).\n"
 "        "
-msgstr "\n        SPACE CHEER guarantees that delivered products will match the specifications\n        of the approved order. In case of a manufacturing defect, the user must report it\n        within 7 calendar days after receiving the order, attaching photographic\n        evidence. SPACE CHEER will evaluate each case and determine the appropriate solution (replacement,\n        repair, or credit).\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER guarantees that delivered products will match the "
+"specifications\n"
+"        of the approved order. In case of a manufacturing defect, the user "
+"must report it\n"
+"        within 7 calendar days after receiving the order, attaching "
+"photographic\n"
+"        evidence. SPACE CHEER will evaluate each case and determine the "
+"appropriate solution (replacement,\n"
+"        repair, or credit).\n"
+"        "
 
 #: .\templates\core\terminos.html:190
 msgid "Protección de Datos de Menores de Edad"
@@ -4693,7 +5065,15 @@ msgid ""
 "Posesión de los\n"
 "        Particulares (LFPDPPP)</strong>.\n"
 "        "
-msgstr "\n        SPACE CHEER handles data of minors in accordance with the\n        <strong>General Law on the Rights of Girls, Boys, and Adolescents (LGDNNA)</strong>\n        and the <strong>Federal Law on the Protection of Personal Data Held by\n        Private Parties (LFPDPPP)</strong>.\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER handles data of minors in accordance with the\n"
+"        <strong>General Law on the Rights of Girls, Boys, and Adolescents "
+"(LGDNNA)</strong>\n"
+"        and the <strong>Federal Law on the Protection of Personal Data Held "
+"by\n"
+"        Private Parties (LFPDPPP)</strong>.\n"
+"        "
 
 #: .\templates\core\terminos.html:201
 msgid ""
@@ -4706,7 +5086,16 @@ msgid ""
 "menor en la Plataforma,\n"
 "        el Tutor declara:\n"
 "        "
-msgstr "\n        The registration and processing of personal data of athletes under 18 years old\n        requires the <strong class=\"sc-color-light\">express consent of the parent or\n        legal guardian</strong> (hereinafter \"the Guardian\"). By registering a minor on the Platform,\n        the Guardian declares:\n        "
+msgstr ""
+"\n"
+"        The registration and processing of personal data of athletes under "
+"18 years old\n"
+"        requires the <strong class=\"sc-color-light\">express consent of the "
+"parent or\n"
+"        legal guardian</strong> (hereinafter \"the Guardian\"). By "
+"registering a minor on the Platform,\n"
+"        the Guardian declares:\n"
+"        "
 
 #: .\templates\core\terminos.html:209
 msgid "Ser el padre, madre o tutor legal del menor."
@@ -4717,7 +5106,9 @@ msgid ""
 "Autorizar el tratamiento de los datos personales del menor, incluyendo "
 "nombre, fecha de nacimiento, CURP y medidas corporales, para los fines de la "
 "Plataforma."
-msgstr "Authorizing the processing of the minor's personal data, including name, date of birth, CURP, and body measurements, for the Platform's purposes."
+msgstr ""
+"Authorizing the processing of the minor's personal data, including name, "
+"date of birth, CURP, and body measurements, for the Platform's purposes."
 
 #: .\templates\core\terminos.html:211
 msgid "Que la información proporcionada es veraz y está actualizada."
@@ -4727,7 +5118,9 @@ msgstr "That the information provided is truthful and up to date."
 msgid ""
 "Comprender que puede revocar este consentimiento en cualquier momento, "
 "solicitándolo a space.cheer.space@gmail.com."
-msgstr "Understanding that this consent may be revoked at any time by requesting it at space.cheer.space@gmail.com."
+msgstr ""
+"Understanding that this consent may be revoked at any time by requesting it "
+"at space.cheer.space@gmail.com."
 
 #: .\templates\core\terminos.html:215
 msgid ""
@@ -4738,7 +5131,13 @@ msgid ""
 "COACH, STAFF) y el propio\n"
 "        Tutor vinculado podrán consultar esta información.\n"
 "        "
-msgstr "\n        Minors' data is subject to additional access controls within the\n        Platform. Only authorized team personnel (HEADCOACH, COACH, STAFF) and the\n        linked Guardian may access this information.\n        "
+msgstr ""
+"\n"
+"        Minors' data is subject to additional access controls within the\n"
+"        Platform. Only authorized team personnel (HEADCOACH, COACH, STAFF) "
+"and the\n"
+"        linked Guardian may access this information.\n"
+"        "
 
 #: .\templates\core\terminos.html:222
 msgid ""
@@ -4751,7 +5150,16 @@ msgid ""
 "        <a href=\"mailto:space.cheer.space@gmail.com\" class=\"sc-color-"
 "cyan\">space.cheer.space@gmail.com</a>.\n"
 "        "
-msgstr "\n        SPACE CHEER will not share minors' data with third parties, except when expressly required by law.\n        Guardians may exercise their ARCO rights (Access, Rectification, Cancellation, and\n        Objection) by sending a request to\n        <a href=\"mailto:space.cheer.space@gmail.com\" class=\"sc-color-cyan\">space.cheer.space@gmail.com</a>.\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER will not share minors' data with third parties, except "
+"when expressly required by law.\n"
+"        Guardians may exercise their ARCO rights (Access, Rectification, "
+"Cancellation, and\n"
+"        Objection) by sending a request to\n"
+"        <a href=\"mailto:space.cheer.space@gmail.com\" class=\"sc-color-"
+"cyan\">space.cheer.space@gmail.com</a>.\n"
+"        "
 
 #: .\templates\core\terminos.html:233
 msgid "Propiedad Intelectual"
@@ -4768,7 +5176,16 @@ msgid ""
 "internacionales de propiedad\n"
 "        intelectual y derechos de autor.\n"
 "        "
-msgstr "\n        All content on the Platform — including, without limitation, the source code, design,\n        logos, text, images, and features — is the exclusive property of SPACE CHEER or\n        its licensors, and is protected by Mexican and international intellectual property\n        and copyright laws.\n        "
+msgstr ""
+"\n"
+"        All content on the Platform — including, without limitation, the "
+"source code, design,\n"
+"        logos, text, images, and features — is the exclusive property of "
+"SPACE CHEER or\n"
+"        its licensors, and is protected by Mexican and international "
+"intellectual property\n"
+"        and copyright laws.\n"
+"        "
 
 #: .\templates\core\terminos.html:243
 msgid ""
@@ -4781,7 +5198,16 @@ msgid ""
 "de la Plataforma con el\n"
 "        único fin de prestar el servicio.\n"
 "        "
-msgstr "\n        Users retain ownership of the content they upload to the Platform (photographs,\n        uniform designs, etc.), but grant SPACE CHEER a non-exclusive, royalty-free\n        license to host, reproduce, and display such content within the Platform for the\n        sole purpose of providing the service.\n        "
+msgstr ""
+"\n"
+"        Users retain ownership of the content they upload to the Platform "
+"(photographs,\n"
+"        uniform designs, etc.), but grant SPACE CHEER a non-exclusive, "
+"royalty-free\n"
+"        license to host, reproduce, and display such content within the "
+"Platform for the\n"
+"        sole purpose of providing the service.\n"
+"        "
 
 #: .\templates\core\terminos.html:251
 msgid ""
@@ -4790,7 +5216,13 @@ msgid ""
 "cualquier elemento de la\n"
 "        Plataforma sin autorización escrita previa de SPACE CHEER.\n"
 "        "
-msgstr "\n        The reproduction, distribution, or commercial use of any element of the\n        Platform is prohibited without SPACE CHEER's prior written authorization.\n        "
+msgstr ""
+"\n"
+"        The reproduction, distribution, or commercial use of any element of "
+"the\n"
+"        Platform is prohibited without SPACE CHEER's prior written "
+"authorization.\n"
+"        "
 
 #: .\templates\core\terminos.html:260
 msgid "Limitación de Responsabilidad"
@@ -4802,19 +5234,27 @@ msgid ""
 "        En la medida permitida por la ley aplicable, SPACE CHEER no será "
 "responsable de:\n"
 "        "
-msgstr "\n        To the extent permitted by applicable law, SPACE CHEER will not be liable for:\n        "
+msgstr ""
+"\n"
+"        To the extent permitted by applicable law, SPACE CHEER will not be "
+"liable for:\n"
+"        "
 
 #: .\templates\core\terminos.html:267
 msgid ""
 "Daños directos, indirectos, incidentales o consecuentes derivados del uso o "
 "imposibilidad de uso de la Plataforma."
-msgstr "Direct, indirect, incidental, or consequential damages arising from the use or inability to use the Platform."
+msgstr ""
+"Direct, indirect, incidental, or consequential damages arising from the use "
+"or inability to use the Platform."
 
 #: .\templates\core\terminos.html:268
 msgid ""
 "Interrupciones del servicio por mantenimiento, fallas técnicas o causas de "
 "fuerza mayor."
-msgstr "Service interruptions due to maintenance, technical failures, or force majeure."
+msgstr ""
+"Service interruptions due to maintenance, technical failures, or force "
+"majeure."
 
 #: .\templates\core\terminos.html:269
 msgid "Pérdida de datos causada por el usuario o por terceros no autorizados."
@@ -4824,7 +5264,9 @@ msgstr "Data loss caused by the user or by unauthorized third parties."
 msgid ""
 "Inexactitudes en medidas proporcionadas por el usuario que afecten la "
 "confección de uniformes."
-msgstr "Inaccuracies in measurements provided by the user that affect uniform manufacturing."
+msgstr ""
+"Inaccuracies in measurements provided by the user that affect uniform "
+"manufacturing."
 
 #: .\templates\core\terminos.html:271
 msgid "El contenido publicado por usuarios en el feed social de la Plataforma."
@@ -4839,7 +5281,14 @@ msgid ""
 "al evento que originó\n"
 "        la reclamación.\n"
 "        "
-msgstr "\n        SPACE CHEER's maximum liability to the user, in any case, will not exceed\n        the amount paid by the user during the three (3) months prior to the event that gave rise to\n        the claim.\n        "
+msgstr ""
+"\n"
+"        SPACE CHEER's maximum liability to the user, in any case, will not "
+"exceed\n"
+"        the amount paid by the user during the three (3) months prior to the "
+"event that gave rise to\n"
+"        the claim.\n"
+"        "
 
 #: .\templates\core\terminos.html:284
 msgid "Ley Aplicable y Jurisdicción"
@@ -4860,7 +5309,20 @@ msgid ""
 "corresponderles por razón de\n"
 "        su domicilio presente o futuro.\n"
 "        "
-msgstr "\n        These T&C are governed by and interpreted in accordance with the laws in force in the\n        <strong class=\"sc-color-light\">United Mexican States</strong>. For the resolution of\n        any dispute arising from their interpretation or performance, the parties submit\n        to the jurisdiction of the competent courts of the State of Guanajuato, Mexico,\n        expressly waiving any other venue that might correspond to them by reason of\n        their present or future domicile.\n        "
+msgstr ""
+"\n"
+"        These T&C are governed by and interpreted in accordance with the "
+"laws in force in the\n"
+"        <strong class=\"sc-color-light\">United Mexican States</strong>. For "
+"the resolution of\n"
+"        any dispute arising from their interpretation or performance, the "
+"parties submit\n"
+"        to the jurisdiction of the competent courts of the State of "
+"Guanajuato, Mexico,\n"
+"        expressly waiving any other venue that might correspond to them by "
+"reason of\n"
+"        their present or future domicile.\n"
+"        "
 
 #: .\templates\core\terminos.html:296
 msgid ""
@@ -4875,7 +5337,18 @@ msgid ""
 "de Niñas, Niños y\n"
 "        Adolescentes (LGDNNA)</strong>.\n"
 "        "
-msgstr "\n        Regarding the protection of personal data, processing is governed by the\n        <strong class=\"sc-color-light\">Federal Law on the Protection of Personal Data Held\n        by Private Parties (LFPDPPP)</strong> and its Regulations, and with respect to minors,\n        by the <strong class=\"sc-color-light\">General Law on the Rights of Girls, Boys, and\n        Adolescents (LGDNNA)</strong>.\n        "
+msgstr ""
+"\n"
+"        Regarding the protection of personal data, processing is governed by "
+"the\n"
+"        <strong class=\"sc-color-light\">Federal Law on the Protection of "
+"Personal Data Held\n"
+"        by Private Parties (LFPDPPP)</strong> and its Regulations, and with "
+"respect to minors,\n"
+"        by the <strong class=\"sc-color-light\">General Law on the Rights of "
+"Girls, Boys, and\n"
+"        Adolescents (LGDNNA)</strong>.\n"
+"        "
 
 #: .\templates\core\terminos.html:310
 msgid ""
@@ -4884,7 +5357,11 @@ msgid ""
 "relacionados con estos\n"
 "        Términos y Condiciones, puedes comunicarte con nosotros a:\n"
 "        "
-msgstr "\n        For any inquiry, claim, or exercise of rights related to these\n        Terms and Conditions, you can contact us at:\n        "
+msgstr ""
+"\n"
+"        For any inquiry, claim, or exercise of rights related to these\n"
+"        Terms and Conditions, you can contact us at:\n"
+"        "
 
 #: .\templates\core\terminos.html:321
 msgid "Responderemos en un plazo máximo de 10 días hábiles."
@@ -4903,7 +5380,9 @@ msgid ""
 "Tu cuenta está activa, pero necesitas que tu entrenador asigne un tutor "
 "antes de continuar. Una vez asignado, tendrás acceso completo a la "
 "plataforma."
-msgstr "Your account is active, but you need your coach to assign a guardian before continuing. Once assigned, you will have full access to the platform."
+msgstr ""
+"Your account is active, but you need your coach to assign a guardian before "
+"continuing. Once assigned, you will have full access to the platform."
 
 #: .\templates\custody\minor_blocked.html:18
 msgid "Si crees que esto es un error, contacta a tu entrenador."
@@ -5118,7 +5597,9 @@ msgstr "View open events"
 msgid ""
 "No tienes equipos activos. Crea o activa tu equipo para poder registrarte en "
 "eventos."
-msgstr "You have no active teams. Create or activate your team to register for events."
+msgstr ""
+"You have no active teams. Create or activate your team to register for "
+"events."
 
 #: .\templates\events\coach\my_registrations.html:36
 msgid "Fecha inscripción"
@@ -5131,7 +5612,9 @@ msgstr "Cancel registration"
 #: .\templates\events\coach\my_registrations.html:98
 msgid ""
 "Este registro ya fue aceptado. Al cancelarlo perderás el lugar en el evento."
-msgstr "This registration was already accepted. Cancelling it will lose your spot in the event."
+msgstr ""
+"This registration was already accepted. Cancelling it will lose your spot in "
+"the event."
 
 #: .\templates\events\coach\my_registrations.html:108
 msgid "Sí, cancelar registro"
@@ -5171,7 +5654,11 @@ msgid ""
 "              Tu equipo competirá automáticamente en la categoría "
 "<strong>%(cat)s</strong>.\n"
 "            "
-msgstr "\n              Your team will automatically compete in the <strong>%(cat)s</strong> category.\n            "
+msgstr ""
+"\n"
+"              Your team will automatically compete in the <strong>%(cat)s</"
+"strong> category.\n"
+"            "
 
 #: .\templates\events\coach\register_team.html:104
 #: .\templates\events\coach\register_team.html:130
@@ -5219,7 +5706,8 @@ msgstr "Confirm status change"
 msgid ""
 "¿Estás seguro de que deseas realizar este cambio? Esta acción no se puede "
 "deshacer."
-msgstr "Are you sure you want to make this change? This action cannot be undone."
+msgstr ""
+"Are you sure you want to make this change? This action cannot be undone."
 
 #: .\templates\events\event_detail.html:127
 msgid "Información del evento"
@@ -5646,7 +6134,7 @@ msgstr "Products"
 
 #: .\templates\orders\admin\offline_create.html:95
 #: .\templates\orders\users\order_detail.html:353
-#: .\templates\orders\users\order_detail.html:627
+#: .\templates\orders\users\order_detail.html:706
 msgid "Agregar producto"
 msgstr "Add product"
 
@@ -5686,8 +6174,10 @@ msgid "Sin plantilla"
 msgstr "No template"
 
 #: .\templates\orders\admin\offline_create.html:151
-#: .\templates\orders\admin\order_detail.html:367
-#: .\templates\orders\admin\order_detail.html:429
+#: .\templates\orders\admin\order_detail.html:398
+#: .\templates\orders\admin\order_detail.html:476
+#: .\templates\orders\items\sizes_grid.html:31
+#: .\templates\orders\users\order_detail.html:476
 #: .\templates\products\product_detail.html:412
 #: .\templates\products\product_detail.html:436
 msgid "Talla"
@@ -5698,7 +6188,7 @@ msgid "Ej. M, 32, única"
 msgstr "E.g. M, 32, one-size"
 
 #: .\templates\orders\admin\offline_create.html:155
-#: .\templates\orders\admin\order_detail.html:368
+#: .\templates\orders\admin\order_detail.html:399
 #: .\templates\orders\items\item_detail.html:81
 msgid "Cantidad"
 msgstr "Quantity"
@@ -5836,184 +6326,226 @@ msgstr "Operational dates"
 #: .\templates\orders\admin\order_detail.html:337
 msgid ""
 "Esta orden solo contiene productos simples. No requiere fechas adicionales."
-msgstr "This order contains only simple products. No additional dates required."
+msgstr ""
+"This order contains only simple products. No additional dates required."
 
 #: .\templates\orders\admin\order_detail.html:346
 msgid "Guardar fechas"
 msgstr "Save dates"
 
-#: .\templates\orders\admin\order_detail.html:369
+#: .\templates\orders\admin\order_detail.html:370
+msgid ""
+"Un renglón por talla; la cantidad es el número de alumnos que la llevan."
+msgstr "One row per size; the quantity is the number of athletes wearing it."
+
+#: .\templates\orders\admin\order_detail.html:377
+#, fuzzy
+#| msgid "Mis Alumnos"
+msgid "alumnos"
+msgstr "My Students"
+
+#: .\templates\orders\admin\order_detail.html:380
+#: .\templates\orders\users\order_detail.html:428
+#, fuzzy
+#| msgid "Eliminar talla"
+msgid "sin talla"
+msgstr "Delete size"
+
+#: .\templates\orders\admin\order_detail.html:386
+#: .\templates\orders\items\item_detail.html:169
+#: .\templates\orders\users\order_detail.html:440
+#, fuzzy
+#| msgid "Categoría de equipo"
+msgid "Capturar tallas del equipo"
+msgstr "Team category"
+
+#: .\templates\orders\admin\order_detail.html:400
 #: .\templates\orders\items\item_detail.html:91
+#: .\templates\orders\users\order_detail.html:458
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: .\templates\orders\admin\order_detail.html:403
-#: .\templates\orders\users\order_detail.html:472
+#: .\templates\orders\admin\order_detail.html:434
+#: .\templates\orders\users\order_detail.html:542
 msgid "Atletas:"
 msgstr "Athletes:"
 
-#: .\templates\orders\admin\order_detail.html:409
-#: .\templates\orders\users\order_detail.html:485
+#: .\templates\orders\admin\order_detail.html:443
+#: .\templates\orders\users\order_detail.html:556
 msgid "Medidas completas"
 msgstr "Complete measurements"
 
-#: .\templates\orders\admin\order_detail.html:411
+#: .\templates\orders\admin\order_detail.html:445
 msgid "Medidas pendientes"
 msgstr "Pending measurements"
 
-#: .\templates\orders\admin\order_detail.html:424
+#: .\templates\orders\admin\order_detail.html:457
+#: .\templates\orders\items\item_detail.html:195
+#: .\templates\orders\items\item_measurements.html:20
+#, fuzzy
+#| msgid "Editar datos"
+msgid "Editar medidas"
+msgstr "Edit data"
+
+#: .\templates\orders\admin\order_detail.html:471
 msgid "Talla, notas y medidas:"
 msgstr "Size, notes and measurements:"
 
-#: .\templates\orders\admin\order_detail.html:450
-#: .\templates\orders\users\order_detail.html:453
+#: .\templates\orders\admin\order_detail.html:497
+#: .\templates\orders\users\order_detail.html:523
 msgid "Talla:"
 msgstr "Size:"
 
-#: .\templates\orders\admin\order_detail.html:451
+#: .\templates\orders\admin\order_detail.html:498
 msgid "Notas:"
 msgstr "Notes:"
 
-#: .\templates\orders\admin\order_detail.html:462
+#: .\templates\orders\admin\order_detail.html:509
 msgid "No hay productos en esta orden"
 msgstr "No products in this order"
 
-#: .\templates\orders\admin\order_detail.html:477
+#: .\templates\orders\admin\order_detail.html:524
 msgid "Progreso de medidas"
 msgstr "Measurement progress"
 
-#: .\templates\orders\admin\order_detail.html:483
+#: .\templates\orders\admin\order_detail.html:530
 #, python-format
 msgid ""
 "\n"
 "        %(complete)s de %(total)s atletas completos\n"
 "        "
-msgstr "\n        %(complete)s of %(total)s athletes complete\n        "
+msgstr ""
+"\n"
+"        %(complete)s of %(total)s athletes complete\n"
+"        "
 
-#: .\templates\orders\admin\order_detail.html:506
+#: .\templates\orders\admin\order_detail.html:553
 #, python-format
 msgid ""
 "\n"
 "      %(pending)s atleta sin medidas completas\n"
 "      "
-msgstr "\n      %(pending)s athlete without complete measurements\n      "
+msgstr ""
+"\n"
+"      %(pending)s athlete without complete measurements\n"
+"      "
 
-#: .\templates\orders\admin\order_detail.html:512
+#: .\templates\orders\admin\order_detail.html:559
 msgid "Todas las medidas están completas"
 msgstr "All measurements are complete"
 
-#: .\templates\orders\admin\order_detail.html:523
+#: .\templates\orders\admin\order_detail.html:570
 msgid "Gestión de medidas"
 msgstr "Measurement management"
 
-#: .\templates\orders\admin\order_detail.html:531
+#: .\templates\orders\admin\order_detail.html:578
 msgid "Bloqueadas definitivamente"
 msgstr "Permanently locked"
 
-#: .\templates\orders\admin\order_detail.html:533
+#: .\templates\orders\admin\order_detail.html:580
 msgid "Abiertas"
 msgstr "Open"
 
-#: .\templates\orders\admin\order_detail.html:535
+#: .\templates\orders\admin\order_detail.html:582
 msgid "Cerradas"
 msgstr "Closed"
 
-#: .\templates\orders\admin\order_detail.html:546
+#: .\templates\orders\admin\order_detail.html:593
 msgid "Cerrar medidas"
 msgstr "Close measurements"
 
-#: .\templates\orders\admin\order_detail.html:555
+#: .\templates\orders\admin\order_detail.html:602
 msgid "Reabrir"
 msgstr "Reopen"
 
-#: .\templates\orders\admin\order_detail.html:564
+#: .\templates\orders\admin\order_detail.html:611
 msgid "Bloquear definitivo"
 msgstr "Lock permanently"
 
-#: .\templates\orders\admin\order_detail.html:579
-#: .\templates\orders\users\order_detail.html:638
+#: .\templates\orders\admin\order_detail.html:626
+#: .\templates\orders\users\order_detail.html:717
 msgid "Diseños"
 msgstr "Designs"
 
-#: .\templates\orders\admin\order_detail.html:583
+#: .\templates\orders\admin\order_detail.html:630
 msgid "Subir nuevo diseño"
 msgstr "Upload new design"
 
-#: .\templates\orders\admin\order_detail.html:595
+#: .\templates\orders\admin\order_detail.html:642
 msgid "Seleccionar imagen"
 msgstr "Select image"
 
-#: .\templates\orders\admin\order_detail.html:601
+#: .\templates\orders\admin\order_detail.html:648
 msgid "Marcar como diseño final"
 msgstr "Mark as final design"
 
-#: .\templates\orders\admin\order_detail.html:606
+#: .\templates\orders\admin\order_detail.html:653
 msgid "Subir"
 msgstr "Upload"
 
-#: .\templates\orders\admin\order_detail.html:622
-#: .\templates\orders\admin\order_detail.html:651
-#: .\templates\orders\users\order_detail.html:650
-#: .\templates\orders\users\order_detail.html:674
+#: .\templates\orders\admin\order_detail.html:669
+#: .\templates\orders\admin\order_detail.html:698
+#: .\templates\orders\users\order_detail.html:729
+#: .\templates\orders\users\order_detail.html:753
 msgid "Diseño"
 msgstr "Design"
 
-#: .\templates\orders\admin\order_detail.html:645
-#: .\templates\orders\users\order_detail.html:668
+#: .\templates\orders\admin\order_detail.html:692
+#: .\templates\orders\users\order_detail.html:747
 #, python-format
 msgid "Diseño #%(num)s"
 msgstr "Design #%(num)s"
 
-#: .\templates\orders\admin\order_detail.html:654
-#: .\templates\orders\users\order_detail.html:677
+#: .\templates\orders\admin\order_detail.html:701
+#: .\templates\orders\users\order_detail.html:756
 msgid "Subido por:"
 msgstr "Uploaded by:"
 
-#: .\templates\orders\admin\order_detail.html:655
-#: .\templates\orders\users\order_detail.html:678
+#: .\templates\orders\admin\order_detail.html:702
+#: .\templates\orders\users\order_detail.html:757
 msgid "Fecha:"
 msgstr "Date:"
 
-#: .\templates\orders\admin\order_detail.html:657
-#: .\templates\orders\users\order_detail.html:680
+#: .\templates\orders\admin\order_detail.html:704
+#: .\templates\orders\users\order_detail.html:759
 msgid "Estado:"
 msgstr "Status:"
 
-#: .\templates\orders\admin\order_detail.html:677
+#: .\templates\orders\admin\order_detail.html:724
 msgid "No hay diseños subidos aún."
 msgstr "No designs uploaded yet."
 
-#: .\templates\orders\admin\order_detail.html:687
-#: .\templates\orders\users\order_detail.html:743
+#: .\templates\orders\admin\order_detail.html:734
+#: .\templates\orders\users\order_detail.html:822
 msgid "Acciones disponibles"
 msgstr "Available actions"
 
-#: .\templates\orders\admin\order_detail.html:700
+#: .\templates\orders\admin\order_detail.html:747
 msgid "Aprobar Diseño"
 msgstr "Approve Design"
 
-#: .\templates\orders\admin\order_detail.html:707
+#: .\templates\orders\admin\order_detail.html:754
 #, python-format
 msgid "Hay %(n)s medidas sin completar"
 msgstr "There are %(n)s incomplete measurements"
 
-#: .\templates\orders\admin\order_detail.html:714
+#: .\templates\orders\admin\order_detail.html:761
 msgid "Enviar a Producción"
 msgstr "Send to Production"
 
-#: .\templates\orders\admin\order_detail.html:721
+#: .\templates\orders\admin\order_detail.html:768
 msgid "Marcar Entregado"
 msgstr "Mark Delivered"
 
-#: .\templates\orders\admin\order_detail.html:730
+#: .\templates\orders\admin\order_detail.html:777
 msgid "Cancelar Pedido"
 msgstr "Cancel Order"
 
-#: .\templates\orders\admin\order_detail.html:752
+#: .\templates\orders\admin\order_detail.html:799
 msgid "Confirmar envío a producción"
 msgstr "Confirm send to production"
 
-#: .\templates\orders\admin\order_detail.html:756
+#: .\templates\orders\admin\order_detail.html:803
 msgid ""
 "¿Confirmas que el diseño y las medidas están listos? Esto enviará el pedido "
 "al piso de producción."
@@ -6021,47 +6553,47 @@ msgstr ""
 "Do you confirm the design and measurements are ready? This will send the "
 "order to the production floor."
 
-#: .\templates\orders\admin\order_detail.html:762
+#: .\templates\orders\admin\order_detail.html:809
 msgid "Sí, enviar a producción"
 msgstr "Yes, send to production"
 
-#: .\templates\orders\admin\order_detail.html:776
+#: .\templates\orders\admin\order_detail.html:823
 msgid "Confirmar cancelación"
 msgstr "Confirm cancellation"
 
-#: .\templates\orders\admin\order_detail.html:782
+#: .\templates\orders\admin\order_detail.html:829
 msgid "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?"
 msgstr "This action will permanently cancel the order. Are you sure?"
 
-#: .\templates\orders\admin\order_detail.html:784
-#: .\templates\orders\users\order_detail.html:809
+#: .\templates\orders\admin\order_detail.html:831
+#: .\templates\orders\users\order_detail.html:888
 msgid "Motivo de la cancelación (opcional)"
 msgstr "Cancellation reason (optional)"
 
-#: .\templates\orders\admin\order_detail.html:787
-#: .\templates\orders\users\order_detail.html:812
+#: .\templates\orders\admin\order_detail.html:834
+#: .\templates\orders\users\order_detail.html:891
 msgid "Ej. el cliente ya no lo necesita, se pidió por error…"
 msgstr "E.g. the customer no longer needs it, it was ordered by mistake…"
 
-#: .\templates\orders\admin\order_detail.html:790
+#: .\templates\orders\admin\order_detail.html:837
 msgid "No, mantener pedido"
 msgstr "No, keep order"
 
-#: .\templates\orders\admin\order_detail.html:791
-#: .\templates\orders\users\order_detail.html:819
+#: .\templates\orders\admin\order_detail.html:838
+#: .\templates\orders\users\order_detail.html:898
 msgid "Sí, cancelar pedido"
 msgstr "Yes, cancel order"
 
-#: .\templates\orders\admin\order_detail.html:802
+#: .\templates\orders\admin\order_detail.html:849
 msgid "No hay transiciones disponibles en este estado."
 msgstr "No transitions available in this state."
 
-#: .\templates\orders\admin\order_detail.html:812
-#: .\templates\orders\users\order_detail.html:702
+#: .\templates\orders\admin\order_detail.html:859
+#: .\templates\orders\users\order_detail.html:781
 msgid "Historial"
 msgstr "History"
 
-#: .\templates\orders\admin\order_detail.html:837
+#: .\templates\orders\admin\order_detail.html:884
 msgid "No hay eventos registrados."
 msgstr "No events registered."
 
@@ -6076,7 +6608,11 @@ msgid ""
 "        Mostrando %(start)s–%(end)s\n"
 "        de %(total)s órdenes\n"
 "        "
-msgstr "\n        Showing %(start)s–%(end)s\n        of %(total)s orders\n        "
+msgstr ""
+"\n"
+"        Showing %(start)s–%(end)s\n"
+"        of %(total)s orders\n"
+"        "
 
 #: .\templates\orders\admin\order_list.html:22
 msgid "Pedido personal"
@@ -6124,6 +6660,41 @@ msgstr "Items"
 msgid "No hay órdenes"
 msgstr "No orders"
 
+#: .\templates\orders\items\_measurements_grid.html:8
+#: .\templates\orders\items\sizes_grid.html:31
+#, fuzzy
+#| msgid "Mis Alumnos"
+msgid "Alumno"
+msgstr "My Students"
+
+#: .\templates\orders\items\_measurements_grid.html:15
+msgid ""
+"Este campo ya no forma parte del producto. La medida se conserva pero no "
+"puede editarse."
+msgstr "This field is no longer part of the product. The measurement is kept but cannot be edited."
+
+#: .\templates\orders\items\_measurements_grid.html:15
+#, fuzzy
+#| msgid "Retirado"
+msgid "retirada"
+msgstr "Withdrawn"
+
+#: .\templates\orders\items\_measurements_grid.html:39
+msgid "Editada respecto del perfil del atleta"
+msgstr "Edited from the athlete's profile value"
+
+#: .\templates\orders\items\_measurements_grid.html:39
+#, fuzzy
+#| msgid "Editar datos"
+msgid "editada"
+msgstr "Edit data"
+
+#: .\templates\orders\items\_measurements_grid.html:55
+#, fuzzy
+#| msgid "No hay atletas asignados"
+msgid "No hay atletas asignados a este item."
+msgstr "No athletes assigned"
+
 #: .\templates\orders\items\item_detail.html:34
 #: .\templates\orders\products\add_product.html:16
 #: .\templates\orders\products\add_product.html:324
@@ -6131,7 +6702,7 @@ msgid "Volver a la orden"
 msgstr "Back to order"
 
 #: .\templates\orders\items\item_detail.html:42
-#: .\templates\orders\users\order_detail.html:417
+#: .\templates\orders\users\order_detail.html:483
 msgid "Configuración incompleta"
 msgstr "Incomplete setup"
 
@@ -6160,73 +6731,132 @@ msgid "Importar atletas"
 msgstr "Import athletes"
 
 #: .\templates\orders\items\item_detail.html:134
-#: .\templates\orders\items\item_detail.html:336
-#: .\templates\orders\users\order_detail.html:834
+#: .\templates\orders\items\item_detail.html:379
+#: .\templates\orders\users\order_detail.html:913
 msgid "Eliminar producto"
 msgstr "Delete product"
 
-#: .\templates\orders\items\item_detail.html:152
+#: .\templates\orders\items\item_detail.html:158
+msgid "Alumnos con esta talla"
+msgstr "Athletes with this size"
+
+#: .\templates\orders\items\item_detail.html:164
+#, fuzzy
+#| msgid "Sin equipo asignado"
+msgid "Sin alumnos asignados."
+msgstr "No team assigned"
+
+#: .\templates\orders\items\item_detail.html:179
 msgid "Atletas asignados"
 msgstr "Assigned athletes"
 
-#: .\templates\orders\items\item_detail.html:157
+#: .\templates\orders\items\item_detail.html:184
 #, python-format
 msgid "%(count)s atleta"
 msgstr "%(count)s athlete"
 
-#: .\templates\orders\items\item_detail.html:210
+#: .\templates\orders\items\item_detail.html:192
+#, fuzzy
+#| msgid "Registro de equipo"
+msgid "Medidas del equipo"
+msgstr "Team registration"
+
+#: .\templates\orders\items\item_detail.html:253
 msgid "Medidas registradas"
 msgstr "Registered measurements"
 
-#: .\templates\orders\items\item_detail.html:238
+#: .\templates\orders\items\item_detail.html:281
 msgid "Personalización"
 msgstr "Customization"
 
-#: .\templates\orders\items\item_detail.html:251
-msgid "Medidas"
-msgstr "Measurements"
-
-#: .\templates\orders\items\item_detail.html:274
+#: .\templates\orders\items\item_detail.html:317
 msgid "No hay atletas asignados"
 msgstr "No athletes assigned"
 
-#: .\templates\orders\items\item_detail.html:278
+#: .\templates\orders\items\item_detail.html:321
 msgid "Debes asignar atletas para configurar este producto"
 msgstr "You must assign athletes to configure this product"
 
-#: .\templates\orders\items\item_detail.html:297
+#: .\templates\orders\items\item_detail.html:340
 msgid "Medidas requeridas para este producto"
 msgstr "Required measurements for this product"
 
-#: .\templates\orders\items\item_detail.html:341
+#: .\templates\orders\items\item_detail.html:384
 #, python-format
 msgid "¿Eliminar <strong>%(name)s</strong> de la orden?"
 msgstr "Delete <strong>%(name)s</strong> from the order?"
 
-#: .\templates\orders\items\item_detail.html:344
+#: .\templates\orders\items\item_detail.html:387
 msgid ""
 "Esta acción eliminará atletas y medidas asociadas. No se puede deshacer."
-msgstr "This action will delete athletes and associated measurements. It cannot be undone."
+msgstr ""
+"This action will delete athletes and associated measurements. It cannot be "
+"undone."
 
 #: .\templates\orders\items\item_measurements.html:10
-msgid "Medidas de"
-msgstr "Measurements of"
+#: .\templates\orders\items\measurements_grid.html:10
+#, fuzzy
+#| msgid "Volver al feed"
+msgid "Volver al item"
+msgstr "Back to feed"
 
-#: .\templates\orders\items\item_measurements.html:28
-msgid "Registro de medidas"
-msgstr "Measurement record"
+#: .\templates\orders\items\measurements_grid.html:16
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "        %(complete)s de %(total)s atletas completos\n"
+#| "        "
+msgid "%(complete)s de %(total)s alumnos con medidas completas"
+msgstr ""
+"\n"
+"        %(complete)s of %(total)s athletes complete\n"
+"        "
 
-#: .\templates\orders\items\item_measurements.html:38
-msgid "La orden no permite modificar medidas."
-msgstr "The order does not allow modifying measurements."
-
-#: .\templates\orders\items\item_measurements.html:78
-msgid "Este producto no tiene medidas configuradas."
-msgstr "This product has no configured measurements."
-
-#: .\templates\orders\items\item_measurements.html:93
+#: .\templates\orders\items\measurements_grid.html:25
 msgid "Guardar medidas"
 msgstr "Save measurements"
+
+#: .\templates\orders\items\measurements_grid.html:29
+#, fuzzy
+#| msgid "Las medidas existentes no se perderán."
+msgid "Las medidas están cerradas o bloqueadas para esta orden."
+msgstr "Existing measurements will not be lost."
+
+#: .\templates\orders\items\measurements_grid.html:34
+#, fuzzy
+#| msgid "Puedes agregar o editar tus medidas."
+msgid "No tienes permiso para editar estas medidas."
+msgstr "You can add or edit your measurements."
+
+#: .\templates\orders\items\sizes_grid.html:6
+#: .\templates\products\product_detail.html:398
+msgid "Tallas"
+msgstr "Sizes"
+
+#: .\templates\orders\items\sizes_grid.html:8
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "        %(complete)s de %(total)s atletas completos\n"
+#| "        "
+msgid ""
+"\n"
+"      %(done)s de %(total)s alumnos con talla asignada.\n"
+"    "
+msgstr ""
+"\n"
+"        %(complete)s of %(total)s athletes complete\n"
+"        "
+
+#: .\templates\orders\items\sizes_grid.html:22
+msgid "Las tallas están cerradas para esta orden."
+msgstr "Sizes are closed for this order."
+
+#: .\templates\orders\items\sizes_grid.html:58
+#, fuzzy
+#| msgid "Guardar fechas"
+msgid "Guardar tallas"
+msgstr "Save dates"
 
 #: .\templates\orders\partials\pagination.html:4
 msgid "Paginación"
@@ -6240,7 +6870,12 @@ msgid ""
 "            a <strong>%(end)s</strong>\n"
 "            de <strong>%(total)s</strong> resultados\n"
 "            "
-msgstr "\n            Showing <strong>%(start)s</strong>\n            to <strong>%(end)s</strong>\n            of <strong>%(total)s</strong> results\n            "
+msgstr ""
+"\n"
+"            Showing <strong>%(start)s</strong>\n"
+"            to <strong>%(end)s</strong>\n"
+"            of <strong>%(total)s</strong> results\n"
+"            "
 
 #: .\templates\orders\partials\pagination.html:18
 msgid "Primera"
@@ -6264,6 +6899,7 @@ msgid "Filtros"
 msgstr "Filters"
 
 #: .\templates\orders\products\add_product.html:36
+#: .\templates\orders\users\order_detail.html:490
 #: .\templates\products\product_detail.html:277
 #: .\templates\products\product_form.html:90
 msgid "Tipo de producto"
@@ -6581,7 +7217,7 @@ msgid "Fecha límite para medidas: %(date)s"
 msgstr "Measurement deadline: %(date)s"
 
 #: .\templates\orders\users\order_detail.html:382
-#: .\templates\orders\users\order_detail.html:502
+#: .\templates\orders\users\order_detail.html:573
 msgid "Medidas cerradas"
 msgstr "Measurements closed"
 
@@ -6594,140 +7230,238 @@ msgid "Productos en la orden"
 msgstr "Products in the order"
 
 #: .\templates\orders\users\order_detail.html:394
-#: .\templates\orders\users\order_detail.html:615
+#: .\templates\orders\users\order_detail.html:694
 #: .\templates\products\product_list.html:13
 msgid "producto"
 msgstr "product"
 
-#: .\templates\orders\users\order_detail.html:460
+#: .\templates\orders\users\order_detail.html:409
+#, fuzzy
+#| msgid "Publicaciones del equipo"
+msgid "Tallas del equipo"
+msgstr "Team posts"
+
+#: .\templates\orders\users\order_detail.html:412
+msgid ""
+"Este producto se pide por talla: cada talla es un renglón del pedido y su "
+"cantidad es el número de alumnos que la llevan."
+msgstr "This product is ordered by size: each size is a row of the order and its quantity is the number of athletes wearing it."
+
+#: .\templates\orders\users\order_detail.html:418
+#, python-format
+msgid "Alumnos con talla %(talla)s"
+msgstr "Athletes with size %(talla)s"
+
+#: .\templates\orders\users\order_detail.html:424
+msgid "Capturados:"
+msgstr "Captured:"
+
+#: .\templates\orders\users\order_detail.html:425
+#: .\templates\social\team_page.html:14
+msgid "de"
+msgstr "of"
+
+#: .\templates\orders\users\order_detail.html:432
+#, fuzzy
+#| msgid "Equipo propietario"
+msgid "Equipo completo"
+msgstr "Owner team"
+
+#: .\templates\orders\users\order_detail.html:443
+msgid "Una sola pantalla para todo el equipo"
+msgstr "One screen for the whole team"
+
+#: .\templates\orders\users\order_detail.html:455
+msgid "Cómo leer cada renglón:"
+msgstr "How to read each row:"
+
+#: .\templates\orders\users\order_detail.html:456
+#, fuzzy
+#| msgid "Cant:"
+msgid "Cant."
+msgstr "Qty:"
+
+#: .\templates\orders\users\order_detail.html:456
+msgid "son las piezas de esa talla,"
+msgstr "is the number of pieces of that size,"
+
+#: .\templates\orders\users\order_detail.html:457
+#, fuzzy
+#| msgid "Unit:"
+msgid "Unit."
+msgstr "Unit:"
+
+#: .\templates\orders\users\order_detail.html:457
+msgid "el precio por pieza (talla grande puede sumar un adicional) y"
+msgstr "the price per piece (a large size may add a surcharge) and"
+
+#: .\templates\orders\users\order_detail.html:458
+msgid "es Cant. × Unit."
+msgstr "is Qty. × Unit."
+
+#: .\templates\orders\users\order_detail.html:459
+msgid ""
+"Las etiquetas grises describen el producto; pasa el cursor sobre ellas para "
+"ver qué significan."
+msgstr "The grey labels describe the product; hover over them to see what they mean."
+
+#: .\templates\orders\users\order_detail.html:494
+msgid "Cómo se personaliza: global, por equipo o por atleta"
+msgstr "How it is customized: global, per team or per athlete"
+
+#: .\templates\orders\users\order_detail.html:498
+msgid "Alcance: de catálogo general o exclusivo de un equipo"
+msgstr "Scope: general catalog or exclusive to one team"
+
+#: .\templates\orders\users\order_detail.html:523
+msgid "Cada talla del producto es un renglón aparte del pedido"
+msgstr "Each size of the product is a separate row of the order"
+
+#: .\templates\orders\users\order_detail.html:530
 msgid "No seleccionada"
 msgstr "Not selected"
 
-#: .\templates\orders\users\order_detail.html:462
+#: .\templates\orders\users\order_detail.html:532
 msgid "Seleccionar talla"
 msgstr "Select size"
 
-#: .\templates\orders\users\order_detail.html:489
+#: .\templates\orders\users\order_detail.html:560
 msgid "Medidas incompletas"
 msgstr "Incomplete measurements"
 
-#: .\templates\orders\users\order_detail.html:498
+#: .\templates\orders\users\order_detail.html:569
 msgid "Configurar"
 msgstr "Configure"
 
-#: .\templates\orders\users\order_detail.html:519
+#: .\templates\orders\users\order_detail.html:590
 msgid "más"
 msgstr "more"
 
-#: .\templates\orders\users\order_detail.html:535
+#: .\templates\orders\users\order_detail.html:606
 #, python-format
 msgid "Medidas de %(name)s"
 msgstr "Measurements for %(name)s"
 
-#: .\templates\orders\users\order_detail.html:570
+#: .\templates\orders\users\order_detail.html:641
 msgid "subtotal"
 msgstr "subtotal"
 
-#: .\templates\orders\users\order_detail.html:573
+#: .\templates\orders\users\order_detail.html:645
+msgid "Piezas de esta talla: sale del número de alumnos asignados"
+msgstr "Pieces of this size: taken from the number of assigned athletes"
+
+#: .\templates\orders\users\order_detail.html:645
+#, fuzzy
+#| msgid "Detalles del producto"
+msgid "Piezas de este producto"
+msgstr "Product details"
+
+#: .\templates\orders\users\order_detail.html:646
 msgid "Cant:"
 msgstr "Qty:"
 
-#: .\templates\orders\users\order_detail.html:575
+#: .\templates\orders\users\order_detail.html:651
+msgid "Precio por pieza: base del producto + adicional de la talla"
+msgstr "Price per piece: product base + size surcharge"
+
+#: .\templates\orders\users\order_detail.html:652
 msgid "Unit:"
 msgstr "Unit:"
 
-#: .\templates\orders\users\order_detail.html:584
+#: .\templates\orders\users\order_detail.html:663
 msgid "Gestionar atletas"
 msgstr "Manage athletes"
 
-#: .\templates\orders\users\order_detail.html:591
+#: .\templates\orders\users\order_detail.html:670
 msgid "Elegir talla"
 msgstr "Choose size"
 
-#: .\templates\orders\users\order_detail.html:611
+#: .\templates\orders\users\order_detail.html:690
 msgid "Total de la orden:"
 msgstr "Order total:"
 
-#: .\templates\orders\users\order_detail.html:615
+#: .\templates\orders\users\order_detail.html:694
 msgid "unidades"
 msgstr "units"
 
-#: .\templates\orders\users\order_detail.html:623
+#: .\templates\orders\users\order_detail.html:702
 msgid "Esta orden aún no tiene productos"
 msgstr "This order has no products yet"
 
-#: .\templates\orders\users\order_detail.html:624
+#: .\templates\orders\users\order_detail.html:703
 msgid "Agrega productos para comenzar"
 msgstr "Add products to start"
 
-#: .\templates\orders\users\order_detail.html:717
+#: .\templates\orders\users\order_detail.html:796
 msgid "Sistema"
 msgstr "System"
 
-#: .\templates\orders\users\order_detail.html:720
+#: .\templates\orders\users\order_detail.html:799
 #, python-format
 msgid "de %(from)s → %(to)s"
 msgstr "from %(from)s → %(to)s"
 
-#: .\templates\orders\users\order_detail.html:731
+#: .\templates\orders\users\order_detail.html:810
 msgid "Ver historial completo"
 msgstr "View full history"
 
-#: .\templates\orders\users\order_detail.html:754
-#: .\templates\orders\users\order_detail.html:801
+#: .\templates\orders\users\order_detail.html:833
+#: .\templates\orders\users\order_detail.html:880
 msgid "Cancelar pedido"
 msgstr "Cancel order"
 
-#: .\templates\orders\users\order_detail.html:764
+#: .\templates\orders\users\order_detail.html:843
 msgid "Enviar pedido"
 msgstr "Submit order"
 
-#: .\templates\orders\users\order_detail.html:766
+#: .\templates\orders\users\order_detail.html:845
 msgid "Aprobar diseño"
 msgstr "Approve design"
 
-#: .\templates\orders\users\order_detail.html:768
+#: .\templates\orders\users\order_detail.html:847
 msgid "Iniciar producción"
 msgstr "Start production"
 
-#: .\templates\orders\users\order_detail.html:770
+#: .\templates\orders\users\order_detail.html:849
 msgid "Marcar como entregada"
 msgstr "Mark as delivered"
 
-#: .\templates\orders\users\order_detail.html:773
+#: .\templates\orders\users\order_detail.html:852
 #, python-format
 msgid "Pasar a %(s)s"
 msgstr "Move to %(s)s"
 
-#: .\templates\orders\users\order_detail.html:784
+#: .\templates\orders\users\order_detail.html:863
 msgid "Resuelve los problemas señalados arriba"
 msgstr "Resolve the issues listed above"
 
-#: .\templates\orders\users\order_detail.html:784
+#: .\templates\orders\users\order_detail.html:863
 msgid "para poder avanzar."
 msgstr "to proceed."
 
-#: .\templates\orders\users\order_detail.html:789
+#: .\templates\orders\users\order_detail.html:868
 msgid "No hay acciones disponibles"
 msgstr "No actions available"
 
-#: .\templates\orders\users\order_detail.html:790
+#: .\templates\orders\users\order_detail.html:869
 msgid "Esta orden ha alcanzado su estado final"
 msgstr "This order has reached its final state"
 
-#: .\templates\orders\users\order_detail.html:840
+#: .\templates\orders\users\order_detail.html:919
 msgid "¿Eliminar"
 msgstr "Delete"
 
-#: .\templates\orders\users\order_detail.html:840
+#: .\templates\orders\users\order_detail.html:919
 msgid "de la orden?"
 msgstr "from the order?"
 
-#: .\templates\orders\users\order_detail.html:843
+#: .\templates\orders\users\order_detail.html:922
 msgid ""
 "Se eliminarán todos los atletas y medidas asociadas. Esta acción no se puede "
 "deshacer."
-msgstr "All athletes and associated measurements will be deleted. This action cannot be undone."
+msgstr ""
+"All athletes and associated measurements will be deleted. This action cannot "
+"be undone."
 
 #: .\templates\orders\users\order_edit.html:9
 #, python-format
@@ -6886,7 +7620,7 @@ msgid "URL: /products/dev/preview3d-test/"
 msgstr "URL: /products/dev/preview3d-test/"
 
 #: .\templates\products\partials\preview3d_test.html:118
-#: .\templates\products\partials\preview_3d.html:16
+#: .\templates\products\partials\preview_3d.html:18
 msgid "Modelo genérico"
 msgstr "Generic model"
 
@@ -6930,39 +7664,39 @@ msgstr "Renderer:"
 msgid "FPS (aprox):"
 msgstr "FPS (approx):"
 
-#: .\templates\products\partials\preview_3d.html:14
+#: .\templates\products\partials\preview_3d.html:16
 msgid "Vista 3D"
 msgstr "3D view"
 
-#: .\templates\products\partials\preview_3d.html:31
+#: .\templates\products\partials\preview_3d.html:33
 msgid "Tu dispositivo no soporta la vista 3D."
 msgstr "Your device does not support the 3D view."
 
-#: .\templates\products\partials\preview_3d.html:38
+#: .\templates\products\partials\preview_3d.html:40
 msgid "Azul"
 msgstr "Blue"
 
-#: .\templates\products\partials\preview_3d.html:39
+#: .\templates\products\partials\preview_3d.html:41
 msgid "Rojo"
 msgstr "Red"
 
-#: .\templates\products\partials\preview_3d.html:40
+#: .\templates\products\partials\preview_3d.html:42
 msgid "Verde"
 msgstr "Green"
 
-#: .\templates\products\partials\preview_3d.html:41
+#: .\templates\products\partials\preview_3d.html:43
 msgid "Amarillo"
 msgstr "Yellow"
 
-#: .\templates\products\partials\preview_3d.html:42
+#: .\templates\products\partials\preview_3d.html:44
 msgid "Negro"
 msgstr "Black"
 
-#: .\templates\products\partials\preview_3d.html:43
+#: .\templates\products\partials\preview_3d.html:45
 msgid "Púrpura"
 msgstr "Purple"
 
-#: .\templates\products\partials\preview_3d.html:46
+#: .\templates\products\partials\preview_3d.html:48
 msgid "Modelo ilustrativo. Sube un .glb al producto para ver el modelo real."
 msgstr ""
 "Illustrative model. Upload a .glb to the product to see the real model."
@@ -7053,7 +7787,11 @@ msgid ""
 "                  Este producto está siendo usado en <strong>%(count)s "
 "orden</strong>\n"
 "                "
-msgstr "\n                  This product is being used in <strong>%(count)s order</strong>\n                "
+msgstr ""
+"\n"
+"                  This product is being used in <strong>%(count)s order</"
+"strong>\n"
+"                "
 
 #: .\templates\products\product_detail.html:218
 msgid "activa"
@@ -7063,7 +7801,9 @@ msgstr "active"
 msgid ""
 "No puedes modificar su estructura (scope, usage_type, size_strategy) ni "
 "eliminarlo."
-msgstr "You cannot modify its structure (scope, usage_type, size_strategy) or delete it."
+msgstr ""
+"You cannot modify its structure (scope, usage_type, size_strategy) or delete "
+"it."
 
 #: .\templates\products\product_detail.html:235
 msgid "Editar información"
@@ -7077,7 +7817,9 @@ msgstr "Locked fields"
 msgid ""
 "Tipo de producto, Tipo de uso, Estrategia de tallas, Alcance y Equipo "
 "propietario no pueden modificarse porque este producto ya está en órdenes."
-msgstr "Product type, Usage type, Size strategy, Scope, and Owner team cannot be modified because this product is already in orders."
+msgstr ""
+"Product type, Usage type, Size strategy, Scope, and Owner team cannot be "
+"modified because this product is already in orders."
 
 #: .\templates\products\product_detail.html:284
 #: .\templates\products\product_detail.html:298
@@ -7120,10 +7862,6 @@ msgid ""
 "producto."
 msgstr ""
 "Optional, max 15 MB. Generate it with Tripo AI or Meshy from product photos."
-
-#: .\templates\products\product_detail.html:398
-msgid "Tallas"
-msgstr "Sizes"
 
 #: .\templates\products\product_detail.html:413
 msgid "XS, S, M..."
@@ -7267,10 +8005,6 @@ msgstr "Active"
 msgid "Inactivos"
 msgstr "Inactive"
 
-#: .\templates\products\product_list.html:59
-msgid "Limpiar"
-msgstr "Clear"
-
 #: .\templates\products\product_list.html:78
 msgid "Estrategia"
 msgstr "Strategy"
@@ -7334,15 +8068,6 @@ msgstr "Search athletes, teams, tournaments…"
 #: .\templates\social\base_social_v2.html:35
 msgid "Densidad"
 msgstr "Density"
-
-#: .\templates\social\base_social_v2.html:37
-#: .\templates\social\base_social_v2.html:43
-#: .\templates\social\notifications.html:3
-#: .\templates\social\notifications.html:6
-#: .\templates\social\partials\social_bell.html:3
-#: .\templates\social\settings.html:53
-msgid "Notificaciones"
-msgstr "Notifications"
 
 #: .\templates\social\base_social_v2.html:47
 msgid "Marcar leídas"
@@ -7408,7 +8133,9 @@ msgstr "No posts yet!"
 msgid ""
 "Sé el primero en compartir tu rutina con el equipo 🎉 Una foto del entreno "
 "basta para arrancar."
-msgstr "Be the first to share your routine with the team 🎉 One photo from practice is enough to get started."
+msgstr ""
+"Be the first to share your routine with the team 🎉 One photo from practice "
+"is enough to get started."
 
 #: .\templates\social\feed.html:65
 msgid "O descubre equipos para seguir →"
@@ -7452,14 +8179,6 @@ msgstr "%(c)s comps. accepted · %(a)s athletes"
 #: .\templates\social\feed.html:131
 msgid "Ver ranking completo"
 msgstr "View full ranking"
-
-#: .\templates\social\notifications.html:9
-msgid "Marcar todas como leídas"
-msgstr "Mark all as read"
-
-#: .\templates\social\notifications.html:30
-msgid "No tienes notificaciones."
-msgstr "You have no notifications."
 
 #: .\templates\social\partials\feed_posts_fragment.html:7
 msgid "Ver más publicaciones"
@@ -7572,7 +8291,9 @@ msgstr "Social space settings"
 msgid ""
 "Tu visibilidad está en 'Solo mi equipo' pero no perteneces a ningún equipo "
 "activo: solo tú y los administradores verán tu contenido."
-msgstr "Your visibility is set to 'Only my team' but you don't belong to any active team: only you and administrators will see your content."
+msgstr ""
+"Your visibility is set to 'Only my team' but you don't belong to any active "
+"team: only you and administrators will see your content."
 
 #: .\templates\social\settings.html:12
 msgid "Perfil social"
@@ -7633,10 +8354,6 @@ msgstr "Search team…"
 #: .\templates\social\team_directory.html:26
 msgid "No se encontraron equipos."
 msgstr "No teams found."
-
-#: .\templates\social\team_page.html:14
-msgid "de"
-msgstr "of"
 
 #: .\templates\social\team_page.html:18
 msgid "concursos"
@@ -7720,7 +8437,11 @@ msgid ""
 "                                                ¿Seguro que deseas eliminar "
 "la categoría <strong>%(nombre)s</strong>?\n"
 "                                            "
-msgstr "\n                                                Are you sure you want to delete the category <strong>%(nombre)s</strong>?\n                                            "
+msgstr ""
+"\n"
+"                                                Are you sure you want to "
+"delete the category <strong>%(nombre)s</strong>?\n"
+"                                            "
 
 #: .\templates\teams\manage_categories.html:107
 msgid "No hay categorías registradas."
@@ -7840,7 +8561,11 @@ msgid ""
 "                                Estás a punto de eliminar el equipo "
 "<strong>\"%(nombre)s\"</strong>.\n"
 "                            "
-msgstr "\n                                You are about to delete the team <strong>\"%(nombre)s\"</strong>.\n                            "
+msgstr ""
+"\n"
+"                                You are about to delete the team "
+"<strong>\"%(nombre)s\"</strong>.\n"
+"                            "
 
 #: .\templates\teams\manage_teams.html:414
 msgid "Esta acción no se puede deshacer."
