@@ -482,3 +482,35 @@ class TestUnSoloBotonDeTallas:
         # tema oscuro de la app salen blancas.
         assert "table-light" not in cuerpo
         assert "table-secondary" not in cuerpo
+
+
+@pytest.mark.django_db
+class TestTarjetasDeItemPorTalla:
+
+    def _con_tallas(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+        return order, product, url
+
+    def test_cada_tarjeta_dice_de_que_talla_es(self, client):
+        """Tres tarjetas con el mismo nombre de producto no se distinguen entre
+        si; la talla tiene que estar en el encabezado, no solo en un renglon."""
+        order, product, url = self._con_tallas(client)
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        assert "Talla M" in cuerpo
+        assert "Talla L" in cuerpo
+
+    def test_no_avisa_medidas_incompletas_en_un_producto_sin_medidas(self, client):
+        """El producto por talla no pide medidas: el aviso amarillo por alumno
+        es falso y manda a configurar algo que no existe."""
+        order, product, url = self._con_tallas(client)
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        assert "Medidas incompletas" not in cuerpo

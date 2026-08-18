@@ -472,6 +472,9 @@
                   <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                     <h5 class="card-title mb-0">
                       {{ item.product.name }}
+                      {% if item.size_variant %}
+                        <span class="badge bg-primary ms-1">{% trans "Talla" %} {{ item.size_variant.size }}</span>
+                      {% endif %}
                       {% if not item.product.is_active %}
                         <span class="badge bg-secondary">{% trans "Inactivo" %}</span>
                       {% endif %}
@@ -548,7 +551,8 @@
                                     <span class="fw-semibold small text-truncate">
                                       {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
                                     </span>
-                                    {% if athlete_item.has_complete_measurements %}
+                                    {% if not item.product.requires_measurements %}
+                                    {% elif athlete_item.has_complete_measurements %}
                                       <span class="badge bg-success flex-shrink-0" title="{% trans 'Medidas completas' %}">
                                         <i class="bi bi-check-circle"></i>
                                       </span>
@@ -558,7 +562,7 @@
                                       </span>
                                     {% endif %}
                                   </div>
-                                  {% if not athlete_item.has_complete_measurements %}
+                                  {% if item.product.requires_measurements and not athlete_item.has_complete_measurements %}
                                   {% if order.measurements_open and can_edit %}
                                     <a href="{% url 'orders:order_item_detail' item.id %}"
                                       class="btn btn-sm btn-outline-primary w-100">
