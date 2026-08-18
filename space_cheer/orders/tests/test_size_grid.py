@@ -466,3 +466,19 @@ class TestUnSoloBotonDeTallas:
         )
 
         assert response.content.decode().count(url) == 1
+
+    def test_el_panel_admin_no_pinta_filas_claras_sobre_el_tema_oscuro(self, client):
+        order, product, url = self._con_dos_tallas(client)
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        client.force_login(admin)
+
+        response = client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": order.id})
+        )
+
+        cuerpo = response.content.decode()
+        # table-light y table-secondary traen su propio fondo claro fijo: en el
+        # tema oscuro de la app salen blancas.
+        assert "table-light" not in cuerpo
+        assert "table-secondary" not in cuerpo

@@ -428,7 +428,7 @@
                 </td>
               </tr>
               {% if item.athletes.exists %}
-                <tr class="table-secondary bg-opacity-10">
+                <tr class="sc-table-row">
                   <td colspan="5">
                     <div class="p-2">
                       <strong><i class="bi bi-person-arms-up me-1"></i>{% trans "Atletas:" %}</strong>
@@ -464,7 +464,7 @@
                 </tr>
               {% endif %}
               {% if order.order_type == "OFFLINE" %}
-                <tr class="table-light">
+                <tr class="sc-table-row">
                   <td colspan="5">
                     <div class="p-2">
                       <strong><i class="bi bi-rulers me-1"></i>{% trans "Talla, notas y medidas:" %}</strong>

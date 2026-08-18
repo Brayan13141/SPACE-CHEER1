@@ -75,6 +75,9 @@
 .sc-bg-pink-card     { background: rgba(255,79,154,0.07); border: 1px solid rgba(255,79,154,0.2); }
 .sc-bg-overlay       { background: rgba(0,0,0,0.35); }
 .sc-bg-panel         { background: var(--sc-panel, #1a1a2e); }
+/* Fila de tabla: las celdas de Bootstrap pintan su propio --bs-table-bg,
+   asi que un background en el <tr> queda tapado. Hay que mover la variable. */
+.sc-table-row        { --bs-table-bg: var(--sc-panel, #1a1a2e); --bs-table-color: #e2e8f0; }
 .sc-bg-darkest       { background: var(--sc-dark, #0d0d1a); }
 .sc-bg-purple-solid  { background: var(--sc-purple); color: #fff; }
 
