@@ -539,3 +539,48 @@ class TestTutorGuardandoSuFila:
         assert respuesta.status_code == 302
         tallas = {i.size_variant.size: i.quantity for i in order.items.all()}
         assert tallas == {"S": 1, "M": 1, "L": 1}
+
+
+@pytest.mark.django_db
+class TestAuditoriaQueFaltaba:
+    """Hallazgos Important de la revision final: habia escrituras y lecturas de
+    la talla de un menor que no dejaban rastro en PiiAccessLog."""
+
+    def test_reescribir_la_talla_del_perfil_deja_edit_size_aunque_el_pedido_no_cambie(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M"})
+        # El perfil se corrige por otro lado (pantalla del atleta): ahora diverge
+        # del pedido, y volver a guardar el roster lo revierte M<-L en silencio.
+        AthleteStandardSize.objects.filter(user=a1).update(size="L")
+        PiiAccessLog.objects.all().delete()
+
+        client.post(url, {f"size_{a1.id}": "M"})
+
+        assert AthleteStandardSize.objects.get(user=a1).size == "M"
+        assert PiiAccessLog.objects.filter(
+            access_type="EDIT_SIZE", target_user=a1
+        ).count() == 1
+
+    def test_ver_el_detalle_del_item_por_talla_deja_view_size(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "M"})
+        item = order.items.get(size_variant__size="M")
+        PiiAccessLog.objects.all().delete()
+
+        client.get(reverse("orders:order_item_detail", args=[item.id]))
+
+        registros = PiiAccessLog.objects.filter(access_type="VIEW_SIZE")
+        assert set(registros.values_list("target_user_id", flat=True)) == {a1.id, a2.id}
+
+    def test_el_panel_admin_deja_view_size_por_alumno(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        client.force_login(admin)
+        PiiAccessLog.objects.all().delete()
+
+        client.get(reverse("orders:admin_order_detail", kwargs={"order_id": order.id}))
+
+        registros = PiiAccessLog.objects.filter(access_type="VIEW_SIZE")
+        assert set(registros.values_list("target_user_id", flat=True)) == {a1.id, a2.id}

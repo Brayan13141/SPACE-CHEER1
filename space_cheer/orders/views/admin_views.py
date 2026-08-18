@@ -299,6 +299,21 @@ def admin_order_detail(request, order_id):
         notes=f"Admin order detail pk={order.pk}",
     )
 
+    # El panel tambien lista que alumno lleva cada talla, que es el mismo tipo
+    # de dato de un menor y hasta ahora se mostraba sin dejar rastro.
+    PiiAuditService.log_many(
+        request=request,
+        target_users=[
+            athlete_item.athlete
+            for order_item in items
+            if order_item.product.uses_standard_sizes
+            for athlete_item in order_item.athletes.all()
+        ],
+        access_type="VIEW_SIZE",
+        field_accessed="standard_size",
+        notes=f"Admin order detail pk={order.pk}",
+    )
+
     dates_form = OrderDatesForm(instance=order)
     available_transitions = OrderStateService.get_available_transitions(
         order, request.user

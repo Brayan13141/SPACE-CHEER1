@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.models import User
 from accounts.services.pii_audit_service import PiiAuditService
 from orders.models import Order
 from orders.services.servicesItems.size_assignment_service import (
@@ -82,7 +83,21 @@ def _log_size_view(request, grid, order, product):
 
 
 def _log_size_edit(request, order, product, result):
-    for athlete in result.changed_athletes:
+    """Audita a los alumnos TOCADOS, que no son solo los que se movieron de fila.
+
+    reconcile() tambien reescribe la talla guardada del alumno (Decision 5), y
+    eso pasa incluso cuando el pedido no cambia: si el perfil se corrigio por la
+    pantalla del atleta y despues alguien reguarda el roster, la talla del menor
+    se revierte. Auditar solo changed_athletes dejaba esa escritura sin rastro.
+    """
+    tocados = {athlete.id: athlete for athlete in result.changed_athletes}
+
+    faltantes = set(result.profile_updates) - set(tocados)
+    if faltantes:
+        for athlete in User.objects.filter(id__in=faltantes):
+            tocados[athlete.id] = athlete
+
+    for athlete in tocados.values():
         PiiAuditService.log(
             request=request,
             target_user=athlete,

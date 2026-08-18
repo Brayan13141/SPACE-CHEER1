@@ -64,6 +64,17 @@ def order_item_detail(request, item_id):
     if requires_athlete or uses_standard_sizes:
         athlete_items = list(item.athletes.all())
 
+    if uses_standard_sizes and athlete_items:
+        # Esta pagina expone la talla de menores, igual que el grid: se registra
+        # el acceso por sujeto (log_many coalesce, no llena la bitacora).
+        PiiAuditService.log_many(
+            request=request,
+            target_users=[athlete_item.athlete for athlete_item in athlete_items],
+            access_type="VIEW_SIZE",
+            field_accessed="standard_size",
+            notes=f"Item detail pk={item.pk}",
+        )
+
     # Tabla consolidada de medidas: solo tiene sentido si el item ya tiene
     # atletas asignados y el producto usa medidas.
     grid = None
