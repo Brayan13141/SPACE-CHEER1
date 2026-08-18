@@ -201,6 +201,27 @@ class TestConciliacion:
         assert a2.id in result.errors
         assert order.items.get(size_variant__size="M").quantity == 1
 
+    def test_un_producto_fuera_del_catalogo_de_la_orden_no_se_puede_inyectar(self):
+        """SEGURIDAD (IDOR de producto): la orden esta autorizada, el producto no.
+
+        reconcile() crea OrderItem directo, saltandose el filtro de catalogo
+        que si aplica OrderItemService.add_product. Un producto retirado (su
+        temporada ya no esta activa) pasa OrderItem.clean() sin problema
+        --clean solo frena los TEAM_ONLY de otro equipo-- asi que sin esta
+        guarda un coach autorizado en su propia orden le inyecta un producto
+        que la politica de catalogo no le permitia pedir.
+        """
+        order, product, (a1, a2, a3) = self._setup()
+        product.season.is_active = False
+        product.season.save()
+
+        with pytest.raises(ValidationError):
+            OrderItemSizeAssignmentService.reconcile(
+                order, product, {a1.id: "M"}, viewer=order.created_by
+            )
+
+        assert not order.items.exists()
+
     def test_reconcile_no_duplica_items_de_la_misma_talla(self):
         """Documenta el invariante del lock a nivel de Order: llamar reconcile()
         dos veces seguidas con la misma asignacion nunca produce dos OrderItem

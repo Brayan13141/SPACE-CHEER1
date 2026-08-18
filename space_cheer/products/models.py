@@ -172,6 +172,15 @@ class Product(models.Model):
         return self.size_strategy == "MEASUREMENTS"
 
     @property
+    def uses_standard_sizes(self):
+        """Pieza A: el producto asigna ALUMNOS por talla estandar.
+
+        Es distinto de requires_athletes, que exige MEASUREMENTS y por eso
+        devuelve False justo para esta combinacion.
+        """
+        return self.usage_type == "TEAM_CUSTOM" and self.size_strategy == "STANDARD"
+
+    @property
     def requires_athletes(self):
         return (
             self.usage_type in ["TEAM_CUSTOM", "ATHLETE_CUSTOM"]

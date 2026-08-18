@@ -12,6 +12,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from orders.models import Order, OrderItem, OrderItemAthlete
+from orders.services.servicesItems.product_selector import (
+    available_products_for_order,
+)
 
 
 @dataclass
@@ -26,10 +29,7 @@ class OrderItemSizeAssignmentService:
 
     @staticmethod
     def applies_to(product):
-        return (
-            product.usage_type == "TEAM_CUSTOM"
-            and product.size_strategy == "STANDARD"
-        )
+        return product.uses_standard_sizes
 
     @staticmethod
     @transaction.atomic
@@ -40,6 +40,14 @@ class OrderItemSizeAssignmentService:
 
         if order.order_type != "TEAM":
             raise ValidationError("Solo las ordenes de equipo usan roster de tallas")
+
+        # La orden viene autorizada por quien llama; el PRODUCTO no. Sin esto,
+        # el OrderItem.objects.create() de mas abajo se salta el filtro de
+        # catalogo que si aplica OrderItemService.add_product, y OrderItem.clean()
+        # no lo cubre (solo frena los TEAM_ONLY de otro equipo). Va aqui y no en
+        # la vista para cubrir cualquier llamada futura al servicio.
+        if not available_products_for_order(order).filter(pk=product.pk).exists():
+            raise ValidationError("Este producto no está permitido para esta orden")
 
         if not order.can_edit_general():
             raise ValidationError("La orden no es editable")

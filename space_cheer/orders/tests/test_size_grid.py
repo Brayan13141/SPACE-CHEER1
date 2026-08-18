@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 
 from accounts.models import AthleteProfile, PiiAccessLog
+from measures.models import AthleteStandardSize
 from orders.services.sizes.SizeGridService import SizeGridService
 from orders.tests.factories import (
     AthleteFactory,
@@ -13,6 +14,7 @@ from orders.tests.factories import (
     TeamOrderFactory,
     TeamProductWithSizesFactory,
     UserFactory,
+    RoleFactory,
     UserTeamMembershipFactory,
 )
 
@@ -137,6 +139,16 @@ class TestSizeGridBuild:
         with pytest.raises(PermissionDenied):
             SizeGridService.build(order, product, order.created_by)
 
+    def test_un_producto_fuera_del_catalogo_de_la_orden_no_arma_grid(self):
+        """SEGURIDAD: si el producto no se puede pedir en esta orden, la
+        pantalla no se ofrece siquiera. Espeja la guarda de reconcile()."""
+        order, product, athletes = self._setup()
+        product.season.is_active = False
+        product.season.save()
+
+        with pytest.raises(PermissionDenied):
+            SizeGridService.build(order, product, order.created_by)
+
     def test_assignments_from_post_ignora_las_filas_ajenas(self):
         """SEGURIDAD: el tutor postea la celda de otro menor a mano y no pasa."""
         order, product, (a1, a2, a3) = self._setup()
@@ -209,6 +221,27 @@ class TestSizeGridView:
 
         assert response.status_code == 200      # no 500, no 403 pelado
         assert not order.items.exists()         # nada se guardo
+        # El intento igual muestra el roster completo, asi que se audita: sin
+        # esta asercion, quien "simplifique" el return de esa rama y borre la
+        # linea de auditoria pasa igual toda la suite.
+        assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").count() == 2
+
+
+    def test_post_sin_permiso_de_escritura_no_dice_que_la_orden_esta_cerrada(self, client):
+        """Dos causas distintas piden dos mensajes: "la orden esta cerrada" y
+        "ves el roster pero no lo capturas tu" no son lo mismo, y el propio
+        docstring de SizeGrid avisa que confundirlas es mentirle al usuario."""
+        order, product, athletes, url = setup_view_case(client)
+        order.created_by = UserFactory()
+        order.save()
+        client.force_login(order.owner_team.coach)
+
+        response = client.post(url, {f"size_{athletes[0].id}": "M"})
+
+        assert response.status_code == 200
+        avisos = [str(m) for m in response.context["messages"]]
+        assert avisos == [SizeGridService.NO_WRITE_MESSAGE]
+        assert not order.items.exists()
 
 
 @pytest.mark.django_db
@@ -244,4 +277,4 @@ class TestSizeGridAuditoria:
 
         client.post(url, {f"size_{a1.id}": "XXL"})
 
-        assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").exists()
+        assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").count() == 2

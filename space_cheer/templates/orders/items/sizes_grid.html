@@ -13,11 +13,12 @@
   {% comment %}
     El mensaje va literal aqui: LOCKED_MESSAGE es un atributo de clase de
     SizeGridService, NO del dataclass SizeGrid, asi que {{ grid.LOCKED_MESSAGE }}
-    renderizaria vacio y la pantalla no diria nada estando bloqueada.
+    renderizaria vacio y la pantalla no diria nada estando bloqueada. Mantener
+    este texto igual al de SizeGridService.LOCKED_MESSAGE.
   {% endcomment %}
   {% if grid.is_locked %}
     <div class="alert alert-warning">
-      {% trans "Las tallas están cerradas o bloqueadas para esta orden." %}
+      {% trans "Las tallas están cerradas para esta orden." %}
     </div>
   {% endif %}
 

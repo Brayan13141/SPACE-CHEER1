@@ -38,12 +38,18 @@ class SizeGrid:
 
 class SizeGridService:
 
-    LOCKED_MESSAGE = "Las tallas están cerradas o bloqueadas para esta orden."
+    LOCKED_MESSAGE = "Las tallas están cerradas para esta orden."
+    # Dos causas distintas, dos mensajes: ver el roster sin poder capturarlo no
+    # es lo mismo que una orden bloqueada (ver el comentario de SizeGrid.can_edit).
+    NO_WRITE_MESSAGE = "No tienes permiso para capturar las tallas de esta orden."
 
     @staticmethod
     def build(order, product, viewer, values=None, errors=None):
         from measures.models import AthleteStandardSize
         from orders.models import OrderItemAthlete
+        from orders.services.servicesItems.product_selector import (
+            available_products_for_order,
+        )
         from orders.services.servicesItems.size_assignment_service import (
             OrderItemSizeAssignmentService,
         )
@@ -58,6 +64,11 @@ class SizeGridService:
             # Espeja la guarda de reconcile(). Sin esto, _team_athletes() filtra
             # por team=None, devuelve [] y la pantalla sale VACIA en vez de
             # fallar: parece que el equipo no tiene alumnos.
+            raise PermissionDenied
+
+        # Misma guarda que reconcile(): si el producto no se puede pedir en esta
+        # orden, la pantalla no se ofrece.
+        if not available_products_for_order(order).filter(pk=product.pk).exists():
             raise PermissionDenied
 
         sizes = list(

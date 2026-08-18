@@ -32,7 +32,12 @@ def order_product_sizes_grid(request, order_id, product_id):
             # porque ninguna fila es editable, y si igual se llamara,
             # reconcile() lanzaria ValidationError("La orden no es editable")
             # sin que nada la atrape (500 en vez del aviso que pide el diseño).
-            messages.error(request, SizeGridService.LOCKED_MESSAGE)
+            messages.error(
+                request,
+                SizeGridService.LOCKED_MESSAGE
+                if grid.is_locked
+                else SizeGridService.NO_WRITE_MESSAGE,
+            )
             _log_size_view(request, grid, order, product)
             return render(request, "orders/items/sizes_grid.html", {"grid": grid})
 
