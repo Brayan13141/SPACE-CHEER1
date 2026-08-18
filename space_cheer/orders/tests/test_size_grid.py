@@ -6,7 +6,11 @@ from django.urls import reverse
 
 from accounts.models import AthleteProfile, PiiAccessLog
 from measures.models import AthleteStandardSize
+from orders.services.servicesItems.size_assignment_service import (
+    OrderItemSizeAssignmentService,
+)
 from orders.services.sizes.SizeGridService import SizeGridService
+from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.tests.factories import (
     AthleteFactory,
     AthleteStandardSizeFactory,
@@ -14,6 +18,8 @@ from orders.tests.factories import (
     TeamOrderFactory,
     TeamProductWithSizesFactory,
     UserFactory,
+    OrderItemFactory,
+    ProductFactory,
     RoleFactory,
     UserTeamMembershipFactory,
 )
@@ -384,3 +390,79 @@ class TestPanelAdminConTallas:
         )
 
         assert "Medidas pendientes" not in response.content.decode()
+
+
+@pytest.mark.django_db
+class TestResumenDeTallas:
+    """Un pedido de 12 playeras son 3 OrderItem (uno por talla). Sin agrupar,
+    la pantalla repite el producto y el boton de captura una vez por talla."""
+
+    def test_agrupa_los_items_por_producto_con_su_desglose(self):
+        order, product, athletes = setup_team_roster(athlete_count=4)
+        OrderItemSizeAssignmentService.reconcile(
+            order, product,
+            {athletes[0].id: "M", athletes[1].id: "M", athletes[2].id: "L"},
+            viewer=order.created_by,
+        )
+
+        resumen = SizeSummaryService.for_order(order)
+
+        assert len(resumen) == 1
+        grupo = resumen[0]
+        assert grupo.product == product
+        assert grupo.rows == [("M", 2), ("L", 1)]
+        assert grupo.assigned == 3
+        assert grupo.total == 4
+        assert grupo.missing == 1
+
+    def test_ignora_los_productos_que_no_usan_talla_por_alumno(self):
+        order, product, athletes = setup_team_roster()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {athletes[0].id: "M"}, viewer=order.created_by
+        )
+        OrderItemFactory(order=order, product=ProductFactory())
+
+        resumen = SizeSummaryService.for_order(order)
+
+        assert [grupo.product for grupo in resumen] == [product]
+
+    def test_un_pedido_sin_items_por_talla_no_trae_resumen(self):
+        order = TeamOrderFactory()
+        OrderItemFactory(order=order, product=ProductFactory())
+
+        assert SizeSummaryService.for_order(order) == []
+
+
+@pytest.mark.django_db
+class TestUnSoloBotonDeTallas:
+    """Bryan: "no entiendo por que cada item tiene el boton de capturar las
+    tallas si con uno solo se muestran las tallas de todos los alumnos"."""
+
+    def _con_dos_tallas(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+        assert order.items.count() == 2
+        return order, product, url
+
+    def test_el_detalle_del_pedido_agrupa_y_deja_un_solo_boton(self, client):
+        order, product, url = self._con_dos_tallas(client)
+
+        response = client.get(reverse("orders:detail_order", args=[order.id]))
+
+        cuerpo = response.content.decode()
+        assert cuerpo.count(url) == 1
+        grupos = response.context["size_groups"]
+        assert len(grupos) == 1
+        assert grupos[0].assigned == 2
+
+    def test_el_panel_admin_tambien_deja_un_solo_boton(self, client):
+        order, product, url = self._con_dos_tallas(client)
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        client.force_login(admin)
+
+        response = client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": order.id})
+        )
+
+        assert response.content.decode().count(url) == 1

@@ -397,6 +397,69 @@
 
 
   {% if order.items.exists %}
+
+    {% if size_groups %}
+      {# Un OrderItem por talla: sin agrupar, el mismo producto sale N veces. #}
+      {% for grupo in size_groups %}
+        <div class="card shadow-sm mb-3 border-primary border-opacity-25">
+          <div class="card-body">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+              <div class="flex-grow-1 min-w-0">
+                <h5 class="card-title mb-1">
+                  <i class="bi bi-rulers me-2"></i>{% trans "Tallas del equipo" %} — {{ grupo.product.name }}
+                </h5>
+                <p class="text-muted small mb-3">
+                  {% trans "Este producto se pide por talla: cada talla es un renglón del pedido y su cantidad es el número de alumnos que la llevan." %}
+                </p>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                  {% for talla, alumnos in grupo.rows %}
+                    <span class="badge bg-primary fs-6"
+                          data-bs-toggle="tooltip"
+                          title="{% blocktrans %}Alumnos con talla {{ talla }}{% endblocktrans %}">
+                      {{ talla }} <span class="opacity-75">×{{ alumnos }}</span>
+                    </span>
+                  {% endfor %}
+                </div>
+                <div class="small">
+                  <span class="text-muted">{% trans "Capturados:" %}</span>
+                  <strong>{{ grupo.assigned }}</strong> {% trans "de" %} <strong>{{ grupo.total }}</strong>
+                  {% if grupo.missing %}
+                    <span class="badge bg-warning text-dark ms-2">
+                      <i class="bi bi-exclamation-triangle me-1"></i>{{ grupo.missing }} {% trans "sin talla" %}
+                    </span>
+                  {% else %}
+                    <span class="badge bg-success ms-2">
+                      <i class="bi bi-check-circle me-1"></i>{% trans "Equipo completo" %}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="flex-shrink-0 align-self-md-center">
+                <a href="{% url 'orders:order_product_sizes_grid' order_id=order.id product_id=grupo.product.id %}"
+                   class="btn btn-primary">
+                  <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
+                </a>
+                <div class="form-text text-center mt-1">
+                  {% trans "Una sola pantalla para todo el equipo" %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="alert alert-secondary d-flex align-items-start gap-2 py-2 small mb-3" role="note">
+      <i class="bi bi-info-circle mt-1"></i>
+      <div>
+        {% trans "Cómo leer cada renglón:" %}
+        <strong>{% trans "Cant." %}</strong> {% trans "son las piezas de esa talla," %}
+        <strong>{% trans "Unit." %}</strong> {% trans "el precio por pieza (talla grande puede sumar un adicional) y" %}
+        <strong>{% trans "Subtotal" %}</strong> {% trans "es Cant. × Unit." %}
+        {% trans "Las etiquetas grises describen el producto; pasa el cursor sobre ellas para ver qué significan." %}
+      </div>
+    </div>
+
     <div class="row g-3 mb-4">
       {% for item in order.items.all %}
         <div class="col-12">
@@ -420,13 +483,16 @@
 
                   <!-- Badges del producto -->
                   <div class="d-flex flex-wrap gap-2 mb-2">
-                    <span class="badge bg-secondary border">
+                    <span class="badge bg-secondary border" data-bs-toggle="tooltip"
+                          title="{% trans 'Tipo de producto' %}">
                       <i class="bi bi-tag me-1"></i>{{ item.product.get_product_type_display }}
                     </span>
-                    <span class="badge bg-secondary border">
+                    <span class="badge bg-secondary border" data-bs-toggle="tooltip"
+                          title="{% trans 'Cómo se personaliza: global, por equipo o por atleta' %}">
                       <i class="bi bi-gear me-1"></i>{{ item.product.get_usage_type_display }}
                     </span>
-                    <span class="badge bg-secondary border">
+                    <span class="badge bg-secondary border" data-bs-toggle="tooltip"
+                          title="{% trans 'Alcance: de catálogo general o exclusivo de un equipo' %}">
                       <i class="bi bi-globe me-1"></i>{{ item.product.get_scope_display }}
                     </span>
                     {% if item.product.owner_team %}
@@ -450,7 +516,8 @@
                   <!-- Talla -->
                   {% if item.needs_size %}
                     <div class="mb-2 small">
-                      <span class="text-muted">{% trans "Talla:" %}</span>
+                      <span class="text-muted" data-bs-toggle="tooltip"
+                            title="{% trans 'Cada talla del producto es un renglón aparte del pedido' %}">{% trans "Talla:" %}</span>
                       {% if item.size_variant %}
                         <span class="fw-semibold ms-1">{{ item.size_variant.size }}</span>
                         {% if item.size_variant.additional_price > 0 %}
@@ -570,9 +637,17 @@
                     <span class="text-muted small"> {% trans "subtotal" %}</span>
                   </div>
                   <div class="small text-muted mb-3">
-                    <span>{% trans "Cant:" %}</span> <strong>{{ item.quantity }}</strong>
+                    <span data-bs-toggle="tooltip"
+                          title="{% if item.product.uses_standard_sizes %}{% trans 'Piezas de esta talla: sale del número de alumnos asignados' %}{% else %}{% trans 'Piezas de este producto' %}{% endif %}">
+                      {% trans "Cant:" %} <strong>{{ item.quantity }}</strong>
+                      {% if item.product.uses_standard_sizes %}<i class="bi bi-people ms-1"></i>{% endif %}
+                    </span>
                     <span class="mx-1">|</span>
-                    <span>{% trans "Unit:" %}</span> <strong>${{ item.unit_price|floatformat:2 }}</strong>
+                    <span data-bs-toggle="tooltip"
+                          title="{% trans 'Precio por pieza: base del producto + adicional de la talla' %}">
+                      {% trans "Unit:" %} <strong>${{ item.unit_price|floatformat:2 }}</strong>
+                      <i class="bi bi-question-circle ms-1"></i>
+                    </span>
                   </div>
 
                   <div class="d-flex flex-column gap-3">

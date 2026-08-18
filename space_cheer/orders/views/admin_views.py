@@ -14,6 +14,7 @@ from orders.models import (
     OrderLog,
     OrderDesignImage,
 )
+from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.services.state import OrderStateService
 from orders.services.measurements.MeasurementGridService import (
     MeasurementGridService,
@@ -322,6 +323,7 @@ def admin_order_detail(request, order_id):
             "measurements_summary": measurements_summary,
             "grids": grids,
             "measurement_actions": measurement_actions,  # 👈 AÑADE ESTO
+            "size_groups": SizeSummaryService.for_order(order),
         },
     )
 

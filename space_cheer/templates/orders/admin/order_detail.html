@@ -358,6 +358,37 @@
         <i class="bi bi-box-seam me-2"></i>{% trans "Productos" %}
       </h5>
     </div>
+    {% if size_groups %}
+      <div class="card-body border-bottom pb-3">
+        {% for grupo in size_groups %}
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 {% if not forloop.last %}mb-3{% endif %}">
+            <div class="min-w-0">
+              <div class="fw-semibold">
+                <i class="bi bi-rulers me-1"></i>{{ grupo.product.name }}
+              </div>
+              <div class="small text-muted mb-1">
+                {% trans "Un renglón por talla; la cantidad es el número de alumnos que la llevan." %}
+              </div>
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                {% for talla, alumnos in grupo.rows %}
+                  <span class="badge bg-primary">{{ talla }} <span class="opacity-75">×{{ alumnos }}</span></span>
+                {% endfor %}
+                <span class="small text-muted ms-1">
+                  {{ grupo.assigned }}/{{ grupo.total }} {% trans "alumnos" %}
+                </span>
+                {% if grupo.missing %}
+                  <span class="badge bg-warning text-dark">{{ grupo.missing }} {% trans "sin talla" %}</span>
+                {% endif %}
+              </div>
+            </div>
+            <a href="{% url 'orders:order_product_sizes_grid' order_id=order.id product_id=grupo.product.id %}"
+               class="btn btn-sm btn-outline-primary flex-shrink-0">
+              <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -416,12 +447,6 @@
                           </li>
                         {% endfor %}
                       </ul>
-                      {% if item.product.uses_standard_sizes %}
-                        <a href="{% url 'orders:order_product_sizes_grid' order_id=item.order_id product_id=item.product_id %}"
-                           class="btn btn-sm btn-outline-primary mt-2">
-                          <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
-                        </a>
-                      {% endif %}
                       {% with grid=grids|dict_get:item.id %}
                         {% if grid %}
                           <div class="mt-2">

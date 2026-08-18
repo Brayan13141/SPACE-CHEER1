@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib import messages
 from orders.models import Order, OrderItem
+from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.services.state import OrderCreationService, OrderStateService
 from orders.services.factories import OrderContactInfoFactory
 from orders.services.preconditions import can_submit_order
@@ -294,6 +295,9 @@ def order_detail(request, order_id):
             "order": order,
             "order_flags": order_flags,
             "blocking_issues": blocking_issues,
+            # Los items por talla se agrupan por producto: son N filas del MISMO
+            # producto y un solo roster, asi que una sola tarjeta y un solo boton.
+            "size_groups": SizeSummaryService.for_order(order),
             "available_transitions": available_transitions,
             "transition_labels": transition_labels,
         },
