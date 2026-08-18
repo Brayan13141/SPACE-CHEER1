@@ -514,3 +514,28 @@ class TestTarjetasDeItemPorTalla:
         ).content.decode()
 
         assert "Medidas incompletas" not in cuerpo
+
+
+@pytest.mark.django_db
+class TestTutorGuardandoSuFila:
+    """El caso real del bug: la pantalla del tutor solo trae su fila, asi que el
+    POST del tutor llegaba a reconcile() como si fuera el roster completo."""
+
+    def test_el_tutor_guarda_a_su_hijo_sin_tocar_al_resto_del_equipo(self, client):
+        order, product, athletes = setup_team_roster(athlete_count=3)
+        a1, a2, a3 = athletes
+        url = reverse(
+            "orders:order_product_sizes_grid",
+            args=[order.id, product.id],
+        )
+        client.force_login(order.created_by)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "M", f"size_{a3.id}": "L"})
+
+        guardian = CoachFactory()
+        make_minor_with_guardian(a1, guardian)
+        client.force_login(guardian)
+        respuesta = client.post(url, {f"size_{a1.id}": "S"})
+
+        assert respuesta.status_code == 302
+        tallas = {i.size_variant.size: i.quantity for i in order.items.all()}
+        assert tallas == {"S": 1, "M": 1, "L": 1}

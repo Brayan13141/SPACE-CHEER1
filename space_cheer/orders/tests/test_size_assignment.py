@@ -201,6 +201,49 @@ class TestConciliacion:
         assert a2.id in result.errors
         assert order.items.get(size_variant__size="M").quantity == 1
 
+    def test_un_roster_parcial_no_borra_las_filas_de_los_demas(self):
+        """CRITICO: reconcile() concilia estado completo, pero la vista le pasa
+        SOLO las filas editables del que guarda. Para un tutor eso es una sola
+        fila, asi que todo el resto del equipo quedaba 'stale' y se borraba, con
+        sus items y las cantidades del pedido."""
+        order, product, (a1, a2, a3) = self._setup()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product,
+            {a1.id: "M", a2.id: "M", a3.id: "L"},
+            viewer=order.created_by,
+        )
+
+        # El tutor de a1 guarda unicamente la fila de su hijo.
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "S"}, viewer=order.created_by
+        )
+
+        items = {i.size_variant.size: i for i in order.items.all()}
+        assert set(items) == {"S", "M", "L"}          # nadie perdio su talla
+        assert items["M"].quantity == 1               # a2 sigue en M
+        assert items["L"].quantity == 1               # a3 sigue en L
+        assert set(items["S"].athletes.values_list("athlete_id", flat=True)) == {a1.id}
+
+    def test_un_roster_parcial_limpia_al_que_ya_no_es_del_equipo(self):
+        """La contracara: la fila de alguien que ya no es atleta activo se
+        retira aunque no venga en el roster que se esta guardando; esa fila no
+        puede ser valida para nadie."""
+        order, product, (a1, a2, a3) = self._setup()
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M", a2.id: "M"}, viewer=order.created_by
+        )
+        membership = a2.team_memberships.get(team=order.owner_team)
+        membership.is_active = False
+        membership.save()
+
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {a1.id: "M"}, viewer=order.created_by
+        )
+
+        item = order.items.get(size_variant__size="M")
+        assert set(item.athletes.values_list("athlete_id", flat=True)) == {a1.id}
+        assert item.quantity == 1
+
     def test_un_producto_fuera_del_catalogo_de_la_orden_no_se_puede_inyectar(self):
         """SEGURIDAD (IDOR de producto): la orden esta autorizada, el producto no.
 

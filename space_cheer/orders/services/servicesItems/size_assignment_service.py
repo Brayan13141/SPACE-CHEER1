@@ -10,6 +10,7 @@ from dataclasses import dataclass, field as dataclass_field
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 
 from orders.models import Order, OrderItem, OrderItemAthlete
 from orders.services.servicesItems.product_selector import (
@@ -34,7 +35,16 @@ class OrderItemSizeAssignmentService:
     @staticmethod
     @transaction.atomic
     def reconcile(order, product, assignments, viewer):
-        """assignments: {athlete_id: talla}. Talla vacia = sin asignar."""
+        """assignments: {athlete_id: talla}. Talla vacia = sin asignar.
+
+        assignments ES EL ALCANCE de la operacion, no solo su contenido: quien
+        llama manda las filas sobre las que tiene autoridad, y este servicio no
+        toca ninguna otra. La vista se lo pasa ya filtrado por permisos
+        (SizeGridService.assignments_from_post devuelve solo las filas
+        editables), asi que un tutor manda UNA fila y el resto del equipo no es
+        asunto suyo. Conciliar contra el estado completo con un roster parcial
+        borraba las filas de los demas, sus items y las cantidades del pedido.
+        """
         if not OrderItemSizeAssignmentService.applies_to(product):
             raise ValidationError("Este producto no usa tallas por alumno")
 
@@ -95,9 +105,15 @@ class OrderItemSizeAssignmentService:
         changed = []
 
         # 1. Quitar filas que ya no corresponden (cambio de talla, vaciado, baja).
+        #    Solo dentro del alcance de quien guarda; la unica excepcion es la
+        #    fila de alguien que ya no es atleta activo, que no puede ser valida
+        #    para nadie y por eso se retira aunque no venga en este roster.
+        scope_ids = set(assignments)
         for size, item in items.items():
             keep = set(targets.get(size, []))
-            stale = item.athletes.exclude(athlete_id__in=keep)
+            stale = item.athletes.exclude(athlete_id__in=keep).filter(
+                Q(athlete_id__in=scope_ids) | ~Q(athlete_id__in=valid_athlete_ids)
+            )
             for athlete_item in stale.select_related("athlete"):
                 changed.append(athlete_item.athlete)
             stale.delete()
