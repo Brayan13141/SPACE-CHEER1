@@ -278,3 +278,48 @@ class TestSizeGridAuditoria:
         client.post(url, {f"size_{a1.id}": "XXL"})
 
         assert PiiAccessLog.objects.filter(access_type="VIEW_SIZE").count() == 2
+
+
+@pytest.mark.django_db
+class TestTallaEnPerfilDelAtleta:
+    """La talla es un dato del ALUMNO (Decision 1), asi que tambien se captura
+    donde viven sus medidas, no solo desde el roster de un pedido."""
+
+    def _setup(self, client):
+        order = TeamOrderFactory()
+        coach = order.owner_team.coach
+        athlete = AthleteFactory()
+        UserTeamMembershipFactory(user=athlete, team=order.owner_team)
+        client.force_login(coach)
+        url = reverse("coach:edit_athlete_measures", args=[athlete.id])
+        return athlete, url
+
+    def test_el_coach_guarda_la_talla_del_alumno(self, client):
+        athlete, url = self._setup(client)
+
+        response = client.post(url, {"standard_size": "L"})
+
+        assert response.status_code == 302
+        assert AthleteStandardSize.objects.get(user=athlete).size == "L"
+        assert PiiAccessLog.objects.filter(
+            access_type="EDIT_SIZE", target_user=athlete
+        ).count() == 1
+
+    def test_vaciar_el_selector_borra_la_talla_y_deja_rastro(self, client):
+        athlete, url = self._setup(client)
+        AthleteStandardSizeFactory(user=athlete, size="M")
+
+        client.post(url, {"standard_size": ""})
+
+        assert not AthleteStandardSize.objects.filter(user=athlete).exists()
+        assert PiiAccessLog.objects.filter(
+            access_type="EDIT_SIZE", target_user=athlete
+        ).count() == 1
+
+    def test_guardar_la_misma_talla_no_ensucia_la_bitacora(self, client):
+        athlete, url = self._setup(client)
+        AthleteStandardSizeFactory(user=athlete, size="M")
+
+        client.post(url, {"standard_size": "M"})
+
+        assert not PiiAccessLog.objects.filter(access_type="EDIT_SIZE").exists()

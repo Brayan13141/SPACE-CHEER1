@@ -40,7 +40,12 @@ from accounts.models import (
 from custody.services.minor_service import MinorAthleteService
 from accounts.services.ownership_service import OwnershipService
 from measures.forms import DynamicMeasurementsForm
-from measures.models import MeasurementField, MeasurementValue
+from accounts.services.pii_audit_service import PiiAuditService
+from measures.models import (
+    AthleteStandardSize,
+    MeasurementField,
+    MeasurementValue,
+)
 from teams.forms import QuickAthleteRegisterForm
 from teams.models import Team, UserTeamMembership, GLOBAL_ROLE_HIERARCHY
 
@@ -383,6 +388,7 @@ def edit_athlete_measures(request, id):
                         field=field,
                         defaults={"value": str(value)},
                     )
+            _save_standard_size(request, athlete)
             messages.success(request, "Medidas actualizadas.")
             return redirect("coach:edit_athlete_measures", id=id)
     else:
@@ -400,8 +406,46 @@ def edit_athlete_measures(request, id):
             "athlete": athlete,
             "is_minor": is_minor,
             "guardian": guardian,
+            "standard_size": AthleteStandardSize.objects.filter(user=athlete).first(),
+            "size_choices": AthleteStandardSize.SIZE_CHOICES,
         },
     )
+
+
+def _save_standard_size(request, athlete):
+    """La talla estandar es hermana de las medidas: mismo dueño (el alumno) y
+    misma pantalla. Va fuera de DynamicMeasurementsForm porque ese form se arma
+    desde MeasurementField y no conoce este campo; si el form no valida, la
+    talla tampoco se guarda, igual que el resto de la pantalla.
+
+    Solo se escribe (y se audita) cuando la talla CAMBIA: un guardado que no la
+    mueve llenaria la bitacora de ruido y la volveria inutil para investigar.
+    """
+    raw_size = (request.POST.get("standard_size") or "").strip().upper()
+    valid_sizes = {code for code, _ in AthleteStandardSize.SIZE_CHOICES}
+    current = AthleteStandardSize.objects.filter(user=athlete).first()
+
+    if raw_size in valid_sizes and (current is None or current.size != raw_size):
+        AthleteStandardSize.objects.update_or_create(
+            user=athlete,
+            defaults={"size": raw_size, "updated_by": request.user},
+        )
+        PiiAuditService.log(
+            request=request,
+            target_user=athlete,
+            access_type="EDIT_SIZE",
+            field_accessed="standard_size",
+            notes="Pantalla de medidas del atleta",
+        )
+    elif not raw_size and current is not None:
+        current.delete()
+        PiiAuditService.log(
+            request=request,
+            target_user=athlete,
+            access_type="EDIT_SIZE",
+            field_accessed="standard_size",
+            notes="Talla borrada desde la pantalla del atleta",
+        )
 
 
 # =============================================================================

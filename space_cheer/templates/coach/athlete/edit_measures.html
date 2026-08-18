@@ -89,6 +89,21 @@
                     {% endfor %}
                 </div>
 
+                <!-- TALLA ESTANDAR: dato del alumno, hermano de sus medidas -->
+                <div class="row mt-4">
+                    <div class="col-12 col-md-4">
+                        <label for="standard_size" class="form-label">
+                            <i class="bi bi-rulers me-1"></i> {% trans "Talla estándar" %}
+                        </label>
+                        <select name="standard_size" id="standard_size" class="form-select">
+                            <option value="">—</option>
+                            {% for code, label in size_choices %}
+                            <option value="{{ code }}" {% if standard_size and standard_size.size == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
                 <!-- BOTONES INFERIORES (SOLO PARA MÓVIL COMO BACKUP) -->
                 <div class="d-none d-md-flex justify-content-end mt-4 pt-3 border-top">
                     <div class="d-flex gap-3">
