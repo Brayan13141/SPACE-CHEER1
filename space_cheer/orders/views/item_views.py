@@ -52,13 +52,16 @@ def order_item_detail(request, item_id):
     requires_athlete = product.requires_athletes
     requires_sizes = product.size_strategy == "STANDARD"
     requires_measurements = product.requires_measurements
+    # Pieza A: asigna alumnos aunque requires_athletes sea False (esa propiedad
+    # exige MEASUREMENTS, y lo que se relajo fue OrderItemAthlete.clean()).
+    uses_standard_sizes = product.uses_standard_sizes
 
     # -------------------------------------------------
     # ATLETAS DEL ITEM
     # -------------------------------------------------
     athlete_items = []
 
-    if requires_athlete:
+    if requires_athlete or uses_standard_sizes:
         athlete_items = list(item.athletes.all())
 
     # Tabla consolidada de medidas: solo tiene sentido si el item ya tiene
@@ -125,6 +128,7 @@ def order_item_detail(request, item_id):
         "requires_athlete": requires_athlete,
         "requires_team": requires_team,
         "requires_sizes": requires_sizes,
+        "uses_standard_sizes": uses_standard_sizes,
         "requires_measurements": requires_measurements,
         "configuration_state": configuration_state,
         "missing_configuration": missing_configuration,

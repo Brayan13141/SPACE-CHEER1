@@ -145,6 +145,32 @@
   </div>
 
 
+  {% comment %}
+    Bloque propio: la seccion de atletas de abajo cuelga de can_manage_athletes,
+    que es False para TEAM_CUSTOM+STANDARD (requires_athletes exige MEASUREMENTS).
+    Sin esto, el item por talla no dice QUIEN la lleva.
+  {% endcomment %}
+  {% if uses_standard_sizes %}
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-body">
+      <h2 class="h6 mb-3">
+        <i class="bi bi-people me-1"></i>{% trans "Alumnos con esta talla" %}
+      </h2>
+      <ul class="list-unstyled mb-3">
+        {% for athlete_item in athlete_items %}
+        <li><i class="bi bi-person me-1"></i>{{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.username }}</li>
+        {% empty %}
+        <li class="text-secondary">{% trans "Sin alumnos asignados." %}</li>
+        {% endfor %}
+      </ul>
+      <a class="btn btn-sm btn-outline-light"
+         href="{% url 'orders:order_product_sizes_grid' order_id=item.order_id product_id=item.product_id %}">
+        <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   {% if can_manage_athletes %}
 
   <div class="d-flex justify-content-between align-items-center mb-3">

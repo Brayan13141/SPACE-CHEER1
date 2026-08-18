@@ -323,3 +323,64 @@ class TestTallaEnPerfilDelAtleta:
         client.post(url, {"standard_size": "M"})
 
         assert not PiiAccessLog.objects.filter(access_type="EDIT_SIZE").exists()
+
+
+@pytest.mark.django_db
+class TestDetalleDelItemConTallas:
+    """El item por talla se ve desde el detalle: sin esto, la talla existe en la
+    base pero nadie ve QUIEN la lleva sin volver al roster."""
+
+    def test_el_detalle_lista_los_alumnos_de_esa_talla(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "M"})
+        item = order.items.get(size_variant__size="M")
+
+        response = client.get(reverse("orders:order_item_detail", args=[item.id]))
+
+        assert response.status_code == 200
+        cuerpo = response.content.decode()
+        assert a1.get_full_name() in cuerpo
+        assert a2.get_full_name() in cuerpo
+
+    def test_hay_enlace_al_grid_de_tallas(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M"})
+        item = order.items.get(size_variant__size="M")
+
+        response = client.get(reverse("orders:order_item_detail", args=[item.id]))
+
+        assert url in response.content.decode()
+
+
+@pytest.mark.django_db
+class TestPanelAdminConTallas:
+
+    def test_el_admin_ve_los_alumnos_y_llega_al_grid_de_tallas(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "M"})
+
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        client.force_login(admin)
+        response = client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": order.id})
+        )
+
+        cuerpo = response.content.decode()
+        assert a1.get_full_name() in cuerpo
+        assert url in cuerpo          # puede saltar al roster desde el panel
+
+    def test_el_item_por_talla_no_muestra_badges_de_medidas(self, client):
+        """El badge "Medidas pendientes" es de productos MEASUREMENTS; en un
+        item por talla no aplica y solo confunde: ese producto no pide medidas."""
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M"})
+
+        admin = UserFactory(profile_completed=True)
+        admin.roles.add(RoleFactory(name="ADMIN"))
+        client.force_login(admin)
+        response = client.get(
+            reverse("orders:admin_order_detail", kwargs={"order_id": order.id})
+        )
+
+        assert "Medidas pendientes" not in response.content.decode()
