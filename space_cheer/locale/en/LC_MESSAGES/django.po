@@ -1843,26 +1843,23 @@ msgid "Sin asignar"
 msgstr "Unassigned"
 
 #: .\production\templates\production\admin_overview.html:61
-#, fuzzy
 #| msgid "Completada"
 msgid "Completadas"
 msgstr "Completed"
 
 #: .\production\templates\production\admin_overview.html:66
-#, fuzzy
 #| msgid "Detalle"
 msgid "Del"
-msgstr "Detail"
+msgstr "From"
 
 #: .\production\templates\production\admin_overview.html:68
 msgid "al"
 msgstr "to"
 
 #: .\production\templates\production\admin_overview.html:70
-#, fuzzy
 #| msgid "Filtros"
 msgid "Filtrar"
-msgstr "Filters"
+msgstr "Filter"
 
 #: .\production\templates\production\admin_overview.html:72
 #: .\templates\products\product_list.html:59
@@ -2375,22 +2372,19 @@ msgid "Nombre del rol"
 msgstr "Role name"
 
 #: .\production\templates\production\config\roles.html:62
-#, fuzzy
 #| msgid "Operarios"
 msgid "operario(s)"
-msgstr "Workers"
+msgstr "worker(s)"
 
 #: .\production\templates\production\config\roles.html:65
-#, fuzzy
 #| msgid "Responsabilidades"
 msgid "Responsable de"
-msgstr "Responsibilities"
+msgstr "Responsible for"
 
 #: .\production\templates\production\config\roles.html:65
-#, fuzzy
 #| msgid "etapas"
 msgid "etapa(s)"
-msgstr "stages"
+msgstr "stage(s)"
 
 #: .\production\templates\production\config\roles.html:89
 msgid ""
@@ -2399,10 +2393,9 @@ msgid ""
 msgstr "Cannot be deleted: it has assigned workers or is responsible for a stage."
 
 #: .\production\templates\production\config\roles.html:100
-#, fuzzy
 #| msgid "Eliminar foto"
 msgid "Eliminar rol"
-msgstr "Delete photo"
+msgstr "Delete role"
 
 #: .\production\templates\production\config\roles.html:144
 msgid "Sin roles configurados."
@@ -6339,25 +6332,22 @@ msgid ""
 msgstr "One row per size; the quantity is the number of athletes wearing it."
 
 #: .\templates\orders\admin\order_detail.html:377
-#, fuzzy
 #| msgid "Mis Alumnos"
 msgid "alumnos"
-msgstr "My Students"
+msgstr "athletes"
 
 #: .\templates\orders\admin\order_detail.html:380
 #: .\templates\orders\users\order_detail.html:428
-#, fuzzy
 #| msgid "Eliminar talla"
 msgid "sin talla"
-msgstr "Delete size"
+msgstr "without a size"
 
 #: .\templates\orders\admin\order_detail.html:386
 #: .\templates\orders\items\item_detail.html:169
 #: .\templates\orders\users\order_detail.html:440
-#, fuzzy
 #| msgid "Categoría de equipo"
 msgid "Capturar tallas del equipo"
-msgstr "Team category"
+msgstr "Capture team sizes"
 
 #: .\templates\orders\admin\order_detail.html:400
 #: .\templates\orders\items\item_detail.html:91
@@ -6382,10 +6372,9 @@ msgstr "Pending measurements"
 #: .\templates\orders\admin\order_detail.html:457
 #: .\templates\orders\items\item_detail.html:195
 #: .\templates\orders\items\item_measurements.html:20
-#, fuzzy
 #| msgid "Editar datos"
 msgid "Editar medidas"
-msgstr "Edit data"
+msgstr "Edit measurements"
 
 #: .\templates\orders\admin\order_detail.html:471
 msgid "Talla, notas y medidas:"
@@ -6662,10 +6651,9 @@ msgstr "No orders"
 
 #: .\templates\orders\items\_measurements_grid.html:8
 #: .\templates\orders\items\sizes_grid.html:31
-#, fuzzy
 #| msgid "Mis Alumnos"
 msgid "Alumno"
-msgstr "My Students"
+msgstr "Athlete"
 
 #: .\templates\orders\items\_measurements_grid.html:15
 msgid ""
@@ -6674,26 +6662,23 @@ msgid ""
 msgstr "This field is no longer part of the product. The measurement is kept but cannot be edited."
 
 #: .\templates\orders\items\_measurements_grid.html:15
-#, fuzzy
 #| msgid "Retirado"
 msgid "retirada"
-msgstr "Withdrawn"
+msgstr "withdrawn"
 
 #: .\templates\orders\items\_measurements_grid.html:39
 msgid "Editada respecto del perfil del atleta"
 msgstr "Edited from the athlete's profile value"
 
 #: .\templates\orders\items\_measurements_grid.html:39
-#, fuzzy
 #| msgid "Editar datos"
 msgid "editada"
-msgstr "Edit data"
+msgstr "edited"
 
 #: .\templates\orders\items\_measurements_grid.html:55
-#, fuzzy
 #| msgid "No hay atletas asignados"
 msgid "No hay atletas asignados a este item."
-msgstr "No athletes assigned"
+msgstr "No athletes assigned to this item."
 
 #: .\templates\orders\items\item_detail.html:34
 #: .\templates\orders\products\add_product.html:16
@@ -6741,10 +6726,9 @@ msgid "Alumnos con esta talla"
 msgstr "Athletes with this size"
 
 #: .\templates\orders\items\item_detail.html:164
-#, fuzzy
 #| msgid "Sin equipo asignado"
 msgid "Sin alumnos asignados."
-msgstr "No team assigned"
+msgstr "No athletes assigned."
 
 #: .\templates\orders\items\item_detail.html:179
 msgid "Atletas asignados"
@@ -6756,10 +6740,9 @@ msgid "%(count)s atleta"
 msgstr "%(count)s athlete"
 
 #: .\templates\orders\items\item_detail.html:192
-#, fuzzy
 #| msgid "Registro de equipo"
 msgid "Medidas del equipo"
-msgstr "Team registration"
+msgstr "Team measurements"
 
 #: .\templates\orders\items\item_detail.html:253
 msgid "Medidas registradas"
@@ -6795,38 +6778,32 @@ msgstr ""
 
 #: .\templates\orders\items\item_measurements.html:10
 #: .\templates\orders\items\measurements_grid.html:10
-#, fuzzy
 #| msgid "Volver al feed"
 msgid "Volver al item"
-msgstr "Back to feed"
+msgstr "Back to the item"
 
 #: .\templates\orders\items\measurements_grid.html:16
-#, fuzzy, python-format
+#, python-format
 #| msgid ""
 #| "\n"
 #| "        %(complete)s de %(total)s atletas completos\n"
 #| "        "
 msgid "%(complete)s de %(total)s alumnos con medidas completas"
-msgstr ""
-"\n"
-"        %(complete)s of %(total)s athletes complete\n"
-"        "
+msgstr "%(complete)s of %(total)s athletes with complete measurements"
 
 #: .\templates\orders\items\measurements_grid.html:25
 msgid "Guardar medidas"
 msgstr "Save measurements"
 
 #: .\templates\orders\items\measurements_grid.html:29
-#, fuzzy
 #| msgid "Las medidas existentes no se perderán."
 msgid "Las medidas están cerradas o bloqueadas para esta orden."
-msgstr "Existing measurements will not be lost."
+msgstr "Measurements are closed or locked for this order."
 
 #: .\templates\orders\items\measurements_grid.html:34
-#, fuzzy
 #| msgid "Puedes agregar o editar tus medidas."
 msgid "No tienes permiso para editar estas medidas."
-msgstr "You can add or edit your measurements."
+msgstr "You do not have permission to edit these measurements."
 
 #: .\templates\orders\items\sizes_grid.html:6
 #: .\templates\products\product_detail.html:398
@@ -6834,29 +6811,24 @@ msgid "Tallas"
 msgstr "Sizes"
 
 #: .\templates\orders\items\sizes_grid.html:8
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "        %(complete)s de %(total)s atletas completos\n"
-#| "        "
+#, python-format
 msgid ""
 "\n"
 "      %(done)s de %(total)s alumnos con talla asignada.\n"
 "    "
 msgstr ""
 "\n"
-"        %(complete)s of %(total)s athletes complete\n"
-"        "
+"      %(done)s of %(total)s athletes with an assigned size.\n"
+"    "
 
 #: .\templates\orders\items\sizes_grid.html:22
 msgid "Las tallas están cerradas para esta orden."
 msgstr "Sizes are closed for this order."
 
 #: .\templates\orders\items\sizes_grid.html:58
-#, fuzzy
 #| msgid "Guardar fechas"
 msgid "Guardar tallas"
-msgstr "Save dates"
+msgstr "Save sizes"
 
 #: .\templates\orders\partials\pagination.html:4
 msgid "Paginación"
@@ -7236,10 +7208,9 @@ msgid "producto"
 msgstr "product"
 
 #: .\templates\orders\users\order_detail.html:409
-#, fuzzy
 #| msgid "Publicaciones del equipo"
 msgid "Tallas del equipo"
-msgstr "Team posts"
+msgstr "Team sizes"
 
 #: .\templates\orders\users\order_detail.html:412
 msgid ""
@@ -7262,10 +7233,9 @@ msgid "de"
 msgstr "of"
 
 #: .\templates\orders\users\order_detail.html:432
-#, fuzzy
 #| msgid "Equipo propietario"
 msgid "Equipo completo"
-msgstr "Owner team"
+msgstr "Whole team covered"
 
 #: .\templates\orders\users\order_detail.html:443
 msgid "Una sola pantalla para todo el equipo"
@@ -7276,20 +7246,18 @@ msgid "Cómo leer cada renglón:"
 msgstr "How to read each row:"
 
 #: .\templates\orders\users\order_detail.html:456
-#, fuzzy
 #| msgid "Cant:"
 msgid "Cant."
-msgstr "Qty:"
+msgstr "Qty."
 
 #: .\templates\orders\users\order_detail.html:456
 msgid "son las piezas de esa talla,"
 msgstr "is the number of pieces of that size,"
 
 #: .\templates\orders\users\order_detail.html:457
-#, fuzzy
 #| msgid "Unit:"
 msgid "Unit."
-msgstr "Unit:"
+msgstr "Unit."
 
 #: .\templates\orders\users\order_detail.html:457
 msgid "el precio por pieza (talla grande puede sumar un adicional) y"
@@ -7351,10 +7319,9 @@ msgid "Piezas de esta talla: sale del número de alumnos asignados"
 msgstr "Pieces of this size: taken from the number of assigned athletes"
 
 #: .\templates\orders\users\order_detail.html:645
-#, fuzzy
 #| msgid "Detalles del producto"
 msgid "Piezas de este producto"
-msgstr "Product details"
+msgstr "Pieces of this product"
 
 #: .\templates\orders\users\order_detail.html:646
 msgid "Cant:"
