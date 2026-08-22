@@ -757,12 +757,12 @@ class OrderItemAthlete(models.Model):
             raise ValidationError("Producto GLOBAL no usa asignación por atleta")
 
         # Pieza A: TEAM_CUSTOM + STANDARD asigna alumnos para saber a quien le
-        # toca cada talla. La validacion de GLOBAL de arriba NO se toca: es lo
-        # que mantiene los productos de catalogo fuera de este flujo.
-        allows_athletes = product.requires_athletes or (
-            product.usage_type == "TEAM_CUSTOM"
-            and product.size_strategy == "STANDARD"
-        )
+        # toca cada talla — que es exactamente Product.uses_standard_sizes, la
+        # misma propiedad que consultan el servicio y las plantillas. Repetir
+        # aqui la condicion a mano dejaba dos definiciones que podian separarse.
+        # La validacion de GLOBAL de arriba NO se toca: es lo que mantiene los
+        # productos de catalogo fuera de este flujo.
+        allows_athletes = product.requires_athletes or product.uses_standard_sizes
         if not allows_athletes:
             raise ValidationError("Este producto no permite asignación por atleta")
 

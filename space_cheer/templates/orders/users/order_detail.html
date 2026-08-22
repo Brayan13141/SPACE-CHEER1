@@ -551,15 +551,16 @@
                                     <span class="fw-semibold small text-truncate">
                                       {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
                                     </span>
-                                    {% if not item.product.requires_measurements %}
-                                    {% elif athlete_item.has_complete_measurements %}
-                                      <span class="badge bg-success flex-shrink-0" title="{% trans 'Medidas completas' %}">
-                                        <i class="bi bi-check-circle"></i>
-                                      </span>
-                                    {% else %}
-                                      <span class="badge bg-warning text-dark flex-shrink-0" title="{% trans 'Medidas incompletas' %}">
-                                        <i class="bi bi-exclamation-circle"></i>
-                                      </span>
+                                    {% if item.product.requires_measurements %}
+                                      {% if athlete_item.has_complete_measurements %}
+                                        <span class="badge bg-success flex-shrink-0" title="{% trans 'Medidas completas' %}">
+                                          <i class="bi bi-check-circle"></i>
+                                        </span>
+                                      {% else %}
+                                        <span class="badge bg-warning text-dark flex-shrink-0" title="{% trans 'Medidas incompletas' %}">
+                                          <i class="bi bi-exclamation-circle"></i>
+                                        </span>
+                                      {% endif %}
                                     {% endif %}
                                   </div>
                                   {% if item.product.requires_measurements and not athlete_item.has_complete_measurements %}

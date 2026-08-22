@@ -71,19 +71,30 @@ class SizeGridService:
         if not available_products_for_order(order).filter(pk=product.pk).exists():
             raise PermissionDenied
 
-        sizes = list(
-            product.size_variants.order_by("size").values_list("size", flat=True)
-        )
+        sizes = SizeGridService._ordered_sizes(product)
 
         athletes = SizeGridService._team_athletes(order)
         sees_all = SizeGridService._sees_every_row(order, viewer)
 
+        ward_ids = set()
+
         if not sees_all:
-            athletes = [
+            # Dos alcances distintos, no uno: el tutor ESCRIBE las filas de sus
+            # menores; el alumno solo LEE la suya, que es un dato de el. Antes
+            # el alumno era el unico del equipo que no podia ver su propia
+            # talla: caia en el PermissionDenied de abajo.
+            wards = [
                 athlete
                 for athlete in athletes
                 if SizeGridService._is_guardian_of(viewer, athlete)
             ]
+            ward_ids = {athlete.id for athlete in wards}
+            own = [
+                athlete
+                for athlete in athletes
+                if athlete.id == viewer.id and athlete.id not in ward_ids
+            ]
+            athletes = wards + own
             if not athletes:
                 raise PermissionDenied
 
@@ -102,18 +113,22 @@ class SizeGridService:
 
         is_locked = SizeGridService._order_blocks_editing(order)
 
+        # Escribible se decide POR FILA: un tutor que ademas es atleta del
+        # equipo escribe las de sus menores y no la suya.
         if is_locked:
-            can_write = False
+            writable_ids = set()
         elif sees_all:
-            can_write = (
-                viewer.is_superuser
-                or order.created_by_id == viewer.id
-                or SizeGridService._has_admin_role(viewer)
+            writable_ids = (
+                {athlete.id for athlete in athletes}
+                if (
+                    viewer.is_superuser
+                    or order.created_by_id == viewer.id
+                    or SizeGridService._has_admin_role(viewer)
+                )
+                else set()
             )
         else:
-            # Guardian: llegar aqui ya significa que athletes quedo filtrado a
-            # sus propios hijos, asi que todas sus filas son escribibles.
-            can_write = True
+            writable_ids = ward_ids
 
         rows = []
         for athlete in athletes:
@@ -134,7 +149,7 @@ class SizeGridService:
                     athlete_name=athlete.get_full_name() or athlete.username,
                     athlete=athlete,
                     size=size,
-                    editable=can_write,
+                    editable=athlete.id in writable_ids,
                     input_name=input_name,
                     error=errors.get(athlete.id, ""),
                 )
@@ -174,8 +189,26 @@ class SizeGridService:
                 status="accepted",
                 is_active=True,
                 role_in_team="ATHLETE",
-            ).select_related("user")
+            ).select_related("user", "user__athleteprofile")
         ]
+
+    @staticmethod
+    def _ordered_sizes(product):
+        """La escala del alumno manda el orden, no el alfabeto.
+
+        order_by("size") devolvia L, M, S, XL, XS, XXL, que no es el orden de
+        ninguna etiqueta de ropa. Una talla fuera de la escala (calzado
+        numerico, por ejemplo) va al final en vez de inventarle una posicion.
+        """
+        from measures.models import AthleteStandardSize
+
+        escala = [code for code, _ in AthleteStandardSize.SIZE_CHOICES]
+        posicion = {size: index for index, size in enumerate(escala)}
+
+        return sorted(
+            product.size_variants.values_list("size", flat=True),
+            key=lambda size: (posicion.get(size, len(escala)), size),
+        )
 
     @staticmethod
     def _sees_every_row(order, viewer):

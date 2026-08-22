@@ -2,10 +2,13 @@ from datetime import date, timedelta
 
 import pytest
 from django.core.exceptions import PermissionDenied
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from accounts.models import AthleteProfile, PiiAccessLog
 from measures.models import AthleteStandardSize
+from orders.models import Order, OrderItemAthlete
 from orders.services.servicesItems.size_assignment_service import (
     OrderItemSizeAssignmentService,
 )
@@ -18,6 +21,7 @@ from orders.tests.factories import (
     TeamOrderFactory,
     TeamProductWithSizesFactory,
     UserFactory,
+    OrderFactory,
     OrderItemFactory,
     ProductFactory,
     RoleFactory,
@@ -584,3 +588,133 @@ class TestAuditoriaQueFaltaba:
 
         registros = PiiAccessLog.objects.filter(access_type="VIEW_SIZE")
         assert set(registros.values_list("target_user_id", flat=True)) == {a1.id, a2.id}
+
+
+@pytest.mark.django_db
+class TestOrdenDeLasTallas:
+    """El selector salia L, M, S, XL, XS, XXL: order_by("size") ordena por
+    alfabeto, no por escala, y el coach tiene que buscar la talla en un orden
+    que no existe en ninguna etiqueta de ropa."""
+
+    def test_el_selector_sigue_la_escala_del_alumno_no_el_alfabeto(self):
+        order, product, athletes = setup_team_roster()
+
+        grid = SizeGridService.build(order, product, order.created_by)
+
+        assert grid.sizes == ["XS", "S", "M", "L", "XL", "XXL"]
+
+    def test_una_talla_fuera_de_la_escala_va_al_final(self):
+        order, product, athletes = setup_team_roster(sizes=["M", "28", "XS", "30"])
+
+        grid = SizeGridService.build(order, product, order.created_by)
+
+        assert grid.sizes == ["XS", "M", "28", "30"]
+
+
+@pytest.mark.django_db
+class TestAtletaVeSuPropiaFila:
+    """La talla es un dato del ALUMNO (Decision 1) y el alumno era el unico que
+    no podia verla en el roster: build() le lanzaba PermissionDenied."""
+
+    def test_el_atleta_ve_su_fila_y_solo_la_suya(self):
+        order, product, (a1, a2, a3) = setup_team_roster()
+
+        grid = SizeGridService.build(order, product, a1)
+
+        assert [row.athlete_id for row in grid.rows] == [a1.id]
+
+    def test_su_fila_es_de_solo_lectura_y_la_orden_no_sale_bloqueada(self):
+        order, product, (a1, a2, a3) = setup_team_roster()
+        AthleteStandardSizeFactory(user=a1, size="M")
+
+        grid = SizeGridService.build(order, product, a1)
+
+        assert grid.rows[0].size == "M"
+        assert grid.rows[0].editable is False
+        assert grid.can_edit is False
+        assert grid.is_locked is False
+
+    def test_un_post_del_atleta_no_le_asigna_talla(self, client):
+        order, product, (a1, a2, a3) = setup_team_roster()
+        client.force_login(a1)
+        url = reverse(
+            "orders:order_product_sizes_grid", args=[order.id, product.id]
+        )
+
+        client.post(url, {f"size_{a1.id}": "L"})
+
+        assert not OrderItemAthlete.objects.filter(athlete=a1).exists()
+
+    def test_un_ajeno_al_equipo_sigue_sin_entrar(self):
+        order, product, athletes = setup_team_roster()
+
+        with pytest.raises(PermissionDenied):
+            SizeGridService.build(order, product, UserFactory())
+
+    def test_el_tutor_que_ademas_es_del_equipo_no_pierde_sus_filas(self):
+        order, product, (a1, a2, a3) = setup_team_roster()
+        make_minor_with_guardian(a2, a1)
+
+        grid = SizeGridService.build(order, product, a1)
+
+        por_alumno = {row.athlete_id: row.editable for row in grid.rows}
+        assert por_alumno == {a1.id: False, a2.id: True}
+
+
+@pytest.mark.django_db
+class TestConsultasDelGrid:
+    """El camino del tutor leia athlete.athleteprofile fila por fila."""
+
+    def _consultas_del_tutor(self, athlete_count):
+        order, product, athletes = setup_team_roster(athlete_count=athlete_count)
+        guardian = UserFactory()
+        for athlete in athletes:
+            make_minor_with_guardian(athlete, guardian)
+
+        with CaptureQueriesContext(connection) as capturadas:
+            SizeGridService.build(order, product, guardian)
+
+        return len(capturadas)
+
+    def test_el_grid_del_tutor_no_crece_con_el_tamano_del_equipo(self):
+        assert self._consultas_del_tutor(6) == self._consultas_del_tutor(2)
+
+
+@pytest.mark.django_db
+class TestResumenSoloEnOrdenesDeEquipo:
+    """build() y reconcile() ya rechazan las ordenes que no son TEAM; el
+    resumen no lo hacia y devolvia grupos con total=0 (owner_team es None, asi
+    que el conteo de membresias sale vacio) en vez de no ofrecer la pantalla."""
+
+    def test_una_orden_personal_no_trae_resumen_de_tallas(self):
+        # La orden nace PERSONAL: mover order_type con un update() rompe el
+        # check de la tabla (owner_team/owner_user van atados al tipo).
+        order = OrderFactory()
+        product = TeamProductWithSizesFactory()
+        OrderItemFactory(
+            order=order,
+            product=product,
+            size_variant=product.size_variants.first(),
+        )
+
+        assert SizeSummaryService.for_order(order) == []
+
+
+@pytest.mark.django_db
+class TestVueltaAlPedido:
+
+    def test_el_grid_enlaza_de_vuelta_al_pedido(self, client):
+        order, product, athletes = setup_team_roster()
+        client.force_login(order.created_by)
+        url = reverse(
+            "orders:order_product_sizes_grid", args=[order.id, product.id]
+        )
+
+        response = client.get(url)
+
+        # Con el href completo, no solo la ruta: la URL del propio grid
+        # (/orders/N/producto/M/tallas/) CONTIENE /orders/N/ y hacia pasar la
+        # asercion sin que existiera ningun enlace de vuelta.
+        assert f'href="{reverse("orders:detail_order", args=[order.id])}"' in (
+            response.content.decode()
+        )

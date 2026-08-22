@@ -325,3 +325,69 @@ class TestWriteBackAlPerfil:
         assert not AthleteStandardSize.objects.filter(user=a1).exists()
         # La asignacion en el pedido SI ocurre: el producto ofrece esa talla.
         assert order.items.get(size_variant__size="42").athletes.count() == 1
+
+
+@pytest.mark.django_db
+class TestLaEditabilidadSeLeeBajoElLock:
+    """can_edit_general() se leia sobre la instancia que trajo la vista, ANTES
+    del select_for_update. Entre esa lectura y el lock la orden puede haberse
+    cerrado o pasado a produccion: el guardado entraba igual y modificaba una
+    orden que ya no admite cambios."""
+
+    def _roster(self):
+        order = TeamOrderFactory()
+        product = TeamProductWithSizesFactory()
+        athlete = AthleteFactory()
+        UserTeamMembershipFactory(user=athlete, team=order.owner_team)
+        return order, product, athlete
+
+    def test_rechaza_el_guardado_si_la_orden_se_cerro_despues_de_cargarla(self):
+        from orders.models import Order
+
+        order, product, athlete = self._roster()
+        # La vista ya tiene su instancia en memoria (editable); otra sesion
+        # cerro la orden mientras tanto. Se cierra con closed y no con status
+        # porque OrderQuerySet.update() prohibe mover el estado en masa, y el
+        # punto del test es que la instancia en memoria quede vieja.
+        Order.objects.filter(pk=order.pk).update(closed=True)
+
+        with pytest.raises(ValidationError):
+            OrderItemSizeAssignmentService.reconcile(
+                order, product, {athlete.id: "M"}, viewer=order.created_by
+            )
+
+        assert not OrderItemAthlete.objects.filter(athlete=athlete).exists()
+
+
+@pytest.mark.django_db
+class TestConsultasDeLaTallaDePerfil:
+    """_sync_profile_sizes hacia un SELECT y un update_or_create por alumno:
+    ~3 consultas x alumno solo para escribir una talla que casi nunca cambia."""
+
+    def _consultas_de_talla(self, athlete_count):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        order = TeamOrderFactory()
+        product = TeamProductWithSizesFactory()
+        athletes = [AthleteFactory() for _ in range(athlete_count)]
+        for athlete in athletes:
+            UserTeamMembershipFactory(user=athlete, team=order.owner_team)
+
+        assignments = {athlete.id: "M" for athlete in athletes}
+
+        with CaptureQueriesContext(connection) as capturadas:
+            OrderItemSizeAssignmentService.reconcile(
+                order, product, assignments, viewer=order.created_by
+            )
+
+        return len(
+            [
+                consulta
+                for consulta in capturadas.captured_queries
+                if "athletestandardsize" in consulta["sql"].lower()
+            ]
+        )
+
+    def test_no_hace_una_consulta_de_talla_por_alumno(self):
+        assert self._consultas_de_talla(8) == self._consultas_de_talla(2)

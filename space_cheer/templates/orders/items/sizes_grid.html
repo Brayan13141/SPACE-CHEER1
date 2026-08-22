@@ -3,6 +3,11 @@
 
 {% block content %}
 <div class="container py-4">
+  <a href="{% url 'orders:detail_order' grid.order.id %}"
+     class="btn btn-sm btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> {% trans "Volver al pedido" %}
+  </a>
+
   <h1 class="h4 mb-3">{% trans "Tallas" %} — {{ grid.product.name }}</h1>
   <p class="text-secondary">
     {% blocktrans with done=grid.assigned_count total=grid.total_count %}

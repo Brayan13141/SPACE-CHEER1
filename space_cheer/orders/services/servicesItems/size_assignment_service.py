@@ -59,16 +59,20 @@ class OrderItemSizeAssignmentService:
         if not available_products_for_order(order).filter(pk=product.pk).exists():
             raise ValidationError("Este producto no está permitido para esta orden")
 
-        if not order.can_edit_general():
-            raise ValidationError("La orden no es editable")
-
         # Lock a nivel de la ORDEN, no de los items: select_for_update sobre los
         # items existentes no puede bloquear una fila que todavia no existe, asi
         # que dos coaches creando la misma talla por primera vez creaban DOS
         # OrderItem para (order, product, size_variant) y partian la cantidad en
         # silencio. Serializar por orden cierra ese hueco sin migracion; un
         # UniqueConstraint exigiria una y ademas no aplicaria a size_variant NULL.
-        Order.objects.select_for_update().get(pk=order.pk)
+        locked_order = Order.objects.select_for_update().get(pk=order.pk)
+
+        # La editabilidad se comprueba DESPUES del lock y sobre la fila recien
+        # leida. Sobre `order` se leia el estado que la vista trajo en el GET:
+        # entre esa lectura y este punto la orden pudo cerrarse o pasar a
+        # produccion, y el guardado entraba igual.
+        if not locked_order.can_edit_general():
+            raise ValidationError("La orden no es editable")
 
         # Lock: dos coaches del mismo equipo capturando a la vez es real.
         items = {
@@ -184,27 +188,64 @@ class OrderItemSizeAssignmentService:
         updated_at ni dejar auditoria, o la bitacora se llena de ruido y deja
         de servir para investigar.
         """
+        from django.utils import timezone
+
         from measures.models import AthleteStandardSize
 
         valid_sizes = {code for code, _ in AthleteStandardSize.SIZE_CHOICES}
-        updated = []
 
+        deseado = {}
         for size, athlete_ids in targets.items():
             if size not in valid_sizes:
                 # El producto ofrece una talla fuera de la escala del alumno
                 # (p. ej. calzado numerico): no se adivina nada.
                 continue
-
             for athlete_id in athlete_ids:
-                current = AthleteStandardSize.objects.filter(
-                    user_id=athlete_id
-                ).first()
-                if current is not None and current.size == size:
-                    continue
-                AthleteStandardSize.objects.update_or_create(
-                    user_id=athlete_id,
-                    defaults={"size": size, "updated_by": viewer},
+                deseado[athlete_id] = size
+
+        if not deseado:
+            return []
+
+        # Una sola lectura para todo el roster. Antes era un SELECT mas un
+        # update_or_create POR ALUMNO (~3 consultas cada uno) para escribir una
+        # talla que en la mayoria de los guardados no cambia.
+        actuales = {
+            fila.user_id: fila
+            for fila in AthleteStandardSize.objects.filter(user_id__in=deseado)
+        }
+
+        ahora = timezone.now()
+        nuevas = []
+        cambiadas = []
+        updated = []
+
+        for athlete_id, size in deseado.items():
+            fila = actuales.get(athlete_id)
+
+            if fila is None:
+                nuevas.append(
+                    AthleteStandardSize(
+                        user_id=athlete_id, size=size, updated_by=viewer
+                    )
                 )
-                updated.append(athlete_id)
+            elif fila.size != size:
+                fila.size = size
+                fila.updated_by = viewer
+                # bulk_update NO dispara auto_now, asi que updated_at se
+                # quedaria con la fecha vieja y el dato dejaria de ser
+                # auditable. Se pone a mano y se incluye en los campos.
+                fila.updated_at = ahora
+                cambiadas.append(fila)
+            else:
+                continue     # sin cambio: no se toca updated_at ni la bitacora
+
+            updated.append(athlete_id)
+
+        if nuevas:
+            AthleteStandardSize.objects.bulk_create(nuevas)
+        if cambiadas:
+            AthleteStandardSize.objects.bulk_update(
+                cambiadas, ["size", "updated_by", "updated_at"]
+            )
 
         return updated

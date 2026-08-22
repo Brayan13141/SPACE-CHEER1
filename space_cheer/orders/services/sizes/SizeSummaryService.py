@@ -26,6 +26,13 @@ class SizeSummaryService:
     def for_order(order):
         from teams.models import UserTeamMembership
 
+        if order.order_type != "TEAM":
+            # Misma guarda que SizeGridService.build() y reconcile(). Sin ella
+            # el resumen sale con total=0 (owner_team es None, asi que el conteo
+            # de membresias no encuentra a nadie) y la pantalla ofrece capturar
+            # un roster que no existe.
+            return []
+
         items = [
             item
             for item in order.items.select_related("product", "size_variant").all()
