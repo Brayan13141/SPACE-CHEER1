@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-17 22:46-0600\n"
+"POT-Creation-Date: 2026-08-23 09:52-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1313,8 +1313,8 @@ msgstr "Rejection reason"
 
 #: .\events\models.py:23 .\templates\events\admin\results_manage.html:93
 #: .\templates\events\event_detail.html:430
-#: .\templates\orders\admin\order_detail.html:708
-#: .\templates\orders\users\order_detail.html:763
+#: .\templates\orders\admin\order_detail.html:717
+#: .\templates\orders\users\order_detail.html:812
 #: .\templates\orders\users\order_list.html:124
 msgid "Borrador"
 msgstr "Draft"
@@ -1522,7 +1522,7 @@ msgstr "Event categories"
 
 #: .\events\models.py:165 .\templates\events\admin\registrations.html:37
 #: .\templates\events\coach\my_registrations.html:55
-#: .\templates\orders\admin\order_detail.html:426
+#: .\templates\orders\admin\order_detail.html:435
 #: .\templates\orders\items\_measurements_grid.html:48
 #: .\templates\orders\users\order_list.html:128
 #: .\templates\teams\athlete_team.html:63
@@ -1562,8 +1562,8 @@ msgstr "Category"
 #: .\templates\orders\admin\order_detail.html:118
 #: .\templates\orders\admin\order_detail.html:165
 #: .\templates\orders\admin\order_detail.html:202
-#: .\templates\orders\admin\order_detail.html:480
-#: .\templates\orders\admin\order_detail.html:870
+#: .\templates\orders\admin\order_detail.html:489
+#: .\templates\orders\admin\order_detail.html:879
 msgid "Notas"
 msgstr "Notes"
 
@@ -1656,7 +1656,7 @@ msgstr "Staff roles"
 #: .\templates\account\profile\edit.html:74
 #: .\templates\coach\crew\edit_owned_user.html:39
 #: .\templates\events\admin\staff_manage.html:89
-#: .\templates\orders\admin\order_detail.html:868
+#: .\templates\orders\admin\order_detail.html:877
 msgid "Usuario"
 msgstr "User"
 
@@ -1701,10 +1701,10 @@ msgstr "Preliminary"
 #: .\events\models.py:416 .\events\models.py:488
 #: .\templates\events\admin\results_manage.html:44
 #: .\templates\events\judge\panel.html:46
-#: .\templates\orders\admin\order_detail.html:675
-#: .\templates\orders\admin\order_detail.html:706
-#: .\templates\orders\users\order_detail.html:734
-#: .\templates\orders\users\order_detail.html:761
+#: .\templates\orders\admin\order_detail.html:684
+#: .\templates\orders\admin\order_detail.html:715
+#: .\templates\orders\users\order_detail.html:783
+#: .\templates\orders\users\order_detail.html:810
 msgid "Final"
 msgstr "Final"
 
@@ -1843,12 +1843,10 @@ msgid "Sin asignar"
 msgstr "Unassigned"
 
 #: .\production\templates\production\admin_overview.html:61
-#| msgid "Completada"
 msgid "Completadas"
 msgstr "Completed"
 
 #: .\production\templates\production\admin_overview.html:66
-#| msgid "Detalle"
 msgid "Del"
 msgstr "From"
 
@@ -1857,7 +1855,6 @@ msgid "al"
 msgstr "to"
 
 #: .\production\templates\production\admin_overview.html:70
-#| msgid "Filtros"
 msgid "Filtrar"
 msgstr "Filter"
 
@@ -1928,9 +1925,9 @@ msgstr "No workers registered in the system."
 
 #: .\production\templates\production\config\operario_detail.html:15
 #: .\production\templates\production\config\operarios.html:111
-#: .\templates\orders\admin\order_detail.html:410
+#: .\templates\orders\admin\order_detail.html:419
 #: .\templates\orders\products\add_product.html:166
-#: .\templates\orders\users\order_detail.html:479
+#: .\templates\orders\users\order_detail.html:538
 #: .\templates\products\product_list.html:151
 msgid "Inactivo"
 msgstr "Inactive"
@@ -2043,7 +2040,7 @@ msgstr "Stage"
 
 #: .\production\templates\production\config\operario_detail.html:232
 #: .\templates\orders\admin\offline_create.html:107
-#: .\templates\orders\admin\order_detail.html:397
+#: .\templates\orders\admin\order_detail.html:406
 msgid "Producto"
 msgstr "Product"
 
@@ -2177,7 +2174,7 @@ msgstr "Delete this template?"
 #: .\production\templates\production\config\stages.html:199
 #: .\templates\account\addresses\list_address.html:65
 #: .\templates\account\email.html:61 .\templates\measures\manage_fields.html:52
-#: .\templates\orders\users\order_detail.html:515
+#: .\templates\orders\users\order_detail.html:719
 #: .\templates\social\partials\comment_row.html:17
 #: .\templates\social\partials\comment_row_v2.html:15
 #: .\templates\social\partials\post_card.html:22
@@ -2231,9 +2228,9 @@ msgstr "Manage templates"
 #: .\templates\account\guardian\minors_without_guardian.html:149
 #: .\templates\coach\athlete\edit_measures.html:71
 #: .\templates\core\base.html:938 .\templates\core\base.html:976
-#: .\templates\orders\admin\order_detail.html:693
-#: .\templates\orders\admin\order_detail.html:800
-#: .\templates\orders\admin\order_detail.html:824
+#: .\templates\orders\admin\order_detail.html:702
+#: .\templates\orders\admin\order_detail.html:809
+#: .\templates\orders\admin\order_detail.html:833
 #: .\templates\teams\manage_teams.html:302
 #: .\templates\teams\manage_teams.html:358
 #: .\templates\teams\manage_teams.html:400
@@ -2346,7 +2343,7 @@ msgstr "— Select —"
 #: .\templates\account\profile\settings.html:50
 #: .\templates\account\profile\settings.html:98
 #: .\templates\coach\athlete\edit_measures.html:25
-#: .\templates\orders\admin\order_detail.html:491
+#: .\templates\orders\admin\order_detail.html:500
 #: .\templates\social\settings.html:26 .\templates\social\settings.html:46
 #: .\templates\social\settings.html:62 .\templates\social\settings.html:76
 #: .\templates\teams\manage_categories.html:140
@@ -2372,17 +2369,14 @@ msgid "Nombre del rol"
 msgstr "Role name"
 
 #: .\production\templates\production\config\roles.html:62
-#| msgid "Operarios"
 msgid "operario(s)"
 msgstr "worker(s)"
 
 #: .\production\templates\production\config\roles.html:65
-#| msgid "Responsabilidades"
 msgid "Responsable de"
 msgstr "Responsible for"
 
 #: .\production\templates\production\config\roles.html:65
-#| msgid "etapas"
 msgid "etapa(s)"
 msgstr "stage(s)"
 
@@ -2390,10 +2384,10 @@ msgstr "stage(s)"
 msgid ""
 "No se puede eliminar: tiene operarios asignados o es responsable de una "
 "etapa."
-msgstr "Cannot be deleted: it has assigned workers or is responsible for a stage."
+msgstr ""
+"Cannot be deleted: it has assigned workers or is responsible for a stage."
 
 #: .\production\templates\production\config\roles.html:100
-#| msgid "Eliminar foto"
 msgid "Eliminar rol"
 msgstr "Delete role"
 
@@ -2417,10 +2411,10 @@ msgstr "No roles configured."
 #: .\templates\events\event_form.html:111
 #: .\templates\measures\manage_fields.html:124
 #: .\templates\orders\admin\offline_create.html:210
-#: .\templates\orders\admin\order_detail.html:806
+#: .\templates\orders\admin\order_detail.html:815
 #: .\templates\orders\items\item_detail.html:392
 #: .\templates\orders\users\order_contact_info.html:111
-#: .\templates\orders\users\order_detail.html:929
+#: .\templates\orders\users\order_detail.html:978
 #: .\templates\orders\users\order_edit.html:14
 #: .\templates\orders\users\order_edit.html:35
 #: .\templates\products\product_detail.html:693
@@ -2494,6 +2488,7 @@ msgid "Medidas"
 msgstr "Measurements"
 
 #: .\production\templates\production\item_measurements.html:9
+#: .\production\templates\production\order_sizes_print.html:34
 #: .\templates\coach\athlete\edit_measures.html:22
 #: .\templates\coach\crew\create_crew_member.html:20
 #: .\templates\coach\crew\edit_owned_user.html:20
@@ -2504,11 +2499,76 @@ msgstr "Measurements"
 #: .\templates\orders\users\order_contact_info.html:14
 #: .\templates\orders\users\order_create.html:14
 #: .\templates\orders\users\order_detail.html:32
-#: .\templates\orders\users\order_detail.html:895
+#: .\templates\orders\users\order_detail.html:944
 #: .\templates\products\product_detail.html:67
 #: .\templates\products\product_form.html:18
 msgid "Volver"
 msgstr "Back"
+
+#: .\production\templates\production\order_sizes_print.html:37
+msgid "Imprimir"
+msgstr "Print"
+
+#: .\production\templates\production\order_sizes_print.html:47
+#, python-format
+#| msgid "Orden #%(id)s"
+msgid "Pedido #%(id)s"
+msgstr "Order #%(id)s"
+
+#: .\production\templates\production\order_sizes_print.html:55
+#| msgid "Soporte"
+msgid "Corte"
+msgstr "Cutting"
+
+#: .\production\templates\production\order_sizes_print.html:61
+#: .\templates\orders\admin\order_detail.html:75
+#: .\templates\orders\admin\order_list.html:116
+msgid "Total"
+msgstr "Total"
+
+#: .\production\templates\production\order_sizes_print.html:72
+#, python-format
+msgid "%(piezas)s pieza en total"
+msgid_plural "%(piezas)s piezas en total"
+msgstr[0] "%(piezas)s piece in total"
+msgstr[1] "%(piezas)s pieces in total"
+
+#: .\production\templates\production\order_sizes_print.html:76
+msgid "Reparto"
+msgstr "Handout"
+
+#: .\production\templates\production\order_sizes_print.html:81
+#: .\templates\orders\items\_measurements_grid.html:8
+#: .\templates\orders\items\sizes_grid.html:36
+msgid "Alumno"
+msgstr "Athlete"
+
+#: .\production\templates\production\order_sizes_print.html:82
+#: .\templates\orders\admin\offline_create.html:151
+#: .\templates\orders\admin\order_detail.html:407
+#: .\templates\orders\admin\order_detail.html:485
+#: .\templates\orders\items\sizes_grid.html:36
+#: .\templates\orders\users\order_detail.html:451
+#: .\templates\orders\users\order_detail.html:532
+#: .\templates\products\product_detail.html:412
+#: .\templates\products\product_detail.html:436
+msgid "Talla"
+msgstr "Size"
+
+#: .\production\templates\production\order_sizes_print.html:99
+msgid "SIN TALLA"
+msgstr "NO SIZE"
+
+#: .\production\templates\production\order_sizes_print.html:107
+#, python-format
+msgid "Falta la talla de %(faltan)s alumno."
+msgid_plural "Falta la talla de %(faltan)s alumnos."
+msgstr[0] "%(faltan)s athlete is missing a size."
+msgstr[1] "%(faltan)s athletes are missing a size."
+
+#: .\production\templates\production\order_sizes_print.html:108
+msgid "No se cortan hasta tenerla."
+msgstr "They are not cut until it is set."
 
 #: .\social\models.py:15
 #, python-format
@@ -2662,7 +2722,7 @@ msgstr ""
 
 #: .\templates\account\addresses\confirm_delete.html:15
 #: .\templates\orders\items\item_detail.html:396
-#: .\templates\orders\users\order_detail.html:934
+#: .\templates\orders\users\order_detail.html:983
 msgid "Sí, eliminar"
 msgstr "Yes, delete"
 
@@ -3311,7 +3371,7 @@ msgid "Guardián Actual"
 msgstr "Current Guardian"
 
 #: .\templates\account\guardian\headcoach_dashboard.html:51
-#: .\templates\orders\admin\order_detail.html:869
+#: .\templates\orders\admin\order_detail.html:878
 msgid "Acción"
 msgstr "Action"
 
@@ -3363,6 +3423,7 @@ msgstr "Age"
 #: .\templates\measures\manage_fields.html:25
 #: .\templates\orders\admin\order_list.html:117
 #: .\templates\orders\items\item_detail.html:113
+#: .\templates\orders\users\order_detail.html:456
 #: .\templates\orders\users\order_list.html:92
 #: .\templates\products\product_list.html:82
 #: .\templates\teams\manage_categories.html:29
@@ -3746,7 +3807,7 @@ msgid "Perfil"
 msgstr "Profile"
 
 #: .\templates\account\profile\edit.html:84
-#: .\templates\orders\admin\order_detail.html:424
+#: .\templates\orders\admin\order_detail.html:433
 #: .\templates\orders\items\_measurements_grid.html:46
 #: .\templates\orders\items\item_detail.html:226
 msgid "Completo"
@@ -3806,7 +3867,7 @@ msgstr ""
 
 #: .\templates\account\profile\settings.html:4
 #: .\templates\account\profile\settings.html:15 .\templates\core\base.html:746
-#: .\templates\orders\admin\order_detail.html:401
+#: .\templates\orders\admin\order_detail.html:410
 #: .\templates\social\base_social.html:39
 #: .\templates\social\base_social_v2.html:79 .\templates\social\settings.html:3
 msgid "Configuración"
@@ -4699,7 +4760,7 @@ msgstr "Featured"
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
 #: .\templates\orders\admin\order_detail.html:161
-#: .\templates\orders\admin\order_detail.html:867
+#: .\templates\orders\admin\order_detail.html:876
 msgid "Fecha"
 msgstr "Date"
 
@@ -6127,7 +6188,7 @@ msgstr "Products"
 
 #: .\templates\orders\admin\offline_create.html:95
 #: .\templates\orders\users\order_detail.html:353
-#: .\templates\orders\users\order_detail.html:706
+#: .\templates\orders\users\order_detail.html:755
 msgid "Agregar producto"
 msgstr "Add product"
 
@@ -6166,22 +6227,12 @@ msgstr "Production template"
 msgid "Sin plantilla"
 msgstr "No template"
 
-#: .\templates\orders\admin\offline_create.html:151
-#: .\templates\orders\admin\order_detail.html:398
-#: .\templates\orders\admin\order_detail.html:476
-#: .\templates\orders\items\sizes_grid.html:31
-#: .\templates\orders\users\order_detail.html:476
-#: .\templates\products\product_detail.html:412
-#: .\templates\products\product_detail.html:436
-msgid "Talla"
-msgstr "Size"
-
 #: .\templates\orders\admin\offline_create.html:152
 msgid "Ej. M, 32, única"
 msgstr "E.g. M, 32, one-size"
 
 #: .\templates\orders\admin\offline_create.html:155
-#: .\templates\orders\admin\order_detail.html:399
+#: .\templates\orders\admin\order_detail.html:408
 #: .\templates\orders\items\item_detail.html:81
 msgid "Cantidad"
 msgstr "Quantity"
@@ -6263,11 +6314,6 @@ msgstr "Owner"
 msgid "Creada por"
 msgstr "Created by"
 
-#: .\templates\orders\admin\order_detail.html:75
-#: .\templates\orders\admin\order_list.html:116
-msgid "Total"
-msgstr "Total"
-
 #: .\templates\orders\admin\order_detail.html:107
 msgid "Cuenta vinculada"
 msgstr "Linked account"
@@ -6332,72 +6378,74 @@ msgid ""
 msgstr "One row per size; the quantity is the number of athletes wearing it."
 
 #: .\templates\orders\admin\order_detail.html:377
-#| msgid "Mis Alumnos"
 msgid "alumnos"
 msgstr "athletes"
 
 #: .\templates\orders\admin\order_detail.html:380
-#: .\templates\orders\users\order_detail.html:428
-#| msgid "Eliminar talla"
+#: .\templates\orders\users\order_detail.html:435
 msgid "sin talla"
 msgstr "without a size"
 
-#: .\templates\orders\admin\order_detail.html:386
+#: .\templates\orders\admin\order_detail.html:387
 #: .\templates\orders\items\item_detail.html:169
-#: .\templates\orders\users\order_detail.html:440
-#| msgid "Categoría de equipo"
+#: .\templates\orders\users\order_detail.html:490
 msgid "Capturar tallas del equipo"
 msgstr "Capture team sizes"
 
-#: .\templates\orders\admin\order_detail.html:400
+#: .\templates\orders\admin\order_detail.html:393
+#| msgid "Eliminar talla"
+msgid "Imprimir tallas"
+msgstr "Print sizes"
+
+#: .\templates\orders\admin\order_detail.html:409
 #: .\templates\orders\items\item_detail.html:91
-#: .\templates\orders\users\order_detail.html:458
+#: .\templates\orders\users\order_detail.html:454
+#: .\templates\orders\users\order_detail.html:507
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: .\templates\orders\admin\order_detail.html:434
-#: .\templates\orders\users\order_detail.html:542
+#: .\templates\orders\admin\order_detail.html:443
+#: .\templates\orders\users\order_detail.html:580
 msgid "Atletas:"
 msgstr "Athletes:"
 
-#: .\templates\orders\admin\order_detail.html:443
-#: .\templates\orders\users\order_detail.html:556
+#: .\templates\orders\admin\order_detail.html:452
+#: .\templates\orders\users\order_detail.html:597
 msgid "Medidas completas"
 msgstr "Complete measurements"
 
-#: .\templates\orders\admin\order_detail.html:445
+#: .\templates\orders\admin\order_detail.html:454
 msgid "Medidas pendientes"
 msgstr "Pending measurements"
 
-#: .\templates\orders\admin\order_detail.html:457
+#: .\templates\orders\admin\order_detail.html:466
 #: .\templates\orders\items\item_detail.html:195
 #: .\templates\orders\items\item_measurements.html:20
-#| msgid "Editar datos"
 msgid "Editar medidas"
 msgstr "Edit measurements"
 
-#: .\templates\orders\admin\order_detail.html:471
+#: .\templates\orders\admin\order_detail.html:480
 msgid "Talla, notas y medidas:"
 msgstr "Size, notes and measurements:"
 
-#: .\templates\orders\admin\order_detail.html:497
-#: .\templates\orders\users\order_detail.html:523
+#: .\templates\orders\admin\order_detail.html:506
+#: .\templates\orders\users\order_detail.html:571
 msgid "Talla:"
 msgstr "Size:"
 
-#: .\templates\orders\admin\order_detail.html:498
+#: .\templates\orders\admin\order_detail.html:507
 msgid "Notas:"
 msgstr "Notes:"
 
-#: .\templates\orders\admin\order_detail.html:509
+#: .\templates\orders\admin\order_detail.html:518
 msgid "No hay productos en esta orden"
 msgstr "No products in this order"
 
-#: .\templates\orders\admin\order_detail.html:524
+#: .\templates\orders\admin\order_detail.html:533
 msgid "Progreso de medidas"
 msgstr "Measurement progress"
 
-#: .\templates\orders\admin\order_detail.html:530
+#: .\templates\orders\admin\order_detail.html:539
 #, python-format
 msgid ""
 "\n"
@@ -6408,7 +6456,7 @@ msgstr ""
 "        %(complete)s of %(total)s athletes complete\n"
 "        "
 
-#: .\templates\orders\admin\order_detail.html:553
+#: .\templates\orders\admin\order_detail.html:562
 #, python-format
 msgid ""
 "\n"
@@ -6419,122 +6467,122 @@ msgstr ""
 "      %(pending)s athlete without complete measurements\n"
 "      "
 
-#: .\templates\orders\admin\order_detail.html:559
+#: .\templates\orders\admin\order_detail.html:568
 msgid "Todas las medidas están completas"
 msgstr "All measurements are complete"
 
-#: .\templates\orders\admin\order_detail.html:570
+#: .\templates\orders\admin\order_detail.html:579
 msgid "Gestión de medidas"
 msgstr "Measurement management"
 
-#: .\templates\orders\admin\order_detail.html:578
+#: .\templates\orders\admin\order_detail.html:587
 msgid "Bloqueadas definitivamente"
 msgstr "Permanently locked"
 
-#: .\templates\orders\admin\order_detail.html:580
+#: .\templates\orders\admin\order_detail.html:589
 msgid "Abiertas"
 msgstr "Open"
 
-#: .\templates\orders\admin\order_detail.html:582
+#: .\templates\orders\admin\order_detail.html:591
 msgid "Cerradas"
 msgstr "Closed"
 
-#: .\templates\orders\admin\order_detail.html:593
+#: .\templates\orders\admin\order_detail.html:602
 msgid "Cerrar medidas"
 msgstr "Close measurements"
 
-#: .\templates\orders\admin\order_detail.html:602
+#: .\templates\orders\admin\order_detail.html:611
 msgid "Reabrir"
 msgstr "Reopen"
 
-#: .\templates\orders\admin\order_detail.html:611
+#: .\templates\orders\admin\order_detail.html:620
 msgid "Bloquear definitivo"
 msgstr "Lock permanently"
 
-#: .\templates\orders\admin\order_detail.html:626
-#: .\templates\orders\users\order_detail.html:717
+#: .\templates\orders\admin\order_detail.html:635
+#: .\templates\orders\users\order_detail.html:766
 msgid "Diseños"
 msgstr "Designs"
 
-#: .\templates\orders\admin\order_detail.html:630
+#: .\templates\orders\admin\order_detail.html:639
 msgid "Subir nuevo diseño"
 msgstr "Upload new design"
 
-#: .\templates\orders\admin\order_detail.html:642
+#: .\templates\orders\admin\order_detail.html:651
 msgid "Seleccionar imagen"
 msgstr "Select image"
 
-#: .\templates\orders\admin\order_detail.html:648
+#: .\templates\orders\admin\order_detail.html:657
 msgid "Marcar como diseño final"
 msgstr "Mark as final design"
 
-#: .\templates\orders\admin\order_detail.html:653
+#: .\templates\orders\admin\order_detail.html:662
 msgid "Subir"
 msgstr "Upload"
 
-#: .\templates\orders\admin\order_detail.html:669
-#: .\templates\orders\admin\order_detail.html:698
-#: .\templates\orders\users\order_detail.html:729
-#: .\templates\orders\users\order_detail.html:753
+#: .\templates\orders\admin\order_detail.html:678
+#: .\templates\orders\admin\order_detail.html:707
+#: .\templates\orders\users\order_detail.html:778
+#: .\templates\orders\users\order_detail.html:802
 msgid "Diseño"
 msgstr "Design"
 
-#: .\templates\orders\admin\order_detail.html:692
-#: .\templates\orders\users\order_detail.html:747
+#: .\templates\orders\admin\order_detail.html:701
+#: .\templates\orders\users\order_detail.html:796
 #, python-format
 msgid "Diseño #%(num)s"
 msgstr "Design #%(num)s"
 
-#: .\templates\orders\admin\order_detail.html:701
-#: .\templates\orders\users\order_detail.html:756
+#: .\templates\orders\admin\order_detail.html:710
+#: .\templates\orders\users\order_detail.html:805
 msgid "Subido por:"
 msgstr "Uploaded by:"
 
-#: .\templates\orders\admin\order_detail.html:702
-#: .\templates\orders\users\order_detail.html:757
+#: .\templates\orders\admin\order_detail.html:711
+#: .\templates\orders\users\order_detail.html:806
 msgid "Fecha:"
 msgstr "Date:"
 
-#: .\templates\orders\admin\order_detail.html:704
-#: .\templates\orders\users\order_detail.html:759
+#: .\templates\orders\admin\order_detail.html:713
+#: .\templates\orders\users\order_detail.html:808
 msgid "Estado:"
 msgstr "Status:"
 
-#: .\templates\orders\admin\order_detail.html:724
+#: .\templates\orders\admin\order_detail.html:733
 msgid "No hay diseños subidos aún."
 msgstr "No designs uploaded yet."
 
-#: .\templates\orders\admin\order_detail.html:734
-#: .\templates\orders\users\order_detail.html:822
+#: .\templates\orders\admin\order_detail.html:743
+#: .\templates\orders\users\order_detail.html:871
 msgid "Acciones disponibles"
 msgstr "Available actions"
 
-#: .\templates\orders\admin\order_detail.html:747
+#: .\templates\orders\admin\order_detail.html:756
 msgid "Aprobar Diseño"
 msgstr "Approve Design"
 
-#: .\templates\orders\admin\order_detail.html:754
+#: .\templates\orders\admin\order_detail.html:763
 #, python-format
 msgid "Hay %(n)s medidas sin completar"
 msgstr "There are %(n)s incomplete measurements"
 
-#: .\templates\orders\admin\order_detail.html:761
+#: .\templates\orders\admin\order_detail.html:770
 msgid "Enviar a Producción"
 msgstr "Send to Production"
 
-#: .\templates\orders\admin\order_detail.html:768
+#: .\templates\orders\admin\order_detail.html:777
 msgid "Marcar Entregado"
 msgstr "Mark Delivered"
 
-#: .\templates\orders\admin\order_detail.html:777
+#: .\templates\orders\admin\order_detail.html:786
 msgid "Cancelar Pedido"
 msgstr "Cancel Order"
 
-#: .\templates\orders\admin\order_detail.html:799
+#: .\templates\orders\admin\order_detail.html:808
 msgid "Confirmar envío a producción"
 msgstr "Confirm send to production"
 
-#: .\templates\orders\admin\order_detail.html:803
+#: .\templates\orders\admin\order_detail.html:812
 msgid ""
 "¿Confirmas que el diseño y las medidas están listos? Esto enviará el pedido "
 "al piso de producción."
@@ -6542,47 +6590,47 @@ msgstr ""
 "Do you confirm the design and measurements are ready? This will send the "
 "order to the production floor."
 
-#: .\templates\orders\admin\order_detail.html:809
+#: .\templates\orders\admin\order_detail.html:818
 msgid "Sí, enviar a producción"
 msgstr "Yes, send to production"
 
-#: .\templates\orders\admin\order_detail.html:823
+#: .\templates\orders\admin\order_detail.html:832
 msgid "Confirmar cancelación"
 msgstr "Confirm cancellation"
 
-#: .\templates\orders\admin\order_detail.html:829
+#: .\templates\orders\admin\order_detail.html:838
 msgid "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?"
 msgstr "This action will permanently cancel the order. Are you sure?"
 
-#: .\templates\orders\admin\order_detail.html:831
-#: .\templates\orders\users\order_detail.html:888
+#: .\templates\orders\admin\order_detail.html:840
+#: .\templates\orders\users\order_detail.html:937
 msgid "Motivo de la cancelación (opcional)"
 msgstr "Cancellation reason (optional)"
 
-#: .\templates\orders\admin\order_detail.html:834
-#: .\templates\orders\users\order_detail.html:891
+#: .\templates\orders\admin\order_detail.html:843
+#: .\templates\orders\users\order_detail.html:940
 msgid "Ej. el cliente ya no lo necesita, se pidió por error…"
 msgstr "E.g. the customer no longer needs it, it was ordered by mistake…"
 
-#: .\templates\orders\admin\order_detail.html:837
+#: .\templates\orders\admin\order_detail.html:846
 msgid "No, mantener pedido"
 msgstr "No, keep order"
 
-#: .\templates\orders\admin\order_detail.html:838
-#: .\templates\orders\users\order_detail.html:898
+#: .\templates\orders\admin\order_detail.html:847
+#: .\templates\orders\users\order_detail.html:947
 msgid "Sí, cancelar pedido"
 msgstr "Yes, cancel order"
 
-#: .\templates\orders\admin\order_detail.html:849
+#: .\templates\orders\admin\order_detail.html:858
 msgid "No hay transiciones disponibles en este estado."
 msgstr "No transitions available in this state."
 
-#: .\templates\orders\admin\order_detail.html:859
-#: .\templates\orders\users\order_detail.html:781
+#: .\templates\orders\admin\order_detail.html:868
+#: .\templates\orders\users\order_detail.html:830
 msgid "Historial"
 msgstr "History"
 
-#: .\templates\orders\admin\order_detail.html:884
+#: .\templates\orders\admin\order_detail.html:893
 msgid "No hay eventos registrados."
 msgstr "No events registered."
 
@@ -6649,20 +6697,15 @@ msgstr "Items"
 msgid "No hay órdenes"
 msgstr "No orders"
 
-#: .\templates\orders\items\_measurements_grid.html:8
-#: .\templates\orders\items\sizes_grid.html:31
-#| msgid "Mis Alumnos"
-msgid "Alumno"
-msgstr "Athlete"
-
 #: .\templates\orders\items\_measurements_grid.html:15
 msgid ""
 "Este campo ya no forma parte del producto. La medida se conserva pero no "
 "puede editarse."
-msgstr "This field is no longer part of the product. The measurement is kept but cannot be edited."
+msgstr ""
+"This field is no longer part of the product. The measurement is kept but "
+"cannot be edited."
 
 #: .\templates\orders\items\_measurements_grid.html:15
-#| msgid "Retirado"
 msgid "retirada"
 msgstr "withdrawn"
 
@@ -6671,12 +6714,10 @@ msgid "Editada respecto del perfil del atleta"
 msgstr "Edited from the athlete's profile value"
 
 #: .\templates\orders\items\_measurements_grid.html:39
-#| msgid "Editar datos"
 msgid "editada"
 msgstr "edited"
 
 #: .\templates\orders\items\_measurements_grid.html:55
-#| msgid "No hay atletas asignados"
 msgid "No hay atletas asignados a este item."
 msgstr "No athletes assigned to this item."
 
@@ -6687,7 +6728,7 @@ msgid "Volver a la orden"
 msgstr "Back to order"
 
 #: .\templates\orders\items\item_detail.html:42
-#: .\templates\orders\users\order_detail.html:483
+#: .\templates\orders\users\order_detail.html:542
 msgid "Configuración incompleta"
 msgstr "Incomplete setup"
 
@@ -6717,7 +6758,7 @@ msgstr "Import athletes"
 
 #: .\templates\orders\items\item_detail.html:134
 #: .\templates\orders\items\item_detail.html:379
-#: .\templates\orders\users\order_detail.html:913
+#: .\templates\orders\users\order_detail.html:962
 msgid "Eliminar producto"
 msgstr "Delete product"
 
@@ -6726,7 +6767,6 @@ msgid "Alumnos con esta talla"
 msgstr "Athletes with this size"
 
 #: .\templates\orders\items\item_detail.html:164
-#| msgid "Sin equipo asignado"
 msgid "Sin alumnos asignados."
 msgstr "No athletes assigned."
 
@@ -6740,7 +6780,6 @@ msgid "%(count)s atleta"
 msgstr "%(count)s athlete"
 
 #: .\templates\orders\items\item_detail.html:192
-#| msgid "Registro de equipo"
 msgid "Medidas del equipo"
 msgstr "Team measurements"
 
@@ -6778,16 +6817,11 @@ msgstr ""
 
 #: .\templates\orders\items\item_measurements.html:10
 #: .\templates\orders\items\measurements_grid.html:10
-#| msgid "Volver al feed"
 msgid "Volver al item"
 msgstr "Back to the item"
 
 #: .\templates\orders\items\measurements_grid.html:16
 #, python-format
-#| msgid ""
-#| "\n"
-#| "        %(complete)s de %(total)s atletas completos\n"
-#| "        "
 msgid "%(complete)s de %(total)s alumnos con medidas completas"
 msgstr "%(complete)s of %(total)s athletes with complete measurements"
 
@@ -6796,21 +6830,24 @@ msgid "Guardar medidas"
 msgstr "Save measurements"
 
 #: .\templates\orders\items\measurements_grid.html:29
-#| msgid "Las medidas existentes no se perderán."
 msgid "Las medidas están cerradas o bloqueadas para esta orden."
 msgstr "Measurements are closed or locked for this order."
 
 #: .\templates\orders\items\measurements_grid.html:34
-#| msgid "Puedes agregar o editar tus medidas."
 msgid "No tienes permiso para editar estas medidas."
 msgstr "You do not have permission to edit these measurements."
 
-#: .\templates\orders\items\sizes_grid.html:6
+#: .\templates\orders\items\sizes_grid.html:8
+#| msgid "Volver al feed"
+msgid "Volver al pedido"
+msgstr "Back to order"
+
+#: .\templates\orders\items\sizes_grid.html:11
 #: .\templates\products\product_detail.html:398
 msgid "Tallas"
 msgstr "Sizes"
 
-#: .\templates\orders\items\sizes_grid.html:8
+#: .\templates\orders\items\sizes_grid.html:13
 #, python-format
 msgid ""
 "\n"
@@ -6821,12 +6858,11 @@ msgstr ""
 "      %(done)s of %(total)s athletes with an assigned size.\n"
 "    "
 
-#: .\templates\orders\items\sizes_grid.html:22
+#: .\templates\orders\items\sizes_grid.html:27
 msgid "Las tallas están cerradas para esta orden."
 msgstr "Sizes are closed for this order."
 
-#: .\templates\orders\items\sizes_grid.html:58
-#| msgid "Guardar fechas"
+#: .\templates\orders\items\sizes_grid.html:63
 msgid "Guardar tallas"
 msgstr "Save sizes"
 
@@ -6871,7 +6907,7 @@ msgid "Filtros"
 msgstr "Filters"
 
 #: .\templates\orders\products\add_product.html:36
-#: .\templates\orders\users\order_detail.html:490
+#: .\templates\orders\users\order_detail.html:549
 #: .\templates\products\product_detail.html:277
 #: .\templates\products\product_form.html:90
 msgid "Tipo de producto"
@@ -7189,7 +7225,7 @@ msgid "Fecha límite para medidas: %(date)s"
 msgstr "Measurement deadline: %(date)s"
 
 #: .\templates\orders\users\order_detail.html:382
-#: .\templates\orders\users\order_detail.html:573
+#: .\templates\orders\users\order_detail.html:610
 msgid "Medidas cerradas"
 msgstr "Measurements closed"
 
@@ -7202,227 +7238,240 @@ msgid "Productos en la orden"
 msgstr "Products in the order"
 
 #: .\templates\orders\users\order_detail.html:394
-#: .\templates\orders\users\order_detail.html:694
+#: .\templates\orders\users\order_detail.html:743
 #: .\templates\products\product_list.html:13
 msgid "producto"
 msgstr "product"
 
-#: .\templates\orders\users\order_detail.html:409
-#| msgid "Publicaciones del equipo"
-msgid "Tallas del equipo"
-msgstr "Team sizes"
-
-#: .\templates\orders\users\order_detail.html:412
-msgid ""
-"Este producto se pide por talla: cada talla es un renglón del pedido y su "
-"cantidad es el número de alumnos que la llevan."
-msgstr "This product is ordered by size: each size is a row of the order and its quantity is the number of athletes wearing it."
-
-#: .\templates\orders\users\order_detail.html:418
+#: .\templates\orders\users\order_detail.html:423
 #, python-format
-msgid "Alumnos con talla %(talla)s"
-msgstr "Athletes with size %(talla)s"
+msgid "%(piezas)s pieza"
+msgid_plural "%(piezas)s piezas"
+msgstr[0] "%(piezas)s piece"
+msgstr[1] "%(piezas)s pieces"
 
-#: .\templates\orders\users\order_detail.html:424
+#: .\templates\orders\users\order_detail.html:425
+#, python-format
+msgid "%(tallas)s talla"
+msgid_plural "%(tallas)s tallas"
+msgstr[0] "%(tallas)s size"
+msgstr[1] "%(tallas)s sizes"
+
+#: .\templates\orders\users\order_detail.html:431
 msgid "Capturados:"
 msgstr "Captured:"
 
-#: .\templates\orders\users\order_detail.html:425
+#: .\templates\orders\users\order_detail.html:432
 #: .\templates\social\team_page.html:14
 msgid "de"
 msgstr "of"
 
-#: .\templates\orders\users\order_detail.html:432
-#| msgid "Equipo propietario"
+#: .\templates\orders\users\order_detail.html:439
 msgid "Equipo completo"
 msgstr "Whole team covered"
 
-#: .\templates\orders\users\order_detail.html:443
-msgid "Una sola pantalla para todo el equipo"
-msgstr "One screen for the whole team"
-
-#: .\templates\orders\users\order_detail.html:455
-msgid "Cómo leer cada renglón:"
-msgstr "How to read each row:"
-
-#: .\templates\orders\users\order_detail.html:456
-#| msgid "Cant:"
+#: .\templates\orders\users\order_detail.html:452
+#: .\templates\orders\users\order_detail.html:505
 msgid "Cant."
 msgstr "Qty."
 
-#: .\templates\orders\users\order_detail.html:456
-msgid "son las piezas de esa talla,"
-msgstr "is the number of pieces of that size,"
-
-#: .\templates\orders\users\order_detail.html:457
-#| msgid "Unit:"
+#: .\templates\orders\users\order_detail.html:453
+#: .\templates\orders\users\order_detail.html:506
 msgid "Unit."
 msgstr "Unit."
 
-#: .\templates\orders\users\order_detail.html:457
+#: .\templates\orders\users\order_detail.html:455
+#: .\templates\social\ranking.html:28
+msgid "Atletas"
+msgstr "Athletes"
+
+#: .\templates\orders\users\order_detail.html:472
+#: .\templates\orders\users\order_detail.html:715
+#| msgid "Talla"
+msgid "talla"
+msgstr "size"
+
+#: .\templates\orders\users\order_detail.html:476
+#, python-format
+#| msgid "Alumnos con talla %(talla)s"
+msgid "Quitar la talla %(talla)s"
+msgstr "Remove size %(talla)s"
+
+#: .\templates\orders\users\order_detail.html:493
+msgid "Una sola pantalla para todo el equipo"
+msgstr "One screen for the whole team"
+
+#: .\templates\orders\users\order_detail.html:504
+msgid "Cómo leer cada renglón:"
+msgstr "How to read each row:"
+
+#: .\templates\orders\users\order_detail.html:505
+msgid "son las piezas de esa talla,"
+msgstr "is the number of pieces of that size,"
+
+#: .\templates\orders\users\order_detail.html:506
 msgid "el precio por pieza (talla grande puede sumar un adicional) y"
 msgstr "the price per piece (a large size may add a surcharge) and"
 
-#: .\templates\orders\users\order_detail.html:458
+#: .\templates\orders\users\order_detail.html:507
 msgid "es Cant. × Unit."
 msgstr "is Qty. × Unit."
 
-#: .\templates\orders\users\order_detail.html:459
+#: .\templates\orders\users\order_detail.html:508
 msgid ""
 "Las etiquetas grises describen el producto; pasa el cursor sobre ellas para "
 "ver qué significan."
-msgstr "The grey labels describe the product; hover over them to see what they mean."
+msgstr ""
+"The grey labels describe the product; hover over them to see what they mean."
 
-#: .\templates\orders\users\order_detail.html:494
-msgid "Cómo se personaliza: global, por equipo o por atleta"
-msgstr "How it is customized: global, per team or per athlete"
-
-#: .\templates\orders\users\order_detail.html:498
-msgid "Alcance: de catálogo general o exclusivo de un equipo"
-msgstr "Scope: general catalog or exclusive to one team"
-
-#: .\templates\orders\users\order_detail.html:523
+#: .\templates\orders\users\order_detail.html:532
 msgid "Cada talla del producto es un renglón aparte del pedido"
 msgstr "Each size of the product is a separate row of the order"
 
-#: .\templates\orders\users\order_detail.html:530
+#: .\templates\orders\users\order_detail.html:553
+msgid "Cómo se personaliza: global, por equipo o por atleta"
+msgstr "How it is customized: global, per team or per athlete"
+
+#: .\templates\orders\users\order_detail.html:557
+msgid "Alcance: de catálogo general o exclusivo de un equipo"
+msgstr "Scope: general catalog or exclusive to one team"
+
+#: .\templates\orders\users\order_detail.html:572
 msgid "No seleccionada"
 msgstr "Not selected"
 
-#: .\templates\orders\users\order_detail.html:532
-msgid "Seleccionar talla"
-msgstr "Select size"
-
-#: .\templates\orders\users\order_detail.html:560
+#: .\templates\orders\users\order_detail.html:601
 msgid "Medidas incompletas"
 msgstr "Incomplete measurements"
 
-#: .\templates\orders\users\order_detail.html:569
+#: .\templates\orders\users\order_detail.html:605
 msgid "Configurar"
 msgstr "Configure"
 
-#: .\templates\orders\users\order_detail.html:590
-msgid "más"
-msgstr "more"
+#: .\templates\orders\users\order_detail.html:630
+#, python-format
+msgid "%(n)s medida"
+msgid_plural "%(n)s medidas"
+msgstr[0] "%(n)s measurement"
+msgstr[1] "%(n)s measurements"
 
-#: .\templates\orders\users\order_detail.html:606
+#: .\templates\orders\users\order_detail.html:640
 #, python-format
 msgid "Medidas de %(name)s"
 msgstr "Measurements for %(name)s"
 
-#: .\templates\orders\users\order_detail.html:641
+#: .\templates\orders\users\order_detail.html:675
 msgid "subtotal"
 msgstr "subtotal"
 
-#: .\templates\orders\users\order_detail.html:645
+#: .\templates\orders\users\order_detail.html:679
 msgid "Piezas de esta talla: sale del número de alumnos asignados"
 msgstr "Pieces of this size: taken from the number of assigned athletes"
 
-#: .\templates\orders\users\order_detail.html:645
-#| msgid "Detalles del producto"
+#: .\templates\orders\users\order_detail.html:679
 msgid "Piezas de este producto"
 msgstr "Pieces of this product"
 
-#: .\templates\orders\users\order_detail.html:646
+#: .\templates\orders\users\order_detail.html:680
 msgid "Cant:"
 msgstr "Qty:"
 
-#: .\templates\orders\users\order_detail.html:651
+#: .\templates\orders\users\order_detail.html:685
 msgid "Precio por pieza: base del producto + adicional de la talla"
 msgstr "Price per piece: product base + size surcharge"
 
-#: .\templates\orders\users\order_detail.html:652
+#: .\templates\orders\users\order_detail.html:686
 msgid "Unit:"
 msgstr "Unit:"
 
-#: .\templates\orders\users\order_detail.html:663
+#: .\templates\orders\users\order_detail.html:697
 msgid "Gestionar atletas"
 msgstr "Manage athletes"
 
-#: .\templates\orders\users\order_detail.html:670
+#: .\templates\orders\users\order_detail.html:704
 msgid "Elegir talla"
 msgstr "Choose size"
 
-#: .\templates\orders\users\order_detail.html:690
+#: .\templates\orders\users\order_detail.html:739
 msgid "Total de la orden:"
 msgstr "Order total:"
 
-#: .\templates\orders\users\order_detail.html:694
+#: .\templates\orders\users\order_detail.html:743
 msgid "unidades"
 msgstr "units"
 
-#: .\templates\orders\users\order_detail.html:702
+#: .\templates\orders\users\order_detail.html:751
 msgid "Esta orden aún no tiene productos"
 msgstr "This order has no products yet"
 
-#: .\templates\orders\users\order_detail.html:703
+#: .\templates\orders\users\order_detail.html:752
 msgid "Agrega productos para comenzar"
 msgstr "Add products to start"
 
-#: .\templates\orders\users\order_detail.html:796
+#: .\templates\orders\users\order_detail.html:845
 msgid "Sistema"
 msgstr "System"
 
-#: .\templates\orders\users\order_detail.html:799
+#: .\templates\orders\users\order_detail.html:848
 #, python-format
 msgid "de %(from)s → %(to)s"
 msgstr "from %(from)s → %(to)s"
 
-#: .\templates\orders\users\order_detail.html:810
+#: .\templates\orders\users\order_detail.html:859
 msgid "Ver historial completo"
 msgstr "View full history"
 
-#: .\templates\orders\users\order_detail.html:833
-#: .\templates\orders\users\order_detail.html:880
+#: .\templates\orders\users\order_detail.html:882
+#: .\templates\orders\users\order_detail.html:929
 msgid "Cancelar pedido"
 msgstr "Cancel order"
 
-#: .\templates\orders\users\order_detail.html:843
+#: .\templates\orders\users\order_detail.html:892
 msgid "Enviar pedido"
 msgstr "Submit order"
 
-#: .\templates\orders\users\order_detail.html:845
+#: .\templates\orders\users\order_detail.html:894
 msgid "Aprobar diseño"
 msgstr "Approve design"
 
-#: .\templates\orders\users\order_detail.html:847
+#: .\templates\orders\users\order_detail.html:896
 msgid "Iniciar producción"
 msgstr "Start production"
 
-#: .\templates\orders\users\order_detail.html:849
+#: .\templates\orders\users\order_detail.html:898
 msgid "Marcar como entregada"
 msgstr "Mark as delivered"
 
-#: .\templates\orders\users\order_detail.html:852
+#: .\templates\orders\users\order_detail.html:901
 #, python-format
 msgid "Pasar a %(s)s"
 msgstr "Move to %(s)s"
 
-#: .\templates\orders\users\order_detail.html:863
+#: .\templates\orders\users\order_detail.html:912
 msgid "Resuelve los problemas señalados arriba"
 msgstr "Resolve the issues listed above"
 
-#: .\templates\orders\users\order_detail.html:863
+#: .\templates\orders\users\order_detail.html:912
 msgid "para poder avanzar."
 msgstr "to proceed."
 
-#: .\templates\orders\users\order_detail.html:868
+#: .\templates\orders\users\order_detail.html:917
 msgid "No hay acciones disponibles"
 msgstr "No actions available"
 
-#: .\templates\orders\users\order_detail.html:869
+#: .\templates\orders\users\order_detail.html:918
 msgid "Esta orden ha alcanzado su estado final"
 msgstr "This order has reached its final state"
 
-#: .\templates\orders\users\order_detail.html:919
+#: .\templates\orders\users\order_detail.html:968
 msgid "¿Eliminar"
 msgstr "Delete"
 
-#: .\templates\orders\users\order_detail.html:919
+#: .\templates\orders\users\order_detail.html:968
 msgid "de la orden?"
 msgstr "from the order?"
 
-#: .\templates\orders\users\order_detail.html:922
+#: .\templates\orders\users\order_detail.html:971
 msgid ""
 "Se eliminarán todos los atletas y medidas asociadas. Esta acción no se puede "
 "deshacer."
@@ -8233,10 +8282,6 @@ msgstr "No posts yet."
 #: .\templates\social\ranking.html:23
 msgid "Concursos"
 msgstr "Contests"
-
-#: .\templates\social\ranking.html:28
-msgid "Atletas"
-msgstr "Athletes"
 
 #: .\templates\social\ranking.html:53
 msgid "No hay equipos activos."
