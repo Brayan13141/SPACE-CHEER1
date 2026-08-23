@@ -288,6 +288,10 @@ def order_detail(request, order_id):
         "DELIVERED": "Marcar como entregada",
     }
 
+    # Los items por talla se agrupan por producto: son N filas del MISMO
+    # producto y un solo roster, asi que una sola tarjeta y un solo boton.
+    size_groups = SizeSummaryService.for_order(order)
+
     return render(
         request,
         "orders/users/order_detail.html",
@@ -295,9 +299,13 @@ def order_detail(request, order_id):
             "order": order,
             "order_flags": order_flags,
             "blocking_issues": blocking_issues,
-            # Los items por talla se agrupan por producto: son N filas del MISMO
-            # producto y un solo roster, asi que una sola tarjeta y un solo boton.
-            "size_groups": SizeSummaryService.for_order(order),
+            "size_groups": size_groups,
+            # La tarjeta del grupo ya muestra cada talla con su cantidad y su
+            # precio, asi que el bucle de productos salta esos items; si no,
+            # cada talla vuelve a salir como tarjeta suelta debajo.
+            "size_group_item_ids": {
+                item_id for grupo in size_groups for item_id in grupo.item_ids
+            },
             "available_transitions": available_transitions,
             "transition_labels": transition_labels,
         },

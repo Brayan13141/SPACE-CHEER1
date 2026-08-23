@@ -15,6 +15,10 @@
         {% if job.is_urgent %}Quitar urgente{% else %}Marcar urgente{% endif %}
       </button>
     </form>
+    <a href="{% url 'production:order_sizes_print' order_id=job.order.id %}"
+       class="btn btn-sm btn-outline-light" target="_blank" rel="noopener">
+      <i class="bi bi-printer me-1"></i>Imprimir tallas
+    </a>
     <a href="{% url 'production:create_error_report_job' job.pk %}" class="btn btn-sm btn-danger">
       ⚠️ Reportar Error
     </a>

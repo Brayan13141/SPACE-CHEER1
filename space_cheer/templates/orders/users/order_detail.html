@@ -404,44 +404,91 @@
         <div class="card shadow-sm mb-3 border-primary border-opacity-25">
           <div class="card-body">
             <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
-              <div class="flex-grow-1 min-w-0">
-                <h5 class="card-title mb-1">
-                  <i class="bi bi-rulers me-2"></i>{% trans "Tallas del equipo" %} — {{ grupo.product.name }}
+              <div class="min-w-0">
+                <h5 class="card-title mb-1 text-truncate">
+                  <i class="bi bi-rulers me-2"></i>{{ grupo.product.name }}
                 </h5>
-                <p class="text-muted small mb-3">
-                  {% trans "Este producto se pide por talla: cada talla es un renglón del pedido y su cantidad es el número de alumnos que la llevan." %}
-                </p>
-                <div class="d-flex flex-wrap gap-2 mb-2">
-                  {% for talla, alumnos in grupo.rows %}
-                    <span class="badge bg-primary fs-6"
-                          data-bs-toggle="tooltip"
-                          title="{% blocktrans %}Alumnos con talla {{ talla }}{% endblocktrans %}">
-                      {{ talla }} <span class="opacity-75">×{{ alumnos }}</span>
-                    </span>
-                  {% endfor %}
-                </div>
-                <div class="small">
-                  <span class="text-muted">{% trans "Capturados:" %}</span>
-                  <strong>{{ grupo.assigned }}</strong> {% trans "de" %} <strong>{{ grupo.total }}</strong>
-                  {% if grupo.missing %}
-                    <span class="badge bg-warning text-dark ms-2">
-                      <i class="bi bi-exclamation-triangle me-1"></i>{{ grupo.missing }} {% trans "sin talla" %}
-                    </span>
-                  {% else %}
-                    <span class="badge bg-success ms-2">
-                      <i class="bi bi-check-circle me-1"></i>{% trans "Equipo completo" %}
-                    </span>
-                  {% endif %}
+                {% comment %} Metadatos del producto: son iguales en todas las tallas, asi
+                   que van atenuados y no compiten con lo que si cambia. {% endcomment %}
+                <div class="text-muted small">
+                  {{ grupo.product.get_product_type_display }}
+                  <span class="mx-1">·</span>{{ grupo.product.get_usage_type_display }}
+                  <span class="mx-1">·</span>{{ grupo.product.get_scope_display }}
                 </div>
               </div>
-              <div class="flex-shrink-0 align-self-md-center">
-                <a href="{% url 'orders:order_product_sizes_grid' order_id=order.id product_id=grupo.product.id %}"
-                   class="btn btn-primary">
-                  <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
-                </a>
-                <div class="form-text text-center mt-1">
-                  {% trans "Una sola pantalla para todo el equipo" %}
+              <div class="text-md-end flex-shrink-0">
+                <div class="h5 mb-0">${{ grupo.subtotal|floatformat:2 }}</div>
+                <div class="text-muted small">
+                  {% blocktrans count piezas=grupo.assigned %}{{ piezas }} pieza{% plural %}{{ piezas }} piezas{% endblocktrans %}
+                  <span class="mx-1">·</span>
+                  {% blocktrans count tallas=grupo.rows|length %}{{ tallas }} talla{% plural %}{{ tallas }} tallas{% endblocktrans %}
                 </div>
+              </div>
+            </div>
+
+            <div class="small mb-3">
+              <span class="text-muted">{% trans "Capturados:" %}</span>
+              <strong>{{ grupo.assigned }}</strong> {% trans "de" %} <strong>{{ grupo.total }}</strong>
+              {% if grupo.missing %}
+                <span class="badge bg-warning text-dark ms-2">
+                  <i class="bi bi-exclamation-triangle me-1"></i>{{ grupo.missing }} {% trans "sin talla" %}
+                </span>
+              {% else %}
+                <span class="badge bg-success ms-2">
+                  <i class="bi bi-check-circle me-1"></i>{% trans "Equipo completo" %}
+                </span>
+              {% endif %}
+            </div>
+
+            {% comment %} Una fila por talla. Antes cada una era una tarjeta suelta que
+               repetia el nombre del producto y sus etiquetas. {% endcomment %}
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr class="text-muted small">
+                    <th scope="col">{% trans "Talla" %}</th>
+                    <th scope="col" class="text-end">{% trans "Cant." %}</th>
+                    <th scope="col" class="text-end">{% trans "Unit." %}</th>
+                    <th scope="col" class="text-end">{% trans "Subtotal" %}</th>
+                    <th scope="col">{% trans "Atletas" %}</th>
+                    {% if can_edit %}<th scope="col"><span class="visually-hidden">{% trans "Acciones" %}</span></th>{% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for fila in grupo.rows %}
+                    <tr>
+                      <td><span class="badge bg-primary">{{ fila.size }}</span></td>
+                      <td class="text-end">{{ fila.assigned }}</td>
+                      <td class="text-end text-muted">${{ fila.unit_price|floatformat:2 }}</td>
+                      <td class="text-end fw-semibold">${{ fila.subtotal|floatformat:2 }}</td>
+                      <td class="small">{{ fila.athlete_names|join:" · " }}</td>
+                      {% if can_edit %}
+                        <td class="text-end">
+                          <button type="button"
+                                  class="btn btn-sm btn-outline-danger js-delete-item-btn"
+                                  data-item-id="{{ fila.item_id }}"
+                                  data-item-name="{{ grupo.product.name }} — {% trans "talla" %} {{ fila.size }}"
+                                  data-delete-url="{% url 'orders:order_item_delete' fila.item_id %}"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#deleteItemModal"
+                                  aria-label="{% blocktrans with talla=fila.size %}Quitar la talla {{ talla }}{% endblocktrans %}">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="text-center mt-3">
+              <a href="{% url 'orders:order_product_sizes_grid' order_id=order.id product_id=grupo.product.id %}"
+                 class="btn btn-primary">
+                <i class="bi bi-pencil-square me-1"></i>{% trans "Capturar tallas del equipo" %}
+              </a>
+              <div class="form-text mt-1">
+                {% trans "Una sola pantalla para todo el equipo" %}
               </div>
             </div>
           </div>
@@ -462,6 +509,10 @@
 
     <div class="row g-3 mb-4">
       {% for item in order.items.all %}
+        {% comment %} La tarjeta del grupo ya muestra estas tallas con su cantidad, su
+           precio y su papelera: sin esta guarda cada talla vuelve a salir
+           como tarjeta suelta y el producto aparece N+1 veces. {% endcomment %}
+        {% if item.id not in size_group_item_ids %}
         <div class="col-12">
           <div class="card shadow-sm {% if item.configuration_state != 'READY' %}border-warning{% endif %}">
             <div class="card-body">
@@ -473,7 +524,12 @@
                     <h5 class="card-title mb-0">
                       {{ item.product.name }}
                       {% if item.size_variant %}
-                        <span class="badge bg-primary ms-1">{% trans "Talla" %} {{ item.size_variant.size }}</span>
+                        <span class="badge bg-primary ms-1"
+                              data-bs-toggle="tooltip"
+                              title="{% trans 'Cada talla del producto es un renglón aparte del pedido' %}">{% trans "Talla" %} {{ item.size_variant.size }}</span>
+                        {% if item.size_variant.additional_price > 0 %}
+                          <span class="text-muted small">(+${{ item.size_variant.additional_price }})</span>
+                        {% endif %}
                       {% endif %}
                       {% if not item.product.is_active %}
                         <span class="badge bg-secondary">{% trans "Inactivo" %}</span>
@@ -504,34 +560,12 @@
                       </span>
                     {% endif %}
                   </div>
-                    {% if can_edit %}
-                      <button type="button"
-                              class="btn btn-outline-danger btn-sm js-delete-item-btn"
-                              data-item-id="{{ item.id }}"
-                              data-item-name="{{ item.product.name }}"
-                              data-delete-url="{% url 'orders:order_item_delete' item.id %}"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteItemModal">
-                        <i class="bi bi-trash me-1"></i>{% trans "Eliminar" %}
-                      </button>
-                    {% endif %}
-
-                  <!-- Talla -->
-                  {% if item.needs_size %}
+                  {% comment %} La talla ya se dice en el encabezado. Aqui solo queda el
+                     caso en que falta elegirla, que es un aviso, no un dato. {% endcomment %}
+                  {% if item.needs_size and not item.size_variant %}
                     <div class="mb-2 small">
-                      <span class="text-muted" data-bs-toggle="tooltip"
-                            title="{% trans 'Cada talla del producto es un renglón aparte del pedido' %}">{% trans "Talla:" %}</span>
-                      {% if item.size_variant %}
-                        <span class="fw-semibold ms-1">{{ item.size_variant.size }}</span>
-                        {% if item.size_variant.additional_price > 0 %}
-                          <span class="text-muted">(+${{ item.size_variant.additional_price }})</span>
-                        {% endif %}
-                      {% else %}
-                        <span class="badge bg-warning text-dark ms-1">{% trans "No seleccionada" %}</span>
-                        {% if can_edit %}
-                          <a href="#" class="btn btn-sm btn-outline-warning ms-2">{% trans "Seleccionar talla" %}</a>
-                        {% endif %}
-                      {% endif %}
+                      <span class="text-muted">{% trans "Talla:" %}</span>
+                      <span class="badge bg-warning text-dark ms-1">{% trans "No seleccionada" %}</span>
                     </div>
                   {% endif %}
 
@@ -541,65 +575,58 @@
                       <span class="text-muted small d-block mb-2">
                         <i class="bi bi-person-arms-up me-1"></i>{% trans "Atletas:" %}
                       </span>
-                      <div class="row g-2">
+                      {% comment %} Un chip por alumno. Antes cada uno era una tarjeta
+                         dentro de la tarjeta del item: para un solo atleta
+                         ocupaba un cuarto de ancho y dejaba el resto vacio. {% endcomment %}
+                      <div class="d-flex flex-wrap gap-2">
                         {% for athlete_item in item.athletes.all %}
-                          <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 border-0 sc-bg-panel" >
-                              <div class="card-body p-2">
-                                <div class="d-flex flex-column gap-1">
-                                  <div class="d-flex align-items-center justify-content-between gap-1">
-                                    <span class="fw-semibold small text-truncate">
-                                      {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
-                                    </span>
-                                    {% if item.product.requires_measurements %}
-                                      {% if athlete_item.has_complete_measurements %}
-                                        <span class="badge bg-success flex-shrink-0" title="{% trans 'Medidas completas' %}">
-                                          <i class="bi bi-check-circle"></i>
-                                        </span>
-                                      {% else %}
-                                        <span class="badge bg-warning text-dark flex-shrink-0" title="{% trans 'Medidas incompletas' %}">
-                                          <i class="bi bi-exclamation-circle"></i>
-                                        </span>
-                                      {% endif %}
-                                    {% endif %}
-                                  </div>
-                                  {% if item.product.requires_measurements and not athlete_item.has_complete_measurements %}
-                                  {% if order.measurements_open and can_edit %}
-                                    <a href="{% url 'orders:order_item_detail' item.id %}"
-                                      class="btn btn-sm btn-outline-primary w-100">
-                                      <i class="bi bi-rulers"></i> {% trans "Configurar" %}
-                                    </a>
-                                  {% else %}
-                                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                      <i class="bi bi-lock"></i> {% trans "Medidas cerradas" %}
-                                    </button>
-                                  {% endif %}
+                          <div class="d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 sc-bg-panel">
+                            <span class="fw-semibold small text-truncate">
+                              {{ athlete_item.athlete.get_full_name|default:athlete_item.athlete.email }}
+                            </span>
+
+                            {% if item.product.requires_measurements %}
+                              {% if athlete_item.has_complete_measurements %}
+                                <i class="bi bi-check-circle-fill text-success"
+                                   data-bs-toggle="tooltip"
+                                   title="{% trans 'Medidas completas' %}"></i>
+                              {% else %}
+                                <i class="bi bi-exclamation-circle-fill text-warning"
+                                   data-bs-toggle="tooltip"
+                                   title="{% trans 'Medidas incompletas' %}"></i>
+                                {% if order.measurements_open and can_edit %}
+                                  <a href="{% url 'orders:order_item_detail' item.id %}"
+                                     class="small text-decoration-none">
+                                    <i class="bi bi-rulers"></i> {% trans "Configurar" %}
+                                  </a>
+                                {% else %}
+                                  <i class="bi bi-lock text-muted"
+                                     data-bs-toggle="tooltip"
+                                     title="{% trans 'Medidas cerradas' %}"></i>
                                 {% endif %}
-                                  {% if athlete_item.customization %}
-                                    <div class="small text-muted text-truncate" title="{{ athlete_item.customization.custom_text }}">
-                                      <i class="bi bi-type"></i> {{ athlete_item.customization.custom_text|truncatechars:20 }}
-                                    </div>
-                                  {% endif %}
-                                  {% if athlete_item.measurements.exists %}
-                                    <ul class="small text-muted ps-3 mb-0 mt-1">
-                                      {% for m in athlete_item.measurements.all|slice:":3" %}
-                                        <li>{{ m.field_name }}: {{ m.value }} {{ m.field_unit }}</li>
-                                      {% endfor %}
-                                      {% if athlete_item.measurements.count > 3 %}
-                                        <li class="list-unstyled">
-                                          <a href="#" data-bs-toggle="modal" data-bs-target="#measurementsModal{{ athlete_item.id }}">
-                                            +{{ athlete_item.measurements.count|add:"-3" }} {% trans "más" %}
-                                          </a>
-                                        </li>
-                                      {% endif %}
-                                    </ul>
-                                  {% endif %}
-                                </div>
-                              </div>
-                            </div>
+                              {% endif %}
+                            {% endif %}
+
+                            {% if athlete_item.customization %}
+                              <span class="small text-muted text-truncate"
+                                    data-bs-toggle="tooltip"
+                                    title="{{ athlete_item.customization.custom_text }}">
+                                <i class="bi bi-type"></i> {{ athlete_item.customization.custom_text|truncatechars:20 }}
+                              </span>
+                            {% endif %}
+
+                            {% if athlete_item.measurements.exists %}
+                              {% comment %} El chip ya no lista las 3 primeras medidas, asi
+                                 que el modal existe siempre que haya alguna. {% endcomment %}
+                              <a href="#" class="small text-decoration-none"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#measurementsModal{{ athlete_item.id }}">
+                                {% blocktrans count n=athlete_item.measurements.count %}{{ n }} medida{% plural %}{{ n }} medidas{% endblocktrans %}
+                              </a>
+                            {% endif %}
                           </div>
 
-                          {% if athlete_item.measurements.count > 3 %}
+                          {% if athlete_item.measurements.exists %}
                             <div class="modal fade" id="measurementsModal{{ athlete_item.id }}" tabindex="-1" aria-hidden="true">
                               <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
@@ -672,6 +699,19 @@
                       </a>
                     {% endif %}
 
+                    {% comment %} Eliminar: vive con las demas acciones, no suelto a media
+                       tarjeta entre las etiquetas del producto. {% endcomment %}
+                    {% if can_edit %}
+                      <button type="button"
+                              class="btn btn-outline-danger btn-sm js-delete-item-btn"
+                              data-item-id="{{ item.id }}"
+                              data-item-name="{{ item.product.name }}{% if item.size_variant %} — {% trans "talla" %} {{ item.size_variant.size }}{% endif %}"
+                              data-delete-url="{% url 'orders:order_item_delete' item.id %}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteItemModal">
+                        <i class="bi bi-trash me-1"></i>{% trans "Eliminar" %}
+                      </button>
+                    {% endif %}
 
                   </div>
                 </div>
@@ -681,6 +721,7 @@
             </div>
           </div>
         </div>
+        {% endif %}
       {% endfor %}
     </div>
 

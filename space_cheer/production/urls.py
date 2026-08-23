@@ -1,5 +1,11 @@
 from django.urls import path
-from production.views import operario_views, admin_views, config_views, error_report_views
+from production.views import (
+    operario_views,
+    admin_views,
+    config_views,
+    error_report_views,
+    print_views,
+)
 
 app_name = "production"
 
@@ -10,6 +16,12 @@ urlpatterns = [
     path("task/<int:pk>/complete/", operario_views.task_complete, name="task_complete"),
     path("order/<int:pk>/design/", operario_views.order_design, name="order_design"),
     path("item/<int:pk>/measurements/", operario_views.item_measurements, name="item_measurements"),
+    # Hoja imprimible de tallas para el taller
+    path(
+        "pedido/<int:order_id>/tallas/imprimir/",
+        print_views.order_sizes_print,
+        name="order_sizes_print",
+    ),
     # Admin / Staff
     path("admin/", admin_views.admin_overview, name="admin_overview"),
     path("reglamento/", admin_views.reglamento, name="reglamento"),

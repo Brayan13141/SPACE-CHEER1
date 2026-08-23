@@ -1,0 +1,116 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+  /* La app es dark; el papel no. Todo lo de impresion vive aca y no en el CSS
+     global para no arrastrar reglas @media print a las demas pantallas. */
+  @media print {
+    nav, header, footer, .navbar, .no-print { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .hoja { color: #000 !important; }
+    .hoja .table, .hoja .table th, .hoja .table td {
+      color: #000 !important;
+      border-color: #000 !important;
+      background: transparent !important;
+    }
+    .hoja-producto { page-break-after: always; }
+    .hoja-producto:last-child { page-break-after: auto; }
+    a[href]:after { content: ""; }
+    @page { margin: 12mm; }
+  }
+  .casilla {
+    display: inline-block;
+    width: 1em; height: 1em;
+    border: 1px solid currentColor;
+    vertical-align: -0.1em;
+  }
+</style>
+
+<div class="container py-3 py-md-4 hoja">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
+    </a>
+    <button type="button" class="btn btn-primary" onclick="window.print()">
+      <i class="bi bi-printer me-1"></i>{% trans "Imprimir" %}
+    </button>
+  </div>
+
+  {% for grupo in size_groups %}
+    <section class="hoja-producto mb-5">
+
+      <div class="border-bottom pb-2 mb-3">
+        <h1 class="h4 mb-1">{{ grupo.product.name }}</h1>
+        <div class="small">
+          {% blocktrans with id=order.id %}Pedido #{{ id }}{% endblocktrans %}
+          {% if order.owner_team %}
+            <span class="mx-1">·</span>{{ order.owner_team.name }}
+          {% endif %}
+          <span class="mx-1">·</span>{{ order.created_at|date:"d/m/Y" }}
+        </div>
+      </div>
+
+      <h2 class="h6 text-uppercase">{% trans "Corte" %}</h2>
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered w-auto mb-1">
+          <thead>
+            <tr>
+              {% for fila in grupo.rows %}<th class="text-center">{{ fila.size }}</th>{% endfor %}
+              <th class="text-center">{% trans "Total" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {% for fila in grupo.rows %}<td class="text-center fs-5">{{ fila.assigned }}</td>{% endfor %}
+              <td class="text-center fs-5 fw-bold">{{ grupo.assigned }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="small">
+          {% blocktrans count piezas=grupo.assigned %}{{ piezas }} pieza en total{% plural %}{{ piezas }} piezas en total{% endblocktrans %}
+        </div>
+      </div>
+
+      <h2 class="h6 text-uppercase">{% trans "Reparto" %}</h2>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th style="width:3rem"></th>
+            <th>{% trans "Alumno" %}</th>
+            <th style="width:6rem">{% trans "Talla" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in grupo.rows %}
+            {% for nombre in fila.athlete_names %}
+              <tr>
+                <td class="text-center"><span class="casilla"></span></td>
+                <td>{{ nombre }}</td>
+                <td class="fw-bold">{{ fila.size }}</td>
+              </tr>
+            {% endfor %}
+          {% endfor %}
+          {% for nombre in grupo.unassigned_names %}
+            <tr>
+              <td class="text-center">⚠</td>
+              <td>{{ nombre }}</td>
+              <td class="fw-bold">{% trans "SIN TALLA" %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if grupo.missing %}
+        <p class="small mb-0">
+          <strong>{% blocktrans count faltan=grupo.missing %}Falta la talla de {{ faltan }} alumno.{% plural %}Falta la talla de {{ faltan }} alumnos.{% endblocktrans %}</strong>
+          {% trans "No se cortan hasta tenerla." %}
+        </p>
+      {% endif %}
+
+    </section>
+  {% endfor %}
+
+</div>
+{% endblock %}

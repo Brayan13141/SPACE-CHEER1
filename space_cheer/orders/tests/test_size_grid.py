@@ -13,6 +13,7 @@ from orders.services.servicesItems.size_assignment_service import (
     OrderItemSizeAssignmentService,
 )
 from orders.services.sizes.SizeGridService import SizeGridService
+from orders.services.state import OrderStateService
 from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.tests.factories import (
     AthleteFactory,
@@ -414,10 +415,83 @@ class TestResumenDeTallas:
         assert len(resumen) == 1
         grupo = resumen[0]
         assert grupo.product == product
-        assert grupo.rows == [("M", 2), ("L", 1)]
+        assert [(fila.size, fila.assigned) for fila in grupo.rows] == [
+            ("M", 2),
+            ("L", 1),
+        ]
         assert grupo.assigned == 3
         assert grupo.total == 4
         assert grupo.missing == 1
+
+    def test_cada_fila_trae_su_item_su_precio_y_sus_alumnos(self):
+        """La tarjeta fundida muestra una tabla Talla/Cant/Unit/Subtotal, asi
+        que el resumen tiene que cargar lo que antes vivia en el item."""
+        order, product, athletes = setup_team_roster(athlete_count=4)
+        OrderItemSizeAssignmentService.reconcile(
+            order,
+            product,
+            {athletes[0].id: "M", athletes[1].id: "M", athletes[2].id: "L"},
+            viewer=order.created_by,
+        )
+
+        grupo = SizeSummaryService.for_order(order)[0]
+        fila_m = next(f for f in grupo.rows if f.size == "M")
+        item_m = order.items.get(size_variant__size="M")
+
+        assert fila_m.item_id == item_m.id
+        assert fila_m.unit_price == item_m.unit_price
+        assert fila_m.subtotal == item_m.subtotal
+        assert sorted(fila_m.athlete_names) == sorted(
+            a.get_full_name() or a.email for a in athletes[:2]
+        )
+
+    def test_el_grupo_suma_el_subtotal_y_lista_sus_items(self):
+        order, product, athletes = setup_team_roster(athlete_count=4)
+        OrderItemSizeAssignmentService.reconcile(
+            order,
+            product,
+            {athletes[0].id: "M", athletes[1].id: "M", athletes[2].id: "L"},
+            viewer=order.created_by,
+        )
+
+        grupo = SizeSummaryService.for_order(order)[0]
+
+        assert grupo.subtotal == sum(item.subtotal for item in order.items.all())
+        assert set(grupo.item_ids) == set(
+            order.items.values_list("id", flat=True)
+        )
+
+    def test_lista_por_nombre_a_quien_quedo_sin_talla(self):
+        """La hoja de produccion los imprime marcados: un numero suelto no
+        sirve para ir a buscar al alumno que falta."""
+        order, product, athletes = setup_team_roster(athlete_count=4)
+        OrderItemSizeAssignmentService.reconcile(
+            order, product, {athletes[0].id: "M"}, viewer=order.created_by
+        )
+
+        grupo = SizeSummaryService.for_order(order)[0]
+
+        assert grupo.missing == 3
+        assert sorted(grupo.unassigned_names) == sorted(
+            a.get_full_name() or a.email for a in athletes[1:]
+        )
+
+    def test_no_hace_una_consulta_de_alumnos_por_talla(self):
+        """Los nombres se pintan en la tabla: sin prefetch son N+1."""
+        order, product, athletes = setup_team_roster(athlete_count=4)
+        OrderItemSizeAssignmentService.reconcile(
+            order,
+            product,
+            {a.id: talla for a, talla in zip(athletes, ["XS", "S", "M", "L"])},
+            viewer=order.created_by,
+        )
+
+        with CaptureQueriesContext(connection) as capturadas:
+            grupo = SizeSummaryService.for_order(order)
+            [fila.athlete_names for fila in grupo[0].rows]
+
+        consultas = len(capturadas)
+        assert consultas <= 5, f"{consultas} consultas para 4 tallas"
 
     def test_ignora_los_productos_que_no_usan_talla_por_alumno(self):
         order, product, athletes = setup_team_roster()
@@ -496,17 +570,15 @@ class TestTarjetasDeItemPorTalla:
         client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
         return order, product, url
 
-    def test_cada_tarjeta_dice_de_que_talla_es(self, client):
-        """Tres tarjetas con el mismo nombre de producto no se distinguen entre
-        si; la talla tiene que estar en el encabezado, no solo en un renglon."""
+    def test_la_tabla_distingue_cada_talla(self, client):
+        """Antes eran N tarjetas con el mismo nombre y habia que meter la talla
+        en el encabezado para distinguirlas. Ahora es una sola tarjeta con una
+        fila por talla, pero cada talla tiene que seguir siendo visible."""
         order, product, url = self._con_tallas(client)
 
-        cuerpo = client.get(
-            reverse("orders:detail_order", args=[order.id])
-        ).content.decode()
+        grupo = SizeSummaryService.for_order(order)[0]
 
-        assert "Talla M" in cuerpo
-        assert "Talla L" in cuerpo
+        assert {fila.size for fila in grupo.rows} == {"M", "L"}
 
     def test_no_avisa_medidas_incompletas_en_un_producto_sin_medidas(self, client):
         """El producto por talla no pide medidas: el aviso amarillo por alumno
@@ -518,6 +590,87 @@ class TestTarjetasDeItemPorTalla:
         ).content.decode()
 
         assert "Medidas incompletas" not in cuerpo
+
+
+@pytest.mark.django_db
+class TestLosComentariosDePlantillaNoSeRenderizan:
+    """La regex de {# #} de Django NO cruza saltos de linea: un comentario
+    partido en dos lineas se renderiza LITERAL. Dentro de un bucle sale una vez
+    por item, y si menciona una etiqueta HTML puede tragarse lo que sigue.
+
+    Ya paso dos veces en este proyecto. Para comentarios de varias lineas va
+    {% comment %}, que si las cruza.
+    """
+
+    def test_el_detalle_del_pedido_no_muestra_comentarios_en_crudo(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        assert "{#" not in cuerpo
+        assert "{% comment" not in cuerpo
+
+
+@pytest.mark.django_db
+class TestTarjetaFundidaDeTallas:
+    """Un OrderItem por talla daba N tarjetas del mismo producto MAS la tarjeta
+    de resumen: el producto salia N+1 veces en el detalle del pedido."""
+
+    def _con_tallas(self, client):
+        order, product, (a1, a2), url = setup_view_case(client)
+        client.post(url, {f"size_{a1.id}": "M", f"size_{a2.id}": "L"})
+        return order, product, url
+
+    def test_los_items_por_talla_no_se_repiten_como_tarjetas_sueltas(self, client):
+        order, product, url = self._con_tallas(client)
+
+        response = client.get(reverse("orders:detail_order", args=[order.id]))
+
+        agrupados = response.context["size_group_item_ids"]
+        assert set(agrupados) == set(order.items.values_list("id", flat=True))
+
+    def test_hay_una_papelera_por_talla_cuando_se_puede_editar(self, client):
+        order, product, url = self._con_tallas(client)
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        # Con el `="` porque el JS del pie menciona `data-delete-url` en un
+        # comentario, y contar la clase suelta se lo lleva por delante.
+        assert cuerpo.count('data-delete-url="') == order.items.count() == 2
+
+    def test_una_orden_no_editable_no_ofrece_papeleras(self, client):
+        order, product, url = self._con_tallas(client)
+        # No se puede tocar `status` a mano (el save lo bloquea) ni con
+        # queryset.update(); y `closed=True` exige DELIVERED o CANCELLED.
+        OrderStateService.transition(order, "CANCELLED", order.created_by)
+        order.refresh_from_db()
+        assert order.can_edit_general() is False
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        assert 'data-delete-url="' not in cuerpo
+
+    def test_la_papelera_dice_de_que_talla_es(self, client):
+        """Tres confirmaciones que dicen lo mismo no se distinguen: el modal
+        tiene que nombrar la talla, no solo el producto."""
+        order, product, url = self._con_tallas(client)
+
+        cuerpo = client.get(
+            reverse("orders:detail_order", args=[order.id])
+        ).content.decode()
+
+        for talla in ("M", "L"):
+            item = order.items.get(size_variant__size=talla)
+            assert f'data-item-id="{item.id}"' in cuerpo
+            assert f"{product.name} — talla {talla}" in cuerpo
+        assert cuerpo.count('data-item-name="') == 2
 
 
 @pytest.mark.django_db

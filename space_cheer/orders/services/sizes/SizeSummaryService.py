@@ -3,21 +3,56 @@
 Un pedido de 12 playeras son 3 OrderItem (uno por talla), y cada uno es una
 fila mas en la pantalla: sin agrupar, el mismo producto aparece tres veces y el
 boton "capturar tallas" tambien, aunque los tres lleven al mismo roster.
+
+Cada fila carga ademas lo que antes solo vivia en el OrderItem (id, precio y
+alumnos), porque el detalle del pedido pinta una tabla
+Talla/Cant/Unit/Subtotal/Atletas y una papelera por talla: sin esto habria que
+volver a recorrer order.items en la plantilla y el producto seguiria saliendo
+dos veces.
 """
 
 from dataclasses import dataclass, field as dataclass_field
+from decimal import Decimal
+
+
+@dataclass
+class SizeGroupRow:
+    """Una talla del producto: el OrderItem que la representa."""
+
+    size: str
+    assigned: int
+    item_id: int
+    unit_price: Decimal
+    subtotal: Decimal
+    athlete_names: list = dataclass_field(default_factory=list)
 
 
 @dataclass
 class SizeGroup:
     product: object
-    rows: list = dataclass_field(default_factory=list)   # [(talla, alumnos)]
+    rows: list = dataclass_field(default_factory=list)   # [SizeGroupRow]
     assigned: int = 0
     total: int = 0
+    # Quien del roster no tiene talla en ESTE producto. La hoja de produccion
+    # los imprime marcados: un numero suelto no sirve para ir a buscarlos.
+    unassigned_names: list = dataclass_field(default_factory=list)
 
     @property
     def missing(self):
         return max(self.total - self.assigned, 0)
+
+    @property
+    def subtotal(self):
+        return sum((fila.subtotal for fila in self.rows), Decimal("0"))
+
+    @property
+    def item_ids(self):
+        """Los items que esta tarjeta ya representa.
+
+        El detalle del pedido los salta en su bucle de productos; si no, cada
+        talla vuelve a salir como una tarjeta suelta debajo del grupo.
+        """
+        return [fila.item_id for fila in self.rows]
 
 
 class SizeSummaryService:
@@ -35,30 +70,63 @@ class SizeSummaryService:
 
         items = [
             item
-            for item in order.items.select_related("product", "size_variant").all()
+            for item in order.items.select_related("product", "size_variant")
+            .prefetch_related("athletes__athlete")
+            .all()
             if item.product.uses_standard_sizes and item.size_variant_id
         ]
         if not items:
             return []
 
-        total = UserTeamMembership.objects.filter(
-            team=order.owner_team,
-            status="accepted",
-            is_active=True,
-            role_in_team="ATHLETE",
-        ).count()
+        # Se trae el roster entero y no solo su .count(): son los mismos datos
+        # en la misma consulta, y con ellos se sabe QUIEN falta, no solo
+        # cuantos.
+        roster = [
+            membresia.user
+            for membresia in UserTeamMembership.objects.filter(
+                team=order.owner_team,
+                status="accepted",
+                is_active=True,
+                role_in_team="ATHLETE",
+            ).select_related("user")
+        ]
+        total = len(roster)
 
         grupos = {}
+        con_talla = {}
         for item in items:
             grupo = grupos.setdefault(
                 item.product_id, SizeGroup(product=item.product, total=total)
             )
-            asignados = item.athletes.count()
-            grupo.rows.append((item.size_variant.size, asignados))
-            grupo.assigned += asignados
+            # El prefetch ya trajo a los atletas: item.athletes.count() dispara
+            # una consulta por talla y len() de la lista cacheada no.
+            asignaciones = list(item.athletes.all())
+            con_talla.setdefault(item.product_id, set()).update(
+                oia.athlete_id for oia in asignaciones
+            )
+            grupo.rows.append(
+                SizeGroupRow(
+                    size=item.size_variant.size,
+                    assigned=len(asignaciones),
+                    item_id=item.id,
+                    unit_price=item.unit_price,
+                    subtotal=item.subtotal,
+                    athlete_names=[
+                        oia.athlete.get_full_name() or oia.athlete.email
+                        for oia in asignaciones
+                    ],
+                )
+            )
+            grupo.assigned += len(asignaciones)
 
         # Mas alumnos primero: la talla del grueso del equipo es la que se mira.
-        for grupo in grupos.values():
-            grupo.rows.sort(key=lambda fila: (-fila[1], fila[0]))
+        for product_id, grupo in grupos.items():
+            grupo.rows.sort(key=lambda fila: (-fila.assigned, fila.size))
+            asignados = con_talla.get(product_id, set())
+            grupo.unassigned_names = [
+                alumno.get_full_name() or alumno.email
+                for alumno in roster
+                if alumno.id not in asignados
+            ]
 
         return list(grupos.values())
