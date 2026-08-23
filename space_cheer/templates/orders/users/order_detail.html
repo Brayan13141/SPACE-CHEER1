@@ -419,7 +419,7 @@
               <div class="text-md-end flex-shrink-0">
                 <div class="h5 mb-0">${{ grupo.subtotal|floatformat:2 }}</div>
                 <div class="text-muted small">
-                  {% blocktrans count piezas=grupo.assigned %}{{ piezas }} pieza{% plural %}{{ piezas }} piezas{% endblocktrans %}
+                  {% blocktrans count piezas=grupo.quantity %}{{ piezas }} pieza{% plural %}{{ piezas }} piezas{% endblocktrans %}
                   <span class="mx-1">·</span>
                   {% blocktrans count tallas=grupo.rows|length %}{{ tallas }} talla{% plural %}{{ tallas }} tallas{% endblocktrans %}
                 </div>
@@ -458,10 +458,24 @@
                   {% for fila in grupo.rows %}
                     <tr>
                       <td><span class="badge bg-primary">{{ fila.size }}</span></td>
-                      <td class="text-end">{{ fila.assigned }}</td>
+                      {% comment %}
+                        Cant. es la cantidad DEL PEDIDO, la misma con la que se
+                        calcula el subtotal. Poner aqui el numero de alumnos
+                        hacia que la fila se contradijera con la leyenda de
+                        arriba ("Subtotal es Cant. x Unit.") en cuanto el item
+                        se agregaba a mano con cantidad y sin atletas.
+                      {% endcomment %}
+                      <td class="text-end">{{ fila.quantity }}</td>
                       <td class="text-end text-muted">${{ fila.unit_price|floatformat:2 }}</td>
                       <td class="text-end fw-semibold">${{ fila.subtotal|floatformat:2 }}</td>
-                      <td class="small">{{ fila.athlete_names|join:" · " }}</td>
+                      <td class="small">
+                        {{ fila.athlete_names|join:" · " }}
+                        {% if fila.sin_repartir %}
+                          <span class="badge bg-warning text-dark ms-1">
+                            {% blocktrans count n=fila.sin_repartir %}{{ n }} sin alumno{% plural %}{{ n }} sin alumno{% endblocktrans %}
+                          </span>
+                        {% endif %}
+                      </td>
                       {% if can_edit %}
                         <td class="text-end">
                           <button type="button"

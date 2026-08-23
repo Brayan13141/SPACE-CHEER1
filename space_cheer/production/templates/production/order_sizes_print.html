@@ -2,7 +2,10 @@
 {% load i18n %}
 
 {% block content %}
-<style>
+{% comment %} El nonce NO es opcional: style-src es 'self' + nonce, sin unsafe-inline, asi
+   que sin el el navegador descarta el bloque entero y la hoja sale con navbar,
+   en tema oscuro y sin saltos de pagina. {% endcomment %}
+<style nonce="{{ request.csp_nonce }}">
   /* La app es dark; el papel no. Todo lo de impresion vive aca y no en el CSS
      global para no arrastrar reglas @media print a las demas pantallas. */
   @media print {
@@ -33,7 +36,9 @@
     <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary">
       <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
     </a>
-    <button type="button" class="btn btn-primary" onclick="window.print()">
+    {% comment %} Sin onclick: script-src no admite handlers inline y el boton se quedaba
+       mudo, con el error solo en la consola. {% endcomment %}
+    <button type="button" class="btn btn-primary" id="btn-imprimir">
       <i class="bi bi-printer me-1"></i>{% trans "Imprimir" %}
     </button>
   </div>
@@ -53,6 +58,12 @@
       </div>
 
       <h2 class="h6 text-uppercase">{% trans "Corte" %}</h2>
+      {% comment %}
+        Va la CANTIDAD del pedido, no el numero de alumnos. Normalmente son
+        iguales, pero un item agregado a mano con cantidad y sin atletas
+        imprimia "0 piezas" mientras el pedido cobraba 20: no se cortaba nada
+        y la hoja no avisaba.
+      {% endcomment %}
       <div class="table-responsive mb-4">
         <table class="table table-bordered w-auto mb-1">
           <thead>
@@ -63,13 +74,18 @@
           </thead>
           <tbody>
             <tr>
-              {% for fila in grupo.rows %}<td class="text-center fs-5">{{ fila.assigned }}</td>{% endfor %}
-              <td class="text-center fs-5 fw-bold">{{ grupo.assigned }}</td>
+              {% for fila in grupo.rows %}<td class="text-center fs-5">{{ fila.quantity }}</td>{% endfor %}
+              <td class="text-center fs-5 fw-bold">{{ grupo.quantity }}</td>
             </tr>
           </tbody>
         </table>
         <div class="small">
-          {% blocktrans count piezas=grupo.assigned %}{{ piezas }} pieza en total{% plural %}{{ piezas }} piezas en total{% endblocktrans %}
+          {% blocktrans count piezas=grupo.quantity %}{{ piezas }} pieza en total{% plural %}{{ piezas }} piezas en total{% endblocktrans %}
+          {% if grupo.sin_repartir %}
+            <strong>
+              {% blocktrans count n=grupo.sin_repartir %}{{ n }} pieza no tiene alumno asignado.{% plural %}{{ n }} piezas no tienen alumno asignado.{% endblocktrans %}
+            </strong>
+          {% endif %}
         </div>
       </div>
 
@@ -113,4 +129,9 @@
   {% endfor %}
 
 </div>
+
+<script nonce="{{ request.csp_nonce }}">
+  document.getElementById("btn-imprimir")
+          .addEventListener("click", function () { window.print(); });
+</script>
 {% endblock %}

@@ -200,14 +200,11 @@ class SizeGridService:
         ninguna etiqueta de ropa. Una talla fuera de la escala (calzado
         numerico, por ejemplo) va al final en vez de inventarle una posicion.
         """
-        from measures.models import AthleteStandardSize
-
-        escala = [code for code, _ in AthleteStandardSize.SIZE_CHOICES]
-        posicion = {size: index for index, size in enumerate(escala)}
+        from orders.services.sizes.ordering import size_sort_key
 
         return sorted(
             product.size_variants.values_list("size", flat=True),
-            key=lambda size: (posicion.get(size, len(escala)), size),
+            key=size_sort_key,
         )
 
     @staticmethod

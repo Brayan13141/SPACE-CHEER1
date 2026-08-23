@@ -14,17 +14,32 @@ dos veces.
 from dataclasses import dataclass, field as dataclass_field
 from decimal import Decimal
 
+from orders.services.sizes.ordering import size_sort_key
+
 
 @dataclass
 class SizeGroupRow:
-    """Una talla del producto: el OrderItem que la representa."""
+    """Una talla del producto: el OrderItem que la representa.
+
+    `quantity` y `assigned` NO son lo mismo y pueden separarse: reconcile() los
+    mantiene iguales, pero OrderItemService.add_product crea el item con una
+    cantidad a mano y sin atletas. `quantity` es lo que se cobra y lo que hay
+    que cortar; `assigned` es a cuantos alumnos se les reparte.
+    """
 
     size: str
+    quantity: int
     assigned: int
     item_id: int
     unit_price: Decimal
     subtotal: Decimal
     athlete_names: list = dataclass_field(default_factory=list)
+    athlete_ids: list = dataclass_field(default_factory=list)
+
+    @property
+    def sin_repartir(self):
+        """Piezas cobradas que no tienen alumno. Cero es lo normal."""
+        return max(self.quantity - self.assigned, 0)
 
 
 @dataclass
@@ -36,10 +51,32 @@ class SizeGroup:
     # Quien del roster no tiene talla en ESTE producto. La hoja de produccion
     # los imprime marcados: un numero suelto no sirve para ir a buscarlos.
     unassigned_names: list = dataclass_field(default_factory=list)
+    unassigned_ids: list = dataclass_field(default_factory=list)
 
     @property
     def missing(self):
         return max(self.total - self.assigned, 0)
+
+    @property
+    def quantity(self):
+        """Piezas cobradas del producto. Es lo que se corta."""
+        return sum(fila.quantity for fila in self.rows)
+
+    @property
+    def sin_repartir(self):
+        return sum(fila.sin_repartir for fila in self.rows)
+
+    @property
+    def printed_user_ids(self):
+        """Todos los alumnos que una pantalla de este grupo nombra.
+
+        La hoja de produccion imprime tambien a los que NO tienen talla, asi
+        que auditar solo los OrderItemAthlete deja fuera justo a los que salen
+        marcados en papel.
+        """
+        return [
+            athlete_id for fila in self.rows for athlete_id in fila.athlete_ids
+        ] + list(self.unassigned_ids)
 
     @property
     def subtotal(self):
@@ -107,6 +144,7 @@ class SizeSummaryService:
             grupo.rows.append(
                 SizeGroupRow(
                     size=item.size_variant.size,
+                    quantity=item.quantity,
                     assigned=len(asignaciones),
                     item_id=item.id,
                     unit_price=item.unit_price,
@@ -115,18 +153,24 @@ class SizeSummaryService:
                         oia.athlete.get_full_name() or oia.athlete.email
                         for oia in asignaciones
                     ],
+                    athlete_ids=[oia.athlete_id for oia in asignaciones],
                 )
             )
             grupo.assigned += len(asignaciones)
 
-        # Mas alumnos primero: la talla del grueso del equipo es la que se mira.
+        # Por la escala del alumno, no por cantidad. El orden viejo ("mas
+        # alumnos primero") servia para una tira de badges donde se busca la
+        # talla dominante; estas filas se leen al reves, buscando UNA talla
+        # concreta, y XS, S, M, L, XL, XXL es como esta escrita la etiqueta.
         for product_id, grupo in grupos.items():
-            grupo.rows.sort(key=lambda fila: (-fila.assigned, fila.size))
+            grupo.rows.sort(key=lambda fila: size_sort_key(fila.size))
             asignados = con_talla.get(product_id, set())
-            grupo.unassigned_names = [
-                alumno.get_full_name() or alumno.email
-                for alumno in roster
-                if alumno.id not in asignados
+            sin_talla = [
+                alumno for alumno in roster if alumno.id not in asignados
             ]
+            grupo.unassigned_names = [
+                alumno.get_full_name() or alumno.email for alumno in sin_talla
+            ]
+            grupo.unassigned_ids = [alumno.id for alumno in sin_talla]
 
         return list(grupos.values())
