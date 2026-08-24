@@ -424,11 +424,13 @@ class Command(BaseCommand):
         from events.models import Event
 
         name = EVENT_NAMES[0]
-        # Inscripciones abiertas desde hace 5 días — competencia el 14 y 15 de junio 2026
+        # Inscripciones abiertas desde hace 5 días — competencia dentro de ~2 meses.
+        # Fechas relativas a hoy: un seed con fechas fijas caduca y rompe
+        # la validación registration_close >= registration_open.
         reg_open  = today - datetime.timedelta(days=5)
-        reg_close = datetime.date(2026, 5, 31)
-        start     = datetime.date(2026, 6, 14)
-        end       = datetime.date(2026, 6, 15)
+        reg_close = today + datetime.timedelta(days=45)
+        start     = today + datetime.timedelta(days=60)
+        end       = today + datetime.timedelta(days=61)
 
         try:
             event = Event.objects.get(name=name)
@@ -511,11 +513,12 @@ class Command(BaseCommand):
         from events.models import Event, EventResult, EventScore
 
         name = EVENT_NAMES[1]
-        # Copa completada — Guadalajara, 5-6 de abril 2026
-        reg_open  = datetime.date(2026, 2, 1)
-        reg_close = datetime.date(2026, 3, 20)
-        start     = datetime.date(2026, 4, 5)
-        end       = datetime.date(2026, 4, 6)
+        # Copa completada — Guadalajara, hace ~4 meses (relativa a hoy).
+        today_ = datetime.date.today()
+        reg_open  = today_ - datetime.timedelta(days=200)
+        reg_close = today_ - datetime.timedelta(days=140)
+        start     = today_ - datetime.timedelta(days=120)
+        end       = today_ - datetime.timedelta(days=119)
 
         try:
             event = Event.objects.get(name=name)
