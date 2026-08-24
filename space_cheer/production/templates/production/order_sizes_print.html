@@ -2,31 +2,66 @@
 {% load i18n %}
 
 {% block content %}
-{% comment %} El nonce NO es opcional: style-src es 'self' + nonce, sin unsafe-inline, asi
-   que sin el el navegador descarta el bloque entero y la hoja sale con navbar,
-   en tema oscuro y sin saltos de pagina. {% endcomment %}
+{% comment %}
+  El nonce NO es opcional: style-src es 'self' + nonce, sin unsafe-inline, asi
+  que sin el el navegador descarta el bloque entero y la hoja sale con navbar,
+  en tema oscuro y sin saltos de pagina.
+{% endcomment %}
 <style nonce="{{ request.csp_nonce }}">
   /* La app es dark; el papel no. Todo lo de impresion vive aca y no en el CSS
      global para no arrastrar reglas @media print a las demas pantallas. */
+  .hoja-producto { margin-bottom: 3rem; }
+
+  .hoja-corte td { font-size: 1.6rem; font-weight: 700; text-align: center; }
+  .hoja-corte th { text-align: center; font-weight: 600; }
+
+  /* Dos columnas: un A4 con una sola columna de nombres desperdicia medio
+     ancho. Los bloques no se parten a la mitad. */
+  .hoja-reparto { columns: 2; column-gap: 2.5rem; }
+  .hoja-talla { break-inside: avoid; page-break-inside: avoid; margin-bottom: 1.1rem; }
+  .hoja-talla-titulo {
+    font-weight: 700;
+    border-bottom: 2px solid currentColor;
+    padding-bottom: .15rem;
+    margin-bottom: .4rem;
+  }
+  .hoja-alumno {
+    display: flex; align-items: baseline; gap: .5rem;
+    padding: .28rem 0;
+    border-bottom: 1px dotted rgba(128,128,128,.6);
+    break-inside: avoid;
+  }
+  .casilla {
+    flex-shrink: 0;
+    display: inline-block; width: 1em; height: 1em;
+    border: 1px solid currentColor;
+    vertical-align: -0.1em;
+  }
+  .hoja-sin-talla { column-span: all; break-inside: avoid; }
+  .hoja-firmas { break-inside: avoid; page-break-inside: avoid; }
+  .linea-firma {
+    display: inline-block;
+    border-bottom: 1px solid currentColor;
+    min-width: 11rem;
+  }
+  .linea-obs { border-bottom: 1px solid currentColor; height: 1.4rem; }
+
   @media print {
     nav, header, footer, .navbar, .no-print { display: none !important; }
     body { background: #fff !important; color: #000 !important; }
-    .hoja { color: #000 !important; }
+    .hoja, .hoja * { color: #000 !important; }
+    /* Sin esto el navegador tira los fondos y los recuadros salen invisibles. */
+    .hoja, .hoja * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .hoja .table, .hoja .table th, .hoja .table td {
-      color: #000 !important;
       border-color: #000 !important;
       background: transparent !important;
     }
-    .hoja-producto { page-break-after: always; }
+    .hoja-alumno { border-bottom: 1px dotted #666 !important; }
+    .hoja-producto { page-break-after: always; margin-bottom: 0; }
     .hoja-producto:last-child { page-break-after: auto; }
+    .hoja-cabecera { page-break-after: avoid; }
     a[href]:after { content: ""; }
     @page { margin: 12mm; }
-  }
-  .casilla {
-    display: inline-block;
-    width: 1em; height: 1em;
-    border: 1px solid currentColor;
-    vertical-align: -0.1em;
   }
 </style>
 
@@ -36,94 +71,119 @@
     <a href="{% url 'production:dashboard' %}" class="btn btn-outline-secondary">
       <i class="bi bi-arrow-left me-1"></i>{% trans "Volver" %}
     </a>
-    {% comment %} Sin onclick: script-src no admite handlers inline y el boton se quedaba
-       mudo, con el error solo en la consola. {% endcomment %}
+    {% comment %}
+      Sin onclick: script-src no admite handlers inline y el boton se quedaba
+      mudo, con el error solo en la consola.
+    {% endcomment %}
     <button type="button" class="btn btn-primary" id="btn-imprimir">
       <i class="bi bi-printer me-1"></i>{% trans "Imprimir" %}
     </button>
   </div>
 
   {% for grupo in size_groups %}
-    <section class="hoja-producto mb-5">
+    <section class="hoja-producto">
 
-      <div class="border-bottom pb-2 mb-3">
-        <h1 class="h4 mb-1">{{ grupo.product.name }}</h1>
-        <div class="small">
-          {% blocktrans with id=order.id %}Pedido #{{ id }}{% endblocktrans %}
-          {% if order.owner_team %}
-            <span class="mx-1">·</span>{{ order.owner_team.name }}
-          {% endif %}
-          <span class="mx-1">·</span>{{ order.created_at|date:"d/m/Y" }}
+      <div class="hoja-cabecera d-flex justify-content-between align-items-end border-bottom border-2 pb-2 mb-3">
+        <div>
+          <h1 class="h4 mb-1">{{ grupo.product.name }}</h1>
+          <div class="small">
+            {% blocktrans with id=order.id %}Pedido #{{ id }}{% endblocktrans %}
+            {% if order.owner_team %}
+              <span class="mx-1">·</span>{{ order.owner_team.name }}
+            {% endif %}
+            <span class="mx-1">·</span>{{ order.created_at|date:"d/m/Y" }}
+          </div>
+        </div>
+        <div class="text-end">
+          <div class="display-6 fw-bold lh-1">{{ grupo.quantity }}</div>
+          <div class="small text-uppercase">{% trans "piezas" %}</div>
         </div>
       </div>
 
-      <h2 class="h6 text-uppercase">{% trans "Corte" %}</h2>
+      <h2 class="h6 text-uppercase mb-2">{% trans "Corte" %}</h2>
       {% comment %}
         Va la CANTIDAD del pedido, no el numero de alumnos. Normalmente son
         iguales, pero un item agregado a mano con cantidad y sin atletas
         imprimia "0 piezas" mientras el pedido cobraba 20: no se cortaba nada
         y la hoja no avisaba.
       {% endcomment %}
-      <div class="table-responsive mb-4">
-        <table class="table table-bordered w-auto mb-1">
-          <thead>
-            <tr>
-              {% for fila in grupo.rows %}<th class="text-center">{{ fila.size }}</th>{% endfor %}
-              <th class="text-center">{% trans "Total" %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {% for fila in grupo.rows %}<td class="text-center fs-5">{{ fila.quantity }}</td>{% endfor %}
-              <td class="text-center fs-5 fw-bold">{{ grupo.quantity }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="small">
-          {% blocktrans count piezas=grupo.quantity %}{{ piezas }} pieza en total{% plural %}{{ piezas }} piezas en total{% endblocktrans %}
-          {% if grupo.sin_repartir %}
-            <strong>
-              {% blocktrans count n=grupo.sin_repartir %}{{ n }} pieza no tiene alumno asignado.{% plural %}{{ n }} piezas no tienen alumno asignado.{% endblocktrans %}
-            </strong>
-          {% endif %}
-        </div>
-      </div>
-
-      <h2 class="h6 text-uppercase">{% trans "Reparto" %}</h2>
-      <table class="table table-sm">
+      <table class="table table-bordered w-auto mb-2 hoja-corte">
         <thead>
           <tr>
-            <th style="width:3rem"></th>
-            <th>{% trans "Alumno" %}</th>
-            <th style="width:6rem">{% trans "Talla" %}</th>
+            {% for fila in grupo.rows %}<th>{{ fila.size }}</th>{% endfor %}
+            <th>{% trans "Total" %}</th>
           </tr>
         </thead>
         <tbody>
-          {% for fila in grupo.rows %}
-            {% for nombre in fila.athlete_names %}
-              <tr>
-                <td class="text-center"><span class="casilla"></span></td>
-                <td>{{ nombre }}</td>
-                <td class="fw-bold">{{ fila.size }}</td>
-              </tr>
-            {% endfor %}
-          {% endfor %}
-          {% for nombre in grupo.unassigned_names %}
-            <tr>
-              <td class="text-center">⚠</td>
-              <td>{{ nombre }}</td>
-              <td class="fw-bold">{% trans "SIN TALLA" %}</td>
-            </tr>
-          {% endfor %}
+          <tr>
+            {% for fila in grupo.rows %}<td>{{ fila.quantity }}</td>{% endfor %}
+            {# table-active/table-light: fondo claro fijo, blancas en tema oscuro #}
+            <td class="border-3">{{ grupo.quantity }}</td>
+          </tr>
         </tbody>
       </table>
-
-      {% if grupo.missing %}
-        <p class="small mb-0">
-          <strong>{% blocktrans count faltan=grupo.missing %}Falta la talla de {{ faltan }} alumno.{% plural %}Falta la talla de {{ faltan }} alumnos.{% endblocktrans %}</strong>
-          {% trans "No se cortan hasta tenerla." %}
+      {% if grupo.sin_repartir %}
+        <p class="small fw-bold mb-3">
+          {% blocktrans count n=grupo.sin_repartir %}{{ n }} pieza no tiene alumno asignado.{% plural %}{{ n }} piezas no tienen alumno asignado.{% endblocktrans %}
         </p>
       {% endif %}
+
+      <h2 class="h6 text-uppercase mb-2">{% trans "Reparto" %}</h2>
+      <div class="hoja-reparto mb-3">
+        {% for fila in grupo.rows %}
+          <div class="hoja-talla">
+            <div class="hoja-talla-titulo d-flex justify-content-between">
+              <span>{{ fila.size }}</span>
+              <span class="fw-normal small">
+                {% blocktrans count n=fila.quantity %}{{ n }} pieza{% plural %}{{ n }} piezas{% endblocktrans %}
+              </span>
+            </div>
+            {% for nombre in fila.athlete_names %}
+              <div class="hoja-alumno">
+                <span class="casilla"></span>
+                <span>{{ nombre }}</span>
+              </div>
+            {% endfor %}
+            {% if fila.sin_repartir %}
+              <div class="hoja-alumno fst-italic">
+                <span class="casilla"></span>
+                <span>{% blocktrans count n=fila.sin_repartir %}{{ n }} sin alumno{% plural %}{{ n }} sin alumno{% endblocktrans %}</span>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        {% if grupo.unassigned_names %}
+          <div class="hoja-sin-talla mt-2">
+            <div class="hoja-talla-titulo d-flex justify-content-between">
+              <span>{% trans "SIN TALLA" %}</span>
+              <span class="fw-normal small">{% trans "No se cortan hasta tenerla." %}</span>
+            </div>
+            {% for nombre in grupo.unassigned_names %}
+              <div class="hoja-alumno">
+                <span class="fw-bold">!</span>
+                <span>{{ nombre }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="hoja-firmas border-top pt-3 small">
+        <div class="row g-3 mb-2">
+          <div class="col-6">
+            {% trans "Cortó:" %} <span class="linea-firma"></span>
+            <span class="ms-2">{% trans "Fecha:" %} <span class="linea-firma" style="min-width:6rem"></span></span>
+          </div>
+          <div class="col-6">
+            {% trans "Revisó:" %} <span class="linea-firma"></span>
+            <span class="ms-2">{% trans "Fecha:" %} <span class="linea-firma" style="min-width:6rem"></span></span>
+          </div>
+        </div>
+        <div>{% trans "Observaciones:" %}</div>
+        <div class="linea-obs mt-2"></div>
+        <div class="linea-obs mt-2"></div>
+      </div>
 
     </section>
   {% endfor %}

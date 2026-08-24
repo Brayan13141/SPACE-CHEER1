@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-23 13:32-0600\n"
+"POT-Creation-Date: 2026-08-23 17:44-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2488,7 +2488,7 @@ msgid "Medidas"
 msgstr "Measurements"
 
 #: .\production\templates\production\item_measurements.html:9
-#: .\production\templates\production\order_sizes_print.html:38
+#: .\production\templates\production\order_sizes_print.html:72
 #: .\templates\coach\athlete\edit_measures.html:22
 #: .\templates\coach\crew\create_crew_member.html:20
 #: .\templates\coach\crew\edit_owned_user.html:20
@@ -2505,76 +2505,85 @@ msgstr "Measurements"
 msgid "Volver"
 msgstr "Back"
 
-#: .\production\templates\production\order_sizes_print.html:44
+#: .\production\templates\production\order_sizes_print.html:80
 msgid "Imprimir"
 msgstr "Print"
 
-#: .\production\templates\production\order_sizes_print.html:54
+#: .\production\templates\production\order_sizes_print.html:91
 #, python-format
 msgid "Pedido #%(id)s"
 msgstr "Order #%(id)s"
 
-#: .\production\templates\production\order_sizes_print.html:62
+#: .\production\templates\production\order_sizes_print.html:100
+msgid "piezas"
+msgstr "pieces"
+
+#: .\production\templates\production\order_sizes_print.html:104
 msgid "Corte"
 msgstr "Cutting"
 
-#: .\production\templates\production\order_sizes_print.html:75
+#: .\production\templates\production\order_sizes_print.html:116
 #: .\templates\orders\admin\order_detail.html:75
 #: .\templates\orders\admin\order_list.html:116
 msgid "Total"
 msgstr "Total"
 
-#: .\production\templates\production\order_sizes_print.html:86
+#: .\production\templates\production\order_sizes_print.html:129
 #, python-format
-msgid "%(piezas)s pieza en total"
-msgid_plural "%(piezas)s piezas en total"
-msgstr[0] "%(piezas)s piece in total"
-msgstr[1] "%(piezas)s pieces in total"
-
-#: .\production\templates\production\order_sizes_print.html:89
-#, python-format
-#| msgid "Sin alumnos asignados."
 msgid "%(n)s pieza no tiene alumno asignado."
 msgid_plural "%(n)s piezas no tienen alumno asignado."
 msgstr[0] "%(n)s piece has no athlete assigned."
 msgstr[1] "%(n)s pieces have no athlete assigned."
 
-#: .\production\templates\production\order_sizes_print.html:95
+#: .\production\templates\production\order_sizes_print.html:133
 msgid "Reparto"
 msgstr "Handout"
 
-#: .\production\templates\production\order_sizes_print.html:100
-#: .\templates\orders\items\_measurements_grid.html:8
-#: .\templates\orders\items\sizes_grid.html:36
-msgid "Alumno"
-msgstr "Athlete"
+#: .\production\templates\production\order_sizes_print.html:140
+#, python-format
+#| msgid "%(piezas)s pieza"
+#| msgid_plural "%(piezas)s piezas"
+msgid "%(n)s pieza"
+msgid_plural "%(n)s piezas"
+msgstr[0] "%(n)s piece"
+msgstr[1] "%(n)s pieces"
 
-#: .\production\templates\production\order_sizes_print.html:101
-#: .\templates\orders\admin\offline_create.html:151
-#: .\templates\orders\admin\order_detail.html:407
-#: .\templates\orders\admin\order_detail.html:485
-#: .\templates\orders\items\sizes_grid.html:36
-#: .\templates\orders\users\order_detail.html:451
-#: .\templates\orders\users\order_detail.html:547
-#: .\templates\products\product_detail.html:412
-#: .\templates\products\product_detail.html:436
-msgid "Talla"
-msgstr "Size"
+#: .\production\templates\production\order_sizes_print.html:152
+#: .\templates\orders\users\order_detail.html:478
+#, python-format
+msgid "%(n)s sin alumno"
+msgid_plural "%(n)s sin alumno"
+msgstr[0] "%(n)s with no athlete"
+msgstr[1] "%(n)s with no athlete"
 
-#: .\production\templates\production\order_sizes_print.html:118
+#: .\production\templates\production\order_sizes_print.html:161
 msgid "SIN TALLA"
 msgstr "NO SIZE"
 
-#: .\production\templates\production\order_sizes_print.html:126
-#, python-format
-msgid "Falta la talla de %(faltan)s alumno."
-msgid_plural "Falta la talla de %(faltan)s alumnos."
-msgstr[0] "%(faltan)s athlete is missing a size."
-msgstr[1] "%(faltan)s athletes are missing a size."
-
-#: .\production\templates\production\order_sizes_print.html:127
+#: .\production\templates\production\order_sizes_print.html:162
 msgid "No se cortan hasta tenerla."
 msgstr "They are not cut until it is set."
+
+#: .\production\templates\production\order_sizes_print.html:177
+#| msgid "Corte"
+msgid "Cortó:"
+msgstr "Cut by:"
+
+#: .\production\templates\production\order_sizes_print.html:178
+#: .\production\templates\production\order_sizes_print.html:182
+#: .\templates\orders\admin\order_detail.html:711
+#: .\templates\orders\users\order_detail.html:821
+msgid "Fecha:"
+msgstr "Date:"
+
+#: .\production\templates\production\order_sizes_print.html:181
+msgid "Revisó:"
+msgstr "Checked by:"
+
+#: .\production\templates\production\order_sizes_print.html:185
+#| msgid "Inscripciones:"
+msgid "Observaciones:"
+msgstr "Notes:"
 
 #: .\social\models.py:15
 #, python-format
@@ -6233,6 +6242,17 @@ msgstr "Production template"
 msgid "Sin plantilla"
 msgstr "No template"
 
+#: .\templates\orders\admin\offline_create.html:151
+#: .\templates\orders\admin\order_detail.html:407
+#: .\templates\orders\admin\order_detail.html:485
+#: .\templates\orders\items\sizes_grid.html:36
+#: .\templates\orders\users\order_detail.html:451
+#: .\templates\orders\users\order_detail.html:547
+#: .\templates\products\product_detail.html:412
+#: .\templates\products\product_detail.html:436
+msgid "Talla"
+msgstr "Size"
+
 #: .\templates\orders\admin\offline_create.html:152
 msgid "Ej. M, 32, única"
 msgstr "E.g. M, 32, one-size"
@@ -6543,11 +6563,6 @@ msgstr "Design #%(num)s"
 msgid "Subido por:"
 msgstr "Uploaded by:"
 
-#: .\templates\orders\admin\order_detail.html:711
-#: .\templates\orders\users\order_detail.html:821
-msgid "Fecha:"
-msgstr "Date:"
-
 #: .\templates\orders\admin\order_detail.html:713
 #: .\templates\orders\users\order_detail.html:823
 msgid "Estado:"
@@ -6701,6 +6716,11 @@ msgstr "Items"
 #: .\templates\orders\admin\order_list.html:169
 msgid "No hay órdenes"
 msgstr "No orders"
+
+#: .\templates\orders\items\_measurements_grid.html:8
+#: .\templates\orders\items\sizes_grid.html:36
+msgid "Alumno"
+msgstr "Athlete"
 
 #: .\templates\orders\items\_measurements_grid.html:15
 msgid ""
@@ -7288,13 +7308,6 @@ msgstr "Unit."
 #: .\templates\social\ranking.html:28
 msgid "Atletas"
 msgstr "Athletes"
-
-#: .\templates\orders\users\order_detail.html:478
-#, python-format
-msgid "%(n)s sin alumno"
-msgid_plural "%(n)s sin alumno"
-msgstr[0] "%(n)s with no athlete"
-msgstr[1] "%(n)s with no athlete"
 
 #: .\templates\orders\users\order_detail.html:487
 #: .\templates\orders\users\order_detail.html:730

@@ -1,5 +1,7 @@
 """La hoja de tallas que producción imprime para el taller."""
 
+import re
+
 import pytest
 from django.urls import reverse
 
@@ -231,6 +233,19 @@ class TestLaHojaSobreviveAlCSP:
         assert "<style nonce=" in cuerpo
         assert "@media print" in cuerpo
 
+    def test_el_nonce_del_style_es_el_de_la_cabecera(self, client):
+        """`nonce=""` tambien satisface un `"<style nonce=" in cuerpo`, y el
+        navegador descarta igual el bloque. Lo que decide es que el valor este
+        anunciado en Content-Security-Policy."""
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        respuesta = client.get(url)
+        cuerpo = respuesta.content.decode()
+
+        nonce = re.search(r'<style nonce="([^"]+)"', cuerpo).group(1)
+        assert f"'nonce-{nonce}'" in respuesta.headers["Content-Security-Policy"]
+
     def test_el_boton_de_imprimir_no_usa_un_handler_inline(self, client):
         order, product, athletes, url = con_tallas()
         client.force_login(make_admin())
@@ -248,3 +263,71 @@ class TestLaHojaSobreviveAlCSP:
 
         assert "{#" not in cuerpo
         assert "{% comment" not in cuerpo
+
+
+@pytest.mark.django_db
+class TestElRedisenioDeLaHoja:
+    """El rediseño del 2026-08-23: bloques por talla y pie de control.
+
+    La version anterior imprimia un renglon por alumno en una sola lista y sin
+    nada que firmar; los tests de arriba pasan con las dos, asi que no cubren
+    lo nuevo."""
+
+    def test_el_reparto_agrupa_por_talla_con_su_conteo_de_piezas(self, client):
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        cuerpo = client.get(url).content.decode()
+
+        # M lleva 2 alumnos y L 1: el bloque anuncia cuantas piezas se cortan
+        # de esa talla, que es el numero que el taller cuenta al terminar.
+        assert "2 piezas" in cuerpo
+        assert "1 pieza" in cuerpo
+
+    def test_cada_producto_lleva_su_pie_de_control(self, client):
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        cuerpo = client.get(url).content.decode()
+
+        assert "Cortó:" in cuerpo
+        assert "Revisó:" in cuerpo
+        assert "Observaciones:" in cuerpo
+
+
+@pytest.mark.django_db
+class TestLaHojaEnIngles:
+    """makemessages inventa traducciones en cada tanda y ya metio un crash:
+    `%(piezas)s` en el msgstr de un msgid que solo define `%(n)s`. El .po se ve
+    bien leyendolo; el fallo sale al renderizar."""
+
+    def test_la_hoja_renderiza_en_ingles_sin_reventar(self, client):
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        respuesta = client.get(url, headers={"accept-language": "en"})
+
+        assert respuesta.status_code == 200
+
+    def test_el_pie_de_control_sale_traducido(self, client):
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        cuerpo = client.get(url, headers={"accept-language": "en"}).content.decode()
+
+        assert "Cut by:" in cuerpo
+        assert "Checked by:" in cuerpo
+        assert "Notes:" in cuerpo
+        assert "Cortó:" not in cuerpo
+
+    def test_el_conteo_de_piezas_sale_traducido_y_con_su_numero(self, client):
+        order, product, athletes, url = con_tallas()
+        client.force_login(make_admin())
+
+        cuerpo = client.get(url, headers={"accept-language": "en"}).content.decode()
+
+        # Si el msgstr trae un placeholder que el msgid no define, blocktrans
+        # lo deja crudo en vez de reventar: hay que mirar el numero.
+        assert "2 pieces" in cuerpo
+        assert "1 piece" in cuerpo
+        assert "%(" not in cuerpo
