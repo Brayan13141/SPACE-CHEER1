@@ -153,6 +153,15 @@ class Bed(models.Model):
         (BUNK, 'Litera'),
     ]
 
+    # Cuántas personas duerme cada tipo de cama cuando la cama no lo declara.
+    DEFAULT_CAPACITY = {
+        SINGLE: 1,
+        DOUBLE: 2,
+        QUEEN: 2,
+        KING: 2,
+        BUNK: 2,
+    }
+
     room = models.ForeignKey(
         Room,
         on_delete=models.CASCADE,
@@ -160,6 +169,16 @@ class Bed(models.Model):
     )
     bed_type = models.CharField(max_length=20, choices=BED_TYPE_CHOICES, default=SINGLE)
     label = models.CharField(max_length=50, blank=True)  # "Cama A", "Cama derecha"
+    capacity = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Capacidad",
+        help_text=(
+            "Cuántas personas duermen en esta cama. Vacío = el default de su "
+            "tipo (individual 1, el resto 2). Úsalo para una matrimonial "
+            "angosta o una litera de tres."
+        ),
+    )
     notes = models.TextField(blank=True)
 
     class Meta:
@@ -168,6 +187,37 @@ class Bed(models.Model):
 
     def __str__(self):
         return f"{self.get_bed_type_display()} — Hab. {self.room}"
+
+    @property
+    def effective_capacity(self):
+        """Capacidad declarada, o la del tipo de cama si no se declaró."""
+        if self.capacity:
+            return self.capacity
+        return self.DEFAULT_CAPACITY.get(self.bed_type, 1)
+
+    @property
+    def current_occupancy(self):
+        """Huéspedes con estancia viva en esta cama."""
+        if not self.pk:
+            return 0
+        return self.assignments.exclude(stay__status=Stay.CANCELLED).count()
+
+    def _validate_capacity(self):
+        if self.capacity is not None and self.capacity < 1:
+            raise ValidationError({'capacity': "La capacidad debe ser al menos 1."})
+        # No dejar la cama sobrevendida al reducir su capacidad.
+        if self.pk and self.capacity is not None:
+            ocupada = self.current_occupancy
+            if self.capacity < ocupada:
+                raise ValidationError({
+                    'capacity': (
+                        f"No puedes dejar la capacidad en {self.capacity}: la cama "
+                        f"ya tiene {ocupada} huésped(es) asignado(s)."
+                    )
+                })
+
+    def clean(self):
+        self._validate_capacity()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -385,9 +435,25 @@ class RoomAssignment(models.Model):
         if current_count >= self.room.room_type.capacity:
             raise ValidationError({'room': "La habitación ha alcanzado su capacidad máxima."})
 
+    def _validate_minor_lodging(self):
+        """Un menor no comparte habitación con adultos que no sean su tutor
+        o el cuerpo técnico de su equipo (LGDNNA)."""
+        from hospitality.policies import MinorLodgingPolicy
+
+        if not self.room_id or not self.stay_id:
+            return
+        if self.stay.status == Stay.CANCELLED:
+            return
+        MinorLodgingPolicy.validate_room(
+            self.room,
+            incoming_user=self.stay.user,
+            exclude_stay_id=self.stay_id,
+        )
+
     def clean(self):
         self._validate_hotel_consistency()
         self._validate_room_capacity()
+        self._validate_minor_lodging()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -425,19 +491,43 @@ class BedAssignment(models.Model):
     def __str__(self):
         return f"Cama {self.bed} → {self.stay}"
 
-    def _validate_bed_not_double_booked(self):
+    def _validate_bed_capacity(self):
+        """La cama admite tantos huéspedes como su capacidad efectiva: el
+        default de su tipo, o el valor declarado en la cama."""
         if not self.bed_id:
             return
         exclude_pk = self.pk if self.pk else 0
-        conflict = BedAssignment.objects.filter(
+        ocupantes = BedAssignment.objects.filter(
             bed=self.bed
         ).exclude(
             stay__status=Stay.CANCELLED
         ).exclude(
             pk=exclude_pk
+        ).count()
+        capacidad = self.bed.effective_capacity
+        if ocupantes >= capacidad:
+            if capacidad == 1:
+                mensaje = "Esta cama ya está asignada a otro huésped."
+            else:
+                mensaje = (
+                    f"Esta cama ya alcanzó su capacidad ({capacidad} personas)."
+                )
+            raise ValidationError({'bed': mensaje})
+
+    def _validate_minor_lodging(self):
+        """Compartir cama es más estricto que compartir cuarto, pero la regla
+        es la misma: con un menor solo duerme su tutor o cuerpo técnico."""
+        from hospitality.policies import MinorLodgingPolicy
+
+        if not self.bed_id or not self.stay_id:
+            return
+        if self.stay.status == Stay.CANCELLED:
+            return
+        MinorLodgingPolicy.validate_bed(
+            self.bed,
+            incoming_user=self.stay.user,
+            exclude_stay_id=self.stay_id,
         )
-        if conflict.exists():
-            raise ValidationError({'bed': "Esta cama ya está asignada a otro huésped."})
 
     def _validate_room_consistency(self):
         if not self.stay_id or not self.bed_id:
@@ -450,8 +540,9 @@ class BedAssignment(models.Model):
             raise ValidationError({'bed': "La cama no pertenece a la habitación asignada a esta estancia."})
 
     def clean(self):
-        self._validate_bed_not_double_booked()
+        self._validate_bed_capacity()
         self._validate_room_consistency()
+        self._validate_minor_lodging()
 
     def save(self, *args, **kwargs):
         self.full_clean()

@@ -10,6 +10,7 @@ from .models import (
     RoomAssignment,
     Stay,
 )
+from .policies import MinorLodgingPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +142,11 @@ class RoomAssignmentService:
                 f"La habitación #{room.room_number} ha alcanzado su capacidad máxima "
                 f"({room.room_type.capacity})."
             )
+        # Convivencia de menores: se valida aquí además del clean() del modelo
+        # para que el mensaje llegue a la vista antes de intentar guardar.
+        MinorLodgingPolicy.validate_room(
+            room, incoming_user=stay.user, exclude_stay_id=stay.pk,
+        )
         assignment = RoomAssignment(
             stay=stay,
             room=room,
@@ -166,14 +172,25 @@ class RoomAssignmentService:
             raise ValidationError(
                 "La cama no pertenece a la habitación asignada a esta estancia."
             )
-        # Validates bed not already taken by another active stay
-        already_assigned = BedAssignment.objects.filter(
+        # Validates bed still has room: una cama admite tantas personas como
+        # su capacidad efectiva (default del tipo, u override de la cama).
+        ocupantes = BedAssignment.objects.filter(
             bed=bed
         ).exclude(
             stay__status=Stay.CANCELLED
-        ).exists()
-        if already_assigned:
-            raise ValidationError("Esta cama ya está asignada a otro huésped.")
+        ).exclude(
+            stay=stay
+        ).count()
+        capacidad = bed.effective_capacity
+        if ocupantes >= capacidad:
+            raise ValidationError(
+                "Esta cama ya está asignada a otro huésped."
+                if capacidad == 1
+                else f"Esta cama ya alcanzó su capacidad ({capacidad} personas)."
+            )
+        MinorLodgingPolicy.validate_bed(
+            bed, incoming_user=stay.user, exclude_stay_id=stay.pk,
+        )
         assignment = BedAssignment(
             stay=stay,
             bed=bed,
