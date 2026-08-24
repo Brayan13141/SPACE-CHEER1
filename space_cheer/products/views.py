@@ -10,6 +10,7 @@ from measures.models import MeasurementField
 from django.db.models import Q, Min, Max
 from products.models import ProductSizeVariant, ProductMeasurementField
 from django.db.models import ProtectedError
+from orders.services.sizes.ordering import order_by_size
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -313,7 +314,7 @@ def product_detail(request, product_id):
     measurement_fields = product.measurement_fields.select_related("field").order_by(
         "field__order"
     )
-    size_variants = product.size_variants.all().order_by("size")
+    size_variants = order_by_size(product.size_variants.all())
     used_field_ids = measurement_fields.values_list("field_id", flat=True)
     available_fields = (
         MeasurementField.objects.filter(is_active=True)

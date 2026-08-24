@@ -9,6 +9,7 @@ from django.utils.encoding import force_str
 from .models import Season, Product, ProductMeasurementField, ProductSizeVariant
 from decimal import Decimal, InvalidOperation
 from orders.models import OrderItem
+from orders.services.sizes.ordering import order_by_size
 
 
 # ============================================================
@@ -708,7 +709,7 @@ class ProductAdmin(admin.ModelAdmin):
             .prefetch_related(
                 Prefetch(
                     "size_variants",
-                    queryset=ProductSizeVariant.objects.order_by("size"),
+                    queryset=order_by_size(ProductSizeVariant.objects.all()),
                 ),
                 Prefetch(
                     "measurement_fields",

@@ -6,6 +6,7 @@ from django.contrib import messages
 from orders.models import Order
 from orders.services.product_filter_service import ProductFilterService
 from orders.services.servicesItems.order_item_service import OrderItemService
+from orders.services.sizes.ordering import order_by_size
 from products.models import Product, ProductSizeVariant, Season
 
 # ---------------------------------------------------------
@@ -40,7 +41,8 @@ def order_add_product(request, order_id):
         )
         .prefetch_related(
             Prefetch(
-                "size_variants", queryset=ProductSizeVariant.objects.order_by("size")
+                "size_variants",
+                queryset=order_by_size(ProductSizeVariant.objects.all()),
             ),
             "measurement_fields__field",
         )
