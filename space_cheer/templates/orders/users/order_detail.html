@@ -70,6 +70,7 @@
       </div>
     {% endif %}
 
+
   {% elif order.status == 'PENDING' %}
     <div class="alert alert-warning mb-4">
       <div class="d-flex align-items-start gap-2">
@@ -143,6 +144,49 @@
       </div>
     </div>
   {% endif %}
+
+    {# Qué falta para el siguiente paso, y de quién depende cada cosa. #}
+  {% if next_requirements and order.status != 'DRAFT' %}
+      <div class="card border-warning mb-4">
+        <div class="card-header bg-warning bg-opacity-10 d-flex align-items-center">
+          <i class="bi bi-hourglass-split me-2"></i>
+          <strong>
+            {% if next_step_label %}
+              {% blocktrans %}Falta esto para {{ next_step_label }}{% endblocktrans %}
+            {% else %}
+              {% trans "Pendientes del pedido" %}
+            {% endif %}
+          </strong>
+          {% if not next_requirements_mine %}
+            <span class="badge text-bg-secondary ms-auto">
+              {% trans "Nada de tu parte" %}
+            </span>
+          {% endif %}
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for req in next_requirements %}
+            <li class="list-group-item d-flex align-items-start gap-2">
+              {% if req.is_mine %}
+                <i class="bi bi-person-fill-exclamation text-warning mt-1"></i>
+              {% else %}
+                <i class="bi bi-clock-history text-muted mt-1"></i>
+              {% endif %}
+              <div class="flex-grow-1">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span>{{ req.message }}</span>
+                  <span class="badge {% if req.is_mine %}text-bg-warning{% else %}text-bg-light border{% endif %}">
+                    {{ req.owner_label }}
+                  </span>
+                </div>
+                {% if req.hint %}
+                  <small class="text-muted d-block mt-1">{{ req.hint }}</small>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
 
   <!-- ========== DETALLES DE LA ORDEN ========== -->
   <div class="card shadow-sm mb-4">

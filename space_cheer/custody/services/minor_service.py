@@ -168,6 +168,67 @@ class MinorAthleteService:
 
     @staticmethod
     @transaction.atomic
+    def verify_guardianship(*, guardian: User, verified_by: User,
+                            legal_document: str = "") -> GuardianProfile:
+        """Deja constancia de que alguien revisó el respaldo de una tutela legal.
+
+        No sube archivos: registra la referencia del documento y, sobre todo,
+        QUIÉN dio el visto bueno y CUÁNDO. Eso es lo que convierte una casilla
+        de formulario en algo auditable.
+        """
+        if not (verified_by.is_superuser
+                or verified_by.roles.filter(name="ADMIN").exists()):
+            raise PermissionDenied(
+                "Solo un administrador puede verificar una tutela legal."
+            )
+
+        profile = GuardianProfile.objects.filter(user=guardian).first()
+        if profile is None:
+            raise ValidationError(
+                f"{guardian} no tiene perfil de tutor."
+            )
+        if not profile.requires_proof:
+            raise ValidationError(
+                f"La relación '{profile.get_relation_display()}' no requiere "
+                "verificación documental."
+            )
+
+        profile.legal_document = legal_document
+        profile.verified_by = verified_by
+        profile.verified_at = timezone.now()
+        profile.save(update_fields=["legal_document", "verified_by", "verified_at"])
+
+        logger.info(
+            "Tutela legal de %s verificada por %s (documento=%s)",
+            guardian, verified_by, legal_document or "sin referencia",
+        )
+        return profile
+
+    @staticmethod
+    def guardians_needing_attention(guardians=None):
+        """Tutores con tutela legal sin verificar o con demasiados atletas.
+
+        Devuelve [(perfil, [motivos])]. Es para mostrar, no para bloquear.
+        """
+        qs = GuardianProfile.objects.select_related("user")
+        if guardians is not None:
+            qs = qs.filter(user__in=guardians)
+
+        resultado = []
+        for profile in qs:
+            motivos = []
+            if profile.proof_pending:
+                motivos.append("declara tutela legal sin verificar")
+            if profile.over_soft_limit:
+                motivos.append(
+                    f"tiene {profile.athlete_count} atletas a cargo"
+                )
+            if motivos:
+                resultado.append((profile, motivos))
+        return resultado
+
+    @staticmethod
+    @transaction.atomic
     def remove_guardian(*, athlete: User, removed_by: User) -> AthleteProfile:
         """
         Remueve el guardian de un atleta.
@@ -207,7 +268,8 @@ class MinorAthleteService:
         *, athlete: User, relation: str, updated_by: User
     ) -> GuardianProfile:
         """Actualiza el tipo de relación del guardian (PADRE, TUTOR, ACOMP)."""
-        VALID_RELATIONS = {"PADRE", "TUTOR", "ACOMP"}
+        # Las opciones salen del modelo: dos listas de lo mismo se separan.
+        VALID_RELATIONS = {code for code, _ in GuardianProfile.RELATION_CHOICES}
 
         if relation not in VALID_RELATIONS:
             raise ValidationError(
@@ -220,13 +282,32 @@ class MinorAthleteService:
         if guardian is None:
             raise ValidationError(f"El atleta {athlete} no tiene guardian asignado.")
 
-        try:
-            gp = guardian.guardianprofile
-        except GuardianProfile.DoesNotExist:
+        # Se lee de la BASE, no por la relación inversa: `guardian` puede venir
+        # con el perfil cacheado por el signal que lo crea al asignar el rol
+        # GUARDIAN, y esa copia trae los valores por defecto. Leerla de ahí
+        # hacía escribir sobre un estado viejo — la verificación existente no
+        # se veía y no se invalidaba.
+        gp = GuardianProfile.objects.filter(user=guardian).first()
+        if gp is None:
             raise ValidationError(f"El guardian {guardian} no tiene GuardianProfile.")
 
+        relacion_anterior = gp.relation
         gp.relation = relation
-        gp.save(update_fields=["relation"])
+        campos = ["relation"]
+
+        # Cambiar lo que se declara invalida la verificación anterior: se
+        # revisó un vínculo distinto del que ahora se afirma.
+        if relacion_anterior != relation and gp.is_verified:
+            gp.verified_by = None
+            gp.verified_at = None
+            gp.legal_document = ""
+            campos += ["verified_by", "verified_at", "legal_document"]
+            logger.info(
+                "Verificación de %s invalidada: la relación pasó de %s a %s",
+                guardian, relacion_anterior, relation,
+            )
+
+        gp.save(update_fields=campos)
 
         return gp
 

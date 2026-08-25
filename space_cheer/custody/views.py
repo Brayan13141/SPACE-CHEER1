@@ -24,6 +24,7 @@ from django.utils import timezone
 from accounts.models import UserOwnership, AthleteProfile
 from accounts.services.ownership_service import OwnershipService
 from accounts.decorators import role_required
+from custody.models import GuardianProfile
 from custody.services.minor_service import MinorAthleteService
 
 User = get_user_model()
@@ -247,6 +248,29 @@ def assign_guardian(request, athlete_id):
                     f"{guardian.get_full_name()} asignado como guardian "
                     f"de {athlete.get_full_name()}.",
                 )
+
+                # Avisos, no bloqueos: el riesgo no está en la cantidad de
+                # atletas sino en que el vínculo sea falso, así que esto se ve
+                # y se puede ignorar. Un ValidationError aquí solo enseñaría a
+                # elegir "Acompañante" para esquivarlo.
+                perfil = GuardianProfile.objects.filter(user=guardian).first()
+                if perfil:
+                    if perfil.proof_pending:
+                        messages.warning(
+                            request,
+                            f"{guardian.get_full_name()} figura como tutor legal "
+                            "y ese vínculo todavía no está verificado. Un "
+                            "administrador debe registrar el documento de "
+                            "respaldo.",
+                        )
+                    if perfil.over_soft_limit:
+                        messages.warning(
+                            request,
+                            f"{guardian.get_full_name()} ya tiene "
+                            f"{perfil.athlete_count} atletas a su cargo. "
+                            "Verifica que sea correcto.",
+                        )
+
                 return redirect("guardian:headcoach_dashboard")
 
             except (ValidationError, PermissionDenied) as e:
