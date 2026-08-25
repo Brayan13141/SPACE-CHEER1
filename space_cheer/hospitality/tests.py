@@ -295,3 +295,142 @@ class MinorLodgingPolicyTests(LodgingTestBase):
         ra.stay.status = Stay.CANCELLED
         ra.stay.save()
         self.assign_room(self.menor)  # no debe reventar
+
+
+# =====================================================================
+# 3. CIERRE DE HALLAZGOS DE SEGURIDAD
+# =====================================================================
+
+class FailClosedAgeTests(LodgingTestBase):
+    """Una regla de protección no puede apagarse por un dato faltante."""
+
+    def setUp(self):
+        super().setUp()
+        self.team, self.coach = self.make_team("Cometas")
+
+    def _atleta_sin_fecha(self, username):
+        user = UserFactory(username=username)
+        user.birth_date = None
+        user.save(update_fields=["birth_date"])
+        self.join_team(user, self.team)
+        AthleteProfile.objects.create(user=user, emergency_contact="Familia")
+        return user
+
+    def test_atleta_sin_fecha_de_nacimiento_cuenta_como_menor(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        self.assertTrue(MinorLodgingPolicy.is_minor(self._atleta_sin_fecha("sin_fecha")))
+
+    def test_atleta_sin_fecha_queda_protegido(self):
+        atleta = self._atleta_sin_fecha("sin_fecha2")
+        ajeno = self.make_user(age=40, username="ajeno_sf")
+        self.assign_room(atleta)
+        with self.assertRaises(ValidationError):
+            self.assign_room(ajeno)
+
+    def test_no_atleta_sin_fecha_sigue_contando_como_adulto(self):
+        """Por ese lado la falta de dato ya era restrictiva: tiene que estar
+        acreditado para alojarse con un menor."""
+        from hospitality.policies import MinorLodgingPolicy
+
+        adulto = UserFactory(username="adulto_sf")
+        adulto.birth_date = None
+        adulto.save(update_fields=["birth_date"])
+        self.assertFalse(MinorLodgingPolicy.is_minor(adulto))
+
+        menor = self.make_user(age=15, username="menor_sf")
+        self.join_team(menor, self.team)
+        AthleteProfile.objects.create(user=menor, emergency_contact="F")
+        self.assign_room(menor)
+        with self.assertRaises(ValidationError):
+            self.assign_room(adulto)
+
+
+class MembershipRoleMappingTests(LodgingTestBase):
+    """La acreditación se apoya en los roles que el modelo define de verdad."""
+
+    def setUp(self):
+        super().setUp()
+        self.team, self.coach = self.make_team("Cometas")
+        self.menor = self.make_user(age=15, username="menor_rol")
+        self.join_team(self.menor, self.team)
+        AthleteProfile.objects.create(user=self.menor, emergency_contact="F")
+
+    def test_headcoach_no_es_un_valor_valido_de_role_in_team(self):
+        from teams.models import UserTeamMembership
+
+        validos = {code for code, _ in UserTeamMembership.ROLE_CHOICES}
+        self.assertNotIn("HEADCOACH", validos)
+
+    def test_role_in_team_fuera_de_spec_no_acredita(self):
+        """Escribir 'HEADCOACH' a mano no debe dar acceso: ese cargo se
+        reconoce por Team.coach, no por un literal en la membresía."""
+        from hospitality.policies import MinorLodgingPolicy
+
+        impostor = self.make_user(age=40, username="impostor")
+        UserTeamMembership.objects.create(
+            user=impostor, team=self.team, role_in_team="HEADCOACH",
+            status="accepted", is_active=True,
+        )
+        self.assertNotIn(
+            impostor.pk, MinorLodgingPolicy.accredited_adult_ids(self.menor),
+        )
+
+    def test_el_head_coach_real_si_acredita(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        self.assertIn(
+            self.coach.pk, MinorLodgingPolicy.accredited_adult_ids(self.menor),
+        )
+
+
+class StaleAuthorizationTests(LodgingTestBase):
+    """La autorización guardada envejece: hay que poder revalidarla."""
+
+    def setUp(self):
+        super().setUp()
+        self.team, self.coach = self.make_team("Cometas")
+        self.menor = self.make_user(age=15, username="menor_stale")
+        self.join_team(self.menor, self.team)
+        self.guardian = self.make_user(age=42, username="guardian_stale")
+        self.profile = AthleteProfile.objects.create(
+            user=self.menor, emergency_contact="F", guardian=self.guardian,
+        )
+
+    def test_quitar_el_tutor_deja_la_asignacion_en_infraccion(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        ra_menor = self.assign_room(self.menor)
+        self.assign_room(self.guardian)
+        self.assertEqual(MinorLodgingPolicy.audit_stay(ra_menor.stay), [])
+
+        self.profile.guardian = None
+        self.profile.save(update_fields=["guardian"])
+        self.assertTrue(MinorLodgingPolicy.audit_stay(ra_menor.stay))
+
+    def test_el_check_in_rechaza_un_alojamiento_que_dejo_de_cumplir(self):
+        from hospitality.services import HospitalityService
+
+        bed_a = self.make_bed(Bed.SINGLE, label="A")
+        bed_b = self.make_bed(Bed.SINGLE, label="B")
+        ra_menor = self.assign_room(self.menor)
+        ra_guardian = self.assign_room(self.guardian)
+        BedAssignment.objects.create(stay=ra_menor.stay, bed=bed_a)
+        BedAssignment.objects.create(stay=ra_guardian.stay, bed=bed_b)
+
+        self.profile.guardian = None
+        self.profile.save(update_fields=["guardian"])
+
+        with self.assertRaises(ValidationError):
+            HospitalityService.check_in(stay=ra_menor.stay, checked_in_by=self.admin)
+
+    def test_audit_event_lista_las_estancias_en_infraccion(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        self.assign_room(self.menor)
+        self.assign_room(self.guardian)
+        self.assertEqual(MinorLodgingPolicy.audit_event(self.event), {})
+
+        self.profile.guardian = None
+        self.profile.save(update_fields=["guardian"])
+        self.assertTrue(MinorLodgingPolicy.audit_event(self.event))

@@ -29,15 +29,29 @@ class MinorLodgingPolicy:
     # -----------------------------------------------------------------
     @staticmethod
     def is_minor(user) -> bool:
-        """Delega en el servicio de custodia para no tener dos definiciones
-        de 'menor' que puedan separarse.
+        """¿Hay que proteger a esta persona como menor?
 
-        Ojo: devuelve False cuando el usuario no tiene fecha de nacimiento.
-        Un menor sin `birth_date` registrado no queda protegido por esta regla.
+        Parte de `MinorAthleteService.is_minor`, para no tener dos definiciones
+        de "menor" que puedan separarse, pero cierra su punto ciego: ese
+        servicio devuelve False cuando no hay `birth_date`, y una regla de
+        protección que se apaga sola ante un dato faltante no protege nada.
+
+        Aquí, **un atleta sin fecha de nacimiento cuenta como menor**. Es el
+        lado seguro del error: como mucho exige que su tutor o el cuerpo
+        técnico sean quienes lo acompañen, y se corrige llenando su fecha.
+
+        Un no-atleta sin fecha sigue contando como adulto, y por lo tanto tiene
+        que estar acreditado para alojarse con un menor: por ese lado la falta
+        de dato ya era restrictiva, no permisiva.
         """
+        from accounts.models import AthleteProfile
         from custody.services.minor_service import MinorAthleteService
 
-        return MinorAthleteService.is_minor(user)
+        if MinorAthleteService.is_minor(user):
+            return True
+        if user.birth_date is None:
+            return AthleteProfile.objects.filter(user=user).exists()
+        return False
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -69,16 +83,23 @@ class MinorLodgingPolicy:
         if not team_ids:
             return allowed
 
+        # Los roles de membresía se toman de ROLE_CHOICES, no de literales:
+        # "HEADCOACH" NO es un valor válido del modelo (solo ATHLETE, COACH y
+        # STAFF lo son), así que filtrar por él acreditaba a quien tuviera ese
+        # valor escrito fuera de spec, sin que el modelo lo reconozca.
+        roles_validos = {code for code, _ in UserTeamMembership.ROLE_CHOICES}
+        roles_tecnicos = sorted(roles_validos - {"ATHLETE"})
+
         allowed.update(
             UserTeamMembership.objects.filter(
                 team_id__in=team_ids,
                 status="accepted",
                 is_active=True,
-                role_in_team__in=["HEADCOACH", "COACH", "STAFF"],
+                role_in_team__in=roles_tecnicos,
             ).values_list("user_id", flat=True)
         )
-        # El head coach dueño del equipo vive en Team.coach, que no siempre
-        # tiene membresía propia.
+        # El head coach es el dueño del equipo (Team.coach), no un valor de
+        # role_in_team: esa es la única fuente de verdad para ese cargo.
         allowed.update(
             Team.objects.filter(pk__in=team_ids).values_list("coach_id", flat=True)
         )
@@ -166,3 +187,61 @@ class MinorLodgingPolicy:
         # acreditado puede dormir en la habitación de una menor, pero no en su
         # misma cama. Ahí solo entra el tutor.
         cls.validate_group(ocupantes, scope="cama", include_team_staff=False)
+
+    # -----------------------------------------------------------------
+    @classmethod
+    def audit_stay(cls, stay):
+        """Revalida una estancia YA asignada contra el estado actual.
+
+        La validación de `clean()` decide en el momento de asignar y ese
+        resultado queda congelado en la fila. Si después se le quita el tutor
+        al menor, o el coach deja el equipo, la habitación sigue asignada y
+        nadie vuelve a mirar. Esto es lo que rompe ese supuesto.
+
+        Devuelve la lista de mensajes de incumplimiento (vacía si todo bien),
+        en vez de levantar: sirve para auditar en bloque sin cortar al primero.
+        """
+        from django.core.exceptions import ValidationError
+        from hospitality.models import Stay
+
+        if stay.status == Stay.CANCELLED:
+            return []
+
+        problemas = []
+        room_assignment = getattr(stay, "room_assignment", None)
+        if room_assignment is not None:
+            try:
+                cls.validate_room(room_assignment.room)
+            except ValidationError as exc:
+                problemas.extend(exc.messages)
+
+        for bed_assignment in stay.bed_assignments.select_related("bed"):
+            try:
+                cls.validate_bed(bed_assignment.bed)
+            except ValidationError as exc:
+                problemas.extend(exc.messages)
+
+        return problemas
+
+    # -----------------------------------------------------------------
+    @classmethod
+    def audit_event(cls, event):
+        """Todas las estancias vivas de un evento que hoy incumplen la regla.
+
+        Devuelve {stay: [mensajes]}. Pensado para que administración pueda
+        detectar los alojamientos que quedaron inválidos por un cambio
+        posterior de tutela o de equipo.
+        """
+        from hospitality.models import Stay
+
+        resultado = {}
+        estancias = (
+            Stay.objects.filter(event=event)
+            .exclude(status=Stay.CANCELLED)
+            .select_related("user", "room_assignment__room")
+        )
+        for stay in estancias:
+            problemas = cls.audit_stay(stay)
+            if problemas:
+                resultado[stay] = problemas
+        return resultado

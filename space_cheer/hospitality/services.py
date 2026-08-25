@@ -93,6 +93,16 @@ class HospitalityService:
         # Validates stay must have at least one BedAssignment
         if not stay.bed_assignments.exists():
             raise ValidationError("La estancia no tiene cama asignada para hacer check-in.")
+        # La autorización se decidió al asignar y pudo envejecer: si desde
+        # entonces le quitaron el tutor al menor o el coach dejó el equipo, la
+        # fila sigue ahí pero ya no cumple. El check-in es el momento en que el
+        # alojamiento se vuelve físico, así que se revalida aquí.
+        problemas = MinorLodgingPolicy.audit_stay(stay)
+        if problemas:
+            raise ValidationError(
+                "El alojamiento ya no cumple las reglas de convivencia de "
+                "menores: " + " ".join(problemas)
+            )
         stay.status = Stay.CHECKED_IN
         stay.save()
         logger.info("Stay checked in: stay=%s checked_in_by=%s", stay.pk, checked_in_by)

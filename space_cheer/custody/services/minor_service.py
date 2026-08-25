@@ -114,10 +114,28 @@ class MinorAthleteService:
         if guardian == athlete:
             raise ValidationError("Un atleta no puede ser su propio guardian.")
 
+        # Fecha de nacimiento obligatoria: `is_minor()` responde False cuando
+        # falta, así que sin este corte un usuario sin fecha pasaba el filtro
+        # de "no es menor" por omisión del dato, no por ser mayor.
+        if guardian.birth_date is None:
+            raise ValidationError(
+                f"El usuario {guardian} no tiene fecha de nacimiento registrada. "
+                "No se puede confirmar que sea mayor de edad."
+            )
+
         if MinorAthleteService.is_minor(guardian):
             raise ValidationError(
                 f"El usuario {guardian} también es menor de edad "
                 "y no puede ser guardian."
+            )
+
+        # El filtro por rol vivía solo en el desplegable de la vista, así que
+        # el admin de Django, un script o un comando asignaban como guardian a
+        # cualquier usuario. La regla pertenece al servicio.
+        if not guardian.roles.filter(name="GUARDIAN").exists():
+            raise ValidationError(
+                f"El usuario {guardian} no tiene el rol GUARDIAN. "
+                "Asígnale el rol antes de ponerlo como tutor."
             )
 
         # Crear GuardianProfile si no existe
