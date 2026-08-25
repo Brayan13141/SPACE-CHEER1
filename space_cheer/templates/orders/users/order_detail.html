@@ -146,6 +146,14 @@
   {% endif %}
 
     {# Qué falta para el siguiente paso, y de quién depende cada cosa. #}
+  {# Pendientes internos que el cliente no ve en detalle. #}
+  {% if has_internal_pending and not next_requirements and order.status != 'DRAFT' %}
+    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+      <i class="bi bi-hourglass-split me-2 flex-shrink-0"></i>
+      <span>{{ generic_internal_message }}</span>
+    </div>
+  {% endif %}
+
   {% if next_requirements and order.status != 'DRAFT' %}
       <div class="card border-warning mb-4">
         <div class="card-header bg-warning bg-opacity-10 d-flex align-items-center">
@@ -157,7 +165,7 @@
               {% trans "Pendientes del pedido" %}
             {% endif %}
           </strong>
-          {% if not next_requirements_mine %}
+          {% if not next_requirements_mine and not has_internal_pending %}
             <span class="badge text-bg-secondary ms-auto">
               {% trans "Nada de tu parte" %}
             </span>
@@ -185,6 +193,11 @@
             </li>
           {% endfor %}
         </ul>
+        {% if has_internal_pending %}
+          <div class="card-footer bg-transparent text-muted small">
+            <i class="bi bi-hourglass-split me-1"></i>{{ generic_internal_message }}
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 

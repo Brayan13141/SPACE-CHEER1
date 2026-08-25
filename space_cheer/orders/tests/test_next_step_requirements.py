@@ -133,3 +133,78 @@ class NextStepRequirementsTests(TestCase):
         order.save(update_fields=["first_payment_date"])
 
         self.assertEqual(next_step_requirements(order), [])
+
+
+class RequirementVisibilityTests(TestCase):
+    """Cómo se organiza Space Cheer por dentro no es asunto del cliente.
+
+    El cliente ve lo que le toca a él —tiene que poder actuar sobre ello— y del
+    resto solo sabe que el pedido está en curso.
+    """
+
+    def setUp(self):
+        from accounts.models import Role
+        from orders.tests.factories import ProductFactory, UserFactory
+
+        self.product = ProductFactory(
+            product_type="UNIFORM", usage_type="GLOBAL", size_strategy="NONE",
+        )
+        self.order = TeamOrderFactory()
+        OrderItemFactory(order=self.order, product=self.product)
+        self.order.status = "DESIGN_APPROVED"
+        self.order._allow_status_change = True
+        self.order.save()
+
+        self.cliente = self.order.owner_team.coach
+        self.admin = UserFactory(username="admin_vis")
+        self.admin.roles.add(Role.objects.get_or_create(name="ADMIN")[0])
+        self.staff = UserFactory(username="staff_vis")
+        self.staff.roles.add(Role.objects.get_or_create(name="STAFF")[0])
+
+    def test_el_cliente_no_ve_los_pendientes_de_administracion(self):
+        from orders.services.preconditions import visible_requirements
+
+        visibles, hay_internos = visible_requirements(self.order, self.cliente)
+
+        self.assertTrue(hay_internos)
+        self.assertEqual(visibles, [])
+        self.assertNotIn("NO_FIRST_PAYMENT", {r.code for r in visibles})
+
+    def test_administracion_los_ve_todos(self):
+        from orders.services.preconditions import (
+            next_step_requirements, visible_requirements,
+        )
+
+        for usuario in (self.admin, self.staff):
+            visibles, hay_internos = visible_requirements(self.order, usuario)
+            self.assertFalse(hay_internos)
+            self.assertEqual(
+                {r.code for r in visibles},
+                {r.code for r in next_step_requirements(self.order)},
+            )
+
+    def test_el_cliente_si_ve_lo_suyo(self):
+        """Ocultarle sus propios pendientes lo dejaría sin saber qué hacer."""
+        from orders.services.preconditions import (
+            OWNER_COACH, OrderBlockingIssue, visible_requirements,
+        )
+        from unittest.mock import patch
+
+        propio = OrderBlockingIssue(
+            code="ALGO_MIO", message="Falta algo tuyo", owner=OWNER_COACH,
+        )
+        with patch(
+            "orders.services.preconditions.next_step_requirements",
+            return_value=[propio],
+        ):
+            visibles, hay_internos = visible_requirements(self.order, self.cliente)
+
+        self.assertEqual([r.code for r in visibles], ["ALGO_MIO"])
+        self.assertFalse(hay_internos)
+
+    def test_el_mensaje_generico_no_filtra_nada_interno(self):
+        from orders.services.preconditions import GENERIC_INTERNAL_MESSAGE
+
+        texto = GENERIC_INTERNAL_MESSAGE.lower()
+        for palabra in ("pago", "medida", "bloque", "etapa", "taller", "producción"):
+            self.assertNotIn(palabra, texto)

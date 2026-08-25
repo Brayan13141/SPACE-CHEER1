@@ -7,10 +7,11 @@ from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.services.state import OrderCreationService, OrderStateService
 from orders.services.factories import OrderContactInfoFactory
 from orders.services.preconditions import (
+    GENERIC_INTERNAL_MESSAGE,
     NEXT_STATUS,
     NEXT_STATUS_LABELS,
     can_submit_order,
-    next_step_requirements,
+    visible_requirements,
 )
 from teams.models import Team
 from django.db import transaction
@@ -284,7 +285,10 @@ def order_detail(request, order_id):
     # Qué falta para el SIGUIENTE paso, en cualquier estado y de quién depende.
     # `blocking_issues` solo habla en DRAFT; a partir de ahí el pedido se
     # quedaba parado sin decir qué esperaba ni de quién.
-    next_requirements = next_step_requirements(order)
+    # El cliente ve solo lo suyo; del resto sabe que el pedido está en curso.
+    next_requirements, has_internal_pending = visible_requirements(
+        order, request.user
+    )
     next_step_label = NEXT_STATUS_LABELS.get(NEXT_STATUS.get(order.status), "")
 
     available_transitions = OrderStateService.get_available_transitions(
@@ -313,6 +317,8 @@ def order_detail(request, order_id):
             "next_requirements": next_requirements,
             "next_step_label": next_step_label,
             "next_requirements_mine": [r for r in next_requirements if r.is_mine],
+            "has_internal_pending": has_internal_pending,
+            "generic_internal_message": GENERIC_INTERNAL_MESSAGE,
             "size_groups": size_groups,
             # La tarjeta del grupo ya muestra cada talla con su cantidad y su
             # precio, asi que el bucle de productos salta esos items; si no,

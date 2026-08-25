@@ -18,6 +18,18 @@ class OrderPermissions:
         return user.is_superuser or user.roles.filter(name="ADMIN").exists()
 
     @staticmethod
+    def can_administer_orders(user):
+        """Quién trabaja los pedidos por dentro: admin y staff de oficina.
+
+        Distinto de `can_manage_order`, que incluye al cliente sobre SU pedido.
+        Esto separa a quien opera el negocio de quien lo encarga, y decide qué
+        tanto detalle interno se muestra.
+        """
+        if OrderPermissions._has_admin_access(user):
+            return True
+        return user.roles.filter(name="STAFF").exists()
+
+    @staticmethod
     def can_manage_order(user, order):
         """
         Verifica si un usuario puede gestionar una orden específica.
@@ -133,3 +145,7 @@ def can_manage_order(user, order):
 
 def can_approve_design(user, order):
     return OrderPermissions.can_approve_design(user, order)
+
+
+def can_administer_orders(user):
+    return OrderPermissions.can_administer_orders(user)

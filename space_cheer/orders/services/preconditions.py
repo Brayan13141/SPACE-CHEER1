@@ -256,3 +256,33 @@ def next_step_requirements(order: Order) -> list[OrderBlockingIssue]:
         return issues
 
     return issues
+
+
+# Lo que ve un cliente cuando el pendiente no es suyo. No menciona pagos,
+# bloqueos ni etapas de taller: cómo se organiza Space Cheer por dentro no es
+# asunto de quien encarga el pedido, y detallarlo invita a preguntar por qué
+# su pedido lleva tres días en la misma etapa.
+GENERIC_INTERNAL_MESSAGE = (
+    "El equipo de Space Cheer está trabajando en este pedido. "
+    "Te avisaremos en cuanto avance."
+)
+
+
+def visible_requirements(order: Order, viewer) -> tuple[list, bool]:
+    """Los pendientes que `viewer` puede ver, y si hay otros que no.
+
+    Quien administra pedidos (admin y staff) los ve todos con su detalle: es
+    su trabajo. El cliente ve **solo lo suyo** —tiene que poder actuar sobre
+    ello— y del resto sabe únicamente que el pedido está en curso.
+
+    Devuelve (lista_visible, hay_pendientes_internos).
+    """
+    from orders.permissions import can_administer_orders
+
+    requisitos = next_step_requirements(order)
+    if can_administer_orders(viewer):
+        return requisitos, False
+
+    propios = [r for r in requisitos if r.is_mine]
+    ajenos = [r for r in requisitos if not r.is_mine]
+    return propios, bool(ajenos)
