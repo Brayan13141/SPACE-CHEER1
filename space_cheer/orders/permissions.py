@@ -43,15 +43,31 @@ class OrderPermissions:
 
         # Miembros de equipo para órdenes de equipo
         elif order.order_type == "TEAM":
+            if OrderPermissions._is_team_headcoach(user, order.owner_team):
+                return True
             if order.owner_team.memberships.filter(
                 user=user,
                 status="accepted",
                 is_active=True,
-                role_in_team__in=["HEADCOACH", "STAFF"],
+                role_in_team="STAFF",
             ).exists():
                 return True
 
         return False
+
+    @staticmethod
+    def _is_team_headcoach(user, team):
+        """El head coach de un equipo es su `Team.coach`, y solo eso.
+
+        Antes se comparaba `role_in_team == "HEADCOACH"`, pero ese valor NO
+        existe en `UserTeamMembership.ROLE_CHOICES` (solo ATHLETE, COACH y
+        STAFF): la comparación autorizaba a quien tuviera el literal escrito
+        fuera de spec, sin que el modelo lo reconociera como rol. El cargo
+        tiene una sola fuente de verdad y es la FK del equipo.
+        """
+        if team is None or user is None or not user.pk:
+            return False
+        return team.coach_id == user.pk
 
     @staticmethod
     def can_approve_design(user, order):
@@ -66,15 +82,9 @@ class OrderPermissions:
         if order.order_type == "PERSONAL":
             return order.owner_user == user
 
-        # Para equipos: entrenadores
+        # Para equipos: solo el head coach, que es el dueño del equipo.
         if order.order_type == "TEAM":
-            membership = order.owner_team.memberships.filter(
-                user=user, status="accepted", is_active=True
-            ).first()
-
-            if membership:
-                # Solo roles específicos pueden aprobar diseños
-                return membership.role_in_team == "HEADCOACH"
+            return OrderPermissions._is_team_headcoach(user, order.owner_team)
 
         return False
 

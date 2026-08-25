@@ -292,10 +292,13 @@ class Command(BaseCommand):
         self.teams = teams
 
         for team in teams.values():
-            # El headcoach dueño del equipo necesita membresía para aprobar diseños.
+            # El head coach entra al equipo como COACH, que es un valor real de
+            # ROLE_CHOICES. Su cargo de head coach sale de Team.coach, no de un
+            # literal en la membresía: sembrar "HEADCOACH" aquí metía en la base
+            # justo el dato fuera de spec que las reglas dejaron de reconocer.
             UserTeamMembership.objects.get_or_create(
                 user=team.coach, team=team,
-                defaults={"role_in_team": "HEADCOACH", "status": "accepted", "is_active": True},
+                defaults={"role_in_team": "COACH", "status": "accepted", "is_active": True},
             )
             self.complete_profile(team.coach, gender="H", birth=datetime.date(1988, 5, 15), city=team.city)
             CoachProfile.objects.get_or_create(
@@ -308,6 +311,10 @@ class Command(BaseCommand):
 
         for m in UserTeamMembership.objects.filter(team__in=teams.values()).select_related("user", "team"):
             u = m.user
+            # El head coach ya se documentó arriba; su membresía COACH no debe
+            # generar una segunda entrada en el reporte.
+            if u.pk == m.team.coach_id:
+                continue
             if m.role_in_team == "COACH":
                 self.complete_profile(u, gender="M", birth=datetime.date(1993, 2, 10), city=m.team.city)
                 CoachProfile.objects.get_or_create(user=u, defaults={"status": CoachProfile.APPROVED})

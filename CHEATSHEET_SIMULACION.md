@@ -121,9 +121,9 @@ Todos son menores de edad (fuerza el flujo de tutor) y tienen las 8 medidas carg
 
 | Equipo | Ciudad | Código de ingreso | Head coach | Atletas |
 |---|---|---|---|---|
-| Meteors | Puebla | `E517DC` | `hc.meteors@test.com` | 8 |
-| Supernovas | Monterrey | `A315D1` | `hc.supernovas@test.com` | 8 |
-| Comets | Guadalajara | `C2F544` | `hc.comets@test.com` | 8 |
+| Meteors | Puebla | `87E945` | `hc.meteors@test.com` | 8 |
+| Supernovas | Monterrey | `A0935C` | `hc.supernovas@test.com` | 8 |
+| Comets | Guadalajara | `8C6A2F` | `hc.comets@test.com` | 8 |
 
 ---
 
@@ -410,11 +410,13 @@ Lo que queda del hueco de guardianes, y es decisión de negocio, no de código: 
 
 **A decidir:** si un tutor puede quedar a cargo de N atletas sin revisión, y si `TUTOR` (tutela legal) debería exigir algún respaldo distinto que `ACOMP` (acompañante).
 
-### 🔴 Abierto — `"HEADCOACH"` como literal fuera de spec
+### ✅ Resuelto — `"HEADCOACH"` como literal fuera de spec
 
-El mismo problema que se corrigió en hospitality vive en `orders/permissions.py`: `can_approve_design()` decide comparando `membership.role_in_team == "HEADCOACH"`, un valor que el modelo no define. Funciona porque los datos se escriben así por convención.
+`orders/permissions.py` decidía comparando `membership.role_in_team == "HEADCOACH"`, un valor que `UserTeamMembership.ROLE_CHOICES` no define: escribirlo a mano daba permiso de aprobar diseños sin que el modelo reconociera el rol.
 
-**A decidir:** o se agrega HEADCOACH a `ROLE_CHOICES`, o el cargo se lee siempre de `Team.coach`. Tocarlo cambia quién puede aprobar diseños, así que no se hizo sobre la marcha.
+Criterio elegido: **el head coach es `Team.coach`, y solo eso.** Se aplicó en `can_approve_design()` y en `can_manage_order()`, donde vivía el mismo literal. La membresía STAFF sigue valiendo para gestionar la orden.
+
+Efecto lateral bueno: el head coach ya no necesita fila de membresía para aprobar. La simulación dejó de sembrar el valor fuera de spec — ahora entra como COACH, que sí existe.
 
 ---
 

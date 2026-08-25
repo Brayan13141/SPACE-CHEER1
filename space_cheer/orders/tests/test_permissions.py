@@ -287,3 +287,42 @@ class OrderPermissionsViewTests(TestCase):
         order = OrderFactory()
 
         self.assertFalse(OrderPermissions.can_view_order(user, order))
+
+
+class HeadcoachIsTeamCoachTests(TestCase):
+    """El head coach se reconoce por Team.coach, no por un literal de rol.
+
+    `UserTeamMembership.ROLE_CHOICES` solo define ATHLETE, COACH y STAFF: antes
+    se comparaba contra "HEADCOACH", así que escribir ese valor a mano daba
+    permiso de aprobar diseños sin que el modelo lo reconociera como rol.
+    """
+
+    def test_membresia_headcoach_fuera_de_spec_no_aprueba(self):
+        team = TeamFactory()
+        impostor = UserFactory()
+        UserTeamMembershipFactory(
+            team=team,
+            user=impostor,
+            role_in_team="HEADCOACH",
+            status="accepted",
+            is_active=True,
+        )
+        order = TeamOrderFactory(owner_team=team)
+
+        self.assertFalse(OrderPermissions.can_approve_design(impostor, order))
+        self.assertFalse(OrderPermissions.can_manage_order(impostor, order))
+
+    def test_el_dueno_del_equipo_aprueba_sin_membresia(self):
+        """Team.coach basta: el cargo no depende de tener fila de membresía."""
+        team = TeamFactory()
+        order = TeamOrderFactory(owner_team=team)
+
+        self.assertTrue(OrderPermissions.can_approve_design(team.coach, order))
+        self.assertTrue(OrderPermissions.can_manage_order(team.coach, order))
+
+    def test_headcoach_de_otro_equipo_no_aprueba(self):
+        otro_team = TeamFactory()
+        team = TeamFactory()
+        order = TeamOrderFactory(owner_team=team)
+
+        self.assertFalse(OrderPermissions.can_approve_design(otro_team.coach, order))
