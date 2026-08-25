@@ -418,7 +418,7 @@ class Command(BaseCommand):
     # ==================================================================
     def phase_production_config(self):
         from production.models import ProductionStage, ProductStageConfig
-        from products.models import Product, Season
+        from products.models import Product, ProductSizeVariant, Season
 
         stages = {s.slug: s for s in ProductionStage.objects.all()}
 
@@ -457,8 +457,40 @@ class Command(BaseCommand):
                 )
             self.info(f"{product_name}: {len(slugs)} etapas configuradas")
 
-        # Producto interno para pedidos offline (scope INTERNAL).
         season = Season.objects.filter(is_active=True).first()
+
+        # Producto de talla por alumno: TEAM_CUSTOM + STANDARD es la única
+        # combinación que activa `uses_standard_sizes`, y por lo tanto la
+        # rejilla de tallas y la hoja imprimible del taller. Sin uno así, esas
+        # dos pantallas quedan vacías (la hoja responde 404).
+        self.playera, creada = Product.objects.get_or_create(
+            name="Playera de Entrenamiento del Equipo",
+            season=season,
+            defaults={
+                "description": "Playera con el escudo del equipo. Se reparte por talla entre las atletas.",
+                "product_type": "UNIFORM",
+                "usage_type": "TEAM_CUSTOM",
+                "scope": "CATALOG",
+                "size_strategy": "STANDARD",
+                "base_price": Decimal("380.00"),
+            },
+        )
+        for talla, extra in [("XS", "0.00"), ("S", "0.00"), ("M", "0.00"),
+                             ("L", "40.00"), ("XL", "80.00")]:
+            ProductSizeVariant.objects.get_or_create(
+                product=self.playera, size=talla,
+                defaults={"additional_price": Decimal(extra)},
+            )
+        for order_idx, slug in enumerate(FULL, start=1):
+            stage = stages.get(slug)
+            if stage:
+                ProductStageConfig.objects.update_or_create(
+                    product=self.playera, stage=stage,
+                    defaults={"display_order": order_idx},
+                )
+        self.ok(f"Producto por talla {'creado' if creada else 'ya existía'}: {self.playera.name}")
+
+        # Producto interno para pedidos offline (scope INTERNAL).
         self.internal_product, created = Product.objects.get_or_create(
             name="Uniforme Taller (captura offline)",
             season=season,
@@ -648,7 +680,33 @@ class Command(BaseCommand):
         transition(f, "PENDING", user=meteors.coach)
         add_final_design(f, self.admin)
         transition(f, "DESIGN_APPROVED", user=meteors.coach)
-        record(f, "F-meteors-diseno-aprobado", "DESIGN_APPROVED con medidas cerradas pero sin bloquear. Falta primer pago para producción.")
+        # Reparto de tallas por alumna sobre la playera del equipo: es lo que
+        # llena la rejilla de tallas y la hoja imprimible del taller.
+        from orders.services.servicesItems.size_assignment_service import (
+            OrderItemSizeAssignmentService,
+        )
+
+        meteors_athletes = list(
+            User.objects.filter(
+                team_memberships__team=meteors,
+                team_memberships__role_in_team="ATHLETE",
+                team_memberships__is_active=True,
+            ).order_by("pk")
+        )
+        reparto = ["S", "S", "M", "M", "M", "L", "L", "XL"]
+        asignaciones = {
+            atleta.id: reparto[idx % len(reparto)]
+            for idx, atleta in enumerate(meteors_athletes)
+        }
+        OrderItemSizeAssignmentService.reconcile(
+            f, self.playera, asignaciones, meteors.coach,
+        )
+        f.refresh_from_db()
+        f.invalidate_cache()
+        record(f, "F-meteors-diseno-aprobado",
+               "DESIGN_APPROVED con medidas cerradas pero sin bloquear: falta el "
+               "bloqueo y el primer pago para producción. Trae el reparto de "
+               "tallas por alumna, así que su hoja imprimible tiene contenido.")
 
         # ── G. Comets — borrador sin terminar ─────────────────────────
         g = build(comets, comets.coach, [(mochila, 4, None)], "G-comets-borrador")

@@ -121,9 +121,9 @@ Todos son menores de edad (fuerza el flujo de tutor) y tienen las 8 medidas carg
 
 | Equipo | Ciudad | Código de ingreso | Head coach | Atletas |
 |---|---|---|---|---|
-| Meteors | Puebla | `87E945` | `hc.meteors@test.com` | 8 |
-| Supernovas | Monterrey | `A0935C` | `hc.supernovas@test.com` | 8 |
-| Comets | Guadalajara | `8C6A2F` | `hc.comets@test.com` | 8 |
+| Meteors | Puebla | `09FBBF` | `hc.meteors@test.com` | 8 |
+| Supernovas | Monterrey | `83F846` | `hc.supernovas@test.com` | 8 |
+| Comets | Guadalajara | `2BE090` | `hc.comets@test.com` | 8 |
 
 ---
 
@@ -138,7 +138,7 @@ Un pedido por cada estado del ciclo de vida, más los tres tipos (`TEAM`, `PERSO
 | **3** | TEAM | Meteors — Rodrigo Altair | En producción | En progreso | `hc.meteors@test.com` | $17280.00 |
 | **4** | TEAM | Comets — Diego Orión | En producción | Pausado | `hc.comets@test.com` | $2560.00 |
 | **5** | TEAM | Supernovas — Mariana Polaris | Pendiente | — | `hc.supernovas@test.com` | $14400.00 |
-| **6** | TEAM | Meteors — Rodrigo Altair | Diseño aprobado | — | `hc.meteors@test.com` | $24000.00 |
+| **6** | TEAM | Meteors — Rodrigo Altair | Diseño aprobado | — | `hc.meteors@test.com` | $27200.00 |
 | **7** | TEAM | Comets — Diego Orión | Borrador | — | `hc.comets@test.com` | $1800.00 |
 | **8** | TEAM | Supernovas — Mariana Polaris | Cancelado | — | `hc.supernovas@test.com` | $6800.00 |
 | **9** | PERSONAL | Sofía Cruz | Entregado | Completado | `atleta.comets1@test.com` | $1300.00 |
@@ -194,10 +194,10 @@ Un pedido por cada estado del ciclo de vida, más los tres tipos (`TEAM`, `PERSO
 #### Pedido #6 — Diseño aprobado
 
 - **Dueño:** Meteors — Rodrigo Altair · **tipo:** `TEAM` · **creado por:** `hc.meteors@test.com`
-- **Contenido:** 8× Uniforme Base (talla M); 8× Uniforme Personalizado por Equipo — 8 atletas asignados
+- **Contenido:** 8× Uniforme Base (talla M); 2× Playera de Entrenamiento del Equipo (talla S) — 2 atletas asignados; 3× Playera de Entrenamiento del Equipo (talla M) — 3 atletas asignados; 2× Playera de Entrenamiento del Equipo (talla L) — 2 atletas asignados; 1× Playera de Entrenamiento del Equipo (talla XL) — 1 atletas asignados; 8× Uniforme Personalizado por Equipo — 8 atletas asignados
 - **Medidas:** cerradas (reabribles) · límite 2026-09-03
 - **Entrega comprometida:** 2026-11-12
-- **Para qué sirve:** DESIGN_APPROVED con medidas cerradas pero sin bloquear. Falta primer pago para producción.
+- **Para qué sirve:** DESIGN_APPROVED con medidas cerradas pero sin bloquear: falta el bloqueo y el primer pago para producción. Trae el reparto de tallas por alumna, así que su hoja imprimible tiene contenido.
 - **Bitácora:** — → DRAFT (hc.meteors@test.com) · DRAFT → PENDING (hc.meteors@test.com) · PENDING → DESIGN_APPROVED (hc.meteors@test.com)
 
 #### Pedido #7 — Borrador
