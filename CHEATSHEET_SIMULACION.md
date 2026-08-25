@@ -1,6 +1,6 @@
 # Space Cheer — Cheatsheet de la simulación
 
-> Generado el **2026-08-24** por `python manage.py simulate_platform`.
+> Generado el **2026-08-25** por `python manage.py simulate_platform`.
 > Base local PostgreSQL `SPACE`. Todos los usuarios comparten la contraseña **`Test1234!`**.
 
 ## Cómo levantar el entorno
@@ -121,9 +121,9 @@ Todos son menores de edad (fuerza el flujo de tutor) y tienen las 8 medidas carg
 
 | Equipo | Ciudad | Código de ingreso | Head coach | Atletas |
 |---|---|---|---|---|
-| Meteors | Puebla | `C2E58B` | `hc.meteors@test.com` | 8 |
-| Supernovas | Monterrey | `BF0414` | `hc.supernovas@test.com` | 8 |
-| Comets | Guadalajara | `1D844F` | `hc.comets@test.com` | 8 |
+| Meteors | Puebla | `E517DC` | `hc.meteors@test.com` | 8 |
+| Supernovas | Monterrey | `A315D1` | `hc.supernovas@test.com` | 8 |
+| Comets | Guadalajara | `C2F544` | `hc.comets@test.com` | 8 |
 
 ---
 
@@ -392,21 +392,29 @@ Aprobar el diseño solo **cierra** las medidas (`MeasurementLifecycleService.clo
 
 **A decidir:** o el paso se hace explícito en el flujo de aprobación (un aviso o un botón en la misma pantalla), o se bloquea automáticamente al aprobar el diseño. El pedido #6 quedó parado justo ahí para reproducirlo.
 
-### 🔴 Abierto — huecos en la asignación de guardianes
+### ✅ Resuelto — fail-open por edad y acreditación por rol inválido
 
-Las reglas que **sí** existen, en `MinorAthleteService.assign_guardian()`:
+Tres huecos del mismo tipo: la regla existía pero se podía esquivar sin romper nada.
 
-- Solo puede asignar un superuser, un ADMIN, o un HEADCOACH **sobre atletas que le pertenecen** vía `UserOwnership`.
-- El atleta tiene que ser menor de edad; el guardián no puede serlo.
-- Nadie puede ser su propio guardián.
-- El guardián es obligatorio para menores: solo se puede quitar cuando el atleta cumple 18.
-- El desplegable de la interfaz solo lista usuarios con rol GUARDIAN.
+- **`is_minor()` devolvía False sin `birth_date`**, así que un menor sin fecha registrada quedaba fuera de la protección. Ahora un **atleta** sin fecha cuenta como menor; un no-atleta sin fecha sigue contando como adulto, que por ese lado ya era restrictivo.
+- **Se acreditaba por `role_in_team="HEADCOACH"`**, un valor que `UserTeamMembership.ROLE_CHOICES` no define (solo ATHLETE, COACH y STAFF). Los roles salen ahora de ROLE_CHOICES, y el head coach se reconoce por `Team.coach`.
+- **La autorización quedaba congelada en la fila.** Si después le quitaban el tutor al menor, la habitación seguía asignada. `audit_stay()` y `audit_event()` revalidan contra el estado de hoy, y el check-in corta si el alojamiento dejó de cumplir.
 
-Los huecos:
+Además, `assign_guardian()` ahora exige **fecha de nacimiento** y **rol GUARDIAN**; ese filtro vivía solo en el desplegable de la vista, así que el admin de Django o cualquier script lo esquivaban.
 
-- **`is_minor()` devuelve False si no hay fecha de nacimiento**, y el queryset de candidatos incluye explícitamente `birth_date__isnull=True`. Un usuario sin fecha registrada pasa como adulto y aparece en la lista. Esto además **debilita la regla de alojamiento**: un menor sin `birth_date` no queda protegido por `MinorLodgingPolicy`.
-- **El filtro por rol GUARDIAN vive solo en la vista.** El servicio acepta cualquier usuario adulto y le crea el `GuardianProfile` al vuelo, así que el admin de Django, un script o un comando se lo saltan.
-- **Sin límite de atletas por guardián** y **sin verificación del vínculo**: `relation` (PADRE / TUTOR / ACOMP) es una elección libre, sin documento ni aprobación de por medio.
+31 tests en `hospitality/tests.py`.
+
+### 🔴 Abierto — sin tope ni verificación del vínculo del tutor
+
+Lo que queda del hueco de guardianes, y es decisión de negocio, no de código: **no hay límite de cuántos atletas puede tener un guardián** ni **verificación del vínculo declarado**. `relation` (PADRE / TUTOR / ACOMP) se elige libre en un desplegable, sin documento ni aprobación.
+
+**A decidir:** si un tutor puede quedar a cargo de N atletas sin revisión, y si `TUTOR` (tutela legal) debería exigir algún respaldo distinto que `ACOMP` (acompañante).
+
+### 🔴 Abierto — `"HEADCOACH"` como literal fuera de spec
+
+El mismo problema que se corrigió en hospitality vive en `orders/permissions.py`: `can_approve_design()` decide comparando `membership.role_in_team == "HEADCOACH"`, un valor que el modelo no define. Funciona porque los datos se escriben así por convención.
+
+**A decidir:** o se agrega HEADCOACH a `ROLE_CHOICES`, o el cargo se lee siempre de `Team.coach`. Tocarlo cambia quién puede aprobar diseños, así que no se hizo sobre la marcha.
 
 ---
 
