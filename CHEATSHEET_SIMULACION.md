@@ -386,37 +386,35 @@ La simulación lo muestra en la habitación **204**: la tutora Alicia Cruz compa
 
 Cubierto por 22 tests en `hospitality/tests.py`.
 
-### 🔴 Abierto — bloquear las medidas es un paso manual invisible
-
-Aprobar el diseño solo **cierra** las medidas (`MeasurementLifecycleService.close`). Pasar a producción exige `measurements_locked=True`, que se activa en una acción aparte (`orders/views/measurement_views.py:236`). Si nadie la ejecuta, `_validate_to_in_production` corta con «Las medidas deben estar bloqueadas» y desde la interfaz no queda claro qué falta.
-
-**A decidir:** o el paso se hace explícito en el flujo de aprobación (un aviso o un botón en la misma pantalla), o se bloquea automáticamente al aprobar el diseño. El pedido #6 quedó parado justo ahí para reproducirlo.
-
 ### ✅ Resuelto — fail-open por edad y acreditación por rol inválido
 
 Tres huecos del mismo tipo: la regla existía pero se podía esquivar sin romper nada.
 
 - **`is_minor()` devolvía False sin `birth_date`**, así que un menor sin fecha registrada quedaba fuera de la protección. Ahora un **atleta** sin fecha cuenta como menor; un no-atleta sin fecha sigue contando como adulto, que por ese lado ya era restrictivo.
-- **Se acreditaba por `role_in_team="HEADCOACH"`**, un valor que `UserTeamMembership.ROLE_CHOICES` no define (solo ATHLETE, COACH y STAFF). Los roles salen ahora de ROLE_CHOICES, y el head coach se reconoce por `Team.coach`.
+- **Se acreditaba por un rol que no existe.** El filtro incluía `role_in_team="HEADCOACH"`, valor que `UserTeamMembership.ROLE_CHOICES` no define. Los roles salen ahora de ROLE_CHOICES y el head coach se reconoce por `Team.coach`. El mismo defecto vivía en `orders/permissions.py` decidiendo quién aprueba diseños: también corregido, y el head coach ya no necesita membresía para aprobar.
 - **La autorización quedaba congelada en la fila.** Si después le quitaban el tutor al menor, la habitación seguía asignada. `audit_stay()` y `audit_event()` revalidan contra el estado de hoy, y el check-in corta si el alojamiento dejó de cumplir.
 
-Además, `assign_guardian()` ahora exige **fecha de nacimiento** y **rol GUARDIAN**; ese filtro vivía solo en el desplegable de la vista, así que el admin de Django o cualquier script lo esquivaban.
+Además `assign_guardian()` exige **fecha de nacimiento** y **rol GUARDIAN**; ese filtro vivía solo en el desplegable de la vista, así que el admin de Django o cualquier script lo esquivaban.
 
-31 tests en `hospitality/tests.py`.
+### ✅ Resuelto — el pedido ya dice qué falta, y a quién le toca
 
-### 🔴 Abierto — sin tope ni verificación del vínculo del tutor
+`next_step_requirements()` reporta de una sola vez todo lo que falta para el siguiente estado, en cualquier punto del ciclo, con el responsable de cada cosa. Antes las validaciones solo hablaban cuando alguien ya había intentado avanzar, y de a un error por vez.
 
-Lo que queda del hueco de guardianes, y es decisión de negocio, no de código: **no hay límite de cuántos atletas puede tener un guardián** ni **verificación del vínculo declarado**. `relation` (PADRE / TUTOR / ACOMP) se elige libre en un desplegable, sin documento ni aprobación.
+**El cliente no ve el detalle interno.** Admin y staff ven todo; el head coach ve solo lo suyo y del resto sabe que el pedido está en curso. El corte lo hace `can_administer_orders()`.
 
-**A decidir:** si un tutor puede quedar a cargo de N atletas sin revisión, y si `TUTOR` (tutela legal) debería exigir algún respaldo distinto que `ACOMP` (acompañante).
+### ✅ Resuelto — respaldo de la tutela legal
 
-### ✅ Resuelto — `"HEADCOACH"` como literal fuera de spec
+`TUTOR` registra documento, quién verificó y cuándo; solo un ADMIN puede hacerlo, y cambiar la relación invalida la verificación previa. `PADRE` y `ACOMP` siguen declarativos.
 
-`orders/permissions.py` decidía comparando `membership.role_in_team == "HEADCOACH"`, un valor que `UserTeamMembership.ROLE_CHOICES` no define: escribirlo a mano daba permiso de aprobar diseños sin que el modelo reconociera el rol.
+**Sin tope de atletas por tutor**: por encima de 4 la pantalla avisa y deja seguir. El riesgo está en que el vínculo sea falso, no en el número, y un error duro ahí solo enseñaría a elegir «Acompañante» para esquivarlo.
 
-Criterio elegido: **el head coach es `Team.coach`, y solo eso.** Se aplicó en `can_approve_design()` y en `can_manage_order()`, donde vivía el mismo literal. La membresía STAFF sigue valiendo para gestionar la orden.
+### 🔴 Abierto — un menor tiene un solo tutor
 
-Efecto lateral bueno: el head coach ya no necesita fila de membresía para aprobar. La simulación dejó de sembrar el valor fuera de spec — ahora entra como COACH, que sí existe.
+`AthleteProfile.guardian` es un FK simple. En la práctica los padres se turnan según el viaje. **Es la limitación que más va a doler** si se sigue trabajando en hospedaje o custodia.
+
+### 🔴 Abierto — STAFF no abre el detalle de un pedido
+
+`/orders/<id>/` admite ADMIN, HEADCOACH, GUARDIAN, COACH y ATHLETE, pero no STAFF, y `visible_for_user` tampoco le da los pedidos offline. A nivel de servicio staff sí ve todos los pendientes con detalle. Es comportamiento previo; ampliar accesos es decisión de producto.
 
 ---
 
