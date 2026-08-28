@@ -13,18 +13,19 @@ class MinorAccessService:
         Calcula el nivel de acceso de un atleta menor.
         Retorna None si el usuario no es menor de edad.
 
-        BLOCKED   → menor sin guardian asignado
-        READ_ONLY → guardian asignado, sin equipo activo
-        ACTIVE    → guardian asignado + equipo activo
+        BLOCKED   → menor sin NINGÚN tutor acreditado
+        READ_ONLY → al menos un tutor, sin equipo activo
+        ACTIVE    → al menos un tutor + equipo activo
         """
+        from custody.models import Guardianship
+
         if not user.is_minor:
             return None
 
-        try:
-            profile = AthleteProfile.objects.select_related("guardian").get(user=user)
-            if profile.guardian is None:
-                return MinorAccessService.BLOCKED
-        except AthleteProfile.DoesNotExist:
+        if not AthleteProfile.objects.filter(user=user).exists():
+            return MinorAccessService.BLOCKED
+
+        if not Guardianship.objects.filter(athlete=user).exists():
             return MinorAccessService.BLOCKED
 
         has_active_team = UserTeamMembership.objects.filter(

@@ -3,11 +3,12 @@
 Servicio para gestión de atletas menores de edad.
 
 Reglas de negocio:
-- Un atleta menor DEBE tener un tutor/guardian asignado
-- El coach que posee al atleta puede asignar/cambiar el guardian
-- El guardian debe existir en el sistema con perfil GuardianProfile
-- Si el atleta cumple 18 años, se puede desactivar el guardian (no es obligatorio)
-- Un guardian puede tener múltiples atletas bajo su custodia
+- Un atleta menor DEBE tener al menos un tutor acreditado
+- El coach que posee al atleta (o un ADMIN) da de alta y de baja los vínculos
+- Los tutores de un atleta son iguales entre sí: no hay tutor "principal"
+- La relación y la verificación viven en el VÍNCULO, no en el tutor: la misma
+  persona puede ser madre de una atleta y tutora legal de otra
+- Si el atleta cumple 18 años, puede quedarse sin ningún tutor
 """
 
 import logging
@@ -18,7 +19,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from accounts.models import AthleteProfile, UserOwnership
-from custody.models import GuardianProfile
+from custody.models import Guardianship
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -28,8 +29,8 @@ class MinorAthleteService:
     """
     Gestiona el ciclo de vida de atletas menores de edad:
     - Validación de edad
-    - Asignación y remoción de guardian
-    - Verificación de compliance (menor sin guardian = bloqueado)
+    - Alta y baja de vínculos de tutela
+    - Verificación de compliance (menor sin ningún tutor = bloqueado)
     """
 
     # =========================================================================
@@ -56,40 +57,68 @@ class MinorAthleteService:
     @staticmethod
     def requires_guardian(athlete: User) -> bool:
         """
-        Retorna True si el atleta es menor Y no tiene guardian asignado.
+        Retorna True si el atleta es menor Y no tiene NINGÚN tutor acreditado.
         Esto define si el sistema debe bloquear ciertas operaciones.
         """
         if not MinorAthleteService.is_minor(athlete):
             return False
 
-        try:
-            profile = athlete.athleteprofile
-            return profile.guardian is None
-        except AthleteProfile.DoesNotExist:
+        if not AthleteProfile.objects.filter(user=athlete).exists():
             return True
 
+        return not Guardianship.objects.filter(athlete=athlete).exists()
+
     @staticmethod
-    def get_guardian(athlete: User):
+    def is_guardian_of(guardian: User, athlete: User) -> bool:
+        """¿Existe un vínculo de tutela acreditado entre estos dos?
+
+        Predicado único: por acá pasa todo el resto del sistema. No mira la
+        edad del atleta a propósito — quien la necesite la comprueba aparte,
+        exactamente como hoy.
         """
-        Retorna el guardian del atleta o None si no tiene.
-        Lanza ValidationError si el atleta no tiene perfil de atleta.
+        if guardian is None or athlete is None:
+            return False
+        if guardian.pk is None or athlete.pk is None:
+            return False
+        return Guardianship.objects.filter(
+            athlete=athlete, guardian=guardian,
+        ).exists()
+
+    @staticmethod
+    def get_guardians(athlete: User):
+        """Los tutores del atleta (queryset de User, puede venir vacío)."""
+        return User.objects.filter(guardianships_held__athlete=athlete).distinct()
+
+    @staticmethod
+    def get_guardianships(athlete: User):
+        """Los vínculos del atleta, con su relación y su estado de verificación.
+
+        `get_guardians` devuelve User y ahí no se ve si el vínculo está
+        verificado: eso es del par. Las pantallas usan esta.
         """
-        try:
-            return athlete.athleteprofile.guardian
-        except AthleteProfile.DoesNotExist:
-            raise ValidationError(f"El usuario {athlete} no tiene perfil de atleta.")
+        return (
+            Guardianship.objects.filter(athlete=athlete)
+            .select_related("guardian", "verified_by")
+        )
 
     # =========================================================================
-    # ASIGNACIÓN DE GUARDIAN
+    # ALTA Y BAJA DE VÍNCULOS
     # =========================================================================
 
     @staticmethod
     @transaction.atomic
     def assign_guardian(
-        *, athlete: User, guardian: User, assigned_by: User
-    ) -> AthleteProfile:
+        *,
+        athlete: User,
+        guardian: User,
+        assigned_by: User,
+        relation: str = Guardianship.ACOMP,
+    ) -> Guardianship:
         """
-        Asigna un guardian a un atleta menor.
+        Acredita a un tutor más para un atleta menor. NO reemplaza a los demás.
+
+        Idempotente: si el vínculo ya existe, actualiza su relación con las
+        mismas reglas que `update_guardian_relation`.
 
         Lanza:
             ValidationError si las reglas de negocio no se cumplen
@@ -97,9 +126,13 @@ class MinorAthleteService:
         """
         MinorAthleteService._validate_can_manage_athlete(assigned_by, athlete)
 
-        try:
-            profile = athlete.athleteprofile
-        except AthleteProfile.DoesNotExist:
+        valid_relations = {code for code, _ in Guardianship.RELATION_CHOICES}
+        if relation not in valid_relations:
+            raise ValidationError(
+                f"Relación inválida: {relation}. Opciones: {valid_relations}"
+            )
+
+        if not AthleteProfile.objects.filter(user=athlete).exists():
             raise ValidationError(
                 f"El atleta {athlete} no tiene perfil de atleta. "
                 "Crea el perfil primero."
@@ -138,138 +171,73 @@ class MinorAthleteService:
                 "Asígnale el rol antes de ponerlo como tutor."
             )
 
-        # Crear GuardianProfile si no existe
-        guardian_profile, created = GuardianProfile.objects.get_or_create(
-            user=guardian,
-            defaults={"relation": "ACOMP"},
-        )
-
-        if created:
-            logger.info(
-                "GuardianProfile creado para %s asignado como guardian de %s por %s",
-                guardian,
-                athlete,
-                assigned_by,
-            )
-
-        old_guardian = profile.guardian
-        profile.guardian = guardian
-        profile.save(update_fields=["guardian"])
-
-        logger.info(
-            "Guardian %s asignado a atleta menor %s (antes: %s) por %s",
-            guardian,
-            athlete,
-            old_guardian,
-            assigned_by,
-        )
-
-        return profile
-
-    @staticmethod
-    @transaction.atomic
-    def verify_guardianship(*, guardian: User, verified_by: User,
-                            legal_document: str = "") -> GuardianProfile:
-        """Deja constancia de que alguien revisó el respaldo de una tutela legal.
-
-        No sube archivos: registra la referencia del documento y, sobre todo,
-        QUIÉN dio el visto bueno y CUÁNDO. Eso es lo que convierte una casilla
-        de formulario en algo auditable.
-        """
-        if not (verified_by.is_superuser
-                or verified_by.roles.filter(name="ADMIN").exists()):
-            raise PermissionDenied(
-                "Solo un administrador puede verificar una tutela legal."
-            )
-
-        profile = GuardianProfile.objects.filter(user=guardian).first()
-        if profile is None:
-            raise ValidationError(
-                f"{guardian} no tiene perfil de tutor."
-            )
-        if not profile.requires_proof:
-            raise ValidationError(
-                f"La relación '{profile.get_relation_display()}' no requiere "
-                "verificación documental."
-            )
-
-        profile.legal_document = legal_document
-        profile.verified_by = verified_by
-        profile.verified_at = timezone.now()
-        profile.save(update_fields=["legal_document", "verified_by", "verified_at"])
-
-        logger.info(
-            "Tutela legal de %s verificada por %s (documento=%s)",
-            guardian, verified_by, legal_document or "sin referencia",
-        )
-        return profile
-
-    @staticmethod
-    def guardians_needing_attention(guardians=None):
-        """Tutores con tutela legal sin verificar o con demasiados atletas.
-
-        Devuelve [(perfil, [motivos])]. Es para mostrar, no para bloquear.
-        """
-        qs = GuardianProfile.objects.select_related("user")
-        if guardians is not None:
-            qs = qs.filter(user__in=guardians)
-
-        resultado = []
-        for profile in qs:
-            motivos = []
-            if profile.proof_pending:
-                motivos.append("declara tutela legal sin verificar")
-            if profile.over_soft_limit:
-                motivos.append(
-                    f"tiene {profile.athlete_count} atletas a cargo"
+        existente = Guardianship.objects.filter(
+            athlete=athlete, guardian=guardian,
+        ).first()
+        if existente is not None:
+            if existente.relation != relation:
+                return MinorAthleteService.update_guardian_relation(
+                    athlete=athlete,
+                    guardian=guardian,
+                    relation=relation,
+                    updated_by=assigned_by,
                 )
-            if motivos:
-                resultado.append((profile, motivos))
-        return resultado
+            return existente
+
+        vinculo = Guardianship.objects.create(
+            athlete=athlete,
+            guardian=guardian,
+            relation=relation,
+            created_by=assigned_by,
+        )
+
+        logger.info(
+            "Tutor %s acreditado para el atleta menor %s como %s por %s",
+            guardian, athlete, relation, assigned_by,
+        )
+        return vinculo
 
     @staticmethod
     @transaction.atomic
-    def remove_guardian(*, athlete: User, removed_by: User) -> AthleteProfile:
+    def remove_guardian(*, athlete: User, guardian: User, removed_by: User) -> None:
         """
-        Remueve el guardian de un atleta.
-        Solo se permite si el atleta ya es mayor de edad.
+        Quita UN vínculo de tutela. Los demás vínculos del atleta, y los del
+        mismo tutor con otros atletas, quedan intactos.
+
+        Un menor no puede quedarse sin ninguno: el último vínculo solo se
+        suelta cuando el atleta ya es mayor de edad.
         """
         MinorAthleteService._validate_can_manage_athlete(removed_by, athlete)
 
-        try:
-            profile = athlete.athleteprofile
-        except AthleteProfile.DoesNotExist:
-            raise ValidationError("El atleta no tiene perfil.")
+        vinculo = Guardianship.objects.filter(
+            athlete=athlete, guardian=guardian,
+        ).first()
+        if vinculo is None:
+            return  # Idempotente
 
-        if MinorAthleteService.is_minor(athlete):
+        es_el_ultimo = Guardianship.objects.filter(athlete=athlete).count() == 1
+        if es_el_ultimo and MinorAthleteService.is_minor(athlete):
             raise ValidationError(
-                f"No se puede remover el guardian de {athlete} porque sigue siendo menor de edad. "
-                "El guardian es obligatorio para menores."
+                f"No se puede quitar a {guardian} porque es el único tutor de "
+                f"{athlete}, que sigue siendo menor de edad. Acredita a otro "
+                "tutor antes de quitar este."
             )
 
-        if profile.guardian is None:
-            return profile  # Idempotente
-
-        old_guardian = profile.guardian
-        profile.guardian = None
-        profile.save(update_fields=["guardian"])
+        vinculo.delete()
 
         logger.info(
-            "Guardian %s removido de atleta %s (ahora mayor de edad) por %s",
-            old_guardian,
-            athlete,
-            removed_by,
+            "Vínculo de tutela %s → %s removido por %s",
+            guardian, athlete, removed_by,
         )
 
-        return profile
-
     @staticmethod
+    @transaction.atomic
     def update_guardian_relation(
-        *, athlete: User, relation: str, updated_by: User
-    ) -> GuardianProfile:
-        """Actualiza el tipo de relación del guardian (PADRE, TUTOR, ACOMP)."""
+        *, athlete: User, guardian: User, relation: str, updated_by: User
+    ) -> Guardianship:
+        """Actualiza el tipo de relación de UN vínculo (PADRE, TUTOR, ACOMP)."""
         # Las opciones salen del modelo: dos listas de lo mismo se separan.
-        VALID_RELATIONS = {code for code, _ in GuardianProfile.RELATION_CHOICES}
+        VALID_RELATIONS = {code for code, _ in Guardianship.RELATION_CHOICES}
 
         if relation not in VALID_RELATIONS:
             raise ValidationError(
@@ -278,38 +246,100 @@ class MinorAthleteService:
 
         MinorAthleteService._validate_can_manage_athlete(updated_by, athlete)
 
-        guardian = MinorAthleteService.get_guardian(athlete)
-        if guardian is None:
-            raise ValidationError(f"El atleta {athlete} no tiene guardian asignado.")
+        vinculo = Guardianship.objects.filter(
+            athlete=athlete, guardian=guardian,
+        ).first()
+        if vinculo is None:
+            raise ValidationError(f"{guardian} no es tutor de {athlete}.")
 
-        # Se lee de la BASE, no por la relación inversa: `guardian` puede venir
-        # con el perfil cacheado por el signal que lo crea al asignar el rol
-        # GUARDIAN, y esa copia trae los valores por defecto. Leerla de ahí
-        # hacía escribir sobre un estado viejo — la verificación existente no
-        # se veía y no se invalidaba.
-        gp = GuardianProfile.objects.filter(user=guardian).first()
-        if gp is None:
-            raise ValidationError(f"El guardian {guardian} no tiene GuardianProfile.")
-
-        relacion_anterior = gp.relation
-        gp.relation = relation
+        relacion_anterior = vinculo.relation
+        vinculo.relation = relation
         campos = ["relation"]
 
         # Cambiar lo que se declara invalida la verificación anterior: se
-        # revisó un vínculo distinto del que ahora se afirma.
-        if relacion_anterior != relation and gp.is_verified:
-            gp.verified_by = None
-            gp.verified_at = None
-            gp.legal_document = ""
+        # revisó un vínculo distinto del que ahora se afirma. Aplica SOLO a
+        # este vínculo — los demás del mismo tutor no se tocan.
+        if relacion_anterior != relation and vinculo.is_verified:
+            vinculo.verified_by = None
+            vinculo.verified_at = None
+            vinculo.legal_document = ""
             campos += ["verified_by", "verified_at", "legal_document"]
             logger.info(
-                "Verificación de %s invalidada: la relación pasó de %s a %s",
-                guardian, relacion_anterior, relation,
+                "Verificación del vínculo %s → %s invalidada: la relación pasó "
+                "de %s a %s",
+                guardian, athlete, relacion_anterior, relation,
             )
 
-        gp.save(update_fields=campos)
+        vinculo.save(update_fields=campos)
+        return vinculo
 
-        return gp
+    # =========================================================================
+    # VERIFICACIÓN DEL RESPALDO
+    # =========================================================================
+
+    @staticmethod
+    @transaction.atomic
+    def verify_guardianship(
+        *, guardianship: Guardianship, verified_by: User, legal_document: str = "",
+    ) -> Guardianship:
+        """Deja constancia de que alguien revisó el respaldo de una tutela legal.
+
+        No sube archivos: registra la referencia del documento y, sobre todo,
+        QUIÉN dio el visto bueno y CUÁNDO. Eso es lo que convierte una casilla
+        de formulario en algo auditable.
+
+        Recibe el VÍNCULO, no el tutor: verificar la tutela legal sobre una
+        atleta no dice nada de los otros atletas del mismo tutor.
+        """
+        if not (verified_by.is_superuser
+                or verified_by.roles.filter(name="ADMIN").exists()):
+            raise PermissionDenied(
+                "Solo un administrador puede verificar una tutela legal."
+            )
+
+        if not guardianship.requires_proof:
+            raise ValidationError(
+                f"La relación '{guardianship.get_relation_display()}' no requiere "
+                "verificación documental."
+            )
+
+        guardianship.legal_document = legal_document
+        guardianship.verified_by = verified_by
+        guardianship.verified_at = timezone.now()
+        guardianship.save(
+            update_fields=["legal_document", "verified_by", "verified_at"]
+        )
+
+        logger.info(
+            "Tutela legal de %s sobre %s verificada por %s (documento=%s)",
+            guardianship.guardian, guardianship.athlete, verified_by,
+            legal_document or "sin referencia",
+        )
+        return guardianship
+
+    @staticmethod
+    def guardians_needing_attention(guardians=None):
+        """Vínculos con tutela legal sin verificar, o de tutores sobrecargados.
+
+        Devuelve [(vínculo, [motivos])]. Es para mostrar, no para bloquear.
+        """
+        qs = Guardianship.objects.select_related("guardian", "athlete")
+        if guardians is not None:
+            qs = qs.filter(guardian__in=guardians)
+
+        resultado = []
+        for vinculo in qs:
+            motivos = []
+            if vinculo.proof_pending:
+                motivos.append("declara tutela legal sin verificar")
+            if vinculo.over_soft_limit:
+                motivos.append(
+                    f"tiene {Guardianship.athlete_count_for(vinculo.guardian)} "
+                    "atletas a cargo"
+                )
+            if motivos:
+                resultado.append((vinculo, motivos))
+        return resultado
 
     # =========================================================================
     # QUERIES DE CONVENIENCIA
@@ -317,7 +347,7 @@ class MinorAthleteService:
 
     @staticmethod
     def get_minors_without_guardian(coach: User):
-        """Retorna atletas menores SIN guardian, con scope según rol del coach."""
+        """Atletas menores SIN ningún tutor, con scope según rol del coach."""
         owned_ids = UserOwnership.objects.filter(
             owner=coach,
             is_active=True,
@@ -326,34 +356,20 @@ class MinorAthleteService:
         today = timezone.now().date()
         cutoff_date = today.replace(year=today.year - 18)
 
+        base = User.objects.filter(
+            roles__name="ATHLETE",
+            birth_date__isnull=False,
+            birth_date__lte=today,
+            birth_date__gt=cutoff_date,
+        ).filter(
+            Q(athleteprofile__isnull=True) | Q(guardianships__isnull=True)
+        )
+
         if coach.is_superuser or coach.roles.filter(name="ADMIN").exists():
-            return (
-                User.objects.filter(
-                    roles__name="ATHLETE",
-                    birth_date__isnull=False,
-                    birth_date__lte=today,
-                    birth_date__gt=cutoff_date,
-                )
-                .filter(
-                    Q(athleteprofile__isnull=True)
-                    | Q(athleteprofile__guardian__isnull=True)
-                )
-                .select_related("athleteprofile")
-                .distinct()
-            )
+            return base.select_related("athleteprofile").distinct()
         elif coach.roles.filter(name="HEADCOACH").exists():
             return (
-                User.objects.filter(
-                    id__in=owned_ids,
-                    roles__name="ATHLETE",
-                    birth_date__isnull=False,
-                    birth_date__lte=today,
-                    birth_date__gt=cutoff_date,
-                )
-                .filter(
-                    Q(athleteprofile__isnull=True)
-                    | Q(athleteprofile__guardian__isnull=True)
-                )
+                base.filter(id__in=owned_ids)
                 .select_related("athleteprofile")
                 .distinct()
             )
@@ -362,7 +378,7 @@ class MinorAthleteService:
 
     @staticmethod
     def get_all_minors(coach: User):
-        """Retorna TODOS los atletas menores, tengan o no guardian."""
+        """Retorna TODOS los atletas menores, tengan o no tutor."""
         owned_ids = UserOwnership.objects.filter(
             owner=coach,
             is_active=True,
@@ -371,27 +387,24 @@ class MinorAthleteService:
         today = timezone.now().date()
         cutoff_date = today.replace(year=today.year - 18)
 
+        base = User.objects.filter(
+            roles__name="ATHLETE",
+            birth_date__isnull=False,
+            birth_date__lte=today,
+            birth_date__gt=cutoff_date,
+        )
+
         if coach.is_superuser or coach.roles.filter(name="ADMIN").exists():
             return (
-                User.objects.filter(
-                    roles__name="ATHLETE",
-                    birth_date__isnull=False,
-                    birth_date__lte=today,
-                    birth_date__gt=cutoff_date,
-                )
-                .select_related("athleteprofile", "athleteprofile__guardian")
+                base.select_related("athleteprofile")
+                .prefetch_related("guardianships__guardian")
                 .distinct()
             )
         elif coach.roles.filter(name="HEADCOACH").exists():
             return (
-                User.objects.filter(
-                    id__in=owned_ids,
-                    roles__name="ATHLETE",
-                    birth_date__isnull=False,
-                    birth_date__lte=today,
-                    birth_date__gt=cutoff_date,
-                )
-                .select_related("athleteprofile", "athleteprofile__guardian")
+                base.filter(id__in=owned_ids)
+                .select_related("athleteprofile")
+                .prefetch_related("guardianships__guardian")
                 .distinct()
             )
         else:
@@ -399,9 +412,31 @@ class MinorAthleteService:
 
     @staticmethod
     def get_athletes_for_guardian(guardian: User):
-        """Retorna todos los atletas que tienen a este usuario como guardian."""
-        return User.objects.filter(athleteprofile__guardian=guardian).select_related(
-            "athleteprofile"
+        """Retorna todos los atletas que tienen a este usuario como tutor."""
+        return (
+            User.objects.filter(guardianships__guardian=guardian)
+            .select_related("athleteprofile")
+            .distinct()
+        )
+
+    @staticmethod
+    def guardians_present_at(event, athlete: User):
+        """Tutores del atleta con estancia viva en ese evento.
+
+        Es la respuesta a "quién viajó con esta atleta", como CONSULTA y no
+        como dato guardado: una designación por viaje se desincronizaría con
+        las estancias reales y dejaría dos fuentes de verdad en desacuerdo.
+        """
+        from hospitality.models import Stay
+
+        ids = (
+            Stay.objects.filter(event=event)
+            .exclude(status=Stay.CANCELLED)
+            .values_list("user_id", flat=True)
+        )
+        return (
+            User.objects.filter(guardianships_held__athlete=athlete, id__in=ids)
+            .distinct()
         )
 
     # =========================================================================

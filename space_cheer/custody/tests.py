@@ -1,6 +1,7 @@
 import pytest
 from datetime import date
 from accounts.models import AthleteProfile, UserAddress
+from custody.models import Guardianship
 from custody.services.minor_access_service import MinorAccessService
 from orders.tests.factories import AthleteFactory, UserFactory, UserTeamMembershipFactory
 
@@ -34,17 +35,13 @@ class TestMinorAccessService:
     def test_menor_con_guardian_sin_equipo_es_read_only(self):
         minor = self._make_minor()
         guardian = UserFactory()
-        profile = AthleteProfile.objects.get(user=minor)
-        profile.guardian = guardian
-        profile.save()
+        Guardianship.objects.create(athlete=minor, guardian=guardian)
         assert MinorAccessService.get_access_level(minor) == MinorAccessService.READ_ONLY
 
     def test_menor_con_guardian_y_equipo_activo_es_active(self):
         minor = self._make_minor()
         guardian = UserFactory()
-        profile = AthleteProfile.objects.get(user=minor)
-        profile.guardian = guardian
-        profile.save()
+        Guardianship.objects.create(athlete=minor, guardian=guardian)
         UserTeamMembershipFactory(user=minor, is_active=True, status="accepted")
         assert MinorAccessService.get_access_level(minor) == MinorAccessService.ACTIVE
 
@@ -105,12 +102,11 @@ class TestGuardianCreateOrder:
             birth_date=date(date.today().year - 15, 1, 1),
             profile_completed=True,
         )
-        profile, _ = AthleteProfile.objects.get_or_create(
+        AthleteProfile.objects.get_or_create(
             user=minor,
             defaults={"emergency_contact": "Contacto test"},
         )
-        profile.guardian = guardian
-        profile.save()
+        Guardianship.objects.create(athlete=minor, guardian=guardian)
 
         UserAddress.objects.create(
             user=minor,
