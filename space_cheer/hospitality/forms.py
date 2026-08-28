@@ -237,7 +237,7 @@ class HospitalityPreferenceForm(forms.ModelForm):
         if user.roles.filter(name='GUARDIAN').exists():
             return (
                 User.objects
-                .filter(is_active=True, athleteprofile__guardian=user)
+                .filter(is_active=True, guardianships__guardian=user)
                 .distinct()
                 .exclude(pk=user.pk)
                 .order_by('first_name', 'last_name')

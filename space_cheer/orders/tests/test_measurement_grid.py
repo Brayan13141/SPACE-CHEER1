@@ -4,6 +4,7 @@ import pytest
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from custody.models import Guardianship
 from orders.models import OrderItemMeasurement
 from orders.services.measurements.MeasurementGridService import (
     MeasurementGridService,
@@ -69,7 +70,7 @@ def add_athlete(item, team, first_name="Ana", birth_date=None):
 
 
 def add_minor_with_guardian(item, team, guardian, first_name="Hijo"):
-    """Atleta MENOR con tutor asignado.
+    """Atleta MENOR con un tutor acreditado.
 
     OJO: `_is_guardian_of` exige `athlete.is_minor`, y `User.is_minor`
     (accounts/models.py:183) devuelve False cuando `birth_date` es None.
@@ -79,13 +80,17 @@ def add_minor_with_guardian(item, team, guardian, first_name="Hijo"):
     from datetime import date
 
     from accounts.models import AthleteProfile
+    from custody.models import Guardianship
 
     athlete_item = add_athlete(
         item, team, first_name=first_name, birth_date=date(2015, 5, 1)
     )
     AthleteProfile.objects.update_or_create(
         user=athlete_item.athlete,
-        defaults={"guardian": guardian, "emergency_contact": "Tutor"},
+        defaults={"emergency_contact": "Tutor"},
+    )
+    Guardianship.objects.get_or_create(
+        athlete=athlete_item.athlete, guardian=guardian,
     )
     return athlete_item
 
@@ -287,6 +292,22 @@ class MeasurementGridPermissionTests(TestCase):
 
         self.assertEqual(len(grid.rows), 1)
         self.assertEqual(grid.rows[0].athlete_item_id, mine.id)
+
+    def test_los_dos_tutores_de_un_menor_ven_sus_medidas(self):
+        """Criterio 1 de la spec: cada tutor entra por su cuenta."""
+        coach, team, order, item = make_team_item(
+            field_specs=[("Pecho", 10, True)]
+        )
+        madre = UserFactory()
+        padre = UserFactory()
+        hija = add_minor_with_guardian(item, team, madre, first_name="Hija")
+        Guardianship.objects.create(athlete=hija.athlete, guardian=padre)
+
+        grid_madre = MeasurementGridService.build(item, madre)
+        grid_padre = MeasurementGridService.build(item, padre)
+
+        assert [row.athlete.id for row in grid_madre.rows] == [hija.athlete.id]
+        assert [row.athlete.id for row in grid_padre.rows] == [hija.athlete.id]
 
     def test_stranger_is_denied(self):
         coach, team, order, item = make_team_item(
@@ -1286,8 +1307,8 @@ class GridPrefetchReuseTests(TestCase):
             Prefetch(
                 "athletes",
                 queryset=OrderItemAthlete.objects.select_related(
-                    "athlete", "athlete__athleteprofile"
-                ).prefetch_related("measurements"),
+                    "athlete"
+                ).prefetch_related("measurements", "athlete__guardianships"),
             )
         ).get(pk=self.item.pk)
 

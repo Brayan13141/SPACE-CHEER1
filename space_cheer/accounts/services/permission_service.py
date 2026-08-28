@@ -241,10 +241,12 @@ class AccountPermissions:
 
     @staticmethod
     def _is_guardian_of(guardian, athlete) -> bool:
-        try:
-            return athlete.athleteprofile.guardian == guardian
-        except Exception:
-            return False
+        # Envoltorio: el criterio vive en custody, que es el dueño de la
+        # tutela. Se conserva el nombre privado para no tocar a los tres
+        # llamadores de esta clase.
+        from custody.services.minor_service import MinorAthleteService
+
+        return MinorAthleteService.is_guardian_of(guardian, athlete)
 
     @staticmethod
     def _share_team(user_a, user_b) -> bool:

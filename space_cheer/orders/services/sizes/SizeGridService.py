@@ -189,7 +189,7 @@ class SizeGridService:
                 status="accepted",
                 is_active=True,
                 role_in_team="ATHLETE",
-            ).select_related("user", "user__athleteprofile")
+            ).select_related("user").prefetch_related("user__guardianships")
         ]
 
     @staticmethod
@@ -221,18 +221,17 @@ class SizeGridService:
 
     @staticmethod
     def _is_guardian_of(viewer, athlete):
-        # Mismo criterio que MeasurementGridService._is_guardian_of, pero sobre
-        # un User en vez de un OrderItemAthlete: aqui las filas son alumnos del
-        # equipo, no filas del pedido. Unificar las tres variantes que ya
-        # existen (esta, la del grid de medidas y
-        # AccountPermissions._is_guardian_of) es un refactor aparte.
-        from accounts.models import AthleteProfile
+        """Mismo criterio que MeasurementGridService._is_guardian_of, pero
+        sobre un User en vez de un OrderItemAthlete: aqui las filas son
+        alumnos del equipo, no filas del pedido.
 
-        try:
-            profile = athlete.athleteprofile
-        except AthleteProfile.DoesNotExist:
-            return False
-        return profile.guardian_id == viewer.id and athlete.is_minor
+        Se resuelve sobre `guardianships` prefetcheado: una consulta por fila
+        haria escalar el grid del tutor con el tamano del equipo.
+        """
+        return (
+            any(v.guardian_id == viewer.id for v in athlete.guardianships.all())
+            and athlete.is_minor
+        )
 
     @staticmethod
     def _order_blocks_editing(order):

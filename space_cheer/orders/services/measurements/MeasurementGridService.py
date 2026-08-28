@@ -157,8 +157,9 @@ class MeasurementGridService:
         haya usado quien prefetcheó.
 
         CONTRATO para quien prefetchee `athletes`: incluir `measurements` y
-        `select_related("athlete", "athlete__athleteprofile")`. Sin eso el grid
-        vuelve a la base por cada fila y la optimización se da vuelta.
+        `select_related("athlete")` + `prefetch_related("athlete__guardianships")`.
+        Sin eso el grid vuelve a la base por cada fila y la optimización se da
+        vuelta.
         """
         prefetched = getattr(item, "_prefetched_objects_cache", None) or {}
         if "athletes" in prefetched:
@@ -166,11 +167,11 @@ class MeasurementGridService:
                 item.athletes.all(), key=MeasurementGridService._row_sort_key
             )
 
-        # athlete__athleteprofile es obligatorio: _is_guardian_of() lo consulta
-        # por fila, y sin el select_related el conteo crece con los atletas.
+        # athlete__guardianships es obligatorio: _is_guardian_of() lo recorre
+        # por fila, y sin el prefetch el conteo crece con los atletas.
         return list(
-            item.athletes.select_related("athlete", "athlete__athleteprofile")
-            .prefetch_related("measurements")
+            item.athletes.select_related("athlete")
+            .prefetch_related("measurements", "athlete__guardianships")
             .order_by("athlete__first_name", "athlete__last_name", "id")
         )
 
@@ -293,13 +294,19 @@ class MeasurementGridService:
 
     @staticmethod
     def _is_guardian_of(viewer, athlete_item):
-        from accounts.models import AthleteProfile
+        """¿El que mira es tutor de la atleta de esta fila?
 
-        try:
-            profile = athlete_item.athlete.athleteprofile
-        except AthleteProfile.DoesNotExist:
-            return False
-        return profile.guardian_id == viewer.id and athlete_item.athlete.is_minor
+        Se resuelve sobre `athlete.guardianships` prefetcheado a propósito:
+        preguntarle al servicio fila por fila costaría una consulta por
+        atleta y el grid del tutor volvería a escalar con el tamaño del
+        equipo. El criterio es el mismo que `MinorAthleteService.is_guardian_of`
+        más la exigencia de minoría de edad que ya había aquí.
+        """
+        athlete = athlete_item.athlete
+        return (
+            any(v.guardian_id == viewer.id for v in athlete.guardianships.all())
+            and athlete.is_minor
+        )
 
     @staticmethod
     def _is_assigned_operario(item, viewer):

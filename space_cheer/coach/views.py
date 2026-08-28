@@ -135,7 +135,7 @@ def manage_owned_users(request):
         ownerships_qs = ownerships_qs.filter(owner=request.user)
 
     athletes = OwnershipService.get_owned_athletes(request.user)
-    athletes = athletes.select_related("athleteprofile__guardian").prefetch_related(
+    athletes = athletes.select_related("athleteprofile").prefetch_related(
         "roles", "team_memberships__team"
     )
     crew = ownerships_qs.exclude(user__roles__name="ATHLETE").distinct()
@@ -396,7 +396,6 @@ def edit_athlete_measures(request, id):
 
     # Información adicional para el template
     is_minor = MinorAthleteService.is_minor(athlete)
-    guardian = MinorAthleteService.get_guardian(athlete) if is_minor else None
 
     return render(
         request,
@@ -405,7 +404,6 @@ def edit_athlete_measures(request, id):
             "form": form,
             "athlete": athlete,
             "is_minor": is_minor,
-            "guardian": guardian,
             "standard_size": AthleteStandardSize.objects.filter(user=athlete).first(),
             "size_choices": AthleteStandardSize.SIZE_CHOICES,
         },

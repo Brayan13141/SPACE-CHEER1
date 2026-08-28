@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
 from accounts.decorators import role_required
-from accounts.models import AthleteProfile
 from accounts.services.pii_audit_service import PiiAuditService
 from orders.models import Order, OrderItem, OrderItemAthlete
 from django.db import transaction
@@ -28,8 +27,6 @@ def order_item_measurements(request, athlete_item_id):
             "order_item__order",
             "order_item__product",
             "athlete",
-            "athlete__athleteprofile",
-            "athlete__athleteprofile__guardian",
         ).prefetch_related(
             "measurements__field",
             "order_item__product__measurement_fields__field",
@@ -41,13 +38,13 @@ def order_item_measurements(request, athlete_item_id):
     user = request.user
 
     is_authorized = Order.objects.visible_for_user(user).filter(pk=order.pk).exists()
-    is_guardian = False
-    try:
-        profile = athlete_item.athlete.athleteprofile
-        if profile.guardian == user and athlete_item.athlete.is_minor:
-            is_guardian = True
-    except AthleteProfile.DoesNotExist:
-        pass
+
+    from custody.services.minor_service import MinorAthleteService
+
+    is_guardian = (
+        MinorAthleteService.is_guardian_of(user, athlete_item.athlete)
+        and athlete_item.athlete.is_minor
+    )
 
     if not is_authorized and not is_guardian:
         raise PermissionDenied

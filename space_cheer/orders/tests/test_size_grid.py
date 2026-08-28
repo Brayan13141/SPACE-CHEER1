@@ -48,11 +48,12 @@ def setup_team_roster(sizes=None, athlete_count=3):
 def make_minor_with_guardian(athlete, guardian):
     """is_minor es False cuando birth_date es None, asi que un 'menor' sin
     fecha de nacimiento hace fallar todo el scoping del tutor en silencio."""
+    from custody.models import Guardianship
+
     athlete.birth_date = date.today() - timedelta(days=365 * 12)
     athlete.save()
-    AthleteProfile.objects.update_or_create(
-        user=athlete, defaults={"guardian": guardian}
-    )
+    AthleteProfile.objects.update_or_create(user=athlete, defaults={})
+    Guardianship.objects.get_or_create(athlete=athlete, guardian=guardian)
 
 
 @pytest.mark.django_db

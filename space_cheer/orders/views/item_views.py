@@ -34,8 +34,10 @@ def order_item_detail(request, item_id):
             Prefetch(
                 "athletes",
                 queryset=OrderItemAthlete.objects.select_related(
-                    "athlete", "athlete__athleteprofile"
-                ).prefetch_related("measurements", "customization"),
+                    "athlete"
+                ).prefetch_related(
+                    "measurements", "customization", "athlete__guardianships"
+                ),
             )
         )
         .filter(order__in=Order.objects.visible_for_user(request.user)),

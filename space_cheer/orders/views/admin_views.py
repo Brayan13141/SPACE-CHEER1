@@ -221,12 +221,13 @@ def admin_order_detail(request, order_id):
                 ).prefetch_related(
                     Prefetch(
                         "athletes",
-                        # athlete__athleteprofile lo consume _is_guardian_of()
+                        # athlete__guardianships lo consume _is_guardian_of()
                         # del grid, que ahora reusa este prefetch en vez de
                         # rehacer la consulta por item.
                         queryset=OrderItemAthlete.objects.select_related(
-                            "athlete", "athlete__athleteprofile"
+                            "athlete"
                         ).prefetch_related(
+                            "athlete__guardianships",
                             Prefetch(
                                 "measurements",
                                 queryset=OrderItemMeasurement.objects.select_related(
