@@ -4,46 +4,58 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 
-from custody.models import GuardianProfile
+from custody.models import Guardianship
 
 
 # ============================================================
-# GUARDIAN PROFILE INLINE (para usar en accounts admin)
+# VÍNCULO DE TUTELA
 # ============================================================
-class GuardianProfileInline(admin.StackedInline):
-    model = GuardianProfile
-    can_delete = False
-    fields = ("relation",)
+class GuardianshipInline(admin.TabularInline):
+    """Los tutores de un atleta, desde la ficha del atleta."""
 
-    def has_add_permission(self, request, obj=None):
-        return False
+    model = Guardianship
+    fk_name = "athlete"
+    extra = 0
+    fields = ("guardian", "relation", "legal_document", "verified_by", "verified_at")
+    readonly_fields = ("verified_by", "verified_at")
+    raw_id_fields = ("guardian",)
 
 
-# ============================================================
-# GUARDIAN PROFILE ADMIN
-# ============================================================
-@admin.register(GuardianProfile)
-class GuardianProfileAdmin(admin.ModelAdmin):
-    list_display = ("user_link", "relation_badge", "athletes_count")
+@admin.register(Guardianship)
+class GuardianshipAdmin(admin.ModelAdmin):
+    list_display = (
+        "athlete_link", "guardian_link", "relation_badge", "verification_badge",
+    )
     list_filter = ("relation",)
     search_fields = (
-        "user__username",
-        "user__email",
-        "user__first_name",
-        "user__last_name",
+        "athlete__username",
+        "athlete__first_name",
+        "athlete__last_name",
+        "guardian__username",
+        "guardian__email",
+        "guardian__first_name",
+        "guardian__last_name",
     )
-    raw_id_fields = ("user",)
+    raw_id_fields = ("athlete", "guardian", "verified_by", "created_by")
+    readonly_fields = ("created_at",)
 
-    def user_link(self, obj):
-        url = reverse("admin:accounts_user_change", args=[obj.user.id])
+    def _user_link(self, user):
+        url = reverse("admin:accounts_user_change", args=[user.id])
         return format_html(
-            '<a href="{}">{}</a>',
-            url,
-            obj.user.get_full_name() or obj.user.username,
+            '<a href="{}">{}</a>', url, user.get_full_name() or user.username,
         )
 
-    user_link.short_description = "Guardian"
-    user_link.admin_order_field = "user__last_name"
+    def athlete_link(self, obj):
+        return self._user_link(obj.athlete)
+
+    athlete_link.short_description = "Atleta"
+    athlete_link.admin_order_field = "athlete__last_name"
+
+    def guardian_link(self, obj):
+        return self._user_link(obj.guardian)
+
+    guardian_link.short_description = "Tutor"
+    guardian_link.admin_order_field = "guardian__last_name"
 
     def relation_badge(self, obj):
         colors = {
@@ -61,21 +73,22 @@ class GuardianProfileAdmin(admin.ModelAdmin):
 
     relation_badge.short_description = "Relación"
 
-    def athletes_count(self, obj):
-        count = obj.user.athletes_under_guardian.count()
-        if count == 0:
-            return format_html('<span style="color: #999;">0 atletas</span>')
+    def verification_badge(self, obj):
+        if not obj.requires_proof:
+            return format_html('<span style="color: #999;">no aplica</span>')
+        if obj.is_verified:
+            return format_html(
+                '<span style="color: #28a745; font-weight: bold;">verificado</span>'
+            )
         return format_html(
-            '<span style="color: #28a745; font-weight: bold;">{} atleta(s)</span>',
-            count,
+            '<span style="color: #dc3545; font-weight: bold;">sin verificar</span>'
         )
 
-    athletes_count.short_description = "Atletas a cargo"
+    verification_badge.short_description = "Respaldo"
 
     def get_queryset(self, request):
         return (
             super()
             .get_queryset(request)
-            .select_related("user")
-            .prefetch_related("user__athletes_under_guardian")
+            .select_related("athlete", "guardian", "verified_by")
         )

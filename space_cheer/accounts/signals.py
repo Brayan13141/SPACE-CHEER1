@@ -101,27 +101,6 @@ def create_role_profiles(sender, instance, action, pk_set, **kwargs):
                     exc_info=True,
                 )
         # -----------------------------
-        # GUARDIAN
-        # -----------------------------
-        elif role_name == "guardian":
-            try:
-                from custody.models import GuardianProfile
-
-                profile, created = GuardianProfile.objects.get_or_create(user=instance)
-
-                logger.info(
-                    "GuardianProfile %s para usuario_id=%s",
-                    "creado" if created else "existente",
-                    instance.id,
-                )
-
-            except Exception:
-                logger.error(
-                    "Error creando perfil de guardian para usuario_id=%s",
-                    instance.id,
-                    exc_info=True,
-                )
-        # -----------------------------
         # PRODUCCION
         # -----------------------------
         elif role.is_production_type or role_name == "operario":

@@ -252,7 +252,7 @@ class Command(BaseCommand):
     # ==================================================================
     def phase_users(self):
         from accounts.models import AthleteProfile, AthleteMedicalInfo, CoachProfile, StaffProfile
-        from custody.models import GuardianProfile
+        from custody.models import Guardianship
         from teams.models import Team, UserTeamMembership
 
         today = datetime.date.today()
@@ -348,7 +348,6 @@ class Command(BaseCommand):
                 email=email, username=uname, first=first, last=last,
                 role_name="GUARDIAN", gender=gender, birth=datetime.date(1984, 6, 2),
             )
-            GuardianProfile.objects.update_or_create(user=g, defaults={"relation": relation})
             team = teams[team_name]
             tutelados = []
             athletes = User.objects.filter(
@@ -357,15 +356,33 @@ class Command(BaseCommand):
                 team_memberships__is_active=True,
             ).order_by("pk")[:2]
             for a in athletes:
-                prof = AthleteProfile.objects.filter(user=a).first()
-                if prof:
-                    prof.guardian = g
-                    prof.save(update_fields=["guardian"])
+                if AthleteProfile.objects.filter(user=a).exists():
+                    Guardianship.objects.update_or_create(
+                        athlete=a, guardian=g, defaults={"relation": relation},
+                    )
                     tutelados.append(a.get_full_name())
             self.guardians.append(g)
             self.record_user(g, "GUARDIAN",
                              f"{relation} — tutor de: {', '.join(tutelados) or 'sin asignar'}",
                              team=team_name)
+
+        # Segundo tutor de las atletas de Comets: el caso que el modelo viejo
+        # no podía representar, y el que hay que poder ver en la simulación.
+        if self.guardians:
+            segundo = self.get_or_create_user(
+                email="tutor2.comets@test.com", username="tutor2_comets",
+                first="Marcos", last="Cruz", role_name="GUARDIAN",
+                gender="H", birth=datetime.date(1982, 9, 15),
+            )
+            for vinculo in Guardianship.objects.filter(guardian=self.guardians[0]):
+                Guardianship.objects.update_or_create(
+                    athlete=vinculo.athlete, guardian=segundo,
+                    defaults={"relation": "PADRE"},
+                )
+            self.guardians.append(segundo)
+            self.record_user(segundo, "GUARDIAN",
+                             "Segundo tutor de las mismas atletas de Comets",
+                             team="Comets")
 
         # ── Operarios: uno por rol de producción ─────────────────────
         from production.models import ProductionRole
@@ -1450,7 +1467,7 @@ class Command(BaseCommand):
 
         tutora = self.guardians[0]  # tutora de Comets
         a_cargo = list(
-            User.objects.filter(athleteprofile__guardian=tutora).order_by("pk")[:2]
+            User.objects.filter(guardianships__guardian=tutora).order_by("pk")[:2]
         )
         ya_alojados = set()
         if a_cargo:

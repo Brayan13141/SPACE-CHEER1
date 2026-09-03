@@ -163,9 +163,7 @@ class AthleteProfileInline(admin.StackedInline):
     fields = (
         ("emergency_contact", "emergency_phone"),
         "is_active_competitor",
-        "guardian",
     )
-    raw_id_fields = ("guardian",)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -439,7 +437,6 @@ class CustomUserAdmin(BaseUserAdmin):
                 "athleteprofile",
                 "coachprofile",
                 "staffprofile",
-                "guardianprofile",
             )
         )
 
@@ -454,6 +451,8 @@ class CustomUserAdmin(BaseUserAdmin):
                     inlines.insert(0, AthleteProfileInline)
                     if hasattr(obj.athleteprofile, "athletemedicalinfo"):
                         inlines.insert(1, AthleteMedicalInfoInline)
+                from custody.admin import GuardianshipInline
+                inlines.append(GuardianshipInline)
 
             if obj.roles.filter(name__in=["COACH", "HEADCOACH"]).exists():
                 if hasattr(obj, "coachprofile"):
@@ -462,11 +461,6 @@ class CustomUserAdmin(BaseUserAdmin):
             if obj.roles.filter(name="STAFF").exists():
                 if hasattr(obj, "staffprofile"):
                     inlines.insert(0, StaffProfileInline)
-
-            if obj.roles.filter(name__in=["GUARDIAN", "ACOMPANANTE"]).exists():
-                if hasattr(obj, "guardianprofile"):
-                    from custody.admin import GuardianProfileInline
-                    inlines.insert(0, GuardianProfileInline)
 
         return inlines
 
