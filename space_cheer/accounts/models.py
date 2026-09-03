@@ -291,14 +291,9 @@ class AthleteProfile(models.Model):
 
     is_active_competitor = models.BooleanField(default=True)
 
-    # Si es menor, puede requerir un tutor
-    guardian = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="athletes_under_guardian",
-    )
+    # La tutela vive en `custody.Guardianship`, que es del par atleta-tutor:
+    # un menor puede tener varios tutores y cada vínculo lleva su propia
+    # relación y su propia verificación.
 
     def __str__(self):
         return f"Perfil atleta: {self.user}"
@@ -368,7 +363,7 @@ class StaffProfile(models.Model):
         return f"Staff: {self.user}"
 
 
-# GuardianProfile vive en custody/models.py
+# La tutela vive en custody/models.py: Guardianship, del par atleta-tutor.
 # Ejecutar: python manage.py seed_roles  (management command incluido abajo)
 
 
