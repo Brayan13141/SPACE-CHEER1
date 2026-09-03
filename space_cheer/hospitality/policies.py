@@ -5,11 +5,11 @@ La plataforma maneja datos y ahora también la estancia física de menores, suje
 a la LGDNNA. Hay dos niveles, y el de la cama es más estricto que el del cuarto:
 
   HABITACIÓN — un menor la comparte con:
-    - su guardián asignado (`AthleteProfile.guardian`), o
+    - cualquiera de sus tutores acreditados (`custody.Guardianship`), o
     - un adulto acreditado de su equipo: el head coach, o un coach o staff con
       membresía activa y aceptada en un equipo al que el menor pertenece.
 
-  CAMA — un menor solo la comparte con su guardián asignado. Un coach puede
+  CAMA — un menor solo comparte cama con alguno de sus tutores. Un coach puede
     dormir en el mismo cuarto que una atleta menor, pero no en su misma cama.
 
 Cualquier otro adulto queda fuera. Entre menores no hay restricción, y entre
@@ -58,18 +58,22 @@ class MinorLodgingPolicy:
     def accredited_adult_ids(minor, *, include_team_staff=True) -> set:
         """IDs de los adultos que pueden alojarse con este menor.
 
-        `include_team_staff=False` deja solo al guardián: es el criterio para
+        `include_team_staff=False` deja solo a sus tutores: es el criterio para
         compartir cama, más estricto que compartir habitación.
         """
-        from accounts.models import AthleteProfile
+        from custody.models import Guardianship
         from teams.models import Team, UserTeamMembership
 
         allowed = set()
 
-        # 1. Su guardián asignado.
-        profile = AthleteProfile.objects.filter(user=minor).first()
-        if profile and profile.guardian_id:
-            allowed.add(profile.guardian_id)
+        # 1. Sus tutores acreditados. Son N y valen todos por igual: los tres
+        # tipos de relación (padre/madre, tutor legal, acompañante) autorizan
+        # lo mismo, igual que cuando el tutor era uno solo.
+        allowed.update(
+            Guardianship.objects.filter(athlete=minor).values_list(
+                "guardian_id", flat=True
+            )
+        )
 
         # 2. Cuerpo técnico de sus equipos activos (solo a nivel habitación).
         if not include_team_staff:
@@ -137,9 +141,9 @@ class MinorLodgingPolicy:
                 if adult.pk in allowed:
                     continue
                 permitido = (
-                    "solo su tutor asignado o el cuerpo técnico de su equipo"
+                    "solo sus tutores o el cuerpo técnico de su equipo"
                     if include_team_staff
-                    else "solo su tutor asignado"
+                    else "solo sus tutores"
                 )
                 raise ValidationError(
                     f"{adult.get_full_name() or adult.username} no puede compartir "

@@ -4,8 +4,8 @@ Reglas de alojamiento: capacidad real de cada cama y convivencia de menores.
 Dos reglas de negocio:
   1. Una cama admite tantos huéspedes como su capacidad. El tipo de cama da el
      default (individual 1, el resto 2) y cada cama puede sobrescribirlo.
-  2. Un menor de edad solo comparte habitación o cama con su guardián asignado
-     o con adultos acreditados de su equipo (coaches y staff).
+  2. Un menor de edad solo comparte habitación o cama con alguno de sus tutores
+     acreditados o con adultos acreditados de su equipo (coaches y staff).
 """
 
 import datetime
@@ -15,6 +15,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import AthleteProfile, Role
+from custody.models import Guardianship
 from events.models import Event
 from hospitality.models import (
     Bed, BedAssignment, Hotel, Room, RoomAssignment, RoomType, Stay,
@@ -110,9 +111,8 @@ class BedCapacityTests(LodgingTestBase):
         madre = self.make_user(age=40, username="madre")
         hijo = self.make_user(age=14, username="hijo")
         self.join_team(hijo, team)
-        AthleteProfile.objects.create(
-            user=hijo, emergency_contact="Madre", guardian=madre,
-        )
+        AthleteProfile.objects.create(user=hijo, emergency_contact="Madre")
+        Guardianship.objects.create(athlete=hijo, guardian=madre)
 
         ra_madre = self.assign_room(madre)
         ra_hijo = self.assign_room(hijo)
@@ -206,8 +206,9 @@ class MinorLodgingPolicyTests(LodgingTestBase):
         self.join_team(self.menor, self.team)
         self.guardian = self.make_user(age=42, username="guardian")
         AthleteProfile.objects.create(
-            user=self.menor, emergency_contact="Familia", guardian=self.guardian,
+            user=self.menor, emergency_contact="Familia",
         )
+        Guardianship.objects.create(athlete=self.menor, guardian=self.guardian)
 
     def test_menor_no_puede_compartir_habitacion_con_adulto_ajeno(self):
         ajeno = self.make_user(age=38, username="ajeno")
@@ -249,8 +250,9 @@ class MinorLodgingPolicyTests(LodgingTestBase):
         otra_menor = self.make_user(age=14, username="menor2")
         self.join_team(otra_menor, self.team)
         AthleteProfile.objects.create(
-            user=otra_menor, emergency_contact="Familia", guardian=self.guardian,
+            user=otra_menor, emergency_contact="Familia",
         )
+        Guardianship.objects.create(athlete=otra_menor, guardian=self.guardian)
         self.assign_room(self.menor)
         self.assign_room(otra_menor)
         self.assertEqual(self.room.assignments.count(), 2)
@@ -295,6 +297,77 @@ class MinorLodgingPolicyTests(LodgingTestBase):
         ra.stay.status = Stay.CANCELLED
         ra.stay.save()
         self.assign_room(self.menor)  # no debe reventar
+
+    # ── varios tutores ───────────────────────────────────────────────
+    def _segundo_tutor(self, username="segundo_tutor"):
+        otro = self.make_user(age=44, username=username)
+        Guardianship.objects.create(athlete=self.menor, guardian=otro)
+        return otro
+
+    def test_el_segundo_tutor_puede_compartir_habitacion(self):
+        """Criterio 4 de la spec."""
+        padre = self._segundo_tutor("padre_hab")
+        self.assign_room(self.menor)
+        self.assign_room(padre)
+        self.assertEqual(self.room.assignments.count(), 2)
+
+    def test_el_segundo_tutor_puede_compartir_cama(self):
+        """Criterio 3: hoy esto era ValidationError."""
+        padre = self._segundo_tutor("padre_cama")
+        bed = self.make_bed(Bed.DOUBLE)
+        ra_menor = self.assign_room(self.menor)
+        ra_padre = self.assign_room(padre)
+        BedAssignment.objects.create(stay=ra_menor.stay, bed=bed)
+        BedAssignment.objects.create(stay=ra_padre.stay, bed=bed)
+        self.assertEqual(bed.assignments.count(), 2)
+
+    def test_los_tres_tipos_de_relacion_valen_para_la_cama(self):
+        """El criterio de cama no distingue PADRE / TUTOR / ACOMP."""
+        from hospitality.policies import MinorLodgingPolicy
+
+        for i, relacion in enumerate(
+            (Guardianship.PADRE, Guardianship.TUTOR, Guardianship.ACOMP)
+        ):
+            tutor = self.make_user(age=40 + i, username=f"tutor_rel{i}")
+            Guardianship.objects.create(
+                athlete=self.menor, guardian=tutor, relation=relacion,
+            )
+            self.assertIn(
+                tutor.pk,
+                MinorLodgingPolicy.accredited_adult_ids(
+                    self.menor, include_team_staff=False,
+                ),
+            )
+
+    def test_un_adulto_que_no_es_tutor_de_ninguno_sigue_rechazado(self):
+        """Criterio 5: agregar tutores no abre la puerta a terceros."""
+        self._segundo_tutor("padre_ajeno_test")
+        ajeno = self.make_user(age=38, username="ajeno_multi")
+        bed = self.make_bed(Bed.DOUBLE, label="Cama ajena")
+
+        self.assign_room(self.menor)
+        with self.assertRaises(ValidationError):
+            self.assign_room(ajeno)
+
+        ra_menor = self.menor.event_stays.first().room_assignment
+        BedAssignment.objects.create(stay=ra_menor.stay, bed=bed)
+        ra_coach = self.assign_room(self.coach)
+        with self.assertRaises(ValidationError):
+            BedAssignment.objects.create(stay=ra_coach.stay, bed=bed)
+
+    def test_quitar_un_tutor_deja_al_otro_acreditado(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        padre = self._segundo_tutor("padre_baja_hosp")
+        Guardianship.objects.filter(
+            athlete=self.menor, guardian=self.guardian,
+        ).delete()
+
+        permitidos = MinorLodgingPolicy.accredited_adult_ids(
+            self.menor, include_team_staff=False,
+        )
+        self.assertIn(padre.pk, permitidos)
+        self.assertNotIn(self.guardian.pk, permitidos)
 
 
 # =====================================================================
@@ -394,8 +467,9 @@ class StaleAuthorizationTests(LodgingTestBase):
         self.join_team(self.menor, self.team)
         self.guardian = self.make_user(age=42, username="guardian_stale")
         self.profile = AthleteProfile.objects.create(
-            user=self.menor, emergency_contact="F", guardian=self.guardian,
+            user=self.menor, emergency_contact="F",
         )
+        Guardianship.objects.create(athlete=self.menor, guardian=self.guardian)
 
     def test_quitar_el_tutor_deja_la_asignacion_en_infraccion(self):
         from hospitality.policies import MinorLodgingPolicy
@@ -404,8 +478,7 @@ class StaleAuthorizationTests(LodgingTestBase):
         self.assign_room(self.guardian)
         self.assertEqual(MinorLodgingPolicy.audit_stay(ra_menor.stay), [])
 
-        self.profile.guardian = None
-        self.profile.save(update_fields=["guardian"])
+        Guardianship.objects.filter(athlete=self.menor).delete()
         self.assertTrue(MinorLodgingPolicy.audit_stay(ra_menor.stay))
 
     def test_el_check_in_rechaza_un_alojamiento_que_dejo_de_cumplir(self):
@@ -418,8 +491,7 @@ class StaleAuthorizationTests(LodgingTestBase):
         BedAssignment.objects.create(stay=ra_menor.stay, bed=bed_a)
         BedAssignment.objects.create(stay=ra_guardian.stay, bed=bed_b)
 
-        self.profile.guardian = None
-        self.profile.save(update_fields=["guardian"])
+        Guardianship.objects.filter(athlete=self.menor).delete()
 
         with self.assertRaises(ValidationError):
             HospitalityService.check_in(stay=ra_menor.stay, checked_in_by=self.admin)
@@ -431,6 +503,60 @@ class StaleAuthorizationTests(LodgingTestBase):
         self.assign_room(self.guardian)
         self.assertEqual(MinorLodgingPolicy.audit_event(self.event), {})
 
-        self.profile.guardian = None
-        self.profile.save(update_fields=["guardian"])
+        Guardianship.objects.filter(athlete=self.menor).delete()
         self.assertTrue(MinorLodgingPolicy.audit_event(self.event))
+
+
+class AuditoriaConVariosTutoresTests(LodgingTestBase):
+    """Criterio 7: sobre datos con varios tutores, cero falsos positivos."""
+
+    def setUp(self):
+        super().setUp()
+        self.team, self.coach = self.make_team("Cometas")
+        self.menor = self.make_user(age=15, username="menor_audit")
+        self.join_team(self.menor, self.team)
+        AthleteProfile.objects.create(
+            user=self.menor, emergency_contact="Familia",
+        )
+        self.madre = self.make_user(age=42, username="madre_audit")
+        self.padre = self.make_user(age=44, username="padre_audit")
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        Guardianship.objects.create(athlete=self.menor, guardian=self.padre)
+
+    def test_audit_event_no_marca_una_habitacion_con_los_dos_tutores(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        self.assign_room(self.menor)
+        self.assign_room(self.madre)
+        self.assign_room(self.padre)
+        self.assertEqual(MinorLodgingPolicy.audit_event(self.event), {})
+
+    def test_audit_stay_marca_cuando_ya_no_queda_ningun_tutor(self):
+        from hospitality.policies import MinorLodgingPolicy
+
+        ra_menor = self.assign_room(self.menor)
+        self.assign_room(self.madre)
+        self.assertEqual(MinorLodgingPolicy.audit_stay(ra_menor.stay), [])
+
+        Guardianship.objects.filter(athlete=self.menor).delete()
+        self.assertTrue(MinorLodgingPolicy.audit_stay(ra_menor.stay))
+
+    def test_guardians_present_at_devuelve_solo_a_quien_viajo(self):
+        """La consulta que reemplaza a la designación por viaje."""
+        from custody.services.minor_service import MinorAthleteService
+
+        self.assign_room(self.menor)
+        self.assign_room(self.madre)
+
+        presentes = MinorAthleteService.guardians_present_at(self.event, self.menor)
+        self.assertEqual(list(presentes), [self.madre])
+
+    def test_una_estancia_cancelada_no_cuenta_como_presencia(self):
+        from custody.services.minor_service import MinorAthleteService
+
+        ra_madre = self.assign_room(self.madre)
+        ra_madre.stay.status = Stay.CANCELLED
+        ra_madre.stay.save()
+
+        presentes = MinorAthleteService.guardians_present_at(self.event, self.menor)
+        self.assertEqual(list(presentes), [])
