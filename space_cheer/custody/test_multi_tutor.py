@@ -287,3 +287,131 @@ class TestVariosTutores:
             MinorAthleteService.assign_guardian(
                 athlete=mayor, guardian=tutor, assigned_by=self.admin,
             )
+
+
+from django.test import Client
+from django.urls import reverse
+
+
+@pytest.mark.django_db
+class TestPantallasDeCustodia:
+
+    def setup_method(self):
+        self.admin_role, _ = Role.objects.get_or_create(name="ADMIN")
+        self.guardian_role, _ = Role.objects.get_or_create(name="GUARDIAN")
+        Role.objects.get_or_create(name="ATHLETE")
+
+        # `role_required` (accounts/decorators.py:29) rebota a
+        # /accounts/complete-profile/ ANTES de mirar los roles si el perfil no
+        # está completo, y `UserFactory` no lo marca: sin esto el cliente nunca
+        # llega a la vista y los tests fallan sin decir por qué.
+        self.admin = UserFactory(
+            username="admin_vistas", birth_date=datetime.date(1985, 1, 1),
+            profile_completed=True,
+        )
+        self.admin.roles.add(self.admin_role)
+        self.admin.set_password("testpass1234!")
+        self.admin.save()
+
+        self.menor = UserFactory(
+            username="menor_vistas",
+            birth_date=datetime.date.today() - datetime.timedelta(days=365 * 15),
+        )
+        self.menor.roles.add(Role.objects.get(name="ATHLETE"))
+        # El signal de accounts YA creó el AthleteProfile al agregar el rol
+        # ATHLETE (accounts/signals.py:40-45): un create() aquí revienta por
+        # el OneToOne.
+        AthleteProfile.objects.update_or_create(
+            user=self.menor, defaults={"emergency_contact": "Familia"},
+        )
+
+        self.madre = self._tutor("madre_vistas")
+        self.padre = self._tutor("padre_vistas")
+
+        self.client = Client()
+        self.client.login(username=self.admin.username, password="testpass1234!")
+
+    def _tutor(self, username):
+        tutor = UserFactory(
+            username=username, birth_date=datetime.date(1984, 5, 2),
+            profile_completed=True,
+        )
+        tutor.roles.add(self.guardian_role)
+        return tutor
+
+    def test_asignar_un_segundo_tutor_no_reemplaza_al_primero(self):
+        url = reverse("guardian:assign_guardian", args=[self.menor.id])
+        self.client.post(url, {
+            "action": "assign", "guardian_id": self.madre.id, "relation": "PADRE",
+        })
+        self.client.post(url, {
+            "action": "assign", "guardian_id": self.padre.id, "relation": "PADRE",
+        })
+
+        tutores = set(MinorAthleteService.get_guardians(self.menor))
+        assert tutores == {self.madre, self.padre}
+
+    def test_la_relacion_llega_en_la_misma_alta(self):
+        url = reverse("guardian:assign_guardian", args=[self.menor.id])
+        self.client.post(url, {
+            "action": "assign", "guardian_id": self.madre.id, "relation": "TUTOR",
+        })
+        vinculo = Guardianship.objects.get(athlete=self.menor, guardian=self.madre)
+        assert vinculo.relation == Guardianship.TUTOR
+
+    def test_la_pantalla_lista_los_dos_vinculos(self):
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        Guardianship.objects.create(athlete=self.menor, guardian=self.padre)
+
+        url = reverse("guardian:assign_guardian", args=[self.menor.id])
+        respuesta = self.client.get(url)
+
+        cuerpo = respuesta.content.decode()
+        assert self.madre.get_full_name() in cuerpo
+        assert self.padre.get_full_name() in cuerpo
+
+    def test_la_baja_quita_solo_al_tutor_nombrado(self):
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        Guardianship.objects.create(athlete=self.menor, guardian=self.padre)
+
+        url = reverse(
+            "guardian:remove_guardian", args=[self.menor.id, self.padre.id],
+        )
+        self.client.post(url)
+
+        assert MinorAthleteService.is_guardian_of(self.madre, self.menor) is True
+        assert MinorAthleteService.is_guardian_of(self.padre, self.menor) is False
+
+    def test_el_boton_de_baja_apunta_a_un_tutor_concreto(self):
+        """Asertar la URL suelta da falso positivo: se compara el href entero."""
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        Guardianship.objects.create(athlete=self.menor, guardian=self.padre)
+
+        url = reverse("guardian:assign_guardian", args=[self.menor.id])
+        cuerpo = self.client.get(url).content.decode()
+
+        esperado = reverse(
+            "guardian:remove_guardian", args=[self.menor.id, self.padre.id],
+        )
+        assert f'action="{esperado}"' in cuerpo
+
+    def test_el_tutor_ve_a_su_atleta_en_su_panel(self):
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        self.madre.set_password("testpass1234!")
+        self.madre.save()
+
+        cliente = Client()
+        cliente.login(username=self.madre.username, password="testpass1234!")
+        respuesta = cliente.get(reverse("guardian:dashboard"))
+
+        assert self.menor.get_full_name() in respuesta.content.decode()
+
+    def test_el_headcoach_dashboard_muestra_los_dos_tutores(self):
+        Guardianship.objects.create(athlete=self.menor, guardian=self.madre)
+        Guardianship.objects.create(athlete=self.menor, guardian=self.padre)
+
+        respuesta = self.client.get(reverse("guardian:headcoach_dashboard"))
+        cuerpo = respuesta.content.decode()
+
+        assert self.madre.get_full_name() in cuerpo
+        assert self.padre.get_full_name() in cuerpo

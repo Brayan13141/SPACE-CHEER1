@@ -17,7 +17,7 @@ urlpatterns = [
         name="assign_guardian",
     ),
     path(
-        "guardians/remove/<int:athlete_id>/",
+        "guardians/remove/<int:athlete_id>/<int:guardian_id>/",
         views.remove_guardian,
         name="remove_guardian",
     ),

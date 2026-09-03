@@ -1,0 +1,39 @@
+{% load i18n %}
+{# Lista de vínculos de tutela de un atleta, con el estado POR VÍNCULO. #}
+{# Espera: guardianships (queryset de Guardianship) y athlete. #}
+<div class="list-group">
+  {% for vinculo in guardianships %}
+  <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div>
+      <strong>{{ vinculo.guardian.get_full_name }}</strong>
+      <span class="badge ms-2" style="background-color: var(--sc-purple);">
+        {{ vinculo.get_relation_display }}
+      </span>
+      {% if vinculo.proof_pending %}
+        <span class="badge bg-warning text-dark ms-1">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>{% trans "Sin verificar" %}
+        </span>
+      {% elif vinculo.is_verified %}
+        <span class="badge bg-success ms-1">
+          <i class="bi bi-patch-check-fill me-1"></i>{% trans "Verificado" %}
+        </span>
+      {% endif %}
+      <div class="small text-muted">
+        <i class="bi bi-envelope me-1"></i>{{ vinculo.guardian.email }}
+      </div>
+    </div>
+    <form method="post"
+          action="{% url 'guardian:remove_guardian' athlete.id vinculo.guardian.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
+        <i class="bi bi-person-x-fill me-1"></i>{% trans "Quitar" %}
+      </button>
+    </form>
+  </div>
+  {% empty %}
+  <div class="list-group-item text-muted">
+    <i class="bi bi-exclamation-circle me-1"></i>
+    {% trans "Este atleta todavía no tiene ningún tutor acreditado." %}
+  </div>
+  {% endfor %}
+</div>

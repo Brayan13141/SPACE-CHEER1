@@ -55,6 +55,7 @@ class TestMinorAccessService:
         assert MinorAccessService.get_access_level(minor) == MinorAccessService.BLOCKED
 
 
+from django.contrib.messages import get_messages
 from django.test import Client
 
 
@@ -139,6 +140,18 @@ class TestGuardianCreateOrder:
             user=otro_menor,
             defaults={"emergency_contact": "Otro contacto"},
         )
+        # Sin dirección, `OrderContactInfoFactory` revienta y el
+        # `except Exception` de la vista redirige igual: el test pasaría con la
+        # guarda de permisos QUITADA. Con dirección, si la guarda no frena, el
+        # pedido se crea de verdad y la aserción de abajo se pone roja.
+        UserAddress.objects.create(
+            user=otro_menor,
+            label="Casa",
+            address="Otra Calle 456",
+            city="Ciudad de México",
+            zip_code="06600",
+            is_default=True,
+        )
 
         client = Client()
         client.login(username=guardian.username, password="testpass1234!")
@@ -147,3 +160,7 @@ class TestGuardianCreateOrder:
 
         assert response.status_code == 302
         assert not Order.objects.filter(owner_user=otro_menor, created_by=guardian).exists()
+        # El motivo importa: "rechazado por permisos" y "explotó por dentro"
+        # redirigen los dos a guardian:dashboard con un 302.
+        avisos = [m.message for m in get_messages(response.wsgi_request)]
+        assert "No tienes permiso sobre este atleta." in avisos

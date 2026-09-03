@@ -47,7 +47,7 @@
               <tr>
                 <th class="ps-3"><i class="bi bi-person me-1 text-muted"></i> {% trans "Nombre" %}</th>
                 <th><i class="bi bi-envelope me-1 text-muted"></i> Email</th>
-                <th><i class="bi bi-shield-check me-1 text-muted"></i> {% trans "Guardián Actual" %}</th>
+                <th><i class="bi bi-shield-check me-1 text-muted"></i> {% trans "Tutores" %}</th>
                 <th class="text-end pe-3">{% trans "Acción" %}</th>
               </tr>
             </thead>
@@ -72,8 +72,11 @@
                 <td class="ps-3 fw-semibold">{{ athlete.get_full_name }}</td>
                 <td class="text-muted">{{ athlete.email|default:"—" }}</td>
                 <td>
-                  <i class="bi bi-person-check-fill text-success me-1"></i>
-                  {{ athlete.athleteprofile.guardian.get_full_name }}
+                  {% for vinculo in athlete.guardianships.all %}
+                    <span class="badge bg-secondary me-1 mb-1">
+                      <i class="bi bi-person-check-fill me-1"></i>{{ vinculo.guardian.get_full_name }}
+                    </span>
+                  {% endfor %}
                 </td>
                 <td class="text-end pe-3">
                   <a href="{% url 'guardian:assign_guardian' athlete.id %}" class="btn btn-sm btn-outline-secondary">

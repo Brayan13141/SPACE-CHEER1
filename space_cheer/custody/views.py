@@ -24,7 +24,7 @@ from django.utils import timezone
 from accounts.models import UserOwnership, AthleteProfile
 from accounts.services.ownership_service import OwnershipService
 from accounts.decorators import role_required
-from custody.models import GuardianProfile
+from custody.models import Guardianship
 from custody.services.minor_service import MinorAthleteService
 
 User = get_user_model()
@@ -43,7 +43,9 @@ def headcoach_dashboard(request):
     minors_without_guardian = []
     
     for minor in all_minors:
-        if hasattr(minor, "athleteprofile") and minor.athleteprofile.guardian:
+        # `get_all_minors` prefetchea `guardianships__guardian`: leer la lista
+        # aquí no vuelve a la base.
+        if minor.guardianships.all():
             minors_with_guardian.append(minor)
         else:
             minors_without_guardian.append(minor)
@@ -108,7 +110,12 @@ def guardian_dashboard(request):
         {
             "athletes": athletes,
             "alerts": alerts,
-            "guardian_profile": getattr(request.user, "guardianprofile", None),
+            # El tutor puede tener una relación distinta con cada atleta: lo
+            # que se muestra es la lista de vínculos, no un badge del usuario.
+            "guardianships": (
+                Guardianship.objects.filter(guardian=request.user)
+                .select_related("athlete")
+            ),
         },
     )
 
@@ -129,12 +136,8 @@ def guardian_create_order(request, athlete_id):
 
     athlete = get_object_or_404(User, id=athlete_id)
 
-    try:
-        if athlete.athleteprofile.guardian != request.user:
-            messages.error(request, "No tienes permiso sobre este atleta.")
-            return redirect("guardian:dashboard")
-    except AthleteProfile.DoesNotExist:
-        messages.error(request, "Este usuario no tiene perfil de atleta.")
+    if not MinorAthleteService.is_guardian_of(request.user, athlete):
+        messages.error(request, "No tienes permiso sobre este atleta.")
         return redirect("guardian:dashboard")
 
     if not athlete.is_minor:
@@ -215,10 +218,10 @@ def assign_guardian(request, athlete_id):
     if request.method == "POST":
         action = request.POST.get("action")
 
-        # PATH A: Asignar guardian existente
+        # PATH A: Acreditar un tutor más
         if action == "assign":
             guardian_id = request.POST.get("guardian_id")
-            relation = request.POST.get("relation", "ACOMP")
+            relation = request.POST.get("relation", Guardianship.ACOMP)
 
             if not guardian_id:
                 messages.error(request, "Debes seleccionar un guardian.")
@@ -227,25 +230,16 @@ def assign_guardian(request, athlete_id):
             guardian = get_object_or_404(User, id=guardian_id)
 
             try:
-                MinorAthleteService.assign_guardian(
+                vinculo = MinorAthleteService.assign_guardian(
                     athlete=athlete,
                     guardian=guardian,
                     assigned_by=request.user,
+                    relation=relation,
                 )
-
-                if relation in {"PADRE", "TUTOR", "ACOMP"}:
-                    try:
-                        MinorAthleteService.update_guardian_relation(
-                            athlete=athlete,
-                            relation=relation,
-                            updated_by=request.user,
-                        )
-                    except ValidationError:
-                        pass
 
                 messages.success(
                     request,
-                    f"{guardian.get_full_name()} asignado como guardian "
+                    f"{guardian.get_full_name()} acreditado como tutor "
                     f"de {athlete.get_full_name()}.",
                 )
 
@@ -253,23 +247,21 @@ def assign_guardian(request, athlete_id):
                 # atletas sino en que el vínculo sea falso, así que esto se ve
                 # y se puede ignorar. Un ValidationError aquí solo enseñaría a
                 # elegir "Acompañante" para esquivarlo.
-                perfil = GuardianProfile.objects.filter(user=guardian).first()
-                if perfil:
-                    if perfil.proof_pending:
-                        messages.warning(
-                            request,
-                            f"{guardian.get_full_name()} figura como tutor legal "
-                            "y ese vínculo todavía no está verificado. Un "
-                            "administrador debe registrar el documento de "
-                            "respaldo.",
-                        )
-                    if perfil.over_soft_limit:
-                        messages.warning(
-                            request,
-                            f"{guardian.get_full_name()} ya tiene "
-                            f"{perfil.athlete_count} atletas a su cargo. "
-                            "Verifica que sea correcto.",
-                        )
+                if vinculo.proof_pending:
+                    messages.warning(
+                        request,
+                        f"{guardian.get_full_name()} figura como tutor legal "
+                        f"de {athlete.get_full_name()} y ese vínculo todavía "
+                        "no está verificado. Un administrador debe registrar "
+                        "el documento de respaldo.",
+                    )
+                if vinculo.over_soft_limit:
+                    messages.warning(
+                        request,
+                        f"{guardian.get_full_name()} ya tiene "
+                        f"{Guardianship.athlete_count_for(guardian)} atletas a "
+                        "su cargo. Verifica que sea correcto.",
+                    )
 
                 return redirect("guardian:headcoach_dashboard")
 
@@ -358,10 +350,8 @@ def assign_guardian(request, athlete_id):
 
         guardian_qs = guardian_qs.filter(id__in=owned_ids)
 
-    try:
-        current_guardian = MinorAthleteService.get_guardian(athlete)
-    except ValidationError:
-        current_guardian = None
+    guardianships = MinorAthleteService.get_guardianships(athlete)
+    guardian_ids = {v.guardian_id for v in guardianships}
 
     minors_pending = MinorAthleteService.get_minors_without_guardian(
         request.user
@@ -373,14 +363,11 @@ def assign_guardian(request, athlete_id):
         {
             "athlete": athlete,
             "potential_guardians": guardian_qs,
-            "current_guardian": current_guardian,
+            "guardianships": guardianships,
+            "guardian_ids": guardian_ids,
             "minors_pending": minors_pending,
             "minors_pending_count": minors_pending.count(),
-            "relation_choices": [
-                ("PADRE", "Padre / Madre"),
-                ("TUTOR", "Tutor legal"),
-                ("ACOMP", "Acompañante"),
-            ],
+            "relation_choices": Guardianship.RELATION_CHOICES,
         },
     )
 
@@ -391,26 +378,29 @@ def assign_guardian(request, athlete_id):
 
 
 @role_required("HEADCOACH", "ADMIN")
-def remove_guardian(request, athlete_id):
-    """Remueve el guardian de un atleta (solo si ya es mayor de edad)."""
+def remove_guardian(request, athlete_id, guardian_id):
+    """Quita UN vínculo de tutela. Los demás tutores del atleta no se tocan."""
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
     athlete = get_object_or_404(User, id=athlete_id)
+    guardian = get_object_or_404(User, id=guardian_id)
 
     try:
         MinorAthleteService.remove_guardian(
             athlete=athlete,
+            guardian=guardian,
             removed_by=request.user,
         )
         messages.success(
             request,
-            f"Guardian removido de {athlete.get_full_name()}.",
+            f"{guardian.get_full_name()} ya no es tutor de "
+            f"{athlete.get_full_name()}.",
         )
     except (ValidationError, PermissionDenied) as e:
         messages.error(request, str(e))
 
-    return redirect("guardian:headcoach_dashboard")
+    return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 
 # =============================================================================
 # OWNERSHIP — complemento de coach/views.py

@@ -13,11 +13,11 @@
       </h2>
       <p class="text-muted mb-0">
         {{ request.user.get_full_name }}
-        {% if guardian_profile %}
+        {% for vinculo in guardianships %}
           <span class="badge ms-2" style="background-color: var(--sc-purple);">
-            {{ guardian_profile.get_relation_display|default:guardian_profile.relation }}
+            {{ vinculo.athlete.get_full_name }}: {{ vinculo.get_relation_display }}
           </span>
-        {% endif %}
+        {% endfor %}
       </p>
     </div>
   </div>
