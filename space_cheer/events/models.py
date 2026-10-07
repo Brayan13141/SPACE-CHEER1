@@ -4,6 +4,7 @@ import datetime
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -107,7 +108,7 @@ class Event(models.Model):
     def is_registration_open(self):
         if self.status != self.STATUS_REGISTRATION_OPEN:
             return False
-        today = datetime.date.today()
+        today = timezone.localdate()
         if self.registration_open and today < self.registration_open:
             return False
         if self.registration_close and today > self.registration_close:
@@ -307,7 +308,14 @@ class EventStaffRole(models.Model):
         return self.name
 
     def clean(self):
-        pass
+        # `unique=True` distingue mayúsculas: "Coordinador de piso" y
+        # "Coordinador de Piso" convivían como dos roles distintos.
+        if self.name and (
+            EventStaffRole.objects.filter(name__iexact=self.name.strip())
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            raise ValidationError({'name': _('Ya existe un rol de staff con ese nombre.')})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -351,7 +359,17 @@ class EventStaffAssignment(models.Model):
         return f'{self.user} — {self.role} @ {self.event}'
 
     def clean(self):
-        pass
+        # Un rol desactivado no se asigna de nuevo; las asignaciones que ya
+        # tenía siguen editándose.
+        if self.role_id and not self.role.is_active:
+            role_changed = (
+                self.pk is None
+                or EventStaffAssignment.objects.filter(pk=self.pk)
+                .exclude(role_id=self.role_id)
+                .exists()
+            )
+            if role_changed:
+                raise ValidationError({'role': _('Este rol de staff está desactivado.')})
 
     def save(self, *args, **kwargs):
         self.full_clean()

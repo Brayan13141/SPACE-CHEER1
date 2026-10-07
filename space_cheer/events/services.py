@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 from .models import (
     Event,
@@ -101,9 +102,11 @@ class EventService:
     @classmethod
     @transaction.atomic
     def transition_status(cls, *, event, new_status, user) -> Event:
-        # Only the event organizer or a superuser may change status
-        if not (user.is_superuser or event.organizer_id == user.pk):
-            raise PermissionDenied('Only the event organizer or a superuser can change event status.')
+        # El organizador, un superusuario o cualquier ADMIN: igual que para
+        # aceptar inscripciones, que ya admitía a cualquier ADMIN.
+        is_admin = user.roles.filter(name='ADMIN').exists()
+        if not (user.is_superuser or is_admin or event.organizer_id == user.pk):
+            raise PermissionDenied('Solo un administrador o el organizador pueden cambiar el estado del evento.')
 
         allowed = _ALLOWED_TRANSITIONS.get(event.status, set())
         if new_status not in allowed:
@@ -122,11 +125,27 @@ class EventService:
         old_status = event.status
         event.status = new_status
         event.save()
+
+        if new_status == Event.STATUS_CANCELLED:
+            cls._cancel_open_stays(event=event, user=user)
         logger.info(
             'Event status transitioned: id=%s %s → %s by user=%s',
             event.pk, old_status, new_status, user,
         )
         return event
+
+    @classmethod
+    def _cancel_open_stays(cls, *, event, user):
+        """Cancela las estancias que no han hecho check-in. Las ya alojadas se
+        quedan: alguien está físicamente en el hotel y su salida se registra a
+        mano."""
+        from hospitality.models import Stay
+        from hospitality.services import HospitalityService
+
+        for stay in Stay.objects.filter(
+            event=event, status__in=(Stay.REQUESTED, Stay.CONFIRMED),
+        ):
+            HospitalityService.cancel_stay(stay=stay, cancelled_by=user)
 
     @classmethod
     def get_registered_teams_count(cls, event) -> int:
@@ -184,7 +203,7 @@ class EventService:
                 blocking.append('Define la fecha de apertura de inscripciones')
             if not event.registration_close:
                 blocking.append('Define la fecha de cierre de inscripciones')
-            if event.start_date and event.start_date < datetime.date.today():
+            if event.start_date and event.start_date < timezone.localdate():
                 blocking.append('La fecha de inicio del evento ya pasó')
 
         elif target_status == Event.STATUS_REGISTRATION_CLOSED:
@@ -353,6 +372,37 @@ class EventRegistrationService:
         if not (user.is_superuser or is_admin or registration.event.organizer_id == user.pk):
             raise PermissionDenied('Only an admin or the event organizer can accept registrations.')
 
+        # Bloquea el evento para serializar aceptaciones: dos admins aceptando
+        # a la vez leerían el mismo conteo y rebasarían el cupo.
+        event = Event.objects.select_for_update().get(pk=registration.event_id)
+        registration = EventTeamRegistration.objects.select_related('category').get(
+            pk=registration.pk,
+        )
+
+        if registration.status != EventTeamRegistration.STATUS_PENDING:
+            raise ValidationError(
+                f'Solo se aceptan inscripciones pendientes; esta está '
+                f'"{registration.get_status_display()}".'
+            )
+
+        # El cupo se revisaba solo al inscribirse, contra los ya aceptados:
+        # con varias pendientes, aceptarlas todas lo rebasaba.
+        if event.max_teams is not None:
+            if EventService.get_registered_teams_count(event) >= event.max_teams:
+                raise ValidationError('Este evento ya alcanzó el límite máximo de equipos aceptados.')
+
+        category = registration.category
+        if category.max_teams is not None:
+            category_accepted = EventTeamRegistration.objects.filter(
+                category=category,
+                status=EventTeamRegistration.STATUS_ACCEPTED,
+            ).count()
+            if category_accepted >= category.max_teams:
+                raise ValidationError(
+                    f'La categoría "{category.name}" ya alcanzó su límite de '
+                    f'{category.max_teams} equipos aceptados.'
+                )
+
         registration.status = EventTeamRegistration.STATUS_ACCEPTED
         registration.save()
         logger.info('Registration accepted: id=%s by user=%s', registration.pk, user)
@@ -395,8 +445,27 @@ class EventRegistrationService:
                 'Only the submitter, the team coach, or a superuser can withdraw this registration.'
             )
 
+        # Con el evento en curso o cerrado, retirarse reescribiría un
+        # resultado que ya se compitió.
+        event = registration.event
+        if event.status not in (
+            Event.STATUS_DRAFT,
+            Event.STATUS_REGISTRATION_OPEN,
+            Event.STATUS_REGISTRATION_CLOSED,
+        ):
+            raise ValidationError(
+                f'No se puede retirar la inscripción con el evento '
+                f'"{event.get_status_display()}".'
+            )
+
         registration.status = EventTeamRegistration.STATUS_WITHDRAWN
         registration.save()
+        # Sus participantes dejan de estar en el evento junto con el equipo.
+        for participant in registration.participants.exclude(
+            status=EventParticipant.STATUS_CANCELLED,
+        ):
+            participant.status = EventParticipant.STATUS_CANCELLED
+            participant.save()
         logger.info('Registration withdrawn: id=%s by user=%s', registration.pk, user)
         return registration
 
@@ -435,6 +504,14 @@ class EventScoringService:
         cls, *, team_registration, criteria, judge, score, round='FINAL', notes=''
     ) -> EventScore:
         event = team_registration.event
+
+        # Solo se califica con el evento en curso: antes no ha empezado, y
+        # después los resultados publicados quedarían desfasados.
+        if event.status != Event.STATUS_IN_PROGRESS:
+            raise ValidationError(
+                f'Solo se puede calificar con el evento en curso; '
+                f'está "{event.get_status_display()}".'
+            )
 
         # Validate judge assignment only when staff assignments exist (skip in dev mode)
         if event.staff_assignments.exists():
@@ -483,19 +560,46 @@ class EventScoringService:
 
         total_score = (weighted_sum / total_weight) if total_weight else Decimal('0')
 
-        # Upsert EventResult — placement is intentionally left untouched here
+        # placement es obligatorio: un resultado nuevo entra con un lugar
+        # provisional y el reordenamiento de abajo le da el definitivo.
         result, created = EventResult.objects.update_or_create(
             team_registration=team_registration,
             category=category,
             round=round,
             defaults={'total_score': total_score},
+            create_defaults={'total_score': total_score, 'placement': 1},
         )
+        cls._rerank(category=category, round=round)
+        result.refresh_from_db()
         action = 'created' if created else 'updated'
         logger.info(
             'EventResult %s: team_registration=%s category=%s round=%s total_score=%s',
             action, team_registration.pk, category.pk, round, total_score,
         )
         return result
+
+    @classmethod
+    def _rerank(cls, *, category, round):
+        """Reasigna los lugares de la categoría/ronda por puntaje descendente.
+
+        Ranking de competencia: los empates comparten lugar y el siguiente
+        salta (8, 8, 5 → 1, 1, 3). Pisa los lugares puestos a mano; el admin
+        los ajusta después de calcular si hace falta.
+        """
+        results = list(
+            EventResult.objects.select_for_update()
+            .filter(category=category, round=round)
+            .order_by('-total_score', 'pk')
+        )
+        previous_score = None
+        placement = 0
+        for position, res in enumerate(results, start=1):
+            if res.total_score != previous_score:
+                placement = position
+                previous_score = res.total_score
+            if res.placement != placement:
+                res.placement = placement
+                res.save(update_fields=['placement'])
 
     @classmethod
     def get_leaderboard(cls, event, category, round='FINAL') -> list:

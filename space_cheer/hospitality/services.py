@@ -20,6 +20,12 @@ class HospitalityService:
     @classmethod
     @transaction.atomic
     def create_stay(cls, *, event, user, created_by, event_participant=None, notes='') -> Stay:
+        # Un evento completado o cancelado ya no recibe huéspedes nuevos.
+        if event.status in (event.STATUS_COMPLETED, event.STATUS_CANCELLED):
+            raise ValidationError(
+                f"El evento está {event.get_status_display().lower()}: "
+                "no se registran estancias nuevas."
+            )
         # Validates user doesn't already have a Stay for this event
         if Stay.objects.filter(event=event, user=user).exists():
             raise ValidationError(
