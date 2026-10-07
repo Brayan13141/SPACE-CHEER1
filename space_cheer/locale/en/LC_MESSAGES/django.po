@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 16:07-0600\n"
+"POT-Creation-Date: 2026-10-07 17:28-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1312,7 +1312,7 @@ msgid "Motivo del rechazo"
 msgstr "Rejection reason"
 
 #: .\events\models\core.py:23 .\templates\events\admin\results_manage.html:93
-#: .\templates\events\event_detail.html:430
+#: .\templates\events\event_detail.html:435
 #: .\templates\orders\admin\order_detail.html:757
 #: .\templates\orders\users\order_detail.html:886
 #: .\templates\orders\users\order_list.html:124
@@ -1337,7 +1337,7 @@ msgid "Completado"
 msgstr "Completed"
 
 #: .\events\models\core.py:28 .\events\models\registration.py:101
-#: .\templates\events\event_detail.html:249
+#: .\templates\events\event_detail.html:254
 #: .\templates\orders\users\order_list.html:144
 msgid "Cancelado"
 msgstr "Cancelled"
@@ -1359,7 +1359,8 @@ msgid "Amistoso"
 msgstr "Friendly"
 
 #: .\events\models\core.py:43 .\events\models\core.py:124
-#: .\events\models\judging.py:20 .\events\models\staffing.py:16
+#: .\events\models\judging.py:20 .\events\models\staffing.py:17
+#: .\events\models\staffing.py:113
 #: .\production\templates\production\config\operario_detail.html:79
 #: .\production\templates\production\config\operarios.html:38
 #: .\production\templates\production\config\operarios.html:91
@@ -1376,6 +1377,9 @@ msgstr "Friendly"
 #: .\templates\core\manage_landing.html:153
 #: .\templates\events\admin\criteria_manage.html:49
 #: .\templates\events\admin\criteria_manage.html:109
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\organizations.html:18
+#: .\templates\events\staffing\sheet.html:23
 #: .\templates\measures\manage_fields.html:20
 #: .\templates\orders\admin\customers.html:38
 #: .\templates\orders\admin\customers.html:89
@@ -1390,7 +1394,7 @@ msgid "Nombre"
 msgstr "Name"
 
 #: .\events\models\core.py:44 .\events\models\core.py:134
-#: .\events\models\judging.py:21 .\events\models\staffing.py:17
+#: .\events\models\judging.py:21 .\events\models\staffing.py:18
 #: .\production\templates\production\config\plantillas.html:40
 #: .\production\templates\production\config\stages.html:50
 #: .\production\templates\production\config\stages.html:157
@@ -1410,6 +1414,7 @@ msgstr "Event type"
 #: .\templates\events\admin\registrations.html:26
 #: .\templates\events\admin\results_manage.html:67
 #: .\templates\events\coach\my_registrations.html:36
+#: .\templates\events\staffing\event_staff.html:48
 #: .\templates\orders\admin\order_list.html:66
 #: .\templates\orders\admin\order_list.html:115
 #: .\templates\orders\items\_measurements_grid.html:19
@@ -1419,7 +1424,7 @@ msgstr "Event type"
 msgid "Estado"
 msgstr "Status"
 
-#: .\events\models\core.py:57
+#: .\events\models\core.py:57 .\events\models\staffing.py:110
 msgid "Organizador"
 msgstr "Organizer"
 
@@ -1530,7 +1535,7 @@ msgstr "Weight"
 msgid "Puntaje máximo"
 msgstr "Maximum score"
 
-#: .\events\models\judging.py:31 .\events\models\staffing.py:18
+#: .\events\models\judging.py:31 .\events\models\staffing.py:19
 #: .\templates\products\product_list.html:149
 #: .\templates\teams\athlete_team.html:61
 msgid "Activo"
@@ -1584,7 +1589,7 @@ msgstr "Judge"
 
 #: .\events\models\judging.py:90 .\events\models\judging.py:100
 #: .\templates\events\admin\results_manage.html:66
-#: .\templates\events\event_detail.html:413
+#: .\templates\events\event_detail.html:418
 msgid "Puntaje"
 msgstr "Score"
 
@@ -1592,14 +1597,14 @@ msgstr "Score"
 #: .\templates\events\admin\results_manage.html:42
 #: .\templates\events\admin\results_manage.html:66
 #: .\templates\events\admin\score_entry.html:51
-#: .\templates\events\event_detail.html:413
+#: .\templates\events\event_detail.html:418
 #: .\templates\events\judge\panel.html:42
 msgid "Ronda"
 msgstr "Round"
 
 #: .\events\models\judging.py:95 .\events\models\judging.py:164
 #: .\events\models\registration.py:50 .\events\models\registration.py:123
-#: .\events\models\staffing.py:62 .\templates\orders\admin\customers.html:50
+#: .\events\models\staffing.py:63 .\templates\orders\admin\customers.html:50
 #: .\templates\orders\admin\offline_create.html:62
 #: .\templates\orders\admin\offline_create.html:159
 #: .\templates\orders\admin\order_detail.html:118
@@ -1633,8 +1638,8 @@ msgstr ""
 #: .\templates\events\admin\results_manage.html:34
 #: .\templates\events\admin\results_manage.html:65
 #: .\templates\events\coach\my_registrations.html:35
-#: .\templates\events\event_detail.html:379
-#: .\templates\events\event_detail.html:412
+#: .\templates\events\event_detail.html:384
+#: .\templates\events\event_detail.html:417
 #: .\templates\teams\manage_teams.html:50
 msgid "Categoría"
 msgstr "Category"
@@ -1649,8 +1654,8 @@ msgstr "Total score"
 
 #: .\events\models\judging.py:165
 #: .\templates\events\admin\results_manage.html:91
-#: .\templates\events\event_detail.html:414
-#: .\templates\events\event_detail.html:428
+#: .\templates\events\event_detail.html:419
+#: .\templates\events\event_detail.html:433
 msgid "Publicado"
 msgstr "Published"
 
@@ -1661,7 +1666,7 @@ msgstr "Result"
 #: .\events\models\judging.py:172 .\templates\core\base.html:452
 #: .\templates\events\admin\results_manage.html:3
 #: .\templates\events\admin\results_manage.html:59
-#: .\templates\events\event_detail.html:404
+#: .\templates\events\event_detail.html:409
 msgid "Resultados"
 msgstr "Results"
 
@@ -1674,7 +1679,7 @@ msgstr ""
 msgid "El lugar debe ser 1 o mayor."
 msgstr "The place must be 1 or greater."
 
-#: .\events\models\registration.py:22
+#: .\events\models\registration.py:22 .\events\models\staffing.py:180
 #: .\templates\events\admin\registrations.html:37
 #: .\templates\events\coach\my_registrations.html:55
 #: .\templates\orders\admin\order_detail.html:435
@@ -1684,13 +1689,13 @@ msgstr "The place must be 1 or greater."
 msgid "Pendiente"
 msgstr "Pending"
 
-#: .\events\models\registration.py:23
+#: .\events\models\registration.py:23 .\events\models\staffing.py:181
 #: .\templates\events\admin\registrations.html:38
 #: .\templates\events\coach\my_registrations.html:56
 msgid "Aceptado"
 msgstr "Accepted"
 
-#: .\events\models\registration.py:24
+#: .\events\models\registration.py:24 .\events\models\staffing.py:182
 #: .\templates\events\admin\registrations.html:39
 #: .\templates\events\coach\my_registrations.html:57
 msgid "Rechazado"
@@ -1741,7 +1746,7 @@ msgstr "Registered"
 msgid "Confirmado"
 msgstr "Confirmed"
 
-#: .\events\models\registration.py:110 .\events\models\staffing.py:60
+#: .\events\models\registration.py:110 .\events\models\staffing.py:61
 #: .\production\templates\production\config\operario_detail.html:159
 #: .\templates\events\admin\staff_manage.html:183
 msgid "Rol"
@@ -1759,23 +1764,23 @@ msgstr "Participants"
 msgid "El registro de equipo no pertenece al evento seleccionado."
 msgstr "The team registration does not belong to the selected event."
 
-#: .\events\models\staffing.py:19
+#: .\events\models\staffing.py:20
 msgid "Es rol de juez"
 msgstr "Judge role"
 
-#: .\events\models\staffing.py:23
+#: .\events\models\staffing.py:24
 msgid "Rol de staff"
 msgstr "Staff role"
 
-#: .\events\models\staffing.py:24
+#: .\events\models\staffing.py:25
 msgid "Roles de staff"
 msgstr "Staff roles"
 
-#: .\events\models\staffing.py:37
+#: .\events\models\staffing.py:38
 msgid "Ya existe un rol de staff con ese nombre."
 msgstr "A staff role with that name already exists."
 
-#: .\events\models\staffing.py:54
+#: .\events\models\staffing.py:55
 #: .\production\templates\production\config\operarios.html:34
 #: .\production\templates\production\config\operarios.html:92
 #: .\production\templates\production\config\operarios.html:155
@@ -1788,17 +1793,168 @@ msgstr "A staff role with that name already exists."
 msgid "Usuario"
 msgstr "User"
 
-#: .\events\models\staffing.py:74
+#: .\events\models\staffing.py:75
 msgid "Asignación de staff"
 msgstr "Staff assignment"
 
-#: .\events\models\staffing.py:75
+#: .\events\models\staffing.py:76
 msgid "Asignaciones de staff"
 msgstr "Staff assignments"
 
-#: .\events\models\staffing.py:91
+#: .\events\models\staffing.py:92 .\events\models\staffing.py:236
 msgid "Este rol de staff está desactivado."
 msgstr "This staff role is deactivated."
+
+#: .\events\models\staffing.py:108
+msgid "Institución pública"
+msgstr "Public institution"
+
+#: .\events\models\staffing.py:109
+msgid "Proveedor"
+msgstr "Vendor"
+
+#: .\events\models\staffing.py:114
+#: .\templates\events\staffing\organizations.html:18
+#: .\templates\measures\manage_fields.html:22
+#: .\templates\orders\admin\order_detail.html:42
+#: .\templates\orders\admin\order_list.html:76
+#: .\templates\orders\admin\order_list.html:114
+#: .\templates\orders\users\order_detail.html:221
+#: .\templates\orders\users\order_list.html:89
+#: .\templates\products\product_list.html:34
+#: .\templates\products\product_list.html:76
+msgid "Tipo"
+msgstr "Type"
+
+#: .\events\models\staffing.py:115 .\templates\core\base.html:896
+#: .\templates\core\terminos.html:308 .\templates\core\terminos.html:335
+#: .\templates\events\staffing\organizations.html:18
+#: .\templates\orders\admin\order_detail.html:230
+#: .\templates\orders\users\order_detail.html:368
+#: .\templates\orders\users\order_list.html:182
+msgid "Contacto"
+msgstr "Contact"
+
+#: .\events\models\staffing.py:116
+msgid "Teléfono de contacto"
+msgstr "Contact phone"
+
+#: .\events\models\staffing.py:117
+msgid "Activa"
+msgstr "Active"
+
+#: .\events\models\staffing.py:121
+#: .\templates\events\staffing\access_log.html:12
+msgid "Organización"
+msgstr "Organization"
+
+#: .\events\models\staffing.py:122
+#: .\templates\events\staffing\event_staff.html:15
+#: .\templates\events\staffing\organizations.html:3
+#: .\templates\events\staffing\organizations.html:6
+msgid "Organizaciones"
+msgstr "Organizations"
+
+#: .\events\models\staffing.py:133
+msgid "Ya existe una organización con ese nombre."
+msgstr "An organization with that name already exists."
+
+#: .\events\models\staffing.py:155
+msgid "Organización del evento"
+msgstr "Event organization"
+
+#: .\events\models\staffing.py:156
+msgid "Organizaciones del evento"
+msgstr "Event organizations"
+
+#: .\events\models\staffing.py:188
+msgid "Capturado por administración"
+msgstr "Entered by administration"
+
+#: .\events\models\staffing.py:189
+msgid "Enviado por la organización"
+msgstr "Submitted by the organization"
+
+#: .\events\models\staffing.py:195
+#: .\templates\account\bulk_import\result.html:61
+#: .\templates\account\guardian\minors_without_guardian.html:80
+#: .\templates\orders\admin\offline_create.html:51
+msgid "Nombre completo"
+msgstr "Full name"
+
+#: .\events\models\staffing.py:196 .\templates\account\profile\edit.html:142
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\orders\admin\customers.html:42
+#: .\templates\orders\admin\customers.html:90
+#: .\templates\orders\admin\offline_create.html:54
+#: .\templates\orders\admin\offline_create.html:55
+#: .\templates\orders\admin\order_detail.html:99
+#: .\templates\orders\users\order_contact_info.html:47
+#: .\templates\teams\manage_teams.html:52
+msgid "Teléfono"
+msgstr "Phone"
+
+#: .\events\models\staffing.py:197
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\social\feed.html:45
+msgid "Foto"
+msgstr "Photo"
+
+#: .\events\models\staffing.py:198
+msgid "Placa o credencial"
+msgstr "Plate or ID"
+
+#: .\events\models\staffing.py:201
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\sheet.html:23
+msgid "Función"
+msgstr "Role"
+
+#: .\events\models\staffing.py:203
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\sheet.html:21
+msgid "Turno"
+msgstr "Shift"
+
+#: .\events\models\staffing.py:217
+msgid "Elemento de staff externo"
+msgstr "External staff member"
+
+#: .\events\models\staffing.py:218 .\templates\events\event_detail.html:44
+#: .\templates\events\staffing\event_staff.html:3
+#: .\templates\events\staffing\event_staff.html:9
+msgid "Staff externo"
+msgstr "External staff"
+
+#: .\events\models\staffing.py:238
+msgid "Los jueces necesitan cuenta: asígnalos desde Staff y Jueces."
+msgstr "Judges need an account: assign them from Staff and Judges."
+
+#: .\events\models\staffing.py:249 .\templates\events\staffing\sheet.html:23
+msgid "Entrada"
+msgstr "Entry"
+
+#: .\events\models\staffing.py:250 .\templates\events\staffing\sheet.html:23
+msgid "Salida"
+msgstr "Exit"
+
+#: .\events\models\staffing.py:262
+msgid "Registro de acceso"
+msgstr "Access record"
+
+#: .\events\models\staffing.py:263
+#: .\templates\events\staffing\access_log.html:3
+#: .\templates\events\staffing\access_log.html:8
+msgid "Bitácora de accesos"
+msgstr "Access log"
+
+#: .\events\models\staffing.py:270
+msgid "La bitácora de accesos no se edita."
+msgstr "The access log cannot be edited."
+
+#: .\events\models\staffing.py:275
+msgid "La bitácora de accesos no se borra."
+msgstr "The access log cannot be deleted."
 
 #: .\production\templates\production\admin_overview.html:8
 #: .\templates\core\base.html:775
@@ -1924,6 +2080,7 @@ msgstr "Assigned"
 #: .\production\templates\production\config\plantillas.html:101
 #: .\production\templates\production\config\product_stages_matrix.html:79
 #: .\templates\account\guardian\_guardianship_list.html:29
+#: .\templates\events\staffing\invite.html:49
 msgid "Quitar"
 msgstr "Remove"
 
@@ -2220,6 +2377,7 @@ msgstr "Select"
 #: .\production\templates\production\config\product_stages_matrix.html:168
 #: .\templates\events\admin\criteria_manage.html:39
 #: .\templates\events\admin\criteria_manage.html:99
+#: .\templates\events\staffing\organizations.html:12
 #: .\templates\orders\products\add_product.html:296
 #: .\templates\products\product_detail.html:402
 #: .\templates\products\product_detail.html:496
@@ -2424,8 +2582,9 @@ msgstr "No roles configured."
 #: .\templates\events\admin\registrations.html:68
 #: .\templates\events\coach\register_team.html:111
 #: .\templates\events\coach\register_team.html:137
-#: .\templates\events\event_detail.html:103
+#: .\templates\events\event_detail.html:108
 #: .\templates\events\event_form.html:111
+#: .\templates\events\staffing\invite.html:26
 #: .\templates\measures\manage_fields.html:136
 #: .\templates\orders\admin\offline_create.html:210
 #: .\templates\orders\admin\order_detail.html:659
@@ -2956,12 +3115,6 @@ msgstr "Rows with errors"
 msgid "Atletas importados (%(n)s)"
 msgstr "Imported athletes (%(n)s)"
 
-#: .\templates\account\bulk_import\result.html:61
-#: .\templates\account\guardian\minors_without_guardian.html:80
-#: .\templates\orders\admin\offline_create.html:51
-msgid "Nombre completo"
-msgstr "Full name"
-
 #: .\templates\account\bulk_import\result.html:86
 #, python-format
 msgid "Filas con error (%(n)s)"
@@ -3109,7 +3262,7 @@ msgstr ""
 "            "
 
 #: .\templates\account\email_confirm.html:31
-#: .\templates\events\event_detail.html:109
+#: .\templates\events\event_detail.html:114
 #: .\templates\products\product_detail.html:696
 msgid "Confirmar"
 msgstr "Confirm"
@@ -3400,7 +3553,7 @@ msgid ""
 msgstr "Minor athletes who do not yet have a responsible adult assigned."
 
 #: .\templates\account\guardian\minors_without_guardian.html:58
-#: .\templates\events\event_detail.html:299
+#: .\templates\events\event_detail.html:304
 msgid "pendiente"
 msgid_plural "pendientes"
 msgstr[0] "pending"
@@ -3835,17 +3988,6 @@ msgstr "First name(s)"
 #: .\templates\account\profile\edit.html:131
 msgid "Apellidos"
 msgstr "Last name(s)"
-
-#: .\templates\account\profile\edit.html:142
-#: .\templates\orders\admin\customers.html:42
-#: .\templates\orders\admin\customers.html:90
-#: .\templates\orders\admin\offline_create.html:54
-#: .\templates\orders\admin\offline_create.html:55
-#: .\templates\orders\admin\order_detail.html:99
-#: .\templates\orders\users\order_contact_info.html:47
-#: .\templates\teams\manage_teams.html:52
-msgid "Teléfono"
-msgstr "Phone"
 
 #: .\templates\account\profile\edit.html:154
 msgid "Género"
@@ -4356,7 +4498,7 @@ msgstr "Calendar"
 msgid "Mis Registros"
 msgstr "My Registrations"
 
-#: .\templates\core\base.html:468 .\templates\events\event_detail.html:60
+#: .\templates\core\base.html:468 .\templates\events\event_detail.html:65
 msgid "Hospitalidad"
 msgstr "Hospitality"
 
@@ -4368,7 +4510,7 @@ msgstr "Features"
 msgid "Mis Estancias"
 msgstr "My Stays"
 
-#: .\templates\core\base.html:494 .\templates\events\event_detail.html:380
+#: .\templates\core\base.html:494 .\templates\events\event_detail.html:385
 #: .\templates\social\base_social.html:31
 #: .\templates\social\base_social_v2.html:77
 #: .\templates\social\base_social_v2.html:114
@@ -4397,7 +4539,7 @@ msgstr "Administration"
 
 #: .\templates\core\base.html:521
 #: .\templates\events\admin\criteria_manage.html:21
-#: .\templates\events\event_detail.html:372
+#: .\templates\events\event_detail.html:377
 msgid "Categorías"
 msgstr "Categories"
 
@@ -4499,14 +4641,6 @@ msgstr "Support"
 #: .\templates\core\base.html:895
 msgid "Ayuda"
 msgstr "Help"
-
-#: .\templates\core\base.html:896 .\templates\core\terminos.html:308
-#: .\templates\core\terminos.html:335
-#: .\templates\orders\admin\order_detail.html:230
-#: .\templates\orders\users\order_detail.html:368
-#: .\templates\orders\users\order_list.html:182
-msgid "Contacto"
-msgstr "Contact"
 
 #: .\templates\core\base.html:901
 msgid "Contáctanos"
@@ -4761,6 +4895,7 @@ msgstr "Featured"
 
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
+#: .\templates\events\staffing\access_log.html:12
 #: .\templates\orders\admin\order_detail.html:161
 #: .\templates\orders\admin\order_detail.html:954
 msgid "Fecha"
@@ -5446,7 +5581,7 @@ msgstr "If you think this is an error, contact your coach."
 
 #: .\templates\events\admin\criteria_manage.html:3
 #: .\templates\events\admin\criteria_manage.html:12
-#: .\templates\events\event_detail.html:44
+#: .\templates\events\event_detail.html:49
 msgid "Categorías y Criterios"
 msgstr "Categories and Criteria"
 
@@ -5472,7 +5607,7 @@ msgstr "Registrations"
 #: .\templates\events\admin\score_entry.html:50
 #: .\templates\events\coach\my_registrations.html:34
 #: .\templates\events\coach\register_team.html:71
-#: .\templates\events\event_detail.html:412
+#: .\templates\events\event_detail.html:417
 #: .\templates\events\judge\panel.html:66
 #: .\templates\orders\admin\order_list.html:80
 #: .\templates\orders\admin\order_list.html:135
@@ -5541,7 +5676,7 @@ msgstr "No results calculated yet. Use the form above."
 
 #: .\templates\events\admin\score_entry.html:3
 #: .\templates\events\admin\score_entry.html:12
-#: .\templates\events\event_detail.html:49
+#: .\templates\events\event_detail.html:54
 msgid "Ingresar Scores"
 msgstr "Enter Scores"
 
@@ -5687,7 +5822,7 @@ msgstr "Search for open events"
 #: .\templates\events\coach\register_team.html:3
 #: .\templates\events\coach\register_team.html:12
 #: .\templates\events\coach\register_team.html:134
-#: .\templates\events\event_detail.html:78
+#: .\templates\events\event_detail.html:83
 msgid "Registrar Equipo"
 msgstr "Register Team"
 
@@ -5737,88 +5872,88 @@ msgstr "Organized by"
 msgid "Gestionar"
 msgstr "Manage"
 
-#: .\templates\events\event_detail.html:54
+#: .\templates\events\event_detail.html:59
 msgid "Gestionar Resultados"
 msgstr "Manage Results"
 
-#: .\templates\events\event_detail.html:65
+#: .\templates\events\event_detail.html:70
 msgid "Estancias"
 msgstr "Stays"
 
-#: .\templates\events\event_detail.html:73
+#: .\templates\events\event_detail.html:78
 msgid "Mi Estancia"
 msgstr "My Stay"
 
-#: .\templates\events\event_detail.html:83
+#: .\templates\events\event_detail.html:88
 #: .\templates\events\judge\panel.html:4 .\templates\events\judge\panel.html:35
 msgid "Panel de Juez"
 msgstr "Judge Panel"
 
-#: .\templates\events\event_detail.html:95
+#: .\templates\events\event_detail.html:100
 msgid "Confirmar cambio de estado"
 msgstr "Confirm status change"
 
-#: .\templates\events\event_detail.html:99
+#: .\templates\events\event_detail.html:104
 msgid ""
 "¿Estás seguro de que deseas realizar este cambio? Esta acción no se puede "
 "deshacer."
 msgstr ""
 "Are you sure you want to make this change? This action cannot be undone."
 
-#: .\templates\events\event_detail.html:127
+#: .\templates\events\event_detail.html:132
 msgid "Información del evento"
 msgstr "Event information"
 
-#: .\templates\events\event_detail.html:152
+#: .\templates\events\event_detail.html:157
 #, python-format
 msgid "Máx. %(n)s equipos"
 msgstr "Max. %(n)s teams"
 
-#: .\templates\events\event_detail.html:158
+#: .\templates\events\event_detail.html:163
 msgid "Inscripciones:"
 msgstr "Registrations:"
 
-#: .\templates\events\event_detail.html:179
+#: .\templates\events\event_detail.html:184
 msgid "Flujo del Evento"
 msgstr "Event Flow"
 
-#: .\templates\events\event_detail.html:308
+#: .\templates\events\event_detail.html:313
 msgid "Completa estos pasos para poder"
 msgstr "Complete these steps to"
 
-#: .\templates\events\event_detail.html:322
+#: .\templates\events\event_detail.html:327
 msgid "Ir a Categorías y Criterios"
 msgstr "Go to Categories and Criteria"
 
-#: .\templates\events\event_detail.html:326
+#: .\templates\events\event_detail.html:331
 msgid "Editar fechas"
 msgstr "Edit dates"
 
-#: .\templates\events\event_detail.html:332
+#: .\templates\events\event_detail.html:337
 msgid "Ir a Registros"
 msgstr "Go to Registrations"
 
-#: .\templates\events\event_detail.html:337
+#: .\templates\events\event_detail.html:342
 msgid "Ir a Resultados"
 msgstr "Go to Results"
 
-#: .\templates\events\event_detail.html:354
+#: .\templates\events\event_detail.html:359
 msgid "Evento completado. No hay más transiciones disponibles."
 msgstr "Event completed. No more transitions available."
 
-#: .\templates\events\event_detail.html:356
+#: .\templates\events\event_detail.html:361
 msgid "Evento cancelado. No hay más transiciones disponibles."
 msgstr "Event cancelled. No more transitions available."
 
-#: .\templates\events\event_detail.html:358
+#: .\templates\events\event_detail.html:363
 msgid "No hay transiciones disponibles desde el estado actual."
 msgstr "No transitions available from the current state."
 
-#: .\templates\events\event_detail.html:381
+#: .\templates\events\event_detail.html:386
 msgid "Límite"
 msgstr "Limit"
 
-#: .\templates\events\event_detail.html:445
+#: .\templates\events\event_detail.html:450
 msgid "Los resultados se publicarán próximamente."
 msgstr "Results will be published soon."
 
@@ -5963,6 +6098,190 @@ msgstr "Venue to be defined"
 msgid "Ver detalle"
 msgstr "View detail"
 
+#: .\templates\events\staffing\access_log.html:12
+msgid "Movimiento"
+msgstr "Movement"
+
+#: .\templates\events\staffing\access_log.html:12
+msgid "Elemento"
+msgstr "Member"
+
+#: .\templates\events\staffing\access_log.html:12
+msgid "Registró"
+msgstr "Recorded by"
+
+#: .\templates\events\staffing\access_log.html:23
+msgid "Sin movimientos todavía."
+msgstr "No movements yet."
+
+#: .\templates\events\staffing\badges.html:2
+msgid "Gafetes"
+msgstr "Badges"
+
+#: .\templates\events\staffing\badges.html:17
+#, python-format
+msgid "%(n)s gafetes. Imprime con Ctrl+P a escala 100 %%."
+msgstr "%(n)s badges. Print with Ctrl+P at 100 %% scale."
+
+#: .\templates\events\staffing\badges.html:33
+#: .\templates\events\staffing\sheet.html:32
+msgid "No hay elementos aceptados."
+msgstr "There are no accepted members."
+
+#: .\templates\events\staffing\door.html:3
+msgid "Puerta"
+msgstr "Door"
+
+#: .\templates\events\staffing\door.html:13
+msgid "Dentro"
+msgstr "Inside"
+
+#: .\templates\events\staffing\door.html:13
+msgid "Fuera"
+msgstr "Outside"
+
+#: .\templates\events\staffing\door.html:17
+msgid "Registrar salida"
+msgstr "Record exit"
+
+#: .\templates\events\staffing\door.html:19
+msgid "Registrar entrada"
+msgstr "Record entry"
+
+#: .\templates\events\staffing\door_invalid.html:3
+#: .\templates\events\staffing\door_invalid.html:8
+msgid "Gafete no válido"
+msgstr "Invalid badge"
+
+#: .\templates\events\staffing\door_invalid.html:9
+msgid "No dejes pasar a esta persona sin confirmar con administración."
+msgstr "Do not let this person through without confirming with administration."
+
+#: .\templates\events\staffing\event_staff.html:12
+#: .\templates\events\staffing\sheet.html:2
+msgid "Hoja operativa"
+msgstr "Operations sheet"
+
+#: .\templates\events\staffing\event_staff.html:13
+msgid "Bitácora"
+msgstr "Log"
+
+#: .\templates\events\staffing\event_staff.html:14
+msgid "Imprimir gafetes"
+msgstr "Print badges"
+
+#: .\templates\events\staffing\event_staff.html:21
+msgid "Agregar al evento"
+msgstr "Add to event"
+
+#: .\templates\events\staffing\event_staff.html:30
+#, python-format
+msgid "Vence %(d)s"
+msgstr "Expires %(d)s"
+
+#: .\templates\events\staffing\event_staff.html:33
+msgid "Revocar"
+msgstr "Revoke"
+
+#: .\templates\events\staffing\event_staff.html:39
+msgid "Regenerar enlace"
+msgstr "Regenerate link"
+
+#: .\templates\events\staffing\event_staff.html:39
+msgid "Generar enlace"
+msgstr "Generate link"
+
+#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\sheet.html:23
+msgid "Credencial"
+msgstr "ID"
+
+#: .\templates\events\staffing\event_staff.html:59
+msgid "Sin elementos todavía."
+msgstr "No members yet."
+
+#: .\templates\events\staffing\event_staff.html:66
+msgid "Aceptar seleccionados"
+msgstr "Accept selected"
+
+#: .\templates\events\staffing\event_staff.html:67
+msgid "Rechazar / dar de baja seleccionados"
+msgstr "Reject / remove selected"
+
+#: .\templates\events\staffing\event_staff.html:73
+msgid "Capturar elemento directamente"
+msgstr "Enter a member directly"
+
+#: .\templates\events\staffing\event_staff.html:77
+msgid "Capturar"
+msgstr "Enter"
+
+#: .\templates\events\staffing\event_staff.html:83
+msgid "Agrega una organización al evento para empezar."
+msgstr "Add an organization to the event to get started."
+
+#: .\templates\events\staffing\invite.html:3
+msgid "Staff del evento"
+msgstr "Event staff"
+
+#: .\templates\events\staffing\invite.html:15
+msgid "Corregir elemento"
+msgstr "Correct member"
+
+#: .\templates\events\staffing\invite.html:15
+msgid "Agregar elemento"
+msgstr "Add member"
+
+#: .\templates\events\staffing\invite.html:24
+msgid "Guardar corrección"
+msgstr "Save correction"
+
+#: .\templates\events\staffing\invite.html:24
+msgid "Enviar"
+msgstr "Submit"
+
+#: .\templates\events\staffing\invite.html:31
+msgid "Lo que has enviado"
+msgstr "What you have submitted"
+
+#: .\templates\events\staffing\invite.html:44
+msgid "Corregir"
+msgstr "Correct"
+
+#: .\templates\events\staffing\invite.html:54
+msgid "Todavía no has enviado a nadie."
+msgstr "You have not submitted anyone yet."
+
+#: .\templates\events\staffing\invite_inactive.html:3
+msgid "Enlace no activo"
+msgstr "Inactive link"
+
+#: .\templates\events\staffing\invite_inactive.html:7
+msgid "Este enlace ya no está activo"
+msgstr "This link is no longer active"
+
+#: .\templates\events\staffing\invite_inactive.html:8
+msgid "Pide uno nuevo a quien organiza el evento."
+msgstr "Ask the event organizer for a new one."
+
+#: .\templates\events\staffing\organizations.html:30
+#: .\templates\measures\manage_fields.html:139
+msgid "Desactivar"
+msgstr "Disable"
+
+#: .\templates\events\staffing\organizations.html:30
+msgid "Activar"
+msgstr "Activate"
+
+#: .\templates\events\staffing\organizations.html:36
+msgid "Sin organizaciones todavía."
+msgstr "No organizations yet."
+
+#: .\templates\events\staffing\sheet.html:35
+#, python-format
+msgid "Resumen: %(total)s elementos"
+msgstr "Summary: %(total)s members"
+
 #: .\templates\hospitality\bed_form.html:64
 msgid "El tipo de cama es obligatorio"
 msgstr "Bed type is required"
@@ -6039,17 +6358,6 @@ msgstr "Measurement Fields"
 msgid "Nuevo campo"
 msgstr "New field"
 
-#: .\templates\measures\manage_fields.html:22
-#: .\templates\orders\admin\order_detail.html:42
-#: .\templates\orders\admin\order_list.html:76
-#: .\templates\orders\admin\order_list.html:114
-#: .\templates\orders\users\order_detail.html:221
-#: .\templates\orders\users\order_list.html:89
-#: .\templates\products\product_list.html:34
-#: .\templates\products\product_list.html:76
-msgid "Tipo"
-msgstr "Type"
-
 #: .\templates\measures\manage_fields.html:23
 #: .\templates\products\product_detail.html:541
 msgid "Unidad"
@@ -6079,10 +6387,6 @@ msgstr "Are you sure you want to disable the field <strong>%(name)s</strong>?"
 #: .\templates\measures\manage_fields.html:132
 msgid "Las medidas existentes no se perderán."
 msgstr "Existing measurements will not be lost."
-
-#: .\templates\measures\manage_fields.html:139
-msgid "Desactivar"
-msgstr "Disable"
 
 #: .\templates\measures\manage_fields.html:159
 msgid "Nuevo campo de medida"
@@ -8216,10 +8520,6 @@ msgstr "Your team's posts will appear here ✨"
 #, python-format
 msgid "¿Qué está pasando, %(name)s?"
 msgstr "What's happening, %(name)s?"
-
-#: .\templates\social\feed.html:45
-msgid "Foto"
-msgstr "Photo"
 
 #: .\templates\social\feed.html:50
 msgid "Hasta 4 imágenes (JPG/PNG/WebP, máx 5 MB c/u)."
