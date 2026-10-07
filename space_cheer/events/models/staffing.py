@@ -15,7 +15,7 @@ from .core import Event
 
 class EventStaffRole(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name=_('Nombre'))
-    description = models.TextField(blank=True, verbose_name=_('DescripciÃ³n'))
+    description = models.TextField(blank=True, verbose_name=_('Descripción'))
     is_active = models.BooleanField(default=True, verbose_name=_('Activo'))
     is_judge = models.BooleanField(default=False, verbose_name=_('Es rol de juez'))
 
@@ -28,6 +28,8 @@ class EventStaffRole(models.Model):
         return self.name
 
     def clean(self):
+        # `unique=True` distingue mayúsculas: "Coordinador de piso" y
+        # "Coordinador de Piso" convivían como dos roles distintos.
         if self.name and (
             EventStaffRole.objects.filter(name__iexact=self.name.strip())
             .exclude(pk=self.pk)
@@ -70,13 +72,15 @@ class EventStaffAssignment(models.Model):
 
     class Meta:
         unique_together = [('event', 'user', 'role')]
-        verbose_name = _('AsignaciÃ³n de staff')
+        verbose_name = _('Asignación de staff')
         verbose_name_plural = _('Asignaciones de staff')
 
     def __str__(self):
-        return f'{self.user} â {self.role} @ {self.event}'
+        return f'{self.user} — {self.role} @ {self.event}'
 
     def clean(self):
+        # Un rol desactivado no se asigna de nuevo; las asignaciones que ya
+        # tenía siguen editándose.
         if self.role_id and not self.role.is_active:
             role_changed = (
                 self.pk is None
@@ -85,7 +89,7 @@ class EventStaffAssignment(models.Model):
                 .exists()
             )
             if role_changed:
-                raise ValidationError({'role': _('Este rol de staff estÃ¡ desactivado.')})
+                raise ValidationError({'role': _('Este rol de staff está desactivado.')})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -101,7 +105,7 @@ class Organization(models.Model):
     KIND_VENDOR = 'VENDOR'
     KIND_ORGANIZER = 'ORGANIZER'
     KIND_CHOICES = [
-        (KIND_PUBLIC_INSTITUTION, _('InstituciÃ³n pÃºblica')),
+        (KIND_PUBLIC_INSTITUTION, _('Institución pública')),
         (KIND_VENDOR, _('Proveedor')),
         (KIND_ORGANIZER, _('Organizador')),
     ]
@@ -109,12 +113,12 @@ class Organization(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name=_('Nombre'))
     kind = models.CharField(max_length=30, choices=KIND_CHOICES, verbose_name=_('Tipo'))
     contact_name = models.CharField(max_length=150, blank=True, verbose_name=_('Contacto'))
-    contact_phone = models.CharField(max_length=20, blank=True, verbose_name=_('TelÃ©fono de contacto'))
+    contact_phone = models.CharField(max_length=20, blank=True, verbose_name=_('Teléfono de contacto'))
     is_active = models.BooleanField(default=True, verbose_name=_('Activa'))
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('OrganizaciÃ³n')
+        verbose_name = _('Organización')
         verbose_name_plural = _('Organizaciones')
 
     def __str__(self):
@@ -126,7 +130,7 @@ class Organization(models.Model):
             .exclude(pk=self.pk)
             .exists()
         ):
-            raise ValidationError({'name': _('Ya existe una organizaciÃ³n con ese nombre.')})
+            raise ValidationError({'name': _('Ya existe una organización con ese nombre.')})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -148,7 +152,7 @@ class EventOrganization(models.Model):
     class Meta:
         unique_together = [('event', 'organization')]
         ordering = ['organization__name']
-        verbose_name = _('OrganizaciÃ³n del evento')
+        verbose_name = _('Organización del evento')
         verbose_name_plural = _('Organizaciones del evento')
 
     def __str__(self):
@@ -181,20 +185,20 @@ class StaffMember(models.Model):
     SOURCE_ADMIN = 'ADMIN'
     SOURCE_LINK = 'LINK'
     SOURCE_CHOICES = [
-        (SOURCE_ADMIN, _('Capturado por administraciÃ³n')),
-        (SOURCE_LINK, _('Enviado por la organizaciÃ³n')),
+        (SOURCE_ADMIN, _('Capturado por administración')),
+        (SOURCE_LINK, _('Enviado por la organización')),
     ]
 
     event_organization = models.ForeignKey(
         EventOrganization, on_delete=models.CASCADE, related_name='members',
     )
     full_name = models.CharField(max_length=150, verbose_name=_('Nombre completo'))
-    phone = models.CharField(max_length=20, blank=True, verbose_name=_('TelÃ©fono'))
+    phone = models.CharField(max_length=20, blank=True, verbose_name=_('Teléfono'))
     photo = models.ImageField(upload_to='event_staff/photos/', blank=True, verbose_name=_('Foto'))
     credential = models.CharField(max_length=80, blank=True, verbose_name=_('Placa o credencial'))
     role = models.ForeignKey(
         EventStaffRole, on_delete=models.PROTECT, related_name='external_members',
-        verbose_name=_('FunciÃ³n'),
+        verbose_name=_('Función'),
     )
     shift = models.CharField(max_length=80, blank=True, verbose_name=_('Turno'))
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
