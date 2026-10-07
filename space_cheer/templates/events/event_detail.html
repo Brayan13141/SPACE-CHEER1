@@ -40,6 +40,11 @@
               </a>
             </li>
             <li>
+              <a class="dropdown-item" href="{% url 'events:external_staff' event.pk %}">
+                <i class="bi bi-person-badge me-2"></i>{% trans "Staff externo" %}
+              </a>
+            </li>
+            <li>
               <a class="dropdown-item" href="{% url 'events:criteria_manage' event.pk %}">
                 <i class="bi bi-list-stars me-2"></i>{% trans "Categorías y Criterios" %}
               </a>

@@ -142,3 +142,55 @@ class TestInvite:
         resp = client.post(invite_url, {'action': 'remove', 'member_pk': ajeno.pk})
         assert resp.status_code == 404
         assert StaffMember.objects.filter(pk=ajeno.pk).exists()
+
+
+class TestPanelAdmin:
+    def test_solo_admin(self, client, event):
+        client.force_login(_user('coach_x', 'HEADCOACH'))
+        assert client.get(reverse('events:external_staff', args=[event.pk])).status_code in (302, 403)
+
+    def test_vincular_emitir_y_revocar(self, client, admin, event):
+        client.force_login(admin)
+        org = Organization.objects.create(name='Limpieza SA', kind=Organization.KIND_VENDOR)
+        url = reverse('events:external_staff', args=[event.pk])
+        client.post(url, {'action': 'link_org', 'organization': org.pk})
+        eo = EventOrganization.objects.get(event=event, organization=org)
+        client.post(url, {'action': 'issue_invite', 'eo_pk': eo.pk})
+        eo.refresh_from_db()
+        assert eo.invite_is_active
+        client.post(url, {'action': 'revoke_invite', 'eo_pk': eo.pk})
+        eo.refresh_from_db()
+        assert not eo.invite_is_active
+
+    def test_aceptar_en_lote(self, client, admin, event_org, role):
+        client.force_login(admin)
+        a = S.add_member(event_org=event_org, data={'full_name': 'A', 'role': role}, source=StaffMember.SOURCE_LINK)
+        b = S.add_member(event_org=event_org, data={'full_name': 'B', 'role': role}, source=StaffMember.SOURCE_LINK)
+        client.post(reverse('events:external_staff', args=[event_org.event.pk]),
+                    {'action': 'review', 'decision': 'accept', 'member_pks': [a.pk, b.pk]})
+        assert set(event_org.members.values_list('status', flat=True)) == {StaffMember.STATUS_ACCEPTED}
+
+    def test_no_revisa_elementos_de_otro_evento(self, client, admin, event_org, role, event):
+        otro = Event.objects.create(
+            name='Otro', event_type='COMPETITION', organizer=admin,
+            start_date=TODAY + datetime.timedelta(days=40), end_date=TODAY + datetime.timedelta(days=41),
+        )
+        client.force_login(admin)
+        m = S.add_member(event_org=event_org, data={'full_name': 'A', 'role': role}, source=StaffMember.SOURCE_LINK)
+        client.post(reverse('events:external_staff', args=[otro.pk]),
+                    {'action': 'review', 'decision': 'accept', 'member_pks': [m.pk]})
+        m.refresh_from_db()
+        assert m.status == StaffMember.STATUS_PENDING
+
+    def test_ver_el_panel_se_audita(self, client, admin, event_org, role):
+        client.force_login(admin)
+        S.add_member(event_org=event_org, data={'full_name': 'A', 'role': role, 'phone': '1'}, source=StaffMember.SOURCE_LINK)
+        client.get(reverse('events:external_staff', args=[event_org.event.pk]))
+        assert PiiAccessLog.objects.filter(access_type='VIEW_EVENT_STAFF').exists()
+
+    def test_catalogo(self, client, admin):
+        client.force_login(admin)
+        client.post(reverse('events:organization_list'), {
+            'name': 'Protección Civil León', 'kind': Organization.KIND_PUBLIC_INSTITUTION,
+        })
+        assert Organization.objects.filter(name='Protección Civil León').exists()

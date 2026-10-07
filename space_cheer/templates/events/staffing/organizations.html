@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Organizaciones" %}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h3 mb-4">{% trans "Organizaciones" %}</h1>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card"><div class="card-body">
+        <form method="post">{% csrf_token %}
+          {{ form.as_div }}
+          <button type="submit" class="btn btn-primary mt-3 w-100">{% trans "Agregar" %}</button>
+        </form>
+      </div></div>
+    </div>
+    <div class="col-md-8">
+      <table class="table align-middle">
+        <thead><tr><th>{% trans "Nombre" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Contacto" %}</th><th></th></tr></thead>
+        <tbody>
+        {% for org in organizations %}
+          <tr class="{% if not org.is_active %}text-muted{% endif %}">
+            <td>{{ org.name }}</td>
+            <td>{{ org.get_kind_display }}</td>
+            <td>{{ org.contact_name }} {{ org.contact_phone }}</td>
+            <td class="text-end">
+              <form method="post">{% csrf_token %}
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="org_pk" value="{{ org.pk }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                  {% if org.is_active %}{% trans "Desactivar" %}{% else %}{% trans "Activar" %}{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">{% trans "Sin organizaciones todavía." %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Staff externo" %} — {{ event.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <div class="flex-grow-1">
+      <h1 class="h3 mb-0">{% trans "Staff externo" %}</h1>
+      <p class="text-secondary small mb-0">{{ event.name }}</p>
+    </div>
+    {# Los Tasks 5 y 6 agregan aquí "Imprimir gafetes", "Hoja operativa" y "Bitácora". #}
+    <a href="{% url 'events:organization_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-building me-1"></i>{% trans "Organizaciones" %}</a>
+  </div>
+
+  <form method="post" class="row g-2 align-items-end mb-4">{% csrf_token %}
+    <input type="hidden" name="action" value="link_org">
+    <div class="col-md-6">{{ link_form.organization.label_tag }}{{ link_form.organization }}</div>
+    <div class="col-md-3"><button type="submit" class="btn btn-primary w-100">{% trans "Agregar al evento" %}</button></div>
+  </form>
+
+  {% for row in rows %}
+  <div class="card mb-4">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2">
+      <strong class="flex-grow-1">{{ row.eo.organization.name }}</strong>
+      {% if row.invite_url %}
+        <input type="text" readonly class="form-control form-control-sm w-auto flex-grow-1" value="{{ row.invite_url }}" onclick="this.select()">
+        <small class="text-muted">{% blocktrans with d=row.eo.invite_expires_at|date:"d/m/Y H:i" %}Vence {{ d }}{% endblocktrans %}</small>
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="action" value="revoke_invite"><input type="hidden" name="eo_pk" value="{{ row.eo.pk }}">
+          <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Revocar" %}</button>
+        </form>
+      {% endif %}
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="issue_invite"><input type="hidden" name="eo_pk" value="{{ row.eo.pk }}">
+        <button type="submit" class="btn btn-sm btn-outline-primary">
+          {% if row.invite_url %}{% trans "Regenerar enlace" %}{% else %}{% trans "Generar enlace" %}{% endif %}
+        </button>
+      </form>
+    </div>
+    <div class="card-body">
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="review">
+        <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead><tr><th></th><th>{% trans "Foto" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Función" %}</th><th>{% trans "Turno" %}</th><th>{% trans "Credencial" %}</th><th>{% trans "Teléfono" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+          <tbody>
+          {% for m in row.members %}
+            <tr>
+              <td><input type="checkbox" class="form-check-input" name="member_pks" value="{{ m.pk }}"></td>
+              <td>{% if m.photo %}<img src="{{ m.photo.url }}" alt="" width="40" height="40" class="rounded object-fit-cover">{% endif %}</td>
+              <td>{{ m.full_name }}<small class="text-muted d-block">{{ m.get_source_display }}</small></td>
+              <td>{{ m.role.name }}</td><td>{{ m.shift }}</td><td>{{ m.credential }}</td><td>{{ m.phone }}</td>
+              <td><span class="badge {% if m.status == 'ACCEPTED' %}text-bg-success{% elif m.status == 'REJECTED' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ m.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8" class="text-muted">{% trans "Sin elementos todavía." %}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% if row.members %}
+        <div class="d-flex gap-2">
+          <button type="submit" name="decision" value="accept" class="btn btn-sm btn-success">{% trans "Aceptar seleccionados" %}</button>
+          <button type="submit" name="decision" value="reject" class="btn btn-sm btn-outline-danger">{% trans "Rechazar / dar de baja seleccionados" %}</button>
+        </div>
+        {% endif %}
+      </form>
+
+      <details class="mt-3">
+        <summary>{% trans "Capturar elemento directamente" %}</summary>
+        <form method="post" enctype="multipart/form-data" class="mt-2">{% csrf_token %}
+          <input type="hidden" name="action" value="add_member"><input type="hidden" name="eo_pk" value="{{ row.eo.pk }}">
+          {{ member_form.as_div }}
+          <button type="submit" class="btn btn-primary btn-sm mt-2">{% trans "Capturar" %}</button>
+        </form>
+      </details>
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-muted">{% trans "Agrega una organización al evento para empezar." %}</p>
+  {% endfor %}
+</div>
+{% endblock %}

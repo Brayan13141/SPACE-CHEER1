@@ -5,6 +5,7 @@ import events.views.coach_views as coach_views
 import events.views.external_views as external_views
 import events.views.judge_views as judge_views
 import events.views.public_views as public_views
+import events.views.staffing_views as staffing_views
 
 app_name = 'events'
 
@@ -24,6 +25,9 @@ urlpatterns = [
     path('<int:pk>/registrations/<int:reg_pk>/accept/', admin_views.registration_accept, name='registration_accept'),
     path('<int:pk>/registrations/<int:reg_pk>/reject/', admin_views.registration_reject, name='registration_reject'),
     path('<int:pk>/staff/', admin_views.staff_manage, name='staff_manage'),
+    # Staff externo — ADMIN
+    path('organizations/', staffing_views.organization_list, name='organization_list'),
+    path('<int:pk>/external-staff/', staffing_views.external_staff, name='external_staff'),
     path('<int:pk>/criteria/', admin_views.criteria_manage, name='criteria_manage'),
     path('<int:pk>/scores/', admin_views.score_entry, name='score_entry'),
     path('<int:pk>/results/', admin_views.results_manage, name='results_manage'),
