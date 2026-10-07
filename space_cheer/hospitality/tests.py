@@ -560,3 +560,59 @@ class AuditoriaConVariosTutoresTests(LodgingTestBase):
 
         presentes = MinorAthleteService.guardians_present_at(self.event, self.menor)
         self.assertEqual(list(presentes), [])
+
+
+# =====================================================================
+# CONSISTENCIA HABITACIÓN / HOTEL / EVENTO
+# =====================================================================
+
+class HotelConsistencyTests(LodgingTestBase):
+    """`Stay.hotel` es opcional: sin hotel en la estancia, la habitación debe
+    seguir perteneciendo al evento de la estancia."""
+
+    def setUp(self):
+        super().setUp()
+        self.otro_evento = Event.objects.create(
+            name="Otra Copa",
+            organizer=self.admin,
+            start_date=self.today + datetime.timedelta(days=60),
+            end_date=self.today + datetime.timedelta(days=61),
+            venue_city="Monterrey",
+        )
+        otro_hotel = Hotel.objects.create(event=self.otro_evento, name="Hotel Ajeno")
+        otro_tipo = RoomType.objects.create(hotel=otro_hotel, name="Doble", capacity=2)
+        self.habitacion_ajena = Room.objects.create(
+            hotel=otro_hotel, room_type=otro_tipo, room_number="900", floor=9,
+        )
+        self.huesped = self.make_user(age=30, username="huesped_sin_hotel")
+
+    def estancia_sin_hotel(self):
+        return Stay.objects.create(
+            event=self.event, user=self.huesped, hotel=None,
+            status=Stay.CONFIRMED, created_by=self.admin,
+        )
+
+    def test_estancia_sin_hotel_rechaza_habitacion_de_otro_evento(self):
+        stay = self.estancia_sin_hotel()
+        with self.assertRaises(ValidationError):
+            RoomAssignment.objects.create(
+                stay=stay, room=self.habitacion_ajena, assigned_by=self.admin,
+            )
+        self.assertFalse(RoomAssignment.objects.filter(stay=stay).exists())
+
+    def test_estancia_sin_hotel_acepta_habitacion_del_mismo_evento(self):
+        stay = self.estancia_sin_hotel()
+        RoomAssignment.objects.create(stay=stay, room=self.room, assigned_by=self.admin)
+        self.assertTrue(RoomAssignment.objects.filter(stay=stay, room=self.room).exists())
+
+    def test_estancia_con_hotel_sigue_rechazando_habitacion_de_otro_hotel(self):
+        otro_hotel_mismo_evento = Hotel.objects.create(event=self.event, name="Anexo")
+        tipo = RoomType.objects.create(hotel=otro_hotel_mismo_evento, name="Doble", capacity=2)
+        habitacion_anexo = Room.objects.create(
+            hotel=otro_hotel_mismo_evento, room_type=tipo, room_number="201", floor=2,
+        )
+        stay = self.make_stay(self.huesped)
+        with self.assertRaises(ValidationError):
+            RoomAssignment.objects.create(
+                stay=stay, room=habitacion_anexo, assigned_by=self.admin,
+            )

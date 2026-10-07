@@ -420,6 +420,9 @@ class RoomAssignment(models.Model):
             stay = self.stay
             if stay.hotel_id and self.room.hotel_id != stay.hotel_id:
                 raise ValidationError({'room': "La habitación no pertenece al hotel de la estancia."})
+            # Stay.hotel es opcional: sin hotel, la habitación al menos debe ser del evento.
+            if not stay.hotel_id and self.room.hotel.event_id != stay.event_id:
+                raise ValidationError({'room': "La habitación no pertenece al evento de la estancia."})
 
     def _validate_room_capacity(self):
         if not self.room_id:
