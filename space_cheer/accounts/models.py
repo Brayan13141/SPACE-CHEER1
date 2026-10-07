@@ -407,6 +407,7 @@ class PiiAccessLog(models.Model):
         ("EXPORT_DATA", "Exportar datos"),
         ("EDIT_PROFILE", "Editar perfil"),
         ("BULK_IMPORT", "Importación masiva"),
+        ("VIEW_EVENT_STAFF", "Ver datos de staff externo de un evento"),
     ]
 
     # Quién accedió

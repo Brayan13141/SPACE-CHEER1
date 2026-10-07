@@ -6,7 +6,14 @@ igual que cuando todo vivía en un solo models.py.
 
 from .core import Event, EventCategory
 from .registration import EventParticipant, EventTeamRegistration
-from .staffing import EventStaffAssignment, EventStaffRole
+from .staffing import (
+    EventOrganization,
+    EventStaffAssignment,
+    EventStaffRole,
+    Organization,
+    StaffAccessLog,
+    StaffMember,
+)
 from .judging import EventJudgingCriteria, EventResult, EventScore
 
 __all__ = [
@@ -16,6 +23,10 @@ __all__ = [
     "EventParticipant",
     "EventStaffRole",
     "EventStaffAssignment",
+    "Organization",
+    "EventOrganization",
+    "StaffMember",
+    "StaffAccessLog",
     "EventJudgingCriteria",
     "EventScore",
     "EventResult",

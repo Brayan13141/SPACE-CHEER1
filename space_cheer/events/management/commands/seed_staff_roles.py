@@ -106,6 +106,14 @@ STAFF_ROLES = [
         "description": "Apoyo general en tareas asignadas durante el evento.",
         "is_judge": False,
     },
+    # ── Staff externo (sin cuenta) ─────────────────────────────────────────
+    {"name": "Policía", "description": "Elemento de seguridad pública asignado al evento.", "is_judge": False},
+    {"name": "Cruz Roja", "description": "Elemento de Cruz Roja asignado al evento.", "is_judge": False},
+    {"name": "Protección Civil", "description": "Elemento de Protección Civil asignado al evento.", "is_judge": False},
+    {"name": "Control de accesos", "description": "Registra entradas y salidas del staff en la puerta.", "is_judge": False},
+    {"name": "Acomodador", "description": "Guía al público a sus lugares.", "is_judge": False},
+    {"name": "Limpieza", "description": "Mantiene limpias las áreas del evento.", "is_judge": False},
+    {"name": "Taquilla", "description": "Venta y validación de boletos.", "is_judge": False},
     # ── Panel de jueces ────────────────────────────────────────────────────
     {
         "name": "Juez Técnico",
