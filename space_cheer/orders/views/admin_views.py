@@ -16,6 +16,11 @@ from orders.models import (
 )
 from orders.services.sizes.SizeSummaryService import SizeSummaryService
 from orders.services.state import OrderStateService
+from orders.services.preconditions import (
+    NEXT_STATUS,
+    NEXT_STATUS_LABELS,
+    next_step_requirements,
+)
 from orders.services.measurements.MeasurementGridService import (
     MeasurementGridService,
 )
@@ -321,6 +326,18 @@ def admin_order_detail(request, order_id):
     available_transitions = OrderStateService.get_available_transitions(
         order, request.user
     )
+    # ── Qué falta para avanzar ────────────────────────────────────────
+    # Los validadores de OrderStateService solo hablaban al intentar el salto,
+    # de a un error por vez. Aquí se anuncian todos antes, y "Enviar a
+    # Producción" se juzga contra ESE salto: sin diseño, PENDING salta directo.
+    next_status = NEXT_STATUS.get(order.status)
+    if order.status == "PENDING" and not order_flags["requires_design"]:
+        next_status = "IN_PRODUCTION"
+    next_requirements = next_step_requirements(order, to_status=next_status)
+    in_production_blocked = "IN_PRODUCTION" in available_transitions and bool(
+        next_step_requirements(order, to_status="IN_PRODUCTION")
+    )
+
     # ── Measurement actions (UI control) ─────────────────────────────
     measurement_actions = {
         "can_close": (order.measurements_open and not order.measurements_locked),
@@ -340,7 +357,10 @@ def admin_order_detail(request, order_id):
             "order_flags": order_flags,
             "measurements_summary": measurements_summary,
             "grids": grids,
-            "measurement_actions": measurement_actions,  # 👈 AÑADE ESTO
+            "measurement_actions": measurement_actions,
+            "next_requirements": next_requirements,
+            "in_production_blocked": in_production_blocked,
+            "next_step_label": NEXT_STATUS_LABELS.get(next_status, ""),
             "size_groups": SizeSummaryService.for_order(order),
         },
     )

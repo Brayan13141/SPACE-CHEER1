@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-23 17:44-0600\n"
+"POT-Creation-Date: 2026-10-07 16:07-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1311,55 +1311,55 @@ msgstr "The change is reflected in all room types that use it."
 msgid "Motivo del rechazo"
 msgstr "Rejection reason"
 
-#: .\events\models.py:23 .\templates\events\admin\results_manage.html:93
+#: .\events\models\core.py:23 .\templates\events\admin\results_manage.html:93
 #: .\templates\events\event_detail.html:430
-#: .\templates\orders\admin\order_detail.html:717
-#: .\templates\orders\users\order_detail.html:827
+#: .\templates\orders\admin\order_detail.html:757
+#: .\templates\orders\users\order_detail.html:886
 #: .\templates\orders\users\order_list.html:124
 msgid "Borrador"
 msgstr "Draft"
 
-#: .\events\models.py:24
+#: .\events\models\core.py:24
 msgid "Inscripciones abiertas"
 msgstr "Open Registration"
 
-#: .\events\models.py:25
+#: .\events\models\core.py:25
 msgid "Inscripciones cerradas"
 msgstr "Closed Registration"
 
-#: .\events\models.py:26
+#: .\events\models\core.py:26
 msgid "En progreso"
 msgstr "In Progress"
 
-#: .\events\models.py:27
+#: .\events\models\core.py:27
 #: .\production\templates\production\admin_overview.html:86
 msgid "Completado"
 msgstr "Completed"
 
-#: .\events\models.py:28 .\events\models.py:244
+#: .\events\models\core.py:28 .\events\models\registration.py:101
 #: .\templates\events\event_detail.html:249
 #: .\templates\orders\users\order_list.html:144
 msgid "Cancelado"
 msgstr "Cancelled"
 
-#: .\events\models.py:37
+#: .\events\models\core.py:37
 msgid "Competencia"
 msgstr "Competition"
 
-#: .\events\models.py:38
+#: .\events\models\core.py:38
 msgid "Taller"
 msgstr "Workshop"
 
-#: .\events\models.py:39
+#: .\events\models\core.py:39
 msgid "Exhibición"
 msgstr "Exhibition"
 
-#: .\events\models.py:40
+#: .\events\models\core.py:40
 msgid "Amistoso"
 msgstr "Friendly"
 
-#: .\events\models.py:43 .\events\models.py:124 .\events\models.py:296
-#: .\events\models.py:367
+#: .\events\models\core.py:43 .\events\models\core.py:124
+#: .\events\models\judging.py:20 .\events\models\staffing.py:16
 #: .\production\templates\production\config\operario_detail.html:79
 #: .\production\templates\production\config\operarios.html:38
 #: .\production\templates\production\config\operarios.html:91
@@ -1389,8 +1389,8 @@ msgstr "Friendly"
 msgid "Nombre"
 msgstr "Name"
 
-#: .\events\models.py:44 .\events\models.py:134 .\events\models.py:297
-#: .\events\models.py:368
+#: .\events\models\core.py:44 .\events\models\core.py:134
+#: .\events\models\judging.py:21 .\events\models\staffing.py:17
 #: .\production\templates\production\config\plantillas.html:40
 #: .\production\templates\production\config\stages.html:50
 #: .\production\templates\production\config\stages.html:157
@@ -1399,18 +1399,19 @@ msgstr "Name"
 msgid "Descripción"
 msgstr "Description"
 
-#: .\events\models.py:47
+#: .\events\models\core.py:47
 msgid "Tipo de evento"
 msgstr "Event type"
 
-#: .\events\models.py:51 .\events\models.py:185 .\events\models.py:263
+#: .\events\models\core.py:51 .\events\models\registration.py:42
+#: .\events\models\registration.py:120
 #: .\production\templates\production\config\assign_roles.html:35
 #: .\production\templates\production\config\operario_detail.html:161
 #: .\templates\events\admin\registrations.html:26
 #: .\templates\events\admin\results_manage.html:67
 #: .\templates\events\coach\my_registrations.html:36
-#: .\templates\orders\admin\order_list.html:63
-#: .\templates\orders\admin\order_list.html:112
+#: .\templates\orders\admin\order_list.html:66
+#: .\templates\orders\admin\order_list.html:115
 #: .\templates\orders\items\_measurements_grid.html:19
 #: .\templates\orders\users\order_list.html:90
 #: .\templates\products\product_list.html:46
@@ -1418,86 +1419,86 @@ msgstr "Event type"
 msgid "Estado"
 msgstr "Status"
 
-#: .\events\models.py:57
+#: .\events\models\core.py:57
 msgid "Organizador"
 msgstr "Organizer"
 
-#: .\events\models.py:59 .\templates\core\manage_landing.html:110
+#: .\events\models\core.py:59 .\templates\core\manage_landing.html:110
 #: .\templates\events\event_form.html:86
 msgid "Sede"
 msgstr "Venue"
 
-#: .\events\models.py:60 .\templates\account\addresses\form.html:161
+#: .\events\models\core.py:60 .\templates\account\addresses\form.html:161
 #: .\templates\orders\admin\order_detail.html:240
 #: .\templates\orders\users\order_contact_info.html:72
-#: .\templates\orders\users\order_detail.html:321
+#: .\templates\orders\users\order_detail.html:378
 msgid "Dirección"
 msgstr "Address"
 
-#: .\events\models.py:61 .\templates\account\addresses\form.html:179
+#: .\events\models\core.py:61 .\templates\account\addresses\form.html:179
 #: .\templates\orders\users\order_contact_info.html:84
 #: .\templates\teams\manage_teams.html:51
 msgid "Ciudad"
 msgstr "City"
 
-#: .\events\models.py:62
+#: .\events\models\core.py:62
 msgid "Fecha de inicio"
 msgstr "Start date"
 
-#: .\events\models.py:63
+#: .\events\models\core.py:63
 msgid "Fecha de fin"
 msgstr "End date"
 
-#: .\events\models.py:64
+#: .\events\models\core.py:64
 msgid "Apertura de inscripciones"
 msgstr "Registration opens"
 
-#: .\events\models.py:65
+#: .\events\models\core.py:65
 msgid "Cierre de inscripciones"
 msgstr "Registration closes"
 
-#: .\events\models.py:66 .\events\models.py:133
+#: .\events\models\core.py:66 .\events\models\core.py:133
 #: .\templates\events\admin\criteria_manage.html:49
 msgid "Máx. equipos"
 msgstr "Max. teams"
 
-#: .\events\models.py:67
+#: .\events\models\core.py:67
 msgid "Banner"
 msgstr "Banner"
 
-#: .\events\models.py:68
+#: .\events\models\core.py:68
 msgid "Destacado en landing"
 msgstr "Featured on landing"
 
-#: .\events\models.py:69
+#: .\events\models\core.py:69
 msgid "Orden en landing"
 msgstr "Order on landing"
 
-#: .\events\models.py:75 .\templates\events\coach\my_registrations.html:33
+#: .\events\models\core.py:75 .\templates\events\coach\my_registrations.html:33
 msgid "Evento"
 msgstr "Event"
 
-#: .\events\models.py:76
+#: .\events\models\core.py:76
 msgid "Eventos"
 msgstr "Events"
 
-#: .\events\models.py:89
+#: .\events\models\core.py:89
 msgid "La fecha de fin debe ser igual o posterior a la de inicio."
 msgstr "The end date must be equal to or after the start date."
 
-#: .\events\models.py:92
+#: .\events\models\core.py:92
 msgid "El cierre de inscripciones debe ser igual o posterior a la apertura."
 msgstr "Registration close must be on or after the opening date."
 
-#: .\events\models.py:95
+#: .\events\models\core.py:95
 msgid "Las inscripciones deben cerrar antes o el mismo día del evento."
 msgstr "Registration must close before or on the event day."
 
-#: .\events\models.py:131
+#: .\events\models\core.py:131
 msgid "Categoría de equipo"
 msgstr "Team category"
 
-#: .\events\models.py:135 .\events\models.py:377
+#: .\events\models\core.py:135 .\events\models\judging.py:30
 #: .\production\templates\production\admin_overview.html:83
 #: .\production\templates\production\config\operario_detail.html:233
 #: .\production\templates\production\config\plantillas.html:134
@@ -1512,38 +1513,122 @@ msgstr "Team category"
 msgid "Orden"
 msgstr "Order"
 
-#: .\events\models.py:140
+#: .\events\models\core.py:140
 msgid "Categoría de evento"
 msgstr "Event category"
 
-#: .\events\models.py:141
+#: .\events\models\core.py:141
 msgid "Categorías de evento"
 msgstr "Event categories"
 
-#: .\events\models.py:165 .\templates\events\admin\registrations.html:37
-#: .\templates\events\coach\my_registrations.html:55
-#: .\templates\orders\admin\order_detail.html:435
-#: .\templates\orders\items\_measurements_grid.html:48
-#: .\templates\orders\users\order_list.html:128
-#: .\templates\teams\athlete_team.html:63
-msgid "Pendiente"
-msgstr "Pending"
+#: .\events\models\judging.py:24
+#: .\templates\events\admin\criteria_manage.html:109
+msgid "Peso"
+msgstr "Weight"
 
-#: .\events\models.py:166 .\templates\events\admin\registrations.html:38
-#: .\templates\events\coach\my_registrations.html:56
-msgid "Aceptado"
-msgstr "Accepted"
+#: .\events\models\judging.py:28
+msgid "Puntaje máximo"
+msgstr "Maximum score"
 
-#: .\events\models.py:167 .\templates\events\admin\registrations.html:39
-#: .\templates\events\coach\my_registrations.html:57
-msgid "Rechazado"
-msgstr "Rejected"
+#: .\events\models\judging.py:31 .\events\models\staffing.py:18
+#: .\templates\products\product_list.html:149
+#: .\templates\teams\athlete_team.html:61
+msgid "Activo"
+msgstr "Active"
 
-#: .\events\models.py:168
-msgid "Retirado"
-msgstr "Withdrawn"
+#: .\events\models\judging.py:36
+msgid "Criterio de evaluación"
+msgstr "Evaluation criterion"
 
-#: .\events\models.py:181 .\events\models.py:500
+#: .\events\models\judging.py:37
+#: .\templates\events\admin\criteria_manage.html:81
+msgid "Criterios de evaluación"
+msgstr "Evaluation criteria"
+
+#: .\events\models\judging.py:45
+msgid "El peso debe ser mayor a cero."
+msgstr "The weight must be greater than zero."
+
+#: .\events\models\judging.py:47
+msgid "El puntaje máximo debe ser mayor a cero."
+msgstr "The maximum score must be greater than zero."
+
+#: .\events\models\judging.py:68 .\events\models\judging.py:140
+#: .\templates\events\admin\results_manage.html:45
+#: .\templates\events\judge\panel.html:44
+msgid "Preliminar"
+msgstr "Preliminary"
+
+#: .\events\models\judging.py:69 .\events\models\judging.py:141
+#: .\templates\events\admin\results_manage.html:44
+#: .\templates\events\judge\panel.html:46
+#: .\templates\orders\admin\order_detail.html:724
+#: .\templates\orders\admin\order_detail.html:755
+#: .\templates\orders\users\order_detail.html:857
+#: .\templates\orders\users\order_detail.html:884
+msgid "Final"
+msgstr "Final"
+
+#: .\events\models\judging.py:76 .\events\models\registration.py:54
+msgid "Registro de equipo"
+msgstr "Team registration"
+
+#: .\events\models\judging.py:82 .\templates\events\admin\score_entry.html:50
+msgid "Criterio"
+msgstr "Criterion"
+
+#: .\events\models\judging.py:88 .\templates\events\admin\score_entry.html:51
+#: .\templates\events\admin\staff_manage.html:182
+msgid "Juez"
+msgstr "Judge"
+
+#: .\events\models\judging.py:90 .\events\models\judging.py:100
+#: .\templates\events\admin\results_manage.html:66
+#: .\templates\events\event_detail.html:413
+msgid "Puntaje"
+msgstr "Score"
+
+#: .\events\models\judging.py:93 .\events\models\judging.py:162
+#: .\templates\events\admin\results_manage.html:42
+#: .\templates\events\admin\results_manage.html:66
+#: .\templates\events\admin\score_entry.html:51
+#: .\templates\events\event_detail.html:413
+#: .\templates\events\judge\panel.html:42
+msgid "Ronda"
+msgstr "Round"
+
+#: .\events\models\judging.py:95 .\events\models\judging.py:164
+#: .\events\models\registration.py:50 .\events\models\registration.py:123
+#: .\events\models\staffing.py:62 .\templates\orders\admin\customers.html:50
+#: .\templates\orders\admin\offline_create.html:62
+#: .\templates\orders\admin\offline_create.html:159
+#: .\templates\orders\admin\order_detail.html:118
+#: .\templates\orders\admin\order_detail.html:165
+#: .\templates\orders\admin\order_detail.html:202
+#: .\templates\orders\admin\order_detail.html:489
+#: .\templates\orders\admin\order_detail.html:957
+msgid "Notas"
+msgstr "Notes"
+
+#: .\events\models\judging.py:101
+msgid "Puntajes"
+msgstr "Scores"
+
+#: .\events\models\judging.py:109
+msgid "El puntaje no puede ser negativo."
+msgstr "The score cannot be negative."
+
+#: .\events\models\judging.py:112
+#, python-format
+msgid "El puntaje no puede superar el máximo del criterio (%(max)s)."
+msgstr "The score cannot exceed the criterion maximum (%(max)s)."
+
+#: .\events\models\judging.py:119
+msgid "El criterio no pertenece al mismo evento que el registro de equipo."
+msgstr ""
+"The criterion does not belong to the same event as the team registration."
+
+#: .\events\models\judging.py:153 .\events\models\registration.py:38
 #: .\templates\events\admin\registrations.html:24
 #: .\templates\events\admin\results_manage.html:34
 #: .\templates\events\admin\results_manage.html:65
@@ -1554,100 +1639,143 @@ msgstr "Withdrawn"
 msgid "Categoría"
 msgstr "Category"
 
-#: .\events\models.py:193 .\events\models.py:266 .\events\models.py:335
-#: .\events\models.py:442 .\events\models.py:511
-#: .\templates\orders\admin\customers.html:50
-#: .\templates\orders\admin\offline_create.html:62
-#: .\templates\orders\admin\offline_create.html:159
-#: .\templates\orders\admin\order_detail.html:118
-#: .\templates\orders\admin\order_detail.html:165
-#: .\templates\orders\admin\order_detail.html:202
-#: .\templates\orders\admin\order_detail.html:489
-#: .\templates\orders\admin\order_detail.html:879
-msgid "Notas"
-msgstr "Notes"
+#: .\events\models\judging.py:155
+msgid "Lugar"
+msgstr "Place"
 
-#: .\events\models.py:197 .\events\models.py:423
-msgid "Registro de equipo"
-msgstr "Team registration"
+#: .\events\models\judging.py:158
+msgid "Puntaje total"
+msgstr "Total score"
 
-#: .\events\models.py:198 .\templates\events\admin\registrations.html:12
+#: .\events\models\judging.py:165
+#: .\templates\events\admin\results_manage.html:91
+#: .\templates\events\event_detail.html:414
+#: .\templates\events\event_detail.html:428
+msgid "Publicado"
+msgstr "Published"
+
+#: .\events\models\judging.py:171
+msgid "Resultado"
+msgstr "Result"
+
+#: .\events\models\judging.py:172 .\templates\core\base.html:452
+#: .\templates\events\admin\results_manage.html:3
+#: .\templates\events\admin\results_manage.html:59
+#: .\templates\events\event_detail.html:404
+msgid "Resultados"
+msgstr "Results"
+
+#: .\events\models\judging.py:181
+msgid "La categoría no pertenece al mismo evento que el registro de equipo."
+msgstr ""
+"The category does not belong to the same event as the team registration."
+
+#: .\events\models\judging.py:186
+msgid "El lugar debe ser 1 o mayor."
+msgstr "The place must be 1 or greater."
+
+#: .\events\models\registration.py:22
+#: .\templates\events\admin\registrations.html:37
+#: .\templates\events\coach\my_registrations.html:55
+#: .\templates\orders\admin\order_detail.html:435
+#: .\templates\orders\items\_measurements_grid.html:48
+#: .\templates\orders\users\order_list.html:128
+#: .\templates\teams\athlete_team.html:63
+msgid "Pendiente"
+msgstr "Pending"
+
+#: .\events\models\registration.py:23
+#: .\templates\events\admin\registrations.html:38
+#: .\templates\events\coach\my_registrations.html:56
+msgid "Aceptado"
+msgstr "Accepted"
+
+#: .\events\models\registration.py:24
+#: .\templates\events\admin\registrations.html:39
+#: .\templates\events\coach\my_registrations.html:57
+msgid "Rechazado"
+msgstr "Rejected"
+
+#: .\events\models\registration.py:25
+msgid "Retirado"
+msgstr "Withdrawn"
+
+#: .\events\models\registration.py:55
+#: .\templates\events\admin\registrations.html:12
 msgid "Registros de equipos"
 msgstr "Team registrations"
 
-#: .\events\models.py:206
+#: .\events\models\registration.py:63
 msgid "La categoría no pertenece al evento seleccionado."
 msgstr "The category does not belong to the selected event."
 
-#: .\events\models.py:229 .\templates\core\home.html:211
+#: .\events\models\registration.py:86 .\templates\core\home.html:211
 msgid "Atleta"
 msgstr "Athlete"
 
-#: .\events\models.py:230
+#: .\events\models\registration.py:87
 msgid "Head Coach"
 msgstr "Head Coach"
 
-#: .\events\models.py:231 .\templates\teams\manage_teams.html:97
+#: .\events\models\registration.py:88 .\templates\teams\manage_teams.html:97
 msgid "Coach"
 msgstr "Coach"
 
-#: .\events\models.py:232 .\templates\events\event_detail.html:39
+#: .\events\models\registration.py:89 .\templates\events\event_detail.html:39
 msgid "Staff"
 msgstr "Staff"
 
-#: .\events\models.py:233
+#: .\events\models\registration.py:90
 msgid "Tutor"
 msgstr "Tutor"
 
-#: .\events\models.py:234
+#: .\events\models\registration.py:91
 msgid "Invitado"
 msgstr "Guest"
 
-#: .\events\models.py:242 .\templates\account\profile\edit.html:78
+#: .\events\models\registration.py:99 .\templates\account\profile\edit.html:78
 msgid "Registrado"
 msgstr "Registered"
 
-#: .\events\models.py:243
+#: .\events\models\registration.py:100
 msgid "Confirmado"
 msgstr "Confirmed"
 
-#: .\events\models.py:253 .\events\models.py:333
+#: .\events\models\registration.py:110 .\events\models\staffing.py:60
 #: .\production\templates\production\config\operario_detail.html:159
 #: .\templates\events\admin\staff_manage.html:183
 msgid "Rol"
 msgstr "Role"
 
-#: .\events\models.py:270
+#: .\events\models\registration.py:127
 msgid "Participante"
 msgstr "Participant"
 
-#: .\events\models.py:271
+#: .\events\models\registration.py:128
 msgid "Participantes"
 msgstr "Participants"
 
-#: .\events\models.py:280
+#: .\events\models\registration.py:137
 msgid "El registro de equipo no pertenece al evento seleccionado."
 msgstr "The team registration does not belong to the selected event."
 
-#: .\events\models.py:298 .\events\models.py:378
-#: .\templates\products\product_list.html:149
-#: .\templates\teams\athlete_team.html:61
-msgid "Activo"
-msgstr "Active"
-
-#: .\events\models.py:299
+#: .\events\models\staffing.py:19
 msgid "Es rol de juez"
 msgstr "Judge role"
 
-#: .\events\models.py:303
+#: .\events\models\staffing.py:23
 msgid "Rol de staff"
 msgstr "Staff role"
 
-#: .\events\models.py:304
+#: .\events\models\staffing.py:24
 msgid "Roles de staff"
 msgstr "Staff roles"
 
-#: .\events\models.py:327
+#: .\events\models\staffing.py:37
+msgid "Ya existe un rol de staff con ese nombre."
+msgstr "A staff role with that name already exists."
+
+#: .\events\models\staffing.py:54
 #: .\production\templates\production\config\operarios.html:34
 #: .\production\templates\production\config\operarios.html:92
 #: .\production\templates\production\config\operarios.html:155
@@ -1656,133 +1784,21 @@ msgstr "Staff roles"
 #: .\templates\account\profile\edit.html:74
 #: .\templates\coach\crew\edit_owned_user.html:39
 #: .\templates\events\admin\staff_manage.html:89
-#: .\templates\orders\admin\order_detail.html:877
+#: .\templates\orders\admin\order_detail.html:955
 msgid "Usuario"
 msgstr "User"
 
-#: .\events\models.py:347
+#: .\events\models\staffing.py:74
 msgid "Asignación de staff"
 msgstr "Staff assignment"
 
-#: .\events\models.py:348
+#: .\events\models\staffing.py:75
 msgid "Asignaciones de staff"
 msgstr "Staff assignments"
 
-#: .\events\models.py:371 .\templates\events\admin\criteria_manage.html:109
-msgid "Peso"
-msgstr "Weight"
-
-#: .\events\models.py:375
-msgid "Puntaje máximo"
-msgstr "Maximum score"
-
-#: .\events\models.py:383
-msgid "Criterio de evaluación"
-msgstr "Evaluation criterion"
-
-#: .\events\models.py:384 .\templates\events\admin\criteria_manage.html:81
-msgid "Criterios de evaluación"
-msgstr "Evaluation criteria"
-
-#: .\events\models.py:392
-msgid "El peso debe ser mayor a cero."
-msgstr "The weight must be greater than zero."
-
-#: .\events\models.py:394
-msgid "El puntaje máximo debe ser mayor a cero."
-msgstr "The maximum score must be greater than zero."
-
-#: .\events\models.py:415 .\events\models.py:487
-#: .\templates\events\admin\results_manage.html:45
-#: .\templates\events\judge\panel.html:44
-msgid "Preliminar"
-msgstr "Preliminary"
-
-#: .\events\models.py:416 .\events\models.py:488
-#: .\templates\events\admin\results_manage.html:44
-#: .\templates\events\judge\panel.html:46
-#: .\templates\orders\admin\order_detail.html:684
-#: .\templates\orders\admin\order_detail.html:715
-#: .\templates\orders\users\order_detail.html:798
-#: .\templates\orders\users\order_detail.html:825
-msgid "Final"
-msgstr "Final"
-
-#: .\events\models.py:429 .\templates\events\admin\score_entry.html:50
-msgid "Criterio"
-msgstr "Criterion"
-
-#: .\events\models.py:435 .\templates\events\admin\score_entry.html:51
-#: .\templates\events\admin\staff_manage.html:182
-msgid "Juez"
-msgstr "Judge"
-
-#: .\events\models.py:437 .\events\models.py:447
-#: .\templates\events\admin\results_manage.html:66
-#: .\templates\events\event_detail.html:413
-msgid "Puntaje"
-msgstr "Score"
-
-#: .\events\models.py:440 .\events\models.py:509
-#: .\templates\events\admin\results_manage.html:42
-#: .\templates\events\admin\results_manage.html:66
-#: .\templates\events\admin\score_entry.html:51
-#: .\templates\events\event_detail.html:413
-#: .\templates\events\judge\panel.html:42
-msgid "Ronda"
-msgstr "Round"
-
-#: .\events\models.py:448
-msgid "Puntajes"
-msgstr "Scores"
-
-#: .\events\models.py:456
-msgid "El puntaje no puede ser negativo."
-msgstr "The score cannot be negative."
-
-#: .\events\models.py:459
-#, python-format
-msgid "El puntaje no puede superar el máximo del criterio (%(max)s)."
-msgstr "The score cannot exceed the criterion maximum (%(max)s)."
-
-#: .\events\models.py:466
-msgid "El criterio no pertenece al mismo evento que el registro de equipo."
-msgstr ""
-"The criterion does not belong to the same event as the team registration."
-
-#: .\events\models.py:502
-msgid "Lugar"
-msgstr "Place"
-
-#: .\events\models.py:505
-msgid "Puntaje total"
-msgstr "Total score"
-
-#: .\events\models.py:512 .\templates\events\admin\results_manage.html:91
-#: .\templates\events\event_detail.html:414
-#: .\templates\events\event_detail.html:428
-msgid "Publicado"
-msgstr "Published"
-
-#: .\events\models.py:518
-msgid "Resultado"
-msgstr "Result"
-
-#: .\events\models.py:519 .\templates\core\base.html:452
-#: .\templates\events\admin\results_manage.html:3
-#: .\templates\events\admin\results_manage.html:59
-#: .\templates\events\event_detail.html:404
-msgid "Resultados"
-msgstr "Results"
-
-#: .\events\models.py:528
-msgid "La categoría no pertenece al mismo evento que el registro de equipo."
-msgstr ""
-"The category does not belong to the same event as the team registration."
-
-#: .\events\models.py:533
-msgid "El lugar debe ser 1 o mayor."
-msgstr "The place must be 1 or greater."
+#: .\events\models\staffing.py:91
+msgid "Este rol de staff está desactivado."
+msgstr "This staff role is deactivated."
 
 #: .\production\templates\production\admin_overview.html:8
 #: .\templates\core\base.html:775
@@ -1812,7 +1828,7 @@ msgid "Operarios"
 msgstr "Workers"
 
 #: .\production\templates\production\admin_overview.html:33
-#: .\templates\orders\users\order_detail.html:103
+#: .\templates\orders\users\order_detail.html:104
 #: .\templates\orders\users\order_list.html:136
 msgid "En producción"
 msgstr "In production"
@@ -1907,13 +1923,14 @@ msgstr "Assigned"
 #: .\production\templates\production\config\assign_roles.html:60
 #: .\production\templates\production\config\plantillas.html:101
 #: .\production\templates\production\config\product_stages_matrix.html:79
+#: .\templates\account\guardian\_guardianship_list.html:29
 msgid "Quitar"
 msgstr "Remove"
 
 #: .\production\templates\production\config\assign_roles.html:69
 #: .\production\templates\production\config\operarios.html:121
 #: .\production\templates\production\config\responsabilidades.html:48
-#: .\templates\account\guardian\assign_guardian.html:235
+#: .\templates\account\guardian\assign_guardian.html:226
 #: .\templates\account\guardian\headcoach_dashboard.html:63
 #: .\templates\account\guardian\minors_without_guardian.html:119
 msgid "Asignar"
@@ -1927,7 +1944,7 @@ msgstr "No workers registered in the system."
 #: .\production\templates\production\config\operarios.html:111
 #: .\templates\orders\admin\order_detail.html:419
 #: .\templates\orders\products\add_product.html:166
-#: .\templates\orders\users\order_detail.html:553
+#: .\templates\orders\users\order_detail.html:612
 #: .\templates\products\product_list.html:151
 msgid "Inactivo"
 msgstr "Inactive"
@@ -1966,7 +1983,7 @@ msgstr "Email"
 #: .\templates\account\profile\edit.html:194
 #: .\templates\core\manage_landing.html:90
 #: .\templates\events\event_form.html:107
-#: .\templates\measures\manage_fields.html:98
+#: .\templates\measures\manage_fields.html:110
 #: .\templates\orders\users\order_edit.html:32
 #: .\templates\products\product_detail.html:387
 msgid "Guardar cambios"
@@ -2075,9 +2092,9 @@ msgstr "Search by name, username or email…"
 #: .\production\templates\production\config\operarios.html:74
 #: .\templates\orders\admin\customers.html:69
 #: .\templates\orders\admin\customers.html:73
-#: .\templates\orders\admin\order_list.html:58
-#: .\templates\orders\admin\order_list.html:59
-#: .\templates\orders\admin\order_list.html:93
+#: .\templates\orders\admin\order_list.html:61
+#: .\templates\orders\admin\order_list.html:62
+#: .\templates\orders\admin\order_list.html:96
 #: .\templates\products\product_list.html:27
 #: .\templates\social\team_directory.html:9
 msgid "Buscar"
@@ -2151,7 +2168,7 @@ msgstr "Optional"
 #: .\production\templates\production\config\plantillas.html:44
 #: .\production\templates\production\config\roles.html:47
 #: .\production\templates\production\config\stages.html:55
-#: .\templates\measures\manage_fields.html:166
+#: .\templates\measures\manage_fields.html:175
 msgid "Crear"
 msgstr "Create"
 
@@ -2174,7 +2191,7 @@ msgstr "Delete this template?"
 #: .\production\templates\production\config\stages.html:199
 #: .\templates\account\addresses\list_address.html:65
 #: .\templates\account\email.html:61 .\templates\measures\manage_fields.html:52
-#: .\templates\orders\users\order_detail.html:734
+#: .\templates\orders\users\order_detail.html:793
 #: .\templates\social\partials\comment_row.html:17
 #: .\templates\social\partials\comment_row_v2.html:15
 #: .\templates\social\partials\post_card.html:22
@@ -2228,9 +2245,10 @@ msgstr "Manage templates"
 #: .\templates\account\guardian\minors_without_guardian.html:149
 #: .\templates\coach\athlete\edit_measures.html:71
 #: .\templates\core\base.html:938 .\templates\core\base.html:976
-#: .\templates\orders\admin\order_detail.html:702
-#: .\templates\orders\admin\order_detail.html:809
-#: .\templates\orders\admin\order_detail.html:833
+#: .\templates\orders\admin\order_detail.html:646
+#: .\templates\orders\admin\order_detail.html:742
+#: .\templates\orders\admin\order_detail.html:887
+#: .\templates\orders\admin\order_detail.html:911
 #: .\templates\teams\manage_teams.html:302
 #: .\templates\teams\manage_teams.html:358
 #: .\templates\teams\manage_teams.html:400
@@ -2326,7 +2344,7 @@ msgstr "None"
 #: .\templates\account\addresses\list_address.html:61
 #: .\templates\events\event_detail.html:27
 #: .\templates\measures\manage_fields.html:44
-#: .\templates\orders\users\order_detail.html:301
+#: .\templates\orders\users\order_detail.html:358
 #: .\templates\orders\users\order_list.html:190
 #: .\templates\teams\manage_categories.html:52
 #: .\templates\teams\manage_teams.html:136
@@ -2399,7 +2417,6 @@ msgstr "No roles configured."
 #: .\production\templates\production\config\stages.html:196
 #: .\templates\account\addresses\confirm_delete.html:18
 #: .\templates\account\addresses\form.html:228
-#: .\templates\account\guardian\assign_guardian.html:269
 #: .\templates\account\profile\deactivate_confirm.html:72
 #: .\templates\coach\athlete\edit_measures.html:111
 #: .\templates\coach\crew\create_crew_member.html:141
@@ -2409,12 +2426,13 @@ msgstr "No roles configured."
 #: .\templates\events\coach\register_team.html:137
 #: .\templates\events\event_detail.html:103
 #: .\templates\events\event_form.html:111
-#: .\templates\measures\manage_fields.html:124
+#: .\templates\measures\manage_fields.html:136
 #: .\templates\orders\admin\offline_create.html:210
-#: .\templates\orders\admin\order_detail.html:815
+#: .\templates\orders\admin\order_detail.html:659
+#: .\templates\orders\admin\order_detail.html:893
 #: .\templates\orders\items\item_detail.html:392
 #: .\templates\orders\users\order_contact_info.html:111
-#: .\templates\orders\users\order_detail.html:993
+#: .\templates\orders\users\order_detail.html:1052
 #: .\templates\orders\users\order_edit.html:14
 #: .\templates\orders\users\order_edit.html:35
 #: .\templates\products\product_detail.html:693
@@ -2499,7 +2517,7 @@ msgstr "Measurements"
 #: .\templates\orders\users\order_contact_info.html:14
 #: .\templates\orders\users\order_create.html:14
 #: .\templates\orders\users\order_detail.html:32
-#: .\templates\orders\users\order_detail.html:959
+#: .\templates\orders\users\order_detail.html:1018
 #: .\templates\products\product_detail.html:67
 #: .\templates\products\product_form.html:18
 msgid "Volver"
@@ -2524,7 +2542,7 @@ msgstr "Cutting"
 
 #: .\production\templates\production\order_sizes_print.html:116
 #: .\templates\orders\admin\order_detail.html:75
-#: .\templates\orders\admin\order_list.html:116
+#: .\templates\orders\admin\order_list.html:119
 msgid "Total"
 msgstr "Total"
 
@@ -2541,15 +2559,13 @@ msgstr "Handout"
 
 #: .\production\templates\production\order_sizes_print.html:140
 #, python-format
-#| msgid "%(piezas)s pieza"
-#| msgid_plural "%(piezas)s piezas"
 msgid "%(n)s pieza"
 msgid_plural "%(n)s piezas"
 msgstr[0] "%(n)s piece"
 msgstr[1] "%(n)s pieces"
 
 #: .\production\templates\production\order_sizes_print.html:152
-#: .\templates\orders\users\order_detail.html:478
+#: .\templates\orders\users\order_detail.html:537
 #, python-format
 msgid "%(n)s sin alumno"
 msgid_plural "%(n)s sin alumno"
@@ -2565,14 +2581,13 @@ msgid "No se cortan hasta tenerla."
 msgstr "They are not cut until it is set."
 
 #: .\production\templates\production\order_sizes_print.html:177
-#| msgid "Corte"
 msgid "Cortó:"
 msgstr "Cut by:"
 
 #: .\production\templates\production\order_sizes_print.html:178
 #: .\production\templates\production\order_sizes_print.html:182
-#: .\templates\orders\admin\order_detail.html:711
-#: .\templates\orders\users\order_detail.html:821
+#: .\templates\orders\admin\order_detail.html:751
+#: .\templates\orders\users\order_detail.html:880
 msgid "Fecha:"
 msgstr "Date:"
 
@@ -2581,7 +2596,6 @@ msgid "Revisó:"
 msgstr "Checked by:"
 
 #: .\production\templates\production\order_sizes_print.html:185
-#| msgid "Inscripciones:"
 msgid "Observaciones:"
 msgstr "Notes:"
 
@@ -2737,7 +2751,7 @@ msgstr ""
 
 #: .\templates\account\addresses\confirm_delete.html:15
 #: .\templates\orders\items\item_detail.html:396
-#: .\templates\orders\users\order_detail.html:998
+#: .\templates\orders\users\order_detail.html:1057
 msgid "Sí, eliminar"
 msgstr "Yes, delete"
 
@@ -3018,6 +3032,7 @@ msgid ""
 msgstr "The following email addresses are associated with your account:"
 
 #: .\templates\account\email.html:30
+#: .\templates\account\guardian\_guardianship_list.html:18
 msgid "Verificado"
 msgstr "Verified"
 
@@ -3132,13 +3147,20 @@ msgstr "Problems with confirmation?"
 msgid "Reenviar confirmación"
 msgstr "Resend confirmation"
 
+#: .\templates\account\guardian\_guardianship_list.html:14
+msgid "Sin verificar"
+msgstr "Not verified"
+
+#: .\templates\account\guardian\_guardianship_list.html:36
+msgid "Este atleta todavía no tiene ningún tutor acreditado."
+msgstr "This athlete does not have any accredited guardian yet."
+
 #: .\templates\account\guardian\assign_guardian.html:4
 #, python-format
 msgid "Asignar Guardián - %(name)s"
 msgstr "Assign Guardian - %(name)s"
 
 #: .\templates\account\guardian\assign_guardian.html:41
-#: .\templates\account\guardian\assign_guardian.html:162
 msgid "Asignar Guardián"
 msgstr "Assign Guardian"
 
@@ -3159,84 +3181,72 @@ msgstr "Adult"
 msgid "Volver a Mis Alumnos"
 msgstr "Back to My Students"
 
-#: .\templates\account\guardian\assign_guardian.html:61
-#, python-format
-msgid "Guardián Actual: %(name)s"
-msgstr "Current Guardian: %(name)s"
+#: .\templates\account\guardian\assign_guardian.html:60
+msgid "Tutores acreditados"
+msgstr "Accredited guardians"
 
-#: .\templates\account\guardian\assign_guardian.html:64
-msgid "Si seleccionas otro guardián de la lista y guardas, el actual será"
-msgstr ""
-"If you select another guardian from the list and save, the current one will "
-"be"
-
-#: .\templates\account\guardian\assign_guardian.html:64
-msgid "reemplazado (Transferencia)"
-msgstr "replaced (Transfer)"
-
-#: .\templates\account\guardian\assign_guardian.html:69
-#: .\templates\account\guardian\assign_guardian.html:258
-msgid "Remover Guardián"
-msgstr "Remove Guardian"
-
-#: .\templates\account\guardian\assign_guardian.html:82
+#: .\templates\account\guardian\assign_guardian.html:74
 msgid "Guardián registrado"
 msgstr "Registered guardian"
 
-#: .\templates\account\guardian\assign_guardian.html:88
-#: .\templates\account\guardian\assign_guardian.html:171
+#: .\templates\account\guardian\assign_guardian.html:80
+#: .\templates\account\guardian\assign_guardian.html:162
 msgid "Invitar por email"
 msgstr "Invite by email"
 
-#: .\templates\account\guardian\assign_guardian.html:104
+#: .\templates\account\guardian\assign_guardian.html:96
 msgid "Selecciona un guardián"
 msgstr "Select a guardian"
 
-#: .\templates\account\guardian\assign_guardian.html:118
+#: .\templates\account\guardian\assign_guardian.html:110
+msgid "Ya acreditado"
+msgstr "Already accredited"
+
+#: .\templates\account\guardian\assign_guardian.html:112
 msgid "Adulto"
 msgstr "Adult"
 
-#: .\templates\account\guardian\assign_guardian.html:128
+#: .\templates\account\guardian\assign_guardian.html:123
 msgid "Disponible"
 msgstr "Available"
 
-#: .\templates\account\guardian\assign_guardian.html:138
+#: .\templates\account\guardian\assign_guardian.html:133
 msgid "Por favor, selecciona un guardián de la lista."
 msgstr "Please select a guardian from the list."
 
-#: .\templates\account\guardian\assign_guardian.html:145
+#: .\templates\account\guardian\assign_guardian.html:140
 msgid "Tipo de relación"
 msgstr "Relationship type"
 
-#: .\templates\account\guardian\assign_guardian.html:154
+#: .\templates\account\guardian\assign_guardian.html:149
 msgid "Opcional: define el vínculo del guardián con el atleta."
 msgstr "Optional: define the guardian's relationship with the athlete."
 
-#: .\templates\account\guardian\assign_guardian.html:160
-msgid "Transferir a este Guardián"
-msgstr "Transfer to this Guardian"
+#: .\templates\account\guardian\assign_guardian.html:154
+msgid "Acreditar tutor"
+msgstr "Accredit guardian"
 
-#: .\templates\account\guardian\assign_guardian.html:170
+#: .\templates\account\guardian\assign_guardian.html:161
 msgid "No hay usuarios adultos disponibles para ser guardians."
 msgstr "No adult users available to be guardians."
 
-#: .\templates\account\guardian\assign_guardian.html:171
+#: .\templates\account\guardian\assign_guardian.html:162
 msgid "Registra un nuevo usuario"
 msgstr "Register a new user"
 
-#: .\templates\account\guardian\assign_guardian.html:171
+#: .\templates\account\guardian\assign_guardian.html:162
 msgid "o usa la pestaña"
 msgstr "or use the tab"
 
-#: .\templates\account\guardian\assign_guardian.html:179
+#: .\templates\account\guardian\assign_guardian.html:170
 msgid "Si el padre o tutor"
 msgstr "If the parent or guardian"
 
-#: .\templates\account\guardian\assign_guardian.html:179
+#: .\templates\account\guardian\assign_guardian.html:170
 msgid "no tiene cuenta"
 msgstr "has no account"
 
-#: .\templates\account\guardian\assign_guardian.html:179
+#: .\templates\account\guardian\assign_guardian.html:170
 msgid ""
 "en el sistema, puedes enviarle una invitación por email. Cuando se registre "
 "y seleccione el rol"
@@ -3244,27 +3254,27 @@ msgstr ""
 "in the system, you can send them an email invitation. When they register and "
 "select the role"
 
-#: .\templates\account\guardian\assign_guardian.html:179
+#: .\templates\account\guardian\assign_guardian.html:170
 msgid "aparecerá en la lista de guardians disponibles."
 msgstr "they will appear in the list of available guardians."
 
-#: .\templates\account\guardian\assign_guardian.html:186
+#: .\templates\account\guardian\assign_guardian.html:177
 msgid "Email del padre / tutor"
 msgstr "Parent / guardian email"
 
-#: .\templates\account\guardian\assign_guardian.html:191
+#: .\templates\account\guardian\assign_guardian.html:182
 msgid "Por favor, ingresa un correo electrónico válido."
 msgstr "Please enter a valid email address."
 
-#: .\templates\account\guardian\assign_guardian.html:196
+#: .\templates\account\guardian\assign_guardian.html:187
 msgid "Enviar Invitación"
 msgstr "Send Invitation"
 
-#: .\templates\account\guardian\assign_guardian.html:208
+#: .\templates\account\guardian\assign_guardian.html:199
 msgid "¿Por qué asignar un guardián?"
 msgstr "Why assign a guardian?"
 
-#: .\templates\account\guardian\assign_guardian.html:209
+#: .\templates\account\guardian\assign_guardian.html:200
 msgid ""
 "Los atletas menores de edad necesitan un adulto responsable para "
 "autorizaciones, recogida de pedidos y comunicación oficial. El guardián "
@@ -3274,36 +3284,13 @@ msgstr ""
 "and official communication. The guardian can be a parent, legal guardian, or "
 "companion designated by the coach."
 
-#: .\templates\account\guardian\assign_guardian.html:219
+#: .\templates\account\guardian\assign_guardian.html:210
 msgid "Otros menores pendientes"
 msgstr "Other pending minors"
 
-#: .\templates\account\guardian\assign_guardian.html:242
+#: .\templates\account\guardian\assign_guardian.html:233
 msgid "Todos los menores tienen guardian"
 msgstr "All minors have a guardian"
-
-#: .\templates\account\guardian\assign_guardian.html:263
-#, python-format
-msgid ""
-"¿Estás completamente seguro de que deseas <strong>remover a "
-"%(guardian_name)s</strong> como guardián de %(athlete_name)s?"
-msgstr ""
-"Are you completely sure you want to <strong>remove %(guardian_name)s</"
-"strong> as guardian of %(athlete_name)s?"
-
-#: .\templates\account\guardian\assign_guardian.html:265
-msgid ""
-"Esto dejará al atleta sin tutor legal registrado en el sistema. Debe "
-"realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se "
-"reasignará un tutor después."
-msgstr ""
-"This will leave the athlete without a legal guardian registered in the "
-"system. This should only be done if the athlete has already reached "
-"adulthood or if a guardian will be reassigned afterward."
-
-#: .\templates\account\guardian\assign_guardian.html:273
-msgid "Sí, Remover"
-msgstr "Yes, Remove"
 
 #: .\templates\account\guardian\dashboard.html:12
 msgid "Panel de Guardian"
@@ -3382,11 +3369,11 @@ msgid "Gestión de Menores"
 msgstr "Minor Management"
 
 #: .\templates\account\guardian\headcoach_dashboard.html:50
-msgid "Guardián Actual"
-msgstr "Current Guardian"
+msgid "Tutores"
+msgstr "Guardians"
 
 #: .\templates\account\guardian\headcoach_dashboard.html:51
-#: .\templates\orders\admin\order_detail.html:878
+#: .\templates\orders\admin\order_detail.html:956
 msgid "Acción"
 msgstr "Action"
 
@@ -3394,11 +3381,11 @@ msgstr "Action"
 msgid "Sin Asignar"
 msgstr "Unassigned"
 
-#: .\templates\account\guardian\headcoach_dashboard.html:80
+#: .\templates\account\guardian\headcoach_dashboard.html:83
 msgid "Detalles"
 msgstr "Details"
 
-#: .\templates\account\guardian\headcoach_dashboard.html:91
+#: .\templates\account\guardian\headcoach_dashboard.html:94
 msgid "Aún no hay atletas menores bajo tu gestión."
 msgstr "There are no minor athletes under your management yet."
 
@@ -3436,9 +3423,9 @@ msgstr "Age"
 #: .\templates\events\admin\registrations.html:26
 #: .\templates\events\admin\results_manage.html:67
 #: .\templates\measures\manage_fields.html:25
-#: .\templates\orders\admin\order_list.html:117
+#: .\templates\orders\admin\order_list.html:120
 #: .\templates\orders\items\item_detail.html:113
-#: .\templates\orders\users\order_detail.html:456
+#: .\templates\orders\users\order_detail.html:515
 #: .\templates\orders\users\order_list.html:92
 #: .\templates\products\product_list.html:82
 #: .\templates\teams\manage_categories.html:29
@@ -4516,7 +4503,7 @@ msgstr "Help"
 #: .\templates\core\base.html:896 .\templates\core\terminos.html:308
 #: .\templates\core\terminos.html:335
 #: .\templates\orders\admin\order_detail.html:230
-#: .\templates\orders\users\order_detail.html:311
+#: .\templates\orders\users\order_detail.html:368
 #: .\templates\orders\users\order_list.html:182
 msgid "Contacto"
 msgstr "Contact"
@@ -4775,7 +4762,7 @@ msgstr "Featured"
 #: .\templates\core\manage_landing.html:109
 #: .\templates\events\admin\registrations.html:25
 #: .\templates\orders\admin\order_detail.html:161
-#: .\templates\orders\admin\order_detail.html:876
+#: .\templates\orders\admin\order_detail.html:954
 msgid "Fecha"
 msgstr "Date"
 
@@ -5487,8 +5474,8 @@ msgstr "Registrations"
 #: .\templates\events\coach\register_team.html:71
 #: .\templates\events\event_detail.html:412
 #: .\templates\events\judge\panel.html:66
-#: .\templates\orders\admin\order_list.html:77
-#: .\templates\orders\admin\order_list.html:132
+#: .\templates\orders\admin\order_list.html:80
+#: .\templates\orders\admin\order_list.html:135
 #: .\templates\orders\users\order_create.html:37
 #: .\templates\orders\users\order_create.html:44
 #: .\templates\orders\users\order_list.html:113
@@ -5932,8 +5919,8 @@ msgid "Explora eventos y competencias disponibles"
 msgstr "Explore available events and competitions"
 
 #: .\templates\events\event_list.html:24
-#: .\templates\orders\admin\order_list.html:65
-#: .\templates\orders\admin\order_list.html:75
+#: .\templates\orders\admin\order_list.html:68
+#: .\templates\orders\admin\order_list.html:78
 #: .\templates\products\product_list.html:36
 #: .\templates\products\product_list.html:48
 msgid "Todos"
@@ -5972,7 +5959,7 @@ msgid "Sede por definir"
 msgstr "Venue to be defined"
 
 #: .\templates\events\partials\event_card.html:24
-#: .\templates\orders\admin\order_list.html:161
+#: .\templates\orders\admin\order_list.html:164
 msgid "Ver detalle"
 msgstr "View detail"
 
@@ -6054,9 +6041,9 @@ msgstr "New field"
 
 #: .\templates\measures\manage_fields.html:22
 #: .\templates\orders\admin\order_detail.html:42
-#: .\templates\orders\admin\order_list.html:73
-#: .\templates\orders\admin\order_list.html:111
-#: .\templates\orders\users\order_detail.html:164
+#: .\templates\orders\admin\order_list.html:76
+#: .\templates\orders\admin\order_list.html:114
+#: .\templates\orders\users\order_detail.html:221
 #: .\templates\orders\users\order_list.html:89
 #: .\templates\products\product_list.html:34
 #: .\templates\products\product_list.html:76
@@ -6072,37 +6059,37 @@ msgstr "Unit"
 msgid "Acciones campo"
 msgstr "Field actions"
 
-#: .\templates\measures\manage_fields.html:60
+#: .\templates\measures\manage_fields.html:62
 msgid "Habilitar"
 msgstr "Enable"
 
-#: .\templates\measures\manage_fields.html:77
+#: .\templates\measures\manage_fields.html:89
 msgid "Editar campo"
 msgstr "Edit field"
 
-#: .\templates\measures\manage_fields.html:115
+#: .\templates\measures\manage_fields.html:127
 msgid "Desactivar campo"
 msgstr "Disable field"
 
-#: .\templates\measures\manage_fields.html:119
+#: .\templates\measures\manage_fields.html:131
 #, python-format
 msgid "¿Seguro que deseas desactivar el campo <strong>%(name)s</strong>?"
 msgstr "Are you sure you want to disable the field <strong>%(name)s</strong>?"
 
-#: .\templates\measures\manage_fields.html:120
+#: .\templates\measures\manage_fields.html:132
 msgid "Las medidas existentes no se perderán."
 msgstr "Existing measurements will not be lost."
 
-#: .\templates\measures\manage_fields.html:127
+#: .\templates\measures\manage_fields.html:139
 msgid "Desactivar"
 msgstr "Disable"
 
-#: .\templates\measures\manage_fields.html:150
+#: .\templates\measures\manage_fields.html:159
 msgid "Nuevo campo de medida"
 msgstr "New measurement field"
 
 #: .\templates\orders\admin\customers.html:11
-#: .\templates\orders\admin\order_list.html:25
+#: .\templates\orders\admin\order_list.html:27
 msgid "Clientes"
 msgstr "Customers"
 
@@ -6202,8 +6189,8 @@ msgid "Productos"
 msgstr "Products"
 
 #: .\templates\orders\admin\offline_create.html:95
-#: .\templates\orders\users\order_detail.html:353
-#: .\templates\orders\users\order_detail.html:770
+#: .\templates\orders\users\order_detail.html:411
+#: .\templates\orders\users\order_detail.html:829
 msgid "Agregar producto"
 msgstr "Add product"
 
@@ -6246,8 +6233,8 @@ msgstr "No template"
 #: .\templates\orders\admin\order_detail.html:407
 #: .\templates\orders\admin\order_detail.html:485
 #: .\templates\orders\items\sizes_grid.html:36
-#: .\templates\orders\users\order_detail.html:451
-#: .\templates\orders\users\order_detail.html:547
+#: .\templates\orders\users\order_detail.html:510
+#: .\templates\orders\users\order_detail.html:606
 #: .\templates\products\product_detail.html:412
 #: .\templates\products\product_detail.html:436
 msgid "Talla"
@@ -6326,8 +6313,8 @@ msgid "Creada:"
 msgstr "Created:"
 
 #: .\templates\orders\admin\order_detail.html:24
-#: .\templates\orders\users\order_detail.html:226
-#: .\templates\orders\users\order_detail.html:245
+#: .\templates\orders\users\order_detail.html:283
+#: .\templates\orders\users\order_detail.html:302
 #, python-format
 msgid "por %(name)s"
 msgstr "by %(name)s"
@@ -6375,12 +6362,12 @@ msgid "Registrar abono"
 msgstr "Record payment"
 
 #: .\templates\orders\admin\order_detail.html:221
-#: .\templates\orders\users\order_detail.html:297
+#: .\templates\orders\users\order_detail.html:354
 msgid "Información de envío"
 msgstr "Shipping information"
 
 #: .\templates\orders\admin\order_detail.html:244
-#: .\templates\orders\users\order_detail.html:325
+#: .\templates\orders\users\order_detail.html:382
 msgid "Nota:"
 msgstr "Note:"
 
@@ -6408,13 +6395,13 @@ msgid "alumnos"
 msgstr "athletes"
 
 #: .\templates\orders\admin\order_detail.html:380
-#: .\templates\orders\users\order_detail.html:435
+#: .\templates\orders\users\order_detail.html:494
 msgid "sin talla"
 msgstr "without a size"
 
 #: .\templates\orders\admin\order_detail.html:387
 #: .\templates\orders\items\item_detail.html:169
-#: .\templates\orders\users\order_detail.html:505
+#: .\templates\orders\users\order_detail.html:564
 msgid "Capturar tallas del equipo"
 msgstr "Capture team sizes"
 
@@ -6424,18 +6411,18 @@ msgstr "Print sizes"
 
 #: .\templates\orders\admin\order_detail.html:409
 #: .\templates\orders\items\item_detail.html:91
-#: .\templates\orders\users\order_detail.html:454
-#: .\templates\orders\users\order_detail.html:522
+#: .\templates\orders\users\order_detail.html:513
+#: .\templates\orders\users\order_detail.html:581
 msgid "Subtotal"
 msgstr "Subtotal"
 
 #: .\templates\orders\admin\order_detail.html:443
-#: .\templates\orders\users\order_detail.html:595
+#: .\templates\orders\users\order_detail.html:654
 msgid "Atletas:"
 msgstr "Athletes:"
 
 #: .\templates\orders\admin\order_detail.html:452
-#: .\templates\orders\users\order_detail.html:612
+#: .\templates\orders\users\order_detail.html:671
 msgid "Medidas completas"
 msgstr "Complete measurements"
 
@@ -6454,7 +6441,7 @@ msgid "Talla, notas y medidas:"
 msgstr "Size, notes and measurements:"
 
 #: .\templates\orders\admin\order_detail.html:506
-#: .\templates\orders\users\order_detail.html:586
+#: .\templates\orders\users\order_detail.html:645
 msgid "Talla:"
 msgstr "Size:"
 
@@ -6505,104 +6492,166 @@ msgid "Bloqueadas definitivamente"
 msgstr "Permanently locked"
 
 #: .\templates\orders\admin\order_detail.html:589
+msgid "Ya nadie puede corregir una medida. Así llegan a producción."
+msgstr ""
+"Nobody can correct a measurement anymore. This is how they reach production."
+
+#: .\templates\orders\admin\order_detail.html:592
 msgid "Abiertas"
 msgstr "Open"
 
-#: .\templates\orders\admin\order_detail.html:591
+#: .\templates\orders\admin\order_detail.html:594
+msgid ""
+"Las familias y el coach todavía pueden capturar y corregir medidas. Se "
+"cierran solas al aprobar el diseño o al vencer la fecha límite."
+msgstr ""
+"Families and the coach can still enter and correct measurements. They close "
+"automatically when the design is approved or the deadline passes."
+
+#: .\templates\orders\admin\order_detail.html:597
 msgid "Cerradas"
 msgstr "Closed"
 
-#: .\templates\orders\admin\order_detail.html:602
+#: .\templates\orders\admin\order_detail.html:599
+msgid ""
+"Nadie puede capturar, pero aún se pueden reabrir. Para enviar a producción "
+"hay que bloquearlas: ese paso es aparte y no se deshace."
+msgstr ""
+"Nobody can enter measurements, but they can still be reopened. To send the "
+"order to production they must be locked: that is a separate step and cannot "
+"be undone."
+
+#: .\templates\orders\admin\order_detail.html:611
 msgid "Cerrar medidas"
 msgstr "Close measurements"
 
-#: .\templates\orders\admin\order_detail.html:611
+#: .\templates\orders\admin\order_detail.html:620
 msgid "Reabrir"
 msgstr "Reopen"
 
-#: .\templates\orders\admin\order_detail.html:620
+#: .\templates\orders\admin\order_detail.html:628
 msgid "Bloquear definitivo"
 msgstr "Lock permanently"
 
-#: .\templates\orders\admin\order_detail.html:635
-#: .\templates\orders\users\order_detail.html:781
+#: .\templates\orders\admin\order_detail.html:644
+msgid "Bloquear las medidas"
+msgstr "Lock the measurements"
+
+#: .\templates\orders\admin\order_detail.html:649
+msgid ""
+"Esto no se puede deshacer: después ya nadie podrá corregir una medida, ni "
+"administración."
+msgstr ""
+"This cannot be undone: afterwards nobody, not even administration, will be "
+"able to correct a measurement."
+
+#: .\templates\orders\admin\order_detail.html:652
+#, python-format
+msgid "Hay %(n)s atletas sin medidas completas: se bloquearían así."
+msgstr ""
+"%(n)s athletes have incomplete measurements: they would be locked as they "
+"are."
+
+#: .\templates\orders\admin\order_detail.html:655
+msgid "Todas las medidas están completas."
+msgstr "All measurements are complete."
+
+#: .\templates\orders\admin\order_detail.html:662
+msgid "Sí, bloquear definitivo"
+msgstr "Yes, lock permanently"
+
+#: .\templates\orders\admin\order_detail.html:675
+#: .\templates\orders\users\order_detail.html:840
 msgid "Diseños"
 msgstr "Designs"
 
-#: .\templates\orders\admin\order_detail.html:639
+#: .\templates\orders\admin\order_detail.html:679
 msgid "Subir nuevo diseño"
 msgstr "Upload new design"
 
-#: .\templates\orders\admin\order_detail.html:651
+#: .\templates\orders\admin\order_detail.html:691
 msgid "Seleccionar imagen"
 msgstr "Select image"
 
-#: .\templates\orders\admin\order_detail.html:657
+#: .\templates\orders\admin\order_detail.html:697
 msgid "Marcar como diseño final"
 msgstr "Mark as final design"
 
-#: .\templates\orders\admin\order_detail.html:662
+#: .\templates\orders\admin\order_detail.html:702
 msgid "Subir"
 msgstr "Upload"
 
-#: .\templates\orders\admin\order_detail.html:678
-#: .\templates\orders\admin\order_detail.html:707
-#: .\templates\orders\users\order_detail.html:793
-#: .\templates\orders\users\order_detail.html:817
+#: .\templates\orders\admin\order_detail.html:718
+#: .\templates\orders\admin\order_detail.html:747
+#: .\templates\orders\users\order_detail.html:852
+#: .\templates\orders\users\order_detail.html:876
 msgid "Diseño"
 msgstr "Design"
 
-#: .\templates\orders\admin\order_detail.html:701
-#: .\templates\orders\users\order_detail.html:811
+#: .\templates\orders\admin\order_detail.html:741
+#: .\templates\orders\users\order_detail.html:870
 #, python-format
 msgid "Diseño #%(num)s"
 msgstr "Design #%(num)s"
 
-#: .\templates\orders\admin\order_detail.html:710
-#: .\templates\orders\users\order_detail.html:820
+#: .\templates\orders\admin\order_detail.html:750
+#: .\templates\orders\users\order_detail.html:879
 msgid "Subido por:"
 msgstr "Uploaded by:"
 
-#: .\templates\orders\admin\order_detail.html:713
-#: .\templates\orders\users\order_detail.html:823
+#: .\templates\orders\admin\order_detail.html:753
+#: .\templates\orders\users\order_detail.html:882
 msgid "Estado:"
 msgstr "Status:"
 
-#: .\templates\orders\admin\order_detail.html:733
+#: .\templates\orders\admin\order_detail.html:773
 msgid "No hay diseños subidos aún."
 msgstr "No designs uploaded yet."
 
-#: .\templates\orders\admin\order_detail.html:743
-#: .\templates\orders\users\order_detail.html:886
+#: .\templates\orders\admin\order_detail.html:783
+#: .\templates\orders\users\order_detail.html:945
 msgid "Acciones disponibles"
 msgstr "Available actions"
 
-#: .\templates\orders\admin\order_detail.html:756
+#: .\templates\orders\admin\order_detail.html:794
+#, python-format
+msgid "Qué falta para %(next_step_label)s"
+msgstr "What is missing to %(next_step_label)s"
+
+#: .\templates\orders\admin\order_detail.html:796
+msgid "Qué falta para avanzar"
+msgstr "What is missing to move forward"
+
+#: .\templates\orders\admin\order_detail.html:828
 msgid "Aprobar Diseño"
 msgstr "Approve Design"
 
-#: .\templates\orders\admin\order_detail.html:763
+#: .\templates\orders\admin\order_detail.html:835
 #, python-format
 msgid "Hay %(n)s medidas sin completar"
 msgstr "There are %(n)s incomplete measurements"
 
-#: .\templates\orders\admin\order_detail.html:770
+#: .\templates\orders\admin\order_detail.html:843
 msgid "Enviar a Producción"
 msgstr "Send to Production"
 
-#: .\templates\orders\admin\order_detail.html:777
+#: .\templates\orders\admin\order_detail.html:847
+msgid "Se habilita cuando no falte nada de la lista de arriba."
+msgstr "Enabled once nothing on the list above is missing."
+
+#: .\templates\orders\admin\order_detail.html:855
 msgid "Marcar Entregado"
 msgstr "Mark Delivered"
 
-#: .\templates\orders\admin\order_detail.html:786
+#: .\templates\orders\admin\order_detail.html:864
 msgid "Cancelar Pedido"
 msgstr "Cancel Order"
 
-#: .\templates\orders\admin\order_detail.html:808
+#: .\templates\orders\admin\order_detail.html:886
 msgid "Confirmar envío a producción"
 msgstr "Confirm send to production"
 
-#: .\templates\orders\admin\order_detail.html:812
+#: .\templates\orders\admin\order_detail.html:890
 msgid ""
 "¿Confirmas que el diseño y las medidas están listos? Esto enviará el pedido "
 "al piso de producción."
@@ -6610,47 +6659,47 @@ msgstr ""
 "Do you confirm the design and measurements are ready? This will send the "
 "order to the production floor."
 
-#: .\templates\orders\admin\order_detail.html:818
+#: .\templates\orders\admin\order_detail.html:896
 msgid "Sí, enviar a producción"
 msgstr "Yes, send to production"
 
-#: .\templates\orders\admin\order_detail.html:832
+#: .\templates\orders\admin\order_detail.html:910
 msgid "Confirmar cancelación"
 msgstr "Confirm cancellation"
 
-#: .\templates\orders\admin\order_detail.html:838
+#: .\templates\orders\admin\order_detail.html:916
 msgid "Esta acción cancelará el pedido de forma permanente. ¿Estás seguro?"
 msgstr "This action will permanently cancel the order. Are you sure?"
 
-#: .\templates\orders\admin\order_detail.html:840
-#: .\templates\orders\users\order_detail.html:952
+#: .\templates\orders\admin\order_detail.html:918
+#: .\templates\orders\users\order_detail.html:1011
 msgid "Motivo de la cancelación (opcional)"
 msgstr "Cancellation reason (optional)"
 
-#: .\templates\orders\admin\order_detail.html:843
-#: .\templates\orders\users\order_detail.html:955
+#: .\templates\orders\admin\order_detail.html:921
+#: .\templates\orders\users\order_detail.html:1014
 msgid "Ej. el cliente ya no lo necesita, se pidió por error…"
 msgstr "E.g. the customer no longer needs it, it was ordered by mistake…"
 
-#: .\templates\orders\admin\order_detail.html:846
+#: .\templates\orders\admin\order_detail.html:924
 msgid "No, mantener pedido"
 msgstr "No, keep order"
 
-#: .\templates\orders\admin\order_detail.html:847
-#: .\templates\orders\users\order_detail.html:962
+#: .\templates\orders\admin\order_detail.html:925
+#: .\templates\orders\users\order_detail.html:1021
 msgid "Sí, cancelar pedido"
 msgstr "Yes, cancel order"
 
-#: .\templates\orders\admin\order_detail.html:858
+#: .\templates\orders\admin\order_detail.html:936
 msgid "No hay transiciones disponibles en este estado."
 msgstr "No transitions available in this state."
 
-#: .\templates\orders\admin\order_detail.html:868
-#: .\templates\orders\users\order_detail.html:845
+#: .\templates\orders\admin\order_detail.html:946
+#: .\templates\orders\users\order_detail.html:904
 msgid "Historial"
 msgstr "History"
 
-#: .\templates\orders\admin\order_detail.html:893
+#: .\templates\orders\admin\order_detail.html:971
 msgid "No hay eventos registrados."
 msgstr "No events registered."
 
@@ -6671,49 +6720,49 @@ msgstr ""
 "        of %(total)s orders\n"
 "        "
 
-#: .\templates\orders\admin\order_list.html:22
+#: .\templates\orders\admin\order_list.html:24
 msgid "Pedido personal"
 msgstr "Personal order"
 
-#: .\templates\orders\admin\order_list.html:76
-#: .\templates\orders\admin\order_list.html:128
+#: .\templates\orders\admin\order_list.html:79
+#: .\templates\orders\admin\order_list.html:131
 #: .\templates\orders\users\order_create.html:34
 #: .\templates\orders\users\order_list.html:110
 msgid "Personal"
 msgstr "Personal"
 
-#: .\templates\orders\admin\order_list.html:78
-#: .\templates\orders\admin\order_list.html:130
+#: .\templates\orders\admin\order_list.html:81
+#: .\templates\orders\admin\order_list.html:133
 msgid "Personal (offline)"
 msgstr "Personal (offline)"
 
-#: .\templates\orders\admin\order_list.html:83
+#: .\templates\orders\admin\order_list.html:86
 msgid "Desde"
 msgstr "From"
 
-#: .\templates\orders\admin\order_list.html:88
+#: .\templates\orders\admin\order_list.html:91
 msgid "Hasta"
 msgstr "To"
 
-#: .\templates\orders\admin\order_list.html:110
+#: .\templates\orders\admin\order_list.html:113
 msgid "ID"
 msgstr "ID"
 
-#: .\templates\orders\admin\order_list.html:113
-#: .\templates\orders\users\order_detail.html:173
+#: .\templates\orders\admin\order_list.html:116
+#: .\templates\orders\users\order_detail.html:230
 #: .\templates\orders\users\order_list.html:91
 msgid "Dueño"
 msgstr "Owner"
 
-#: .\templates\orders\admin\order_list.html:114
+#: .\templates\orders\admin\order_list.html:117
 msgid "Creado por"
 msgstr "Created by"
 
-#: .\templates\orders\admin\order_list.html:115
+#: .\templates\orders\admin\order_list.html:118
 msgid "Items"
 msgstr "Items"
 
-#: .\templates\orders\admin\order_list.html:169
+#: .\templates\orders\admin\order_list.html:172
 msgid "No hay órdenes"
 msgstr "No orders"
 
@@ -6753,7 +6802,7 @@ msgid "Volver a la orden"
 msgstr "Back to order"
 
 #: .\templates\orders\items\item_detail.html:42
-#: .\templates\orders\users\order_detail.html:557
+#: .\templates\orders\users\order_detail.html:616
 msgid "Configuración incompleta"
 msgstr "Incomplete setup"
 
@@ -6783,7 +6832,7 @@ msgstr "Import athletes"
 
 #: .\templates\orders\items\item_detail.html:134
 #: .\templates\orders\items\item_detail.html:379
-#: .\templates\orders\users\order_detail.html:977
+#: .\templates\orders\users\order_detail.html:1036
 msgid "Eliminar producto"
 msgstr "Delete product"
 
@@ -6931,7 +6980,7 @@ msgid "Filtros"
 msgstr "Filters"
 
 #: .\templates\orders\products\add_product.html:36
-#: .\templates\orders\users\order_detail.html:564
+#: .\templates\orders\users\order_detail.html:623
 #: .\templates\products\product_detail.html:277
 #: .\templates\products\product_form.html:90
 msgid "Tipo de producto"
@@ -7093,407 +7142,420 @@ msgstr "This order cannot be submitted:"
 msgid "Pedido listo para enviarse"
 msgstr "Order ready to submit"
 
-#: .\templates\orders\users\order_detail.html:78
+#: .\templates\orders\users\order_detail.html:79
 msgid "Pedido enviado — en revisión"
 msgstr "Order submitted — under review"
 
-#: .\templates\orders\users\order_detail.html:79
+#: .\templates\orders\users\order_detail.html:80
 msgid "Tu pedido está siendo revisado. Te notificaremos cuando haya novedades."
 msgstr "Your order is being reviewed. We'll notify you when there are updates."
 
-#: .\templates\orders\users\order_detail.html:81
+#: .\templates\orders\users\order_detail.html:82
 msgid "Una vez aprobado el diseño, recibirás confirmación para continuar."
 msgstr ""
 "Once the design is approved, you will receive confirmation to continue."
 
-#: .\templates\orders\users\order_detail.html:92
+#: .\templates\orders\users\order_detail.html:93
 #: .\templates\orders\users\order_list.html:132
 msgid "Diseño aprobado"
 msgstr "Design approved"
 
-#: .\templates\orders\users\order_detail.html:93
+#: .\templates\orders\users\order_detail.html:94
 msgid "El diseño fue aprobado. Tu pedido entrará en producción próximamente."
 msgstr "The design was approved. Your order will enter production soon."
 
-#: .\templates\orders\users\order_detail.html:104
+#: .\templates\orders\users\order_detail.html:105
 msgid "Tu pedido está siendo fabricado."
 msgstr "Your order is being manufactured."
 
-#: .\templates\orders\users\order_detail.html:108
+#: .\templates\orders\users\order_detail.html:109
 #, python-format
 msgid "Fecha estimada de entrega: %(date)s"
 msgstr "Estimated delivery date: %(date)s"
 
-#: .\templates\orders\users\order_detail.html:120
+#: .\templates\orders\users\order_detail.html:121
 msgid "Pedido entregado"
 msgstr "Order delivered"
 
-#: .\templates\orders\users\order_detail.html:123
+#: .\templates\orders\users\order_detail.html:124
 #, python-format
 msgid "Tu pedido fue entregado el %(date)s."
 msgstr "Your order was delivered on %(date)s."
 
-#: .\templates\orders\users\order_detail.html:135
+#: .\templates\orders\users\order_detail.html:136
 msgid "Pedido cancelado"
 msgstr "Order cancelled"
 
-#: .\templates\orders\users\order_detail.html:137
-#: .\templates\orders\users\order_detail.html:246
+#: .\templates\orders\users\order_detail.html:138
+#: .\templates\orders\users\order_detail.html:303
 msgid "Motivo:"
 msgstr "Reason:"
 
-#: .\templates\orders\users\order_detail.html:151
+#: .\templates\orders\users\order_detail.html:163
+#, python-format
+msgid "Falta esto para %(next_step_label)s"
+msgstr "This is missing to %(next_step_label)s"
+
+#: .\templates\orders\users\order_detail.html:165
+msgid "Pendientes del pedido"
+msgstr "Order pending items"
+
+#: .\templates\orders\users\order_detail.html:170
+msgid "Nada de tu parte"
+msgstr "Nothing on your side"
+
+#: .\templates\orders\users\order_detail.html:208
 msgid "Detalles completos"
 msgstr "Full details"
 
-#: .\templates\orders\users\order_detail.html:188
+#: .\templates\orders\users\order_detail.html:245
 msgid "Bloqueo de medidas"
 msgstr "Measurement lock"
 
-#: .\templates\orders\users\order_detail.html:191
+#: .\templates\orders\users\order_detail.html:248
 msgid "Activado,Desactivado"
 msgstr "Enabled,Disabled"
 
-#: .\templates\orders\users\order_detail.html:204
+#: .\templates\orders\users\order_detail.html:261
 msgid "Editable"
 msgstr "Editable"
 
-#: .\templates\orders\users\order_detail.html:206
+#: .\templates\orders\users\order_detail.html:263
 msgid "Sí,No"
 msgstr "Yes,No"
 
-#: .\templates\orders\users\order_detail.html:216
+#: .\templates\orders\users\order_detail.html:273
 msgid "Fechas importantes"
 msgstr "Important dates"
 
-#: .\templates\orders\users\order_detail.html:220
+#: .\templates\orders\users\order_detail.html:277
 msgid "Actualizada:"
 msgstr "Updated:"
 
-#: .\templates\orders\users\order_detail.html:225
+#: .\templates\orders\users\order_detail.html:282
 msgid "Diseño aprobado:"
 msgstr "Design approved:"
 
-#: .\templates\orders\users\order_detail.html:232
+#: .\templates\orders\users\order_detail.html:289
 msgid "Producción iniciada:"
 msgstr "Production started:"
 
-#: .\templates\orders\users\order_detail.html:238
+#: .\templates\orders\users\order_detail.html:295
 msgid "Entregada:"
 msgstr "Delivered:"
 
-#: .\templates\orders\users\order_detail.html:244
+#: .\templates\orders\users\order_detail.html:301
 msgid "Cancelada:"
 msgstr "Cancelled:"
 
-#: .\templates\orders\users\order_detail.html:252
+#: .\templates\orders\users\order_detail.html:309
 msgid "Fecha límite medidas:"
 msgstr "Measurement deadline:"
 
-#: .\templates\orders\users\order_detail.html:258
+#: .\templates\orders\users\order_detail.html:315
 msgid "Fecha entrega uniforme:"
 msgstr "Uniform delivery date:"
 
-#: .\templates\orders\users\order_detail.html:264
+#: .\templates\orders\users\order_detail.html:321
 msgid "Pago congelado:"
 msgstr "Freeze payment:"
 
-#: .\templates\orders\users\order_detail.html:270
+#: .\templates\orders\users\order_detail.html:327
 msgid "Primer pago:"
 msgstr "First payment:"
 
-#: .\templates\orders\users\order_detail.html:275
+#: .\templates\orders\users\order_detail.html:332
 msgid "No hay fechas de eventos registradas"
 msgstr "No event dates registered"
 
-#: .\templates\orders\users\order_detail.html:286
+#: .\templates\orders\users\order_detail.html:343
 msgid "Notas de diseño:"
 msgstr "Design notes:"
 
-#: .\templates\orders\users\order_detail.html:338
+#: .\templates\orders\users\order_detail.html:395
 msgid "Falta información de contacto:"
 msgstr "Missing contact information:"
 
-#: .\templates\orders\users\order_detail.html:338
+#: .\templates\orders\users\order_detail.html:395
 msgid "Por favor, agrega la información de envío para tu orden."
 msgstr "Please add the shipping information for your order."
 
-#: .\templates\orders\users\order_detail.html:342
+#: .\templates\orders\users\order_detail.html:399
 msgid "Agregar Info"
 msgstr "Add Info"
 
-#: .\templates\orders\users\order_detail.html:356
+#: .\templates\orders\users\order_detail.html:415
 #: .\templates\orders\users\order_list.html:188
 msgid "Editar orden"
 msgstr "Edit order"
 
-#: .\templates\orders\users\order_detail.html:364
+#: .\templates\orders\users\order_detail.html:423
 msgid "Medidas bloqueadas"
 msgstr "Measurements locked"
 
-#: .\templates\orders\users\order_detail.html:365
+#: .\templates\orders\users\order_detail.html:424
 msgid "Ya no es posible modificar las medidas para esta orden."
 msgstr "Measurements can no longer be modified for this order."
 
-#: .\templates\orders\users\order_detail.html:370
+#: .\templates\orders\users\order_detail.html:429
 msgid "Medidas abiertas"
 msgstr "Measurements open"
 
-#: .\templates\orders\users\order_detail.html:371
+#: .\templates\orders\users\order_detail.html:430
 msgid "Puedes agregar o editar tus medidas."
 msgstr "You can add or edit your measurements."
 
-#: .\templates\orders\users\order_detail.html:375
+#: .\templates\orders\users\order_detail.html:434
 #, python-format
 msgid "Fecha límite para medidas: %(date)s"
 msgstr "Measurement deadline: %(date)s"
 
-#: .\templates\orders\users\order_detail.html:382
-#: .\templates\orders\users\order_detail.html:625
+#: .\templates\orders\users\order_detail.html:441
+#: .\templates\orders\users\order_detail.html:684
 msgid "Medidas cerradas"
 msgstr "Measurements closed"
 
-#: .\templates\orders\users\order_detail.html:383
+#: .\templates\orders\users\order_detail.html:442
 msgid "Actualmente no es posible editar medidas."
 msgstr "It is not currently possible to edit measurements."
 
-#: .\templates\orders\users\order_detail.html:391
+#: .\templates\orders\users\order_detail.html:450
 msgid "Productos en la orden"
 msgstr "Products in the order"
 
-#: .\templates\orders\users\order_detail.html:394
-#: .\templates\orders\users\order_detail.html:758
+#: .\templates\orders\users\order_detail.html:453
+#: .\templates\orders\users\order_detail.html:817
 #: .\templates\products\product_list.html:13
 msgid "producto"
 msgstr "product"
 
-#: .\templates\orders\users\order_detail.html:423
+#: .\templates\orders\users\order_detail.html:482
 #, python-format
 msgid "%(piezas)s pieza"
 msgid_plural "%(piezas)s piezas"
 msgstr[0] "%(piezas)s piece"
 msgstr[1] "%(piezas)s pieces"
 
-#: .\templates\orders\users\order_detail.html:425
+#: .\templates\orders\users\order_detail.html:484
 #, python-format
 msgid "%(tallas)s talla"
 msgid_plural "%(tallas)s tallas"
 msgstr[0] "%(tallas)s size"
 msgstr[1] "%(tallas)s sizes"
 
-#: .\templates\orders\users\order_detail.html:431
+#: .\templates\orders\users\order_detail.html:490
 msgid "Capturados:"
 msgstr "Captured:"
 
-#: .\templates\orders\users\order_detail.html:432
+#: .\templates\orders\users\order_detail.html:491
 #: .\templates\social\team_page.html:14
 msgid "de"
 msgstr "of"
 
-#: .\templates\orders\users\order_detail.html:439
+#: .\templates\orders\users\order_detail.html:498
 msgid "Equipo completo"
 msgstr "Whole team covered"
 
-#: .\templates\orders\users\order_detail.html:452
-#: .\templates\orders\users\order_detail.html:520
+#: .\templates\orders\users\order_detail.html:511
+#: .\templates\orders\users\order_detail.html:579
 msgid "Cant."
 msgstr "Qty."
 
-#: .\templates\orders\users\order_detail.html:453
-#: .\templates\orders\users\order_detail.html:521
+#: .\templates\orders\users\order_detail.html:512
+#: .\templates\orders\users\order_detail.html:580
 msgid "Unit."
 msgstr "Unit."
 
-#: .\templates\orders\users\order_detail.html:455
+#: .\templates\orders\users\order_detail.html:514
 #: .\templates\social\ranking.html:28
 msgid "Atletas"
 msgstr "Athletes"
 
-#: .\templates\orders\users\order_detail.html:487
-#: .\templates\orders\users\order_detail.html:730
+#: .\templates\orders\users\order_detail.html:546
+#: .\templates\orders\users\order_detail.html:789
 msgid "talla"
 msgstr "size"
 
-#: .\templates\orders\users\order_detail.html:491
+#: .\templates\orders\users\order_detail.html:550
 #, python-format
 msgid "Quitar la talla %(talla)s"
 msgstr "Remove size %(talla)s"
 
-#: .\templates\orders\users\order_detail.html:508
+#: .\templates\orders\users\order_detail.html:567
 msgid "Una sola pantalla para todo el equipo"
 msgstr "One screen for the whole team"
 
-#: .\templates\orders\users\order_detail.html:519
+#: .\templates\orders\users\order_detail.html:578
 msgid "Cómo leer cada renglón:"
 msgstr "How to read each row:"
 
-#: .\templates\orders\users\order_detail.html:520
+#: .\templates\orders\users\order_detail.html:579
 msgid "son las piezas de esa talla,"
 msgstr "is the number of pieces of that size,"
 
-#: .\templates\orders\users\order_detail.html:521
+#: .\templates\orders\users\order_detail.html:580
 msgid "el precio por pieza (talla grande puede sumar un adicional) y"
 msgstr "the price per piece (a large size may add a surcharge) and"
 
-#: .\templates\orders\users\order_detail.html:522
+#: .\templates\orders\users\order_detail.html:581
 msgid "es Cant. × Unit."
 msgstr "is Qty. × Unit."
 
-#: .\templates\orders\users\order_detail.html:523
+#: .\templates\orders\users\order_detail.html:582
 msgid ""
 "Las etiquetas grises describen el producto; pasa el cursor sobre ellas para "
 "ver qué significan."
 msgstr ""
 "The grey labels describe the product; hover over them to see what they mean."
 
-#: .\templates\orders\users\order_detail.html:547
+#: .\templates\orders\users\order_detail.html:606
 msgid "Cada talla del producto es un renglón aparte del pedido"
 msgstr "Each size of the product is a separate row of the order"
 
-#: .\templates\orders\users\order_detail.html:568
+#: .\templates\orders\users\order_detail.html:627
 msgid "Cómo se personaliza: global, por equipo o por atleta"
 msgstr "How it is customized: global, per team or per athlete"
 
-#: .\templates\orders\users\order_detail.html:572
+#: .\templates\orders\users\order_detail.html:631
 msgid "Alcance: de catálogo general o exclusivo de un equipo"
 msgstr "Scope: general catalog or exclusive to one team"
 
-#: .\templates\orders\users\order_detail.html:587
+#: .\templates\orders\users\order_detail.html:646
 msgid "No seleccionada"
 msgstr "Not selected"
 
-#: .\templates\orders\users\order_detail.html:616
+#: .\templates\orders\users\order_detail.html:675
 msgid "Medidas incompletas"
 msgstr "Incomplete measurements"
 
-#: .\templates\orders\users\order_detail.html:620
+#: .\templates\orders\users\order_detail.html:679
 msgid "Configurar"
 msgstr "Configure"
 
-#: .\templates\orders\users\order_detail.html:645
+#: .\templates\orders\users\order_detail.html:704
 #, python-format
 msgid "%(n)s medida"
 msgid_plural "%(n)s medidas"
 msgstr[0] "%(n)s measurement"
 msgstr[1] "%(n)s measurements"
 
-#: .\templates\orders\users\order_detail.html:655
+#: .\templates\orders\users\order_detail.html:714
 #, python-format
 msgid "Medidas de %(name)s"
 msgstr "Measurements for %(name)s"
 
-#: .\templates\orders\users\order_detail.html:690
+#: .\templates\orders\users\order_detail.html:749
 msgid "subtotal"
 msgstr "subtotal"
 
-#: .\templates\orders\users\order_detail.html:694
+#: .\templates\orders\users\order_detail.html:753
 msgid "Piezas de esta talla: sale del número de alumnos asignados"
 msgstr "Pieces of this size: taken from the number of assigned athletes"
 
-#: .\templates\orders\users\order_detail.html:694
+#: .\templates\orders\users\order_detail.html:753
 msgid "Piezas de este producto"
 msgstr "Pieces of this product"
 
-#: .\templates\orders\users\order_detail.html:695
+#: .\templates\orders\users\order_detail.html:754
 msgid "Cant:"
 msgstr "Qty:"
 
-#: .\templates\orders\users\order_detail.html:700
+#: .\templates\orders\users\order_detail.html:759
 msgid "Precio por pieza: base del producto + adicional de la talla"
 msgstr "Price per piece: product base + size surcharge"
 
-#: .\templates\orders\users\order_detail.html:701
+#: .\templates\orders\users\order_detail.html:760
 msgid "Unit:"
 msgstr "Unit:"
 
-#: .\templates\orders\users\order_detail.html:712
+#: .\templates\orders\users\order_detail.html:771
 msgid "Gestionar atletas"
 msgstr "Manage athletes"
 
-#: .\templates\orders\users\order_detail.html:719
+#: .\templates\orders\users\order_detail.html:778
 msgid "Elegir talla"
 msgstr "Choose size"
 
-#: .\templates\orders\users\order_detail.html:754
+#: .\templates\orders\users\order_detail.html:813
 msgid "Total de la orden:"
 msgstr "Order total:"
 
-#: .\templates\orders\users\order_detail.html:758
+#: .\templates\orders\users\order_detail.html:817
 msgid "unidades"
 msgstr "units"
 
-#: .\templates\orders\users\order_detail.html:766
+#: .\templates\orders\users\order_detail.html:825
 msgid "Esta orden aún no tiene productos"
 msgstr "This order has no products yet"
 
-#: .\templates\orders\users\order_detail.html:767
+#: .\templates\orders\users\order_detail.html:826
 msgid "Agrega productos para comenzar"
 msgstr "Add products to start"
 
-#: .\templates\orders\users\order_detail.html:860
+#: .\templates\orders\users\order_detail.html:919
 msgid "Sistema"
 msgstr "System"
 
-#: .\templates\orders\users\order_detail.html:863
+#: .\templates\orders\users\order_detail.html:922
 #, python-format
 msgid "de %(from)s → %(to)s"
 msgstr "from %(from)s → %(to)s"
 
-#: .\templates\orders\users\order_detail.html:874
+#: .\templates\orders\users\order_detail.html:933
 msgid "Ver historial completo"
 msgstr "View full history"
 
-#: .\templates\orders\users\order_detail.html:897
-#: .\templates\orders\users\order_detail.html:944
+#: .\templates\orders\users\order_detail.html:956
+#: .\templates\orders\users\order_detail.html:1003
 msgid "Cancelar pedido"
 msgstr "Cancel order"
 
-#: .\templates\orders\users\order_detail.html:907
+#: .\templates\orders\users\order_detail.html:966
 msgid "Enviar pedido"
 msgstr "Submit order"
 
-#: .\templates\orders\users\order_detail.html:909
+#: .\templates\orders\users\order_detail.html:968
 msgid "Aprobar diseño"
 msgstr "Approve design"
 
-#: .\templates\orders\users\order_detail.html:911
+#: .\templates\orders\users\order_detail.html:970
 msgid "Iniciar producción"
 msgstr "Start production"
 
-#: .\templates\orders\users\order_detail.html:913
+#: .\templates\orders\users\order_detail.html:972
 msgid "Marcar como entregada"
 msgstr "Mark as delivered"
 
-#: .\templates\orders\users\order_detail.html:916
+#: .\templates\orders\users\order_detail.html:975
 #, python-format
 msgid "Pasar a %(s)s"
 msgstr "Move to %(s)s"
 
-#: .\templates\orders\users\order_detail.html:927
+#: .\templates\orders\users\order_detail.html:986
 msgid "Resuelve los problemas señalados arriba"
 msgstr "Resolve the issues listed above"
 
-#: .\templates\orders\users\order_detail.html:927
+#: .\templates\orders\users\order_detail.html:986
 msgid "para poder avanzar."
 msgstr "to proceed."
 
-#: .\templates\orders\users\order_detail.html:932
+#: .\templates\orders\users\order_detail.html:991
 msgid "No hay acciones disponibles"
 msgstr "No actions available"
 
-#: .\templates\orders\users\order_detail.html:933
+#: .\templates\orders\users\order_detail.html:992
 msgid "Esta orden ha alcanzado su estado final"
 msgstr "This order has reached its final state"
 
-#: .\templates\orders\users\order_detail.html:983
+#: .\templates\orders\users\order_detail.html:1042
 msgid "¿Eliminar"
 msgstr "Delete"
 
-#: .\templates\orders\users\order_detail.html:983
+#: .\templates\orders\users\order_detail.html:1042
 msgid "de la orden?"
 msgstr "from the order?"
 
-#: .\templates\orders\users\order_detail.html:986
+#: .\templates\orders\users\order_detail.html:1045
 msgid ""
 "Se eliminarán todos los atletas y medidas asociadas. Esta acción no se puede "
 "deshacer."
@@ -8628,3 +8690,44 @@ msgstr "Tap the three vertical dots to see more options"
 #: .\templates\teams\manage_teams.html:451
 msgid "Los badges indican la categoría y ciudad del equipo"
 msgstr "Badges indicate the team's category and city"
+
+#, python-format
+#~ msgid "Guardián Actual: %(name)s"
+#~ msgstr "Current Guardian: %(name)s"
+
+#~ msgid "Si seleccionas otro guardián de la lista y guardas, el actual será"
+#~ msgstr ""
+#~ "If you select another guardian from the list and save, the current one "
+#~ "will be"
+
+#~ msgid "reemplazado (Transferencia)"
+#~ msgstr "replaced (Transfer)"
+
+#~ msgid "Remover Guardián"
+#~ msgstr "Remove Guardian"
+
+#~ msgid "Transferir a este Guardián"
+#~ msgstr "Transfer to this Guardian"
+
+#, python-format
+#~ msgid ""
+#~ "¿Estás completamente seguro de que deseas <strong>remover a "
+#~ "%(guardian_name)s</strong> como guardián de %(athlete_name)s?"
+#~ msgstr ""
+#~ "Are you completely sure you want to <strong>remove %(guardian_name)s</"
+#~ "strong> as guardian of %(athlete_name)s?"
+
+#~ msgid ""
+#~ "Esto dejará al atleta sin tutor legal registrado en el sistema. Debe "
+#~ "realizarse únicamente si el atleta ya alcanzó la mayoría de edad o si se "
+#~ "reasignará un tutor después."
+#~ msgstr ""
+#~ "This will leave the athlete without a legal guardian registered in the "
+#~ "system. This should only be done if the athlete has already reached "
+#~ "adulthood or if a guardian will be reassigned afterward."
+
+#~ msgid "Sí, Remover"
+#~ msgstr "Yes, Remove"
+
+#~ msgid "Guardián Actual"
+#~ msgstr "Current Guardian"

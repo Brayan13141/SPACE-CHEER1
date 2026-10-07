@@ -116,8 +116,12 @@ NEXT_STATUS_LABELS = {
 }
 
 
-def next_step_requirements(order: Order) -> list[OrderBlockingIssue]:
+def next_step_requirements(order: Order, to_status=None) -> list[OrderBlockingIssue]:
     """Todo lo que falta para que el pedido avance al siguiente estado.
+
+    `to_status` fuerza el salto a evaluar. Sin él se toma el siguiente estado
+    natural; hace falta pasarlo cuando hay un atajo, como PENDING →
+    IN_PRODUCTION en un pedido sin diseño.
 
     `can_submit_order` solo mira el salto DRAFT → PENDING. Esto cubre el ciclo
     entero, porque el problema no era que faltara la validación —los
@@ -130,7 +134,8 @@ def next_step_requirements(order: Order) -> list[OrderBlockingIssue]:
     Devuelve lista vacía si el pedido puede avanzar (o si ya está en un estado
     final).
     """
-    to_status = NEXT_STATUS.get(order.status)
+    if to_status is None:
+        to_status = NEXT_STATUS.get(order.status)
     if to_status is None:
         return []
 
@@ -202,6 +207,8 @@ def next_step_requirements(order: Order) -> list[OrderBlockingIssue]:
         if not items:
             falta("NO_ITEMS", "El pedido no tiene productos")
             return issues
+        if requires_design and order.status == "PENDING":
+            falta("DESIGN_NOT_APPROVED", "Falta aprobar el diseño", OWNER_ADMIN)
         if requires_design and not order.design_images.filter(is_final=True).exists():
             falta("NO_FINAL_DESIGN", "No hay diseño final aprobado", OWNER_ADMIN)
 

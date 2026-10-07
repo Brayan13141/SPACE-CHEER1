@@ -580,14 +580,23 @@
   </div>
   <div class="card-body">
 
-    <!-- Estado actual -->
+    <!-- Estado actual y qué significa -->
     <div class="mb-3">
       {% if order.measurements_locked %}
         <span class="badge bg-danger">{% trans "Bloqueadas definitivamente" %}</span>
+        <small class="text-muted d-block mt-2">
+          {% trans "Ya nadie puede corregir una medida. Así llegan a producción." %}
+        </small>
       {% elif order.measurements_open %}
         <span class="badge bg-success">{% trans "Abiertas" %}</span>
+        <small class="text-muted d-block mt-2">
+          {% trans "Las familias y el coach todavía pueden capturar y corregir medidas. Se cierran solas al aprobar el diseño o al vencer la fecha límite." %}
+        </small>
       {% else %}
         <span class="badge bg-secondary">{% trans "Cerradas" %}</span>
+        <small class="text-muted d-block mt-2">
+          {% trans "Nadie puede capturar, pero aún se pueden reabrir. Para enviar a producción hay que bloquearlas: ese paso es aparte y no se deshace." %}
+        </small>
       {% endif %}
     </div>
 
@@ -613,18 +622,49 @@
       {% endif %}
 
       {% if measurement_actions.can_lock %}
-        <form method="post" action="{% url 'orders:lock_measurements' order.id %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">
-            <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear definitivo" %}
-          </button>
-        </form>
+        <button type="button" class="btn btn-danger"
+                data-bs-toggle="modal" data-bs-target="#modalLockMeasurements">
+          <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear definitivo" %}
+        </button>
       {% endif %}
 
     </div>
 
   </div>
 </div>
+
+{% if measurement_actions.can_lock %}
+{# Fuera de la tarjeta y de cualquier tabla: un <form> anidado sale vacío del parser. #}
+<div class="modal fade" id="modalLockMeasurements" tabindex="-1" aria-labelledby="modalLockMeasurementsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalLockMeasurementsLabel">
+          <i class="bi bi-shield-lock me-1"></i>{% trans "Bloquear las medidas" %}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">{% trans "Esto no se puede deshacer: después ya nadie podrá corregir una medida, ni administración." %}</p>
+        {% if measurements_summary.pending > 0 %}
+          <div class="alert alert-warning py-2 px-3 mb-0 small">
+            ⚠️ {% blocktrans with n=measurements_summary.pending %}Hay {{ n }} atletas sin medidas completas: se bloquearían así.{% endblocktrans %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">{% trans "Todas las medidas están completas." %}</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+        <form method="post" action="{% url 'orders:lock_measurements' order.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger fw-semibold">{% trans "Sí, bloquear definitivo" %}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endif %}
 
   <!-- ========== DESIGNS (mejorado) ========== -->
@@ -743,6 +783,38 @@
       </h5>
     </div>
     <div class="card-body">
+      {# Qué falta para el siguiente paso: antes solo se sabía al intentarlo, de a un error por vez. #}
+      {% if next_requirements %}
+        <div class="border border-warning rounded mb-3">
+          <div class="px-3 py-2 bg-warning bg-opacity-10 d-flex align-items-center">
+            <i class="bi bi-hourglass-split me-2"></i>
+            <strong>
+              {% if next_step_label %}
+                {% blocktrans %}Qué falta para {{ next_step_label }}{% endblocktrans %}
+              {% else %}
+                {% trans "Qué falta para avanzar" %}
+              {% endif %}
+            </strong>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for req in next_requirements %}
+              <li class="list-group-item bg-transparent d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-circle text-warning mt-1"></i>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span>{{ req.message }}</span>
+                    <span class="badge text-bg-light border">{{ req.owner_label }}</span>
+                  </div>
+                  {% if req.hint %}
+                    <small class="text-muted d-block mt-1">{{ req.hint }}</small>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
       {% if available_transitions %}
         <div class="row g-2">
           {% for status in available_transitions %}
@@ -762,12 +834,18 @@
                     ⚠️ {% blocktrans with n=measurements_summary.pending %}Hay {{ n }} medidas sin completar{% endblocktrans %}
                   </div>
                 {% endif %}
-                <button type="button"
+                {# Deshabilitado mientras falte algo: el backend lo rechazaría igual al confirmar. #}
+                <button type="button" id="btnInProduction"
                         class="btn btn-success w-100 py-3 fw-semibold"
                         data-bs-toggle="modal"
-                        data-bs-target="#modalInProduction">
+                        data-bs-target="#modalInProduction"{% if in_production_blocked %} disabled aria-describedby="inProductionBlockedHint"{% endif %}>
                   🚀 {% trans "Enviar a Producción" %}
                 </button>
+                {% if in_production_blocked %}
+                  <small id="inProductionBlockedHint" class="text-muted d-block mt-1">
+                    {% trans "Se habilita cuando no falte nada de la lista de arriba." %}
+                  </small>
+                {% endif %}
 
               {% elif status == "DELIVERED" %}
                 <form method="post" action="{% url 'orders:transition_admin' order.id status %}">
