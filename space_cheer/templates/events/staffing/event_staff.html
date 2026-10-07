@@ -9,7 +9,8 @@
       <h1 class="h3 mb-0">{% trans "Staff externo" %}</h1>
       <p class="text-secondary small mb-0">{{ event.name }}</p>
     </div>
-    {# Los Tasks 5 y 6 agregan aquí "Imprimir gafetes", "Hoja operativa" y "Bitácora". #}
+    {# El Task 6 agrega aquí "Hoja operativa" y "Bitácora". #}
+    <a href="{% url 'events:external_staff_badges' event.pk %}" class="btn btn-outline-primary btn-sm" target="_blank"><i class="bi bi-person-badge me-1"></i>{% trans "Imprimir gafetes" %}</a>
     <a href="{% url 'events:organization_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-building me-1"></i>{% trans "Organizaciones" %}</a>
   </div>
 

@@ -1,0 +1,36 @@
+{% load i18n %}<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>{% trans "Gafetes" %} — {{ event.name }}</title>
+<style>
+  @page { size: letter; margin: 10mm; }
+  body { font-family: system-ui, sans-serif; margin: 0; color: #000; background: #fff; }
+  .sheet { display: grid; grid-template-columns: repeat(2, 85.6mm); gap: 6mm; }
+  .badge { width: 85.6mm; height: 54mm; border: 1px solid #999; border-radius: 3mm; padding: 3mm;
+           box-sizing: border-box; display: flex; gap: 3mm; break-inside: avoid; }
+  .badge img.photo { width: 22mm; height: 28mm; object-fit: cover; border-radius: 1mm; }
+  .badge .info { flex: 1; font-size: 9pt; line-height: 1.25; }
+  .badge .name { font-weight: 700; font-size: 11pt; }
+  .badge .qr svg { width: 26mm; height: 26mm; }
+  .noprint { margin: 8mm 0; }
+  @media print { .noprint { display: none; } }
+</style></head>
+<body>
+  <p class="noprint">{% blocktrans with n=cards|length %}{{ n }} gafetes. Imprime con Ctrl+P a escala 100 %.{% endblocktrans %}</p>
+  <div class="sheet">
+    {% for c in cards %}
+      <div class="badge">
+        {% if c.member.photo %}<img class="photo" src="{{ c.member.photo.url }}" alt="">{% endif %}
+        <div class="info">
+          <div class="name">{{ c.member.full_name }}</div>
+          <div>{{ c.member.event_organization.organization.name }}</div>
+          <div>{{ c.member.role.name }}</div>
+          {% if c.member.shift %}<div>{{ c.member.shift }}</div>{% endif %}
+          {% if c.member.credential %}<div>{{ c.member.credential }}</div>{% endif %}
+          <div style="margin-top:2mm;font-size:8pt;">{{ event.name }}</div>
+        </div>
+        <div class="qr">{{ c.qr }}</div>
+      </div>
+    {% empty %}
+      <p>{% trans "No hay elementos aceptados." %}</p>
+    {% endfor %}
+  </div>
+</body></html>

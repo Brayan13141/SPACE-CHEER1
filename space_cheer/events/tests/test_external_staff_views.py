@@ -194,3 +194,55 @@ class TestPanelAdmin:
             'name': 'Protección Civil León', 'kind': Organization.KIND_PUBLIC_INSTITUTION,
         })
         assert Organization.objects.filter(name='Protección Civil León').exists()
+
+
+class TestGafetesYPuerta:
+    @pytest.fixture
+    def member(self, event_org, role, admin):
+        return S.add_member(event_org=event_org, data={'full_name': 'Rosa', 'role': role, 'photo': _png()},
+                            source=StaffMember.SOURCE_ADMIN, user=admin)
+
+    @pytest.fixture
+    def portero(self, event, admin):
+        user = _user('portero_v', 'STAFF')
+        door_role = EventStaffRole.objects.create(name='Control de accesos')
+        EventStaffAssignment.objects.create(event=event, user=user, role=door_role, assigned_by=admin)
+        return user
+
+    def _door(self, member):
+        return reverse('events:staff_door', args=[S.badge_token(member)])
+
+    def test_gafetes_llevan_qr_con_url_de_puerta(self, client, admin, member, event):
+        client.force_login(admin)
+        html = client.get(reverse('events:external_staff_badges', args=[event.pk])).content.decode()
+        assert 'Rosa' in html and '<svg' in html
+
+    def test_puerta_exige_login(self, client, member):
+        assert client.get(self._door(member)).status_code == 302
+
+    def test_portero_registra_entrada(self, client, portero, member):
+        client.force_login(portero)
+        url = self._door(member)
+        assert client.get(url).status_code == 200
+        client.post(url, {'direction': StaffAccessLog.DIRECTION_IN})
+        assert S.is_inside(member)
+        assert PiiAccessLog.objects.filter(access_type='VIEW_EVENT_STAFF').exists()
+
+    def test_staff_sin_rol_de_puerta_recibe_403(self, client, member):
+        client.force_login(_user('miron', 'STAFF'))
+        assert client.get(self._door(member)).status_code == 403
+
+    def test_gafete_anulado_muestra_invalido(self, client, admin, member):
+        url = self._door(member)
+        S.reject(member=member, user=admin)
+        client.force_login(admin)
+        resp = client.get(url)
+        assert resp.status_code == 404
+        assert 'Rosa' not in resp.content.decode()
+
+    def test_foto_de_staff_no_la_ve_otro_usuario(self, client, member, portero):
+        url = member.photo.url
+        client.force_login(_user('curioso', 'ATHLETE'))
+        assert client.get(url).status_code == 404
+        client.force_login(portero)
+        assert client.get(url).status_code == 200

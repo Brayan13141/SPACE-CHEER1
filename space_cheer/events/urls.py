@@ -28,6 +28,8 @@ urlpatterns = [
     # Staff externo — ADMIN
     path('organizations/', staffing_views.organization_list, name='organization_list'),
     path('<int:pk>/external-staff/', staffing_views.external_staff, name='external_staff'),
+    path('<int:pk>/external-staff/badges/', staffing_views.badges, name='external_staff_badges'),
+    path('access/<str:token>/', external_views.staff_door, name='staff_door'),
     path('<int:pk>/criteria/', admin_views.criteria_manage, name='criteria_manage'),
     path('<int:pk>/scores/', admin_views.score_entry, name='score_entry'),
     path('<int:pk>/results/', admin_views.results_manage, name='results_manage'),

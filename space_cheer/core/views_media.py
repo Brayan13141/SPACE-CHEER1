@@ -30,4 +30,17 @@ def serve_protected_media(request, path):
         if design and not OrderPermissions.can_view_order(request.user, design.order):
             raise Http404
 
+    # Fotos de staff externo: solo ADMIN o quien opera la puerta de ese evento.
+    if path.startswith("event_staff/"):
+        from events.models import StaffMember
+        from events.services import ExternalStaffService
+
+        member = (
+            StaffMember.objects.filter(photo=path)
+            .select_related("event_organization__event")
+            .first()
+        )
+        if member is None or not ExternalStaffService.can_operate_door(request.user, member.event):
+            raise Http404
+
     return FileResponse(requested.open("rb"))

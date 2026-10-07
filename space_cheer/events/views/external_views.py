@@ -5,7 +5,8 @@ puerta a la que lleva el QR del gafete."""
 import logging
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django_ratelimit.decorators import ratelimit
@@ -72,4 +73,33 @@ def staff_invite(request, token):
         'members': own.order_by('full_name'),
         'form': form,
         'editing': editing,
+    })
+
+
+@login_required
+def staff_door(request, token):
+    member = ExternalStaffService.resolve_badge(token)
+    if member is None:
+        return render(request, 'events/staffing/door_invalid.html', status=404)
+    if not ExternalStaffService.can_operate_door(request.user, member.event):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        try:
+            ExternalStaffService.record_access(
+                member=member, direction=request.POST.get('direction'), user=request.user,
+            )
+            messages.success(request, 'Registrado.')
+        except ValidationError as e:
+            messages.error(request, ' '.join(e.messages))
+        return redirect('events:staff_door', token=token)
+
+    PiiAuditService.log(
+        request=request, target_user=None, access_type='VIEW_EVENT_STAFF',
+        field_accessed='photo', notes=f'door staff_member pk={member.pk}',
+    )
+    return render(request, 'events/staffing/door.html', {
+        'member': member,
+        'is_inside': ExternalStaffService.is_inside(member),
+        'recent': member.access_logs.select_related('recorded_by')[:5],
     })

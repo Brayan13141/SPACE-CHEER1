@@ -3,10 +3,12 @@
 
 import logging
 
+import segno
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from accounts.decorators import role_required
 from accounts.services.pii_audit_service import PiiAuditService
@@ -122,3 +124,26 @@ def external_staff(request, pk):
         'member_form': member_form,
         'status_filter': request.GET.get('status', ''),
     })
+
+
+@role_required('ADMIN')
+def badges(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    members = (
+        StaffMember.objects.filter(event_organization__event=event, status=StaffMember.STATUS_ACCEPTED)
+        .select_related('event_organization__organization', 'role')
+        .order_by('event_organization__organization__name', 'full_name')
+    )
+    cards = []
+    for m in members:
+        url = request.build_absolute_uri(
+            reverse('events:staff_door', args=[ExternalStaffService.badge_token(m)])
+        )
+        # svg_inline genera solo el <svg> del QR a partir de nuestra propia URL.
+        cards.append({'member': m, 'qr': mark_safe(segno.make(url, error='m').svg_inline(scale=3))})
+    if cards:
+        PiiAuditService.log(
+            request=request, target_user=None, access_type='VIEW_EVENT_STAFF',
+            field_accessed='photo', notes=f'external_staff badges event pk={event.pk}',
+        )
+    return render(request, 'events/staffing/badges.html', {'event': event, 'cards': cards})

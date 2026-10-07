@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Puerta" %}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 480px;">
+  <div class="card text-center">
+    <div class="card-body">
+      {% if member.photo %}<img src="{{ member.photo.url }}" alt="" class="rounded mb-3" style="width:160px;height:200px;object-fit:cover;">{% endif %}
+      <h1 class="h4 mb-1">{{ member.full_name }}</h1>
+      <p class="mb-1">{{ member.event_organization.organization.name }}</p>
+      <p class="text-muted small mb-3">{{ member.role.name }}{% if member.shift %} · {{ member.shift }}{% endif %}{% if member.credential %} · {{ member.credential }}{% endif %}</p>
+      <span class="badge fs-6 mb-3 {% if is_inside %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+        {% if is_inside %}{% trans "Dentro" %}{% else %}{% trans "Fuera" %}{% endif %}
+      </span>
+      <form method="post" class="d-grid gap-2">{% csrf_token %}
+        {% if is_inside %}
+          <button type="submit" name="direction" value="OUT" class="btn btn-lg btn-warning">{% trans "Registrar salida" %}</button>
+        {% else %}
+          <button type="submit" name="direction" value="IN" class="btn btn-lg btn-success">{% trans "Registrar entrada" %}</button>
+        {% endif %}
+      </form>
+    </div>
+    {% if recent %}
+    <ul class="list-group list-group-flush small">
+      {% for log in recent %}
+        <li class="list-group-item">{{ log.get_direction_display }} · {{ log.recorded_at|date:"d/m H:i" }} · {{ log.recorded_by.get_full_name|default:log.recorded_by.email }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
