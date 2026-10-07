@@ -30,6 +30,7 @@ import json
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -50,6 +51,21 @@ PNG_1X1 = bytes.fromhex(
 
 CURP_STATES = ["JC", "NL", "PL", "DF", "MC", "GT", "VZ", "SL"]
 CURP_CONSONANTS = ["RZL", "PRZ", "MRT", "GNZ", "SNC", "TRR", "VLD", "CRZ"]
+
+
+def phone_for(user) -> str:
+    """Telefono sintetico derivado del pk: unico por construccion y estable
+    entre corridas.
+
+    Un contador posicional no sirve aca: `User.phone` es UNIQUE y persiste en la
+    base, asi que al reiniciarse en cada corrida volvia a repartir numeros ya
+    tomados en cuanto se agregaba un usuario nuevo a la simulacion.
+
+    El prefijo `56` separa este espacio del `55` que dejo la numeracion vieja
+    (y del que usa `UserFactory`): en una base ya sembrada esos `55...` estan
+    pegados a pks que no les corresponden, y volverian a chocar.
+    """
+    return f"56{user.pk:08d}"
 
 
 def make_curp(index: int, gender: str, birth: datetime.date) -> str:
@@ -93,29 +109,32 @@ class Command(BaseCommand):
             "events": [],
             "hospitality": [],
         }
-        self._phone_seq = 5500000000
+        self._emergency_seq = 5500000000
         self._curp_seq = 0
 
-        self.h("FASE 1 — Perfiles y usuarios")
-        self.phase_users()
+        # Todo o nada: un crash o un kill a mitad de corrida no puede dejar la
+        # base con las fases previas grabadas y la siguiente a medias.
+        with transaction.atomic():
+            self.h("FASE 1 — Perfiles y usuarios")
+            self.phase_users()
 
-        self.h("FASE 2 — Configuración de producción")
-        self.phase_production_config()
+            self.h("FASE 2 — Configuración de producción")
+            self.phase_production_config()
 
-        self.h("FASE 3 — Pedidos")
-        self.phase_orders()
+            self.h("FASE 3 — Pedidos")
+            self.phase_orders()
 
-        self.h("FASE 4 — Piso de producción")
-        self.phase_production_floor()
-        # Las órdenes A e I cambian de estado DENTRO de la fase 4 (se entregan
-        # cuando su job cierra), así que el reporte se reconstruye desde la BD.
-        self.rebuild_orders_report()
+            self.h("FASE 4 — Piso de producción")
+            self.phase_production_floor()
+            # Las órdenes A e I cambian de estado DENTRO de la fase 4 (se entregan
+            # cuando su job cierra), así que el reporte se reconstruye desde la BD.
+            self.rebuild_orders_report()
 
-        self.h("FASE 5 — Eventos y concursos")
-        self.phase_events()
+            self.h("FASE 5 — Eventos y concursos")
+            self.phase_events()
 
-        self.h("FASE 6 — Hospitalidad")
-        self.phase_hospitality()
+            self.h("FASE 6 — Hospitalidad")
+            self.phase_hospitality()
 
         out = options["json_out"]
         if out:
@@ -148,9 +167,11 @@ class Command(BaseCommand):
     # ==================================================================
     # HELPERS DE DATOS
     # ==================================================================
-    def next_phone(self):
-        self._phone_seq += 1
-        return str(self._phone_seq)
+    def next_emergency_phone(self):
+        """Contacto de emergencia del atleta: no es unico, lleva su propia
+        secuencia para no mover la numeracion de `User.phone`."""
+        self._emergency_seq += 1
+        return str(self._emergency_seq)
 
     def next_curp(self, gender, birth):
         self._curp_seq += 1
@@ -163,7 +184,7 @@ class Command(BaseCommand):
         from accounts.models import UserAddress
 
         if not user.phone:
-            user.phone = self.next_phone()
+            user.phone = phone_for(user)
         if not user.birth_date:
             user.birth_date = birth
         if not user.gender:
@@ -327,7 +348,7 @@ class Command(BaseCommand):
                     user=u,
                     defaults={
                         "emergency_contact": f"Familia {u.last_name}",
-                        "emergency_phone": self.next_phone(),
+                        "emergency_phone": self.next_emergency_phone(),
                     },
                 )
                 AthleteMedicalInfo.objects.get_or_create(
@@ -429,6 +450,51 @@ class Command(BaseCommand):
                     team_memberships__is_active=True,
                 ).count(),
             })
+
+        self.grant_team_ownership()
+
+    def grant_team_ownership(self):
+        """Da al headcoach de cada equipo el ownership de sus atletas.
+
+        `UserOwnership` es la relacion administrativa (quien puede editar y ver
+        los datos de un atleta), separada de la deportiva `UserTeamMembership`.
+        Sin ella `assign_guardian` corta al headcoach con "No tienes permiso
+        sobre este atleta", asi que las pantallas de custodia solo se podian
+        recorrer como ADMIN, que se salta esa guarda.
+        """
+        from accounts.models import UserOwnership
+        from accounts.services.ownership_service import OwnershipService
+        from teams.models import Team
+
+        creados = 0
+        for team in Team.objects.select_related("coach"):
+            coach = team.coach
+            if coach is None:
+                continue
+
+            atletas = User.objects.filter(
+                team_memberships__team=team,
+                team_memberships__role_in_team="ATHLETE",
+                team_memberships__is_active=True,
+            ).exclude(pk=coach.pk)
+
+            for atleta in atletas:
+                antes = UserOwnership.objects.filter(
+                    owner=coach, user=atleta, is_active=True
+                ).exists()
+                try:
+                    # El headcoach gestiona su propio ownership: no hace falta
+                    # que exista un admin para sembrar esto.
+                    OwnershipService.add_to_ownership(
+                        owner=coach, user=atleta, activated_by=coach
+                    )
+                except (ValidationError, PermissionDenied) as e:
+                    self.warn(f"ownership {coach.email} -> {atleta.email}: {e}")
+                    continue
+                if not antes:
+                    creados += 1
+
+        self.ok(f"Ownership del headcoach sobre sus atletas: {creados} nuevos")
 
     # ==================================================================
     # FASE 2 — CONFIGURACIÓN DE PRODUCCIÓN
@@ -1104,9 +1170,11 @@ class Command(BaseCommand):
             name="Juez de panel",
             defaults={"is_judge": True, "description": "Califica rutinas por criterio"},
         )
+        # iexact: seed_staff_roles lo crea como "Coordinador de Piso".
         coord_role, _ = EventStaffRole.objects.get_or_create(
-            name="Coordinador de piso",
-            defaults={"description": "Ordena entradas y salidas de tarima"},
+            name__iexact="Coordinador de Piso",
+            defaults={"name": "Coordinador de Piso",
+                      "description": "Ordena entradas y salidas de tarima"},
         )
 
         def inscribir_equipos(event, category, status=EventTeamRegistration.STATUS_ACCEPTED):
