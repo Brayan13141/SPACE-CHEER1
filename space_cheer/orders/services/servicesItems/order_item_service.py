@@ -11,8 +11,11 @@ class OrderItemService:
     @transaction.atomic
     def add_product(order, product, quantity=1, size_variant=None):
 
-        if not order.can_edit_general():
-            raise ValidationError("La orden no es editable")
+        # Los productos se cierran al enviar el pedido: solo se agregan en DRAFT.
+        if not order.can_edit_items():
+            raise ValidationError(
+                "El pedido ya fue enviado: no se pueden agregar productos."
+            )
 
         if quantity < 1:
             raise ValidationError("La cantidad debe ser mayor a cero")

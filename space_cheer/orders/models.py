@@ -1085,6 +1085,8 @@ class OrderPayment(models.Model):
     def clean(self):
         if self.amount is None or self.amount <= 0:
             raise ValidationError("El monto debe ser mayor a cero")
+        if self.order.status == "CANCELLED":
+            raise ValidationError("El pedido está cancelado: no acepta abonos")
         if self.order.agreed_price is None:
             raise ValidationError("La orden no tiene precio acordado")
         paid = self.order.payments.exclude(pk=self.pk).aggregate(

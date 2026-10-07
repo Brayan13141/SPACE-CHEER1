@@ -1,5 +1,6 @@
 from accounts.decorators import role_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib import messages
 from orders.models import Order, OrderItem
@@ -25,7 +26,14 @@ from orders.pagination import OrderPaginator
 # logger = logging.getLogger(__name__)
 
 
-@role_required("ATHLETE", "HEADCOACH", "COACH","GUARDIAN","ADMIN")
+ORDER_LIST_ROLES = ("ATHLETE", "HEADCOACH", "COACH", "GUARDIAN", "ADMIN")
+
+
+def _can_open_order_list(user):
+    return user.is_superuser or user.roles.filter(name__in=ORDER_LIST_ROLES).exists()
+
+
+@role_required(*ORDER_LIST_ROLES)
 def order_list(request):
     """
     Lista de órdenes visibles para el usuario.
@@ -242,11 +250,21 @@ def order_contact_info(request, order_id):
     )
 
 
-@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN")
+@role_required("ATHLETE", "HEADCOACH", "COACH", "ADMIN", "GUARDIAN", "STAFF")
 def order_detail(request, order_id):
 
+    # STAFF lee cualquier pedido, pero solo aquí: `visible_for_user` también
+    # decide qué se puede editar, así que abrirlo allá le daría escritura.
+    # Las acciones siguen pasando por sus propios permisos y no le ofrecen nada.
+    is_staff_reader = request.user.roles.filter(name="STAFF").exists()
+    base_qs = (
+        Order.objects.all()
+        if is_staff_reader
+        else Order.objects.visible_for_user(request.user)
+    )
+
     order = get_object_or_404(
-        Order.objects.visible_for_user(request.user)
+        base_qs
         .select_related("owner_user", "owner_team", "created_by", "contact_info")
         .prefetch_related(
             "items__product",
@@ -258,6 +276,13 @@ def order_detail(request, order_id):
             "orderlog_set",
         ),
         pk=order_id,
+    )
+
+    # Lo que STAFF ve solo por lectura no le muestra los botones de edición:
+    # `can_edit_general` mira el estado del pedido, no quién lo está viendo.
+    read_only = (
+        is_staff_reader
+        and not Order.objects.visible_for_user(request.user).filter(pk=order.pk).exists()
     )
 
     items = list(order.items.all())
@@ -328,5 +353,14 @@ def order_detail(request, order_id):
             },
             "available_transitions": available_transitions,
             "transition_labels": transition_labels,
+            "order_can_edit": order.can_edit_general() and not read_only,
+            # Agregar/quitar productos solo en borrador; lo demás sigue el general.
+            "order_can_edit_items": order.can_edit_items() and not read_only,
+            # La lista de pedidos no admite STAFF: "Volver" lo llevaría a un rechazo.
+            "back_url": (
+                reverse("orders:admin_order_list")
+                if is_staff_reader and not _can_open_order_list(request.user)
+                else reverse("orders:manage_orders")
+            ),
         },
     )

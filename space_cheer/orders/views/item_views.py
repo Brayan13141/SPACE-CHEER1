@@ -164,7 +164,7 @@ def _can_user_delete_item(user, order, item) -> bool:
     1. La orden debe estar en DRAFT (no enviada)
     2. El usuario debe ser el creador de la orden o staff
     """
-    if not order.can_edit_general():
+    if not order.can_edit_items():
         return False
 
     if user.is_superuser or user.roles.filter(name="ADMIN").exists():

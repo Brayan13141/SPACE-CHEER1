@@ -383,6 +383,13 @@ class OrderStateService:
 
     @classmethod
     def _validate_to_in_production(cls, order, user=None):
+        # Con diseño, PENDING → IN_PRODUCTION se saltaría la aprobación: la UI
+        # ya ocultaba ese botón, pero el backend lo aceptaba por POST directo.
+        if order.status == "PENDING" and order.requires_design:
+            raise ValidationError(
+                "Debe aprobarse el diseño antes de iniciar producción."
+            )
+
         if order.order_type == "OFFLINE":
             items = list(order.items.select_related("product"))
             if not items:

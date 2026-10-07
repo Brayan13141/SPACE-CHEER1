@@ -25,8 +25,8 @@ def order_add_product(request, order_id):
         pk=order_id,
     )
 
-    if not order.can_edit_general():
-        messages.error(request, "La orden no se puede modificar.")
+    if not order.can_edit_items():
+        messages.error(request, "El pedido ya fue enviado: no se pueden agregar productos.")
         return redirect("orders:detail_order", order_id=order.id)
 
     products_qs = (

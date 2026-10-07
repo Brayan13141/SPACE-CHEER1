@@ -30,8 +30,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 logger = logging.getLogger(__name__)
 
 
-@role_required("ADMIN")
+@role_required("ADMIN", "STAFF")
 def admin_order_list(request):
+    # STAFF consulta la lista; la plantilla le oculta la captura offline y
+    # lo manda al detalle de solo lectura (`admin_order_detail` sigue siendo ADMIN).
     status_filter = request.GET.get("status", "")
     type_filter = request.GET.get("type", "")
     search = request.GET.get("q", "").strip()

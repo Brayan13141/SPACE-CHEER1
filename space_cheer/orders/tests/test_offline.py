@@ -248,6 +248,9 @@ class OfflineTransitionTests(TestCase):
         if requires_design:
             OrderDesignImageFactory(order=order, is_final=True)
         OrderStateService.transition(order, "PENDING", self.admin)
+        if requires_design:
+            # Con diseño no hay salto PENDING → IN_PRODUCTION: se aprueba antes.
+            OrderStateService.transition(order, "DESIGN_APPROVED", self.admin)
         OrderStateService.transition(order, "IN_PRODUCTION", self.admin)
         return order
 

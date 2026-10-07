@@ -18,12 +18,15 @@
       </p>
     </div>
     <div class="col-md-6 text-md-end">
+      {# Captura offline y clientes siguen siendo solo de ADMIN; STAFF solo consulta. #}
+      {% if is_admin %}
       <a href="{% url 'orders:offline_order_create' %}" class="btn btn-primary me-2">
         <i class="bi bi-person-plus me-1"></i>{% trans "Pedido personal" %}
       </a>
       <a href="{% url 'orders:customer_list' %}" class="btn btn-outline-secondary">
         <i class="bi bi-people me-1"></i>{% trans "Clientes" %}
       </a>
+      {% endif %}
     </div>
   </div>
 
@@ -158,7 +161,7 @@
             </td>
 
             <td class="text-end">
-              <a href="{% url 'orders:admin_order_detail' order.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Ver detalle' %}">
+              <a href="{% if is_admin %}{% url 'orders:admin_order_detail' order.id %}{% else %}{% url 'orders:detail_order' order.id %}{% endif %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Ver detalle' %}">
                 <i class="bi bi-eye"></i>
               </a>
             </td>
