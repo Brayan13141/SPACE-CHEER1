@@ -92,7 +92,7 @@ class UserProfilingForm(forms.ModelForm):
 
         birth_date = self.cleaned_data.get("birth_date")
 
-        if birth_date and birth_date > timezone.now().date():
+        if birth_date and birth_date > timezone.localdate():
             raise ValidationError("La fecha de nacimiento no puede estar en el futuro.")
 
         return birth_date

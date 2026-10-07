@@ -156,7 +156,7 @@ class OwnershipService:
         affected_memberships.update(
             is_active=False,
             status="inactive",
-            end_date=timezone.now().date(),
+            end_date=timezone.localdate(),
         )
 
         logger.info(

@@ -114,7 +114,7 @@ class User(AbstractUser):
             self.email = self.email.lower().strip()
 
         if self.birth_date:
-            if self.birth_date > timezone.now().date():
+            if self.birth_date > timezone.localdate():
                 raise ValidationError(
                     {
                         "birth_date": "La fecha de nacimiento no puede estar en el futuro."
@@ -183,7 +183,7 @@ class User(AbstractUser):
     def is_minor(self):
         if not self.birth_date:
             return False
-        today = timezone.now().date()
+        today = timezone.localdate()
         age = (
             today.year
             - self.birth_date.year

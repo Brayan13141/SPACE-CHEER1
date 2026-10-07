@@ -326,7 +326,7 @@ def assign_guardian(request, athlete_id):
             return redirect("guardian:assign_guardian", athlete_id=athlete.id)
 
     # GET: mostrar formulario
-    today = timezone.now().date()
+    today = timezone.localdate()
     eighteen_years_ago = today.replace(year=today.year - 18)
 
     guardian_qs = (

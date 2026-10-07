@@ -31,7 +31,7 @@ class MeasurementLifecycleService:
         if not order.measurements_due_date:
             return
 
-        if timezone.now().date() >= order.measurements_due_date:
+        if timezone.localdate() >= order.measurements_due_date:
             if order.measurements_open:
                 order.measurements_open = False
                 order.save(update_fields=["measurements_open"])

@@ -154,7 +154,7 @@ class UserTeamMembership(models.Model):
     def deactivate(self):
         self.status = "inactive"
         self.is_active = False
-        self.end_date = timezone.now().date()
+        self.end_date = timezone.localdate()
         self.save()
 
 

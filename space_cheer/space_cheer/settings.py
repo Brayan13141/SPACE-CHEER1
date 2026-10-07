@@ -246,7 +246,7 @@ LANGUAGES = [
 LOCALE_PATHS = [BASE_DIR / "locale"]
 LANGUAGE_COOKIE_AGE = 365 * 24 * 3600
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Mexico_City"
 
 USE_I18N = True
 

@@ -19,7 +19,7 @@ ACTIVE_JOB_STATUSES_EXCLUDED = (ProductionJob.Status.COMPLETED, ProductionJob.St
 
 @role_required("ADMIN")
 def admin_overview(request):
-    today = timezone.now().date()
+    today = timezone.localdate()
     filter_by = request.GET.get("filter", "all")
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")

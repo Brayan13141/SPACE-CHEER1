@@ -46,7 +46,7 @@ class MinorAthleteService:
         if not user.birth_date:
             return False
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         age = (
             today.year
             - user.birth_date.year
@@ -353,7 +353,7 @@ class MinorAthleteService:
             is_active=True,
         ).values_list("user_id", flat=True)
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         cutoff_date = today.replace(year=today.year - 18)
 
         base = User.objects.filter(
@@ -384,7 +384,7 @@ class MinorAthleteService:
             is_active=True,
         ).values_list("user_id", flat=True)
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         cutoff_date = today.replace(year=today.year - 18)
 
         base = User.objects.filter(

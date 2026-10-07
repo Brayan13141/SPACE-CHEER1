@@ -16,7 +16,7 @@ def event_list(request):
     events = Event.objects.select_related('organizer').order_by('-start_date')
 
     if filter_status == 'upcoming':
-        today = timezone.now().date()
+        today = timezone.localdate()
         events = events.filter(start_date__gte=today).exclude(status='CANCELLED')
     elif filter_status in [s[0] for s in Event.STATUS_CHOICES]:
         events = events.filter(status=filter_status)

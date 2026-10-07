@@ -29,7 +29,7 @@ def auto_close_measurements(self, *args, **kwargs):
     """
     logger.info("🔄 [TASK] Iniciando cierre automático de medidas")
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     # Query SIN lock primero (lectura rápida)
     candidates = Order.objects.filter(

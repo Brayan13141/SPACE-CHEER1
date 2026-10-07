@@ -48,7 +48,7 @@ class Command(BaseCommand):
         verbose = options["verbose"]
         days_overdue = options["days_overdue"]
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         cutoff_date = today - timezone.timedelta(days=days_overdue)
 
         # Header

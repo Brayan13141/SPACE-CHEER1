@@ -386,7 +386,7 @@ class CustomUserAdmin(BaseUserAdmin):
         if not obj.birth_date:
             return format_html('<span style="color: #999;">-</span>')
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         age = (
             today.year
             - obj.birth_date.year
