@@ -2,6 +2,7 @@
 """ADMIN: catálogo de organizaciones y staff externo de cada evento."""
 
 import logging
+from itertools import groupby
 
 import segno
 from django.contrib import messages
@@ -147,3 +148,39 @@ def badges(request, pk):
             field_accessed='photo', notes=f'external_staff badges event pk={event.pk}',
         )
     return render(request, 'events/staffing/badges.html', {'event': event, 'cards': cards})
+
+
+@role_required('ADMIN')
+def sheet(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    members = list(
+        StaffMember.objects.filter(event_organization__event=event, status=StaffMember.STATUS_ACCEPTED)
+        .select_related('event_organization__organization', 'role')
+        .order_by('event_organization__organization__name', 'shift', 'full_name')
+    )
+    groups = []
+    for org_name, org_members in groupby(members, key=lambda m: m.event_organization.organization.name):
+        org_members = list(org_members)
+        shifts = [
+            {'shift': shift or '—', 'members': list(items)}
+            for shift, items in groupby(org_members, key=lambda m: m.shift)
+        ]
+        groups.append({'organization': org_name, 'shifts': shifts, 'total': len(org_members)})
+
+    by_role = {}
+    for m in members:
+        by_role[m.role.name] = by_role.get(m.role.name, 0) + 1
+
+    return render(request, 'events/staffing/sheet.html', {
+        'event': event, 'groups': groups, 'by_role': sorted(by_role.items()), 'total': len(members),
+    })
+
+
+@role_required('ADMIN')
+def access_log(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    logs = (
+        StaffAccessLog.objects.filter(member__event_organization__event=event)
+        .select_related('member__event_organization__organization', 'member__role', 'recorded_by')
+    )
+    return render(request, 'events/staffing/access_log.html', {'event': event, 'logs': logs})

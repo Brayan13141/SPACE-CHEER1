@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Bitácora de accesos" %} — {{ event.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a href="{% url 'events:external_staff' event.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="h3 mb-0">{% trans "Bitácora de accesos" %}</h1>
+  </div>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Movimiento" %}</th><th>{% trans "Elemento" %}</th><th>{% trans "Organización" %}</th><th>{% trans "Registró" %}</th></tr></thead>
+    <tbody>
+    {% for log in logs %}
+      <tr>
+        <td>{{ log.recorded_at|date:"d/m/Y H:i" }}</td>
+        <td><span class="badge {% if log.direction == 'IN' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ log.get_direction_display }}</span></td>
+        <td>{{ log.member.full_name }}<small class="text-muted d-block">{{ log.member.role.name }}</small></td>
+        <td>{{ log.member.event_organization.organization.name }}</td>
+        <td>{{ log.recorded_by.get_full_name|default:log.recorded_by.email }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="text-muted">{% trans "Sin movimientos todavía." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

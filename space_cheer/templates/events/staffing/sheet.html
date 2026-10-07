@@ -1,0 +1,38 @@
+{% load i18n %}<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>{% trans "Hoja operativa" %} — {{ event.name }}</title>
+<style>
+  @page { size: letter; margin: 12mm; }
+  body { font-family: system-ui, sans-serif; color: #000; background: #fff; font-size: 10pt; }
+  h1 { font-size: 14pt; margin: 0 0 2mm; }
+  h2 { font-size: 12pt; margin: 6mm 0 2mm; break-after: avoid; }
+  h3 { font-size: 10pt; margin: 3mm 0 1mm; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; }
+  th, td { border: 1px solid #555; padding: 1.5mm; text-align: left; }
+  td.firma { width: 22mm; }
+  tr { break-inside: avoid; }
+  @media print { .noprint { display: none; } }
+</style></head>
+<body>
+  <h1>{{ event.name }}</h1>
+  <p>{{ event.start_date|date:"d/m/Y" }} – {{ event.end_date|date:"d/m/Y" }}{% if event.venue_name %} · {{ event.venue_name }}{% endif %}</p>
+  {% for g in groups %}
+    <h2>{{ g.organization }} ({{ g.total }})</h2>
+    {% for s in g.shifts %}
+      <h3>{% trans "Turno" %}: {{ s.shift }}</h3>
+      <table>
+        <thead><tr><th>{% trans "Nombre" %}</th><th>{% trans "Función" %}</th><th>{% trans "Credencial" %}</th><th>{% trans "Entrada" %}</th><th>{% trans "Salida" %}</th></tr></thead>
+        <tbody>
+          {% for m in s.members %}
+            <tr><td>{{ m.full_name }}</td><td>{{ m.role.name }}</td><td>{{ m.credential }}</td><td class="firma"></td><td class="firma"></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  {% empty %}
+    <p>{% trans "No hay elementos aceptados." %}</p>
+  {% endfor %}
+  {% if by_role %}
+    <h2>{% blocktrans %}Resumen: {{ total }} elementos{% endblocktrans %}</h2>
+    <table><tbody>{% for name, n in by_role %}<tr><td>{{ name }}</td><td>{{ n }}</td></tr>{% endfor %}</tbody></table>
+  {% endif %}
+</body></html>

@@ -246,3 +246,23 @@ class TestGafetesYPuerta:
         assert client.get(url).status_code == 404
         client.force_login(portero)
         assert client.get(url).status_code == 200
+
+
+class TestHojaYBitacora:
+    def test_hoja_sin_telefono_y_solo_aceptados(self, client, admin, event_org, role, event):
+        S.add_member(event_org=event_org, data={'full_name': 'Visible', 'role': role, 'phone': '4771231234', 'shift': 'Sábado'},
+                     source=StaffMember.SOURCE_ADMIN, user=admin)
+        S.add_member(event_org=event_org, data={'full_name': 'Pendiente', 'role': role}, source=StaffMember.SOURCE_LINK)
+        client.force_login(admin)
+        html = client.get(reverse('events:external_staff_sheet', args=[event.pk])).content.decode()
+        assert 'Visible' in html
+        assert 'Pendiente' not in html
+        assert '4771231234' not in html
+        assert 'Entrada' in html and 'Salida' in html
+
+    def test_bitacora_lista_accesos(self, client, admin, event_org, role, event):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Rosa', 'role': role}, source=StaffMember.SOURCE_ADMIN, user=admin)
+        S.record_access(member=m, direction=StaffAccessLog.DIRECTION_IN, user=admin)
+        client.force_login(admin)
+        html = client.get(reverse('events:external_staff_log', args=[event.pk])).content.decode()
+        assert 'Rosa' in html
