@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Staff del evento" %} — {{ event.name }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 760px;">
+  <h1 class="h4 mb-1">{{ event.name }}</h1>
+  <p class="text-secondary small mb-4">
+    {{ event.start_date|date:"d/m/Y" }} – {{ event.end_date|date:"d/m/Y" }}
+    {% if event.venue_name %}· {{ event.venue_name }}{% endif %}
+    · {{ event_org.organization.name }}
+  </p>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      {% if editing %}{% trans "Corregir elemento" %}{% else %}{% trans "Agregar elemento" %}{% endif %}
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="{% if editing %}edit{% else %}add{% endif %}">
+        {% if editing %}<input type="hidden" name="member_pk" value="{{ editing.pk }}">{% endif %}
+        {{ form.as_div }}
+        <button type="submit" class="btn btn-primary mt-3">
+          {% if editing %}{% trans "Guardar corrección" %}{% else %}{% trans "Enviar" %}{% endif %}
+        </button>
+        {% if editing %}<a href="?" class="btn btn-link mt-3">{% trans "Cancelar" %}</a>{% endif %}
+      </form>
+    </div>
+  </div>
+
+  <h2 class="h6">{% trans "Lo que has enviado" %}</h2>
+  {# Sin teléfonos ni fotos: quien tenga el enlace no debe poder extraer datos personales. #}
+  <ul class="list-group">
+    {% for m in members %}
+      <li class="list-group-item d-flex align-items-center gap-2">
+        <div class="flex-grow-1">
+          <strong>{{ m.full_name }}</strong>
+          <small class="text-muted d-block">{{ m.role.name }}{% if m.shift %} · {{ m.shift }}{% endif %}</small>
+        </div>
+        <span class="badge {% if m.status == 'ACCEPTED' %}text-bg-success{% elif m.status == 'REJECTED' %}text-bg-danger{% else %}text-bg-warning{% endif %}">
+          {{ m.get_status_display }}
+        </span>
+        {% if m.status == 'PENDING' %}
+          <a href="?edit={{ m.pk }}" class="btn btn-sm btn-outline-secondary">{% trans "Corregir" %}</a>
+          <form method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="member_pk" value="{{ m.pk }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Quitar" %}</button>
+          </form>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">{% trans "Todavía no has enviado a nadie." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

@@ -2,12 +2,15 @@ from django.urls import path
 
 import events.views.admin_views as admin_views
 import events.views.coach_views as coach_views
+import events.views.external_views as external_views
 import events.views.judge_views as judge_views
 import events.views.public_views as public_views
 
 app_name = 'events'
 
 urlpatterns = [
+    # Staff externo — enlace público (sin cuenta)
+    path('invite/<str:token>/', external_views.staff_invite, name='staff_invite'),
     # Public
     path('', public_views.event_list, name='event_list'),
     path('my-registrations/', coach_views.my_registrations, name='my_registrations'),
