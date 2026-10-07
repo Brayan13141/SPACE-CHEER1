@@ -256,3 +256,16 @@ class TestPurga:
         assert not os.path.exists(ruta)
 
         assert S.purge_personal_data(today=dia_90) == 0  # idempotente
+
+
+class TestTareaDePurga:
+    def test_tarea_delega_en_el_servicio(self):
+        from events.tasks import purge_external_staff_personal_data
+        with patch('events.tasks.ExternalStaffService.purge_personal_data', return_value=3) as purge:
+            assert purge_external_staff_personal_data() == 3
+        purge.assert_called_once_with()
+
+    def test_esta_agendada_en_beat(self):
+        from space_cheer.celery import app
+        tareas = {c['task'] for c in app.conf.beat_schedule.values()}
+        assert 'events.tasks.purge_external_staff_personal_data' in tareas

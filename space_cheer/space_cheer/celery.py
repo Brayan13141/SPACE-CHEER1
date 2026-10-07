@@ -25,6 +25,11 @@ app.conf.beat_schedule = {
             "expires": 3600,  # Expira si no se ejecuta en 1 hora
         },
     },
+    "purge-external-staff-personal-data-daily": {
+        "task": "events.tasks.purge_external_staff_personal_data",
+        "schedule": crontab(hour=3, minute=10),
+        "options": {"expires": 3600},
+    },
 }
 
 # Timezone
