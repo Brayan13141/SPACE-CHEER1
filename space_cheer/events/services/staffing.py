@@ -25,6 +25,20 @@ _CLOSED_EVENT_STATUSES = (Event.STATUS_CANCELLED, Event.STATUS_COMPLETED)
 _EDITABLE_FIELDS = ('full_name', 'phone', 'photo', 'credential', 'role', 'shift')
 
 
+def _delete_file_on_commit(storage, name):
+    """Borra un archivo solo si la transacción se confirma."""
+    if not name:
+        return
+
+    def _delete():
+        try:
+            storage.delete(name)
+        except Exception:
+            logger.exception('No se pudo borrar el archivo %s', name)
+
+    transaction.on_commit(_delete)
+
+
 class ExternalStaffService:
 
     DOOR_ROLE_NAME = 'Control de accesos'
@@ -36,7 +50,7 @@ class ExternalStaffService:
     def invite_expiry(cls, event):
         """00:00 hora de México del día en que arranca el evento."""
         return datetime.datetime.combine(
-            event.start_date, datetime.time.min, tzinfo=timezone.get_current_timezone(),
+            event.start_date, datetime.time.min, tzinfo=timezone.get_default_timezone(),
         )
 
     @classmethod
@@ -115,13 +129,38 @@ class ExternalStaffService:
             )
 
     @classmethod
+    def _apply_edit(cls, member, data):
+        """Copia los campos editables. La foto solo se reemplaza con un archivo
+        nuevo (False/None/'' se ignoran) y la anterior se borra al confirmar."""
+        old_photo = ''
+        if member.pk:
+            old_photo = (
+                StaffMember.objects.filter(pk=member.pk).values_list('photo', flat=True).first() or ''
+            )
+        for field in _EDITABLE_FIELDS:
+            if field not in data:
+                continue
+            if field == 'photo' and not data[field]:
+                continue
+            setattr(member, field, data[field])
+        member.save()
+        if old_photo and member.photo and member.photo.name != old_photo:
+            _delete_file_on_commit(member.photo.storage, old_photo)
+        return member
+
+    @classmethod
     @transaction.atomic
     def update_pending_member(cls, *, member, data):
         cls._require_pending(member)
-        for field in _EDITABLE_FIELDS:
-            if field in data:
-                setattr(member, field, data[field])
-        member.save()
+        return cls._apply_edit(member, data)
+
+    @classmethod
+    @transaction.atomic
+    def admin_update_member(cls, *, member, data, user):
+        """El ADMIN corrige a un elemento en cualquier estado; no toca su
+        estado ni su gafete."""
+        cls._apply_edit(member, data)
+        logger.info('Staff member %s edited by admin user=%s', member.pk, getattr(user, 'pk', None))
         return member
 
     @classmethod
@@ -129,7 +168,7 @@ class ExternalStaffService:
     def remove_pending_member(cls, *, member):
         cls._require_pending(member)
         if member.photo:
-            member.photo.delete(save=False)
+            _delete_file_on_commit(member.photo.storage, member.photo.name)
         member.delete()
 
     @classmethod
@@ -229,12 +268,18 @@ class ExternalStaffService:
             personal_data_purged_at__isnull=True,
         )
         count = 0
-        for member in members:
-            if member.photo:
-                member.photo.delete(save=False)
-            member.phone = ''
-            member.personal_data_purged_at = timezone.now()
-            member.save()
-            count += 1
+        for member in members.order_by('pk'):
+            try:
+                with transaction.atomic():
+                    photo_name = member.photo.name if member.photo else ''
+                    storage = member.photo.storage
+                    member.photo = ''
+                    member.phone = ''
+                    member.personal_data_purged_at = timezone.now()
+                    member.save()
+                    _delete_file_on_commit(storage, photo_name)
+                count += 1
+            except Exception:
+                logger.exception('Purge failed for staff member %s', member.pk)
         logger.info('External staff personal data purged: %s members', count)
         return count

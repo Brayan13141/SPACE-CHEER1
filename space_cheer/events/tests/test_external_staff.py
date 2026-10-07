@@ -234,7 +234,8 @@ class TestPuerta:
 
 
 class TestPurga:
-    def test_borra_foto_y_telefono_a_los_90_dias(self, event_org, role, admin, settings, tmp_path):
+    def test_borra_foto_y_telefono_a_los_90_dias(
+            self, event_org, role, admin, settings, tmp_path, django_capture_on_commit_callbacks):
         settings.MEDIA_ROOT = tmp_path
         m = S.add_member(
             event_org=event_org,
@@ -248,7 +249,8 @@ class TestPurga:
         assert S.purge_personal_data(today=dia_89) == 0
 
         dia_90 = event_org.event.end_date + datetime.timedelta(days=90)
-        assert S.purge_personal_data(today=dia_90) == 1
+        with django_capture_on_commit_callbacks(execute=True):
+            assert S.purge_personal_data(today=dia_90) == 1
         m.refresh_from_db()
         assert m.phone == '' and not m.photo
         assert m.personal_data_purged_at is not None

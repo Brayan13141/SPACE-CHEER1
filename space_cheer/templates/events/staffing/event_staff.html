@@ -15,6 +15,27 @@
     <a href="{% url 'events:organization_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-building me-1"></i>{% trans "Organizaciones" %}</a>
   </div>
 
+  {% if editing %}
+  <div class="card mb-4 border-primary">
+    <div class="card-header">{% blocktrans with n=editing.full_name %}Editar elemento: {{ n }}{% endblocktrans %}</div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">{% csrf_token %}
+        <input type="hidden" name="action" value="edit_member"><input type="hidden" name="member_pk" value="{{ editing.pk }}">
+        {{ edit_form.as_div }}
+        <button type="submit" class="btn btn-primary mt-3">{% trans "Guardar cambios" %}</button>
+        <a href="{% url 'events:external_staff' event.pk %}" class="btn btn-link mt-3">{% trans "Cancelar" %}</a>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="btn-group btn-group-sm mb-3" role="group" aria-label="{% trans 'Filtrar por estado' %}">
+    <a href="?" class="btn btn-outline-secondary {% if not status_filter %}active{% endif %}">{% trans "Todos" %}</a>
+    {% for value, label in status_choices %}
+      <a href="?status={{ value }}" class="btn btn-outline-secondary {% if status_filter == value %}active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
   <form method="post" class="row g-2 align-items-end mb-4">{% csrf_token %}
     <input type="hidden" name="action" value="link_org">
     <div class="col-md-6">{{ link_form.organization.label_tag }}{{ link_form.organization }}</div>
@@ -45,7 +66,7 @@
         <input type="hidden" name="action" value="review">
         <div class="table-responsive">
         <table class="table table-sm align-middle">
-          <thead><tr><th></th><th>{% trans "Foto" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Función" %}</th><th>{% trans "Turno" %}</th><th>{% trans "Credencial" %}</th><th>{% trans "Teléfono" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+          <thead><tr><th></th><th>{% trans "Foto" %}</th><th>{% trans "Nombre" %}</th><th>{% trans "Función" %}</th><th>{% trans "Turno" %}</th><th>{% trans "Credencial" %}</th><th>{% trans "Teléfono" %}</th><th>{% trans "Estado" %}</th><th></th></tr></thead>
           <tbody>
           {% for m in row.members %}
             <tr>
@@ -54,9 +75,10 @@
               <td>{{ m.full_name }}<small class="text-muted d-block">{{ m.get_source_display }}</small></td>
               <td>{{ m.role.name }}</td><td>{{ m.shift }}</td><td>{{ m.credential }}</td><td>{{ m.phone }}</td>
               <td><span class="badge {% if m.status == 'ACCEPTED' %}text-bg-success{% elif m.status == 'REJECTED' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ m.get_status_display }}</span></td>
+              <td><a href="?edit_member={{ m.pk }}" class="btn btn-sm btn-outline-secondary">{% trans "Editar" %}</a></td>
             </tr>
           {% empty %}
-            <tr><td colspan="8" class="text-muted">{% trans "Sin elementos todavía." %}</td></tr>
+            <tr><td colspan="9" class="text-muted">{% trans "Sin elementos todavía." %}</td></tr>
           {% endfor %}
           </tbody>
         </table>
@@ -69,11 +91,11 @@
         {% endif %}
       </form>
 
-      <details class="mt-3">
+      <details class="mt-3"{% if row.form_open %} open{% endif %}>
         <summary>{% trans "Capturar elemento directamente" %}</summary>
         <form method="post" enctype="multipart/form-data" class="mt-2">{% csrf_token %}
           <input type="hidden" name="action" value="add_member"><input type="hidden" name="eo_pk" value="{{ row.eo.pk }}">
-          {{ member_form.as_div }}
+          {{ row.form.as_div }}
           <button type="submit" class="btn btn-primary btn-sm mt-2">{% trans "Capturar" %}</button>
         </form>
       </details>

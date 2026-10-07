@@ -8,8 +8,12 @@
     <div class="col-md-4">
       <div class="card"><div class="card-body">
         <form method="post">{% csrf_token %}
+          {% if editing %}
+            <input type="hidden" name="action" value="edit_org"><input type="hidden" name="org_pk" value="{{ editing.pk }}">
+          {% endif %}
           {{ form.as_div }}
-          <button type="submit" class="btn btn-primary mt-3 w-100">{% trans "Agregar" %}</button>
+          <button type="submit" class="btn btn-primary mt-3 w-100">{% if editing %}{% trans "Guardar cambios" %}{% else %}{% trans "Agregar" %}{% endif %}</button>
+          {% if editing %}<a href="{% url 'events:organization_list' %}" class="btn btn-link w-100">{% trans "Cancelar" %}</a>{% endif %}
         </form>
       </div></div>
     </div>
@@ -23,7 +27,8 @@
             <td>{{ org.get_kind_display }}</td>
             <td>{{ org.contact_name }} {{ org.contact_phone }}</td>
             <td class="text-end">
-              <form method="post">{% csrf_token %}
+              <a href="?edit={{ org.pk }}" class="btn btn-sm btn-outline-primary">{% trans "Editar" %}</a>
+              <form method="post" class="d-inline">{% csrf_token %}
                 <input type="hidden" name="action" value="toggle">
                 <input type="hidden" name="org_pk" value="{{ org.pk }}">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">

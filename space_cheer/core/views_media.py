@@ -16,14 +16,18 @@ def serve_protected_media(request, path):
     if not requested.is_file():
         raise Http404
 
+    # Toda la autorización usa la ruta ya resuelta: "./" o "x/../" en la URL
+    # cruda no deben esquivar los prefijos protegidos.
+    rel = requested.relative_to(media_root).as_posix()
+
     # Imágenes de diseño requieren permiso a nivel de orden
-    if path.startswith("designs/"):
+    if rel.startswith("designs/"):
         from orders.models import OrderDesignImage
         from orders.permissions import OrderPermissions
 
         design = (
             OrderDesignImage.objects
-            .filter(image=path)
+            .filter(image=rel)
             .select_related("order")
             .first()
         )
@@ -31,12 +35,12 @@ def serve_protected_media(request, path):
             raise Http404
 
     # Fotos de staff externo: solo ADMIN o quien opera la puerta de ese evento.
-    if path.startswith("event_staff/"):
+    if rel.startswith("event_staff/"):
         from events.models import StaffMember
         from events.services import ExternalStaffService
 
         member = (
-            StaffMember.objects.filter(photo=path)
+            StaffMember.objects.filter(photo=rel)
             .select_related("event_organization__event")
             .first()
         )

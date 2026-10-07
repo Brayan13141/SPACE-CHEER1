@@ -32,14 +32,16 @@ def staff_invite(request, token):
 
     own = event_org.members.filter(source=StaffMember.SOURCE_LINK).select_related('role')
     editing = None
-    if request.GET.get('edit'):
-        editing = own.filter(pk=request.GET['edit'], status=StaffMember.STATUS_PENDING).first()
+    edit_pk = request.GET.get('edit', '')
+    if edit_pk.isdigit():
+        editing = own.filter(pk=edit_pk, status=StaffMember.STATUS_PENDING).first()
 
-    form = StaffMemberForm(instance=editing)
+    form = StaffMemberForm(instance=editing, keep_private=True)
     if request.method == 'POST':
         action = request.POST.get('action')
         if action in ('edit', 'remove'):
-            member = own.filter(pk=request.POST.get('member_pk')).first()
+            member_pk = request.POST.get('member_pk', '')
+            member = own.filter(pk=member_pk).first() if member_pk.isdigit() else None
             if member is None:
                 raise Http404
         try:
@@ -53,7 +55,7 @@ def staff_invite(request, token):
                     messages.success(request, 'Elemento enviado. Queda pendiente de revisión.')
                     return redirect('events:staff_invite', token=token)
             elif action == 'edit':
-                form = StaffMemberForm(request.POST, request.FILES, instance=member)
+                form = StaffMemberForm(request.POST, request.FILES, instance=member, keep_private=True)
                 if form.is_valid():
                     ExternalStaffService.update_pending_member(member=member, data=form.cleaned_data)
                     messages.success(request, 'Elemento corregido.')

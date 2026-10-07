@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 17:28-0600\n"
+"POT-Creation-Date: 2026-10-07 17:52-0600\n"
 "PO-Revision-Date: 2026-06-19 00:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1377,8 +1377,8 @@ msgstr "Friendly"
 #: .\templates\core\manage_landing.html:153
 #: .\templates\events\admin\criteria_manage.html:49
 #: .\templates\events\admin\criteria_manage.html:109
-#: .\templates\events\staffing\event_staff.html:48
-#: .\templates\events\staffing\organizations.html:18
+#: .\templates\events\staffing\event_staff.html:69
+#: .\templates\events\staffing\organizations.html:22
 #: .\templates\events\staffing\sheet.html:23
 #: .\templates\measures\manage_fields.html:20
 #: .\templates\orders\admin\customers.html:38
@@ -1414,7 +1414,7 @@ msgstr "Event type"
 #: .\templates\events\admin\registrations.html:26
 #: .\templates\events\admin\results_manage.html:67
 #: .\templates\events\coach\my_registrations.html:36
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\orders\admin\order_list.html:66
 #: .\templates\orders\admin\order_list.html:115
 #: .\templates\orders\items\_measurements_grid.html:19
@@ -1814,7 +1814,7 @@ msgid "Proveedor"
 msgstr "Vendor"
 
 #: .\events\models\staffing.py:114
-#: .\templates\events\staffing\organizations.html:18
+#: .\templates\events\staffing\organizations.html:22
 #: .\templates\measures\manage_fields.html:22
 #: .\templates\orders\admin\order_detail.html:42
 #: .\templates\orders\admin\order_list.html:76
@@ -1828,7 +1828,7 @@ msgstr "Type"
 
 #: .\events\models\staffing.py:115 .\templates\core\base.html:896
 #: .\templates\core\terminos.html:308 .\templates\core\terminos.html:335
-#: .\templates\events\staffing\organizations.html:18
+#: .\templates\events\staffing\organizations.html:22
 #: .\templates\orders\admin\order_detail.html:230
 #: .\templates\orders\users\order_detail.html:368
 #: .\templates\orders\users\order_list.html:182
@@ -1883,7 +1883,7 @@ msgid "Nombre completo"
 msgstr "Full name"
 
 #: .\events\models\staffing.py:196 .\templates\account\profile\edit.html:142
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\orders\admin\customers.html:42
 #: .\templates\orders\admin\customers.html:90
 #: .\templates\orders\admin\offline_create.html:54
@@ -1895,7 +1895,7 @@ msgid "Teléfono"
 msgstr "Phone"
 
 #: .\events\models\staffing.py:197
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\social\feed.html:45
 msgid "Foto"
 msgstr "Photo"
@@ -1905,13 +1905,13 @@ msgid "Placa o credencial"
 msgstr "Plate or ID"
 
 #: .\events\models\staffing.py:201
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\events\staffing\sheet.html:23
 msgid "Función"
 msgstr "Role"
 
 #: .\events\models\staffing.py:203
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\events\staffing\sheet.html:21
 msgid "Turno"
 msgstr "Shift"
@@ -1955,6 +1955,43 @@ msgstr "The access log cannot be edited."
 #: .\events\models\staffing.py:275
 msgid "La bitácora de accesos no se borra."
 msgstr "The access log cannot be deleted."
+
+#: .\events\views\staffing_views.py:53
+msgid "Organización actualizada."
+msgstr "Organization updated."
+
+#: .\events\views\staffing_views.py:60
+msgid "Organización agregada."
+msgstr "Organization added."
+
+#: .\events\views\staffing_views.py:105
+msgid "Organización agregada al evento."
+msgstr "Organization added to the event."
+
+#: .\events\views\staffing_views.py:108
+msgid "Enlace generado. Si había uno anterior, ya no sirve."
+msgstr "Link generated. Any previous link no longer works."
+
+#: .\events\views\staffing_views.py:111
+msgid "Enlace revocado."
+msgstr "Link revoked."
+
+#: .\events\views\staffing_views.py:120
+msgid "Elemento capturado y aceptado."
+msgstr "Member captured and accepted."
+
+#: .\events\views\staffing_views.py:122 .\events\views\staffing_views.py:136
+msgid "Revisa los datos del elemento."
+msgstr "Check the member details."
+
+#: .\events\views\staffing_views.py:134
+msgid "Elemento actualizado."
+msgstr "Member updated."
+
+#: .\events\views\staffing_views.py:152
+#, python-format
+msgid "%(n)s elemento(s) actualizados."
+msgstr "%(n)s member(s) updated."
 
 #: .\production\templates\production\admin_overview.html:8
 #: .\templates\core\base.html:775
@@ -2140,6 +2177,8 @@ msgstr "Email"
 #: .\templates\account\profile\edit.html:194
 #: .\templates\core\manage_landing.html:90
 #: .\templates\events\event_form.html:107
+#: .\templates\events\staffing\event_staff.html:25
+#: .\templates\events\staffing\organizations.html:15
 #: .\templates\measures\manage_fields.html:110
 #: .\templates\orders\users\order_edit.html:32
 #: .\templates\products\product_detail.html:387
@@ -2377,7 +2416,7 @@ msgstr "Select"
 #: .\production\templates\production\config\product_stages_matrix.html:168
 #: .\templates\events\admin\criteria_manage.html:39
 #: .\templates\events\admin\criteria_manage.html:99
-#: .\templates\events\staffing\organizations.html:12
+#: .\templates\events\staffing\organizations.html:15
 #: .\templates\orders\products\add_product.html:296
 #: .\templates\products\product_detail.html:402
 #: .\templates\products\product_detail.html:496
@@ -2501,6 +2540,8 @@ msgstr "None"
 #: .\templates\account\addresses\form.html:111
 #: .\templates\account\addresses\list_address.html:61
 #: .\templates\events\event_detail.html:27
+#: .\templates\events\staffing\event_staff.html:78
+#: .\templates\events\staffing\organizations.html:30
 #: .\templates\measures\manage_fields.html:44
 #: .\templates\orders\users\order_detail.html:358
 #: .\templates\orders\users\order_list.html:190
@@ -2584,7 +2625,9 @@ msgstr "No roles configured."
 #: .\templates\events\coach\register_team.html:137
 #: .\templates\events\event_detail.html:108
 #: .\templates\events\event_form.html:111
+#: .\templates\events\staffing\event_staff.html:26
 #: .\templates\events\staffing\invite.html:26
+#: .\templates\events\staffing\organizations.html:16
 #: .\templates\measures\manage_fields.html:136
 #: .\templates\orders\admin\offline_create.html:210
 #: .\templates\orders\admin\order_detail.html:659
@@ -6054,6 +6097,7 @@ msgid "Explora eventos y competencias disponibles"
 msgstr "Explore available events and competitions"
 
 #: .\templates\events\event_list.html:24
+#: .\templates\events\staffing\event_staff.html:33
 #: .\templates\orders\admin\order_list.html:68
 #: .\templates\orders\admin\order_list.html:78
 #: .\templates\products\product_list.html:36
@@ -6170,53 +6214,62 @@ msgstr "Log"
 msgid "Imprimir gafetes"
 msgstr "Print badges"
 
-#: .\templates\events\staffing\event_staff.html:21
+#: .\templates\events\staffing\event_staff.html:20
+#, python-format
+msgid "Editar elemento: %(n)s"
+msgstr "Edit member: %(n)s"
+
+#: .\templates\events\staffing\event_staff.html:32
+msgid "Filtrar por estado"
+msgstr "Filter by status"
+
+#: .\templates\events\staffing\event_staff.html:42
 msgid "Agregar al evento"
 msgstr "Add to event"
 
-#: .\templates\events\staffing\event_staff.html:30
+#: .\templates\events\staffing\event_staff.html:51
 #, python-format
 msgid "Vence %(d)s"
 msgstr "Expires %(d)s"
 
-#: .\templates\events\staffing\event_staff.html:33
+#: .\templates\events\staffing\event_staff.html:54
 msgid "Revocar"
 msgstr "Revoke"
 
-#: .\templates\events\staffing\event_staff.html:39
+#: .\templates\events\staffing\event_staff.html:60
 msgid "Regenerar enlace"
 msgstr "Regenerate link"
 
-#: .\templates\events\staffing\event_staff.html:39
+#: .\templates\events\staffing\event_staff.html:60
 msgid "Generar enlace"
 msgstr "Generate link"
 
-#: .\templates\events\staffing\event_staff.html:48
+#: .\templates\events\staffing\event_staff.html:69
 #: .\templates\events\staffing\sheet.html:23
 msgid "Credencial"
 msgstr "ID"
 
-#: .\templates\events\staffing\event_staff.html:59
+#: .\templates\events\staffing\event_staff.html:81
 msgid "Sin elementos todavía."
 msgstr "No members yet."
 
-#: .\templates\events\staffing\event_staff.html:66
+#: .\templates\events\staffing\event_staff.html:88
 msgid "Aceptar seleccionados"
 msgstr "Accept selected"
 
-#: .\templates\events\staffing\event_staff.html:67
+#: .\templates\events\staffing\event_staff.html:89
 msgid "Rechazar / dar de baja seleccionados"
 msgstr "Reject / remove selected"
 
-#: .\templates\events\staffing\event_staff.html:73
+#: .\templates\events\staffing\event_staff.html:95
 msgid "Capturar elemento directamente"
 msgstr "Enter a member directly"
 
-#: .\templates\events\staffing\event_staff.html:77
+#: .\templates\events\staffing\event_staff.html:99
 msgid "Capturar"
 msgstr "Enter"
 
-#: .\templates\events\staffing\event_staff.html:83
+#: .\templates\events\staffing\event_staff.html:105
 msgid "Agrega una organización al evento para empezar."
 msgstr "Add an organization to the event to get started."
 
@@ -6264,16 +6317,16 @@ msgstr "This link is no longer active"
 msgid "Pide uno nuevo a quien organiza el evento."
 msgstr "Ask the event organizer for a new one."
 
-#: .\templates\events\staffing\organizations.html:30
+#: .\templates\events\staffing\organizations.html:35
 #: .\templates\measures\manage_fields.html:139
 msgid "Desactivar"
 msgstr "Disable"
 
-#: .\templates\events\staffing\organizations.html:30
+#: .\templates\events\staffing\organizations.html:35
 msgid "Activar"
 msgstr "Activate"
 
-#: .\templates\events\staffing\organizations.html:36
+#: .\templates\events\staffing\organizations.html:41
 msgid "Sin organizaciones todavía."
 msgstr "No organizations yet."
 
