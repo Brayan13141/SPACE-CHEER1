@@ -4,16 +4,21 @@ Spec: docs/superpowers/specs/2026-10-07-event-staff-sin-cuenta-design.md
 """
 
 import datetime
+import os
+from unittest.mock import patch
 
 import pytest
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from accounts.models import Role, User
 from events import staff_tokens
 from events.models import (
-    Event, EventOrganization, EventStaffRole, Organization, StaffAccessLog, StaffMember,
+    Event, EventOrganization, EventStaffAssignment, EventStaffRole, Organization, StaffAccessLog,
+    StaffMember,
 )
+from events.services import ExternalStaffService as S
 
 pytestmark = pytest.mark.django_db
 
@@ -114,3 +119,140 @@ class TestModelos:
             log.save()
         with pytest.raises(ValidationError):
             log.delete()
+
+
+def _png():
+    # PNG 1x1 válido
+    return SimpleUploadedFile(
+        'f.png',
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89'
+        b'\x00\x00\x00\rIDATx\x9cc\xf8\xff\xff?\x00\x05\xfe\x02\xfe\xa7\x35\x81\x84\x00\x00\x00\x00IEND\xaeB`\x82',
+        content_type='image/png',
+    )
+
+
+class TestEnlace:
+    def test_emitir_y_resolver(self, event_org):
+        token = S.issue_invite(event_org=event_org)
+        assert S.resolve_invite(token) == event_org
+
+    def test_expira_al_inicio_del_evento(self, event_org):
+        token = S.issue_invite(event_org=event_org)
+        despues = S.invite_expiry(event_org.event) + datetime.timedelta(minutes=1)
+        with patch('events.services.staffing.timezone.now', return_value=despues):
+            assert S.resolve_invite(token) is None
+
+    def test_revocado_no_resuelve(self, event_org):
+        token = S.issue_invite(event_org=event_org)
+        S.revoke_invite(event_org=event_org)
+        assert S.resolve_invite(token) is None
+
+    def test_regenerar_anula_el_anterior(self, event_org):
+        viejo = S.issue_invite(event_org=event_org)
+        nuevo = S.issue_invite(event_org=event_org)
+        assert S.resolve_invite(viejo) is None
+        assert S.resolve_invite(nuevo) == event_org
+
+    def test_evento_cancelado_no_resuelve(self, event_org):
+        token = S.issue_invite(event_org=event_org)
+        Event.objects.filter(pk=event_org.event_id).update(status=Event.STATUS_CANCELLED)
+        assert S.resolve_invite(token) is None
+
+
+class TestAltaYRevision:
+    def test_por_enlace_nace_pendiente_sin_gafete(self, event_org, role):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_LINK)
+        assert m.status == StaffMember.STATUS_PENDING
+        assert S.badge_token(m) is None
+
+    def test_por_admin_nace_aceptado_con_gafete(self, event_org, role, admin):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_ADMIN, user=admin)
+        assert m.status == StaffMember.STATUS_ACCEPTED
+        assert S.resolve_badge(S.badge_token(m)) == m
+
+    def test_solo_lo_pendiente_se_corrige(self, event_org, role, admin):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_LINK)
+        S.update_pending_member(member=m, data={'full_name': 'Luis Gómez'})
+        S.accept(member=m, user=admin)
+        with pytest.raises(ValidationError):
+            S.update_pending_member(member=m, data={'full_name': 'Otro'})
+        with pytest.raises(ValidationError):
+            S.remove_pending_member(member=m)
+
+    def test_rechazar_aceptado_anula_gafete(self, event_org, role, admin):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_ADMIN, user=admin)
+        token = S.badge_token(m)
+        S.reject(member=m, user=admin)
+        assert S.resolve_badge(token) is None
+
+    def test_gafete_de_evento_completado_no_sirve(self, event_org, role, admin):
+        m = S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_ADMIN, user=admin)
+        Event.objects.filter(pk=event_org.event_id).update(status=Event.STATUS_COMPLETED)
+        assert S.resolve_badge(S.badge_token(m)) is None
+
+
+class TestPuerta:
+    @pytest.fixture
+    def member(self, event_org, role, admin):
+        return S.add_member(event_org=event_org, data={'full_name': 'Luis', 'role': role}, source=StaffMember.SOURCE_ADMIN, user=admin)
+
+    @pytest.fixture
+    def portero(self, event, admin):
+        user = _user('portero', 'STAFF')
+        door_role = EventStaffRole.objects.create(name='Control de accesos')
+        EventStaffAssignment.objects.create(event=event, user=user, role=door_role, assigned_by=admin)
+        return user
+
+    def test_quien_opera_la_puerta(self, event, admin, portero):
+        assert S.can_operate_door(admin, event)
+        assert S.can_operate_door(portero, event)
+        assert not S.can_operate_door(_user('otro_staff', 'STAFF'), event)
+
+    def test_portero_de_otro_evento_no(self, event, admin, portero):
+        otro = Event.objects.create(
+            name='Otra', event_type='COMPETITION', organizer=admin,
+            start_date=TODAY + datetime.timedelta(days=30), end_date=TODAY + datetime.timedelta(days=31),
+        )
+        assert not S.can_operate_door(portero, otro)
+
+    def test_entrada_y_salida(self, member, portero):
+        assert not S.is_inside(member)
+        S.record_access(member=member, direction=StaffAccessLog.DIRECTION_IN, user=portero)
+        assert S.is_inside(member)
+        S.record_access(member=member, direction=StaffAccessLog.DIRECTION_OUT, user=portero)
+        assert not S.is_inside(member)
+
+    def test_no_registra_dos_entradas_seguidas(self, member, portero):
+        S.record_access(member=member, direction=StaffAccessLog.DIRECTION_IN, user=portero)
+        with pytest.raises(ValidationError):
+            S.record_access(member=member, direction=StaffAccessLog.DIRECTION_IN, user=portero)
+        assert member.access_logs.count() == 1
+
+    def test_sin_permiso_no_registra(self, member):
+        with pytest.raises(PermissionDenied):
+            S.record_access(member=member, direction=StaffAccessLog.DIRECTION_IN, user=_user('x', 'STAFF'))
+
+
+class TestPurga:
+    def test_borra_foto_y_telefono_a_los_90_dias(self, event_org, role, admin, settings, tmp_path):
+        settings.MEDIA_ROOT = tmp_path
+        m = S.add_member(
+            event_org=event_org,
+            data={'full_name': 'Luis', 'role': role, 'phone': '4770000000', 'photo': _png()},
+            source=StaffMember.SOURCE_ADMIN, user=admin,
+        )
+        ruta = m.photo.path
+        S.record_access(member=m, direction=StaffAccessLog.DIRECTION_IN, user=admin)
+
+        dia_89 = event_org.event.end_date + datetime.timedelta(days=89)
+        assert S.purge_personal_data(today=dia_89) == 0
+
+        dia_90 = event_org.event.end_date + datetime.timedelta(days=90)
+        assert S.purge_personal_data(today=dia_90) == 1
+        m.refresh_from_db()
+        assert m.phone == '' and not m.photo
+        assert m.personal_data_purged_at is not None
+        assert m.full_name == 'Luis' and m.access_logs.count() == 1
+        assert not os.path.exists(ruta)
+
+        assert S.purge_personal_data(today=dia_90) == 0  # idempotente

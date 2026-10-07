@@ -7,5 +7,6 @@ igual que cuando todo vivía en un solo services.py.
 from .core import EventService
 from .registration import EventRegistrationService
 from .scoring import EventScoringService
+from .staffing import ExternalStaffService
 
-__all__ = ["EventService", "EventRegistrationService", "EventScoringService"]
+__all__ = ["EventService", "EventRegistrationService", "EventScoringService", "ExternalStaffService"]
