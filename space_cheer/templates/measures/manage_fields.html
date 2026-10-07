@@ -55,6 +55,8 @@
                         <!-- HABILITAR -->
                         <form method="post" class="d-inline">
                             {% csrf_token %}
+                            {# La clave va en un hidden: sc-submit-guard.js deshabilita el botón al enviar y su name no viaja. #}
+                            <input type="hidden" name="habilitar_medida" value="">
                             <input type="hidden" name="field_id" value="{{ field.id }}">
                             <button type="submit" name="habilitar_medida" class="btn btn-sm btn-outline-success">
                                 <i class="bi bi-check-circle me-1"></i>{% trans "Habilitar" %}
@@ -64,6 +66,16 @@
                     </div>
                 </td>
             </tr>
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    {# Los modales van FUERA de la tabla: un <form> dentro de <tbody> sale vacío #}
+    {# del parser y base.html, al envolver los inputs required, los desasocia. #}
+    {% for item in fields_with_forms %}
+    {% with field=item.field form=item.form %}
 
             <!-- ================= MODAL EDITAR ================= -->
             <div class="modal fade" id="modalEditar{{ field.id }}" tabindex="-1">
@@ -132,11 +144,8 @@
                 </div>
             </div>
 
-            {% endwith %}
-            {% endfor %}
-        </tbody>
-    </table>
-    </div>
+    {% endwith %}
+    {% endfor %}
 </div>
 
 <!-- ================= MODAL CREAR ================= -->

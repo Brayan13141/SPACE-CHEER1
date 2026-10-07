@@ -6,11 +6,26 @@
   'use strict';
 
   var LOADING_CLASS = 'sc-btn-loading';
+  var MIRROR_ATTR = 'data-sc-submitter';
 
   function lockButton(btn) {
     if (btn.disabled) return;
     btn.disabled = true;
     btn.classList.add(LOADING_CLASS);
+  }
+
+  // Un botón deshabilitado no viaja en el POST: si el que envía tiene name,
+  // su name/value se copia a un hidden antes de bloquearlo. Sin esto, las vistas
+  // que deciden la acción por el botón (allauth `action_primary`, etc.) no la ven.
+  function mirrorSubmitter(form, submitter) {
+    form.querySelectorAll('input[' + MIRROR_ATTR + ']').forEach(function (el) { el.remove(); });
+    if (!submitter || !submitter.name) return;
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = submitter.name;
+    hidden.value = submitter.value;
+    hidden.setAttribute(MIRROR_ATTR, '');
+    form.appendChild(hidden);
   }
 
   // Delegado en document: cubre todos los <form> de la página, incluidos los
@@ -22,6 +37,7 @@
     if (e.defaultPrevented) return;
     var form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
+    mirrorSubmitter(form, e.submitter);
     form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(lockButton);
   });
 
@@ -33,5 +49,7 @@
       btn.disabled = false;
       btn.classList.remove(LOADING_CLASS);
     });
+    // El hidden del envío anterior no debe colarse si ahora se usa otro botón.
+    document.querySelectorAll('input[' + MIRROR_ATTR + ']').forEach(function (el) { el.remove(); });
   });
 })();
