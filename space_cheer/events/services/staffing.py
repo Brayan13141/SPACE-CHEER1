@@ -9,6 +9,7 @@ import secrets
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from events import staff_tokens
 from events.models import (
@@ -49,9 +50,7 @@ class ExternalStaffService:
     @classmethod
     def invite_expiry(cls, event):
         """00:00 hora de México del día en que arranca el evento."""
-        return datetime.datetime.combine(
-            event.start_date, datetime.time.min, tzinfo=timezone.get_default_timezone(),
-        )
+        return EventOrganization(event=event).invite_expires_at
 
     @classmethod
     @transaction.atomic
@@ -64,10 +63,13 @@ class ExternalStaffService:
     @classmethod
     def issue_invite(cls, *, event_org):
         """Genera (o regenera) el enlace. Regenerar anula el anterior."""
+        if timezone.now() >= event_org.invite_expires_at:
+            raise ValidationError(
+                _('El evento ya empezó: el enlace vencería al generarlo. Captura el staff directamente.')
+            )
         event_org.invite_nonce = staff_tokens.new_nonce()
-        event_org.invite_expires_at = cls.invite_expiry(event_org.event)
         event_org.invite_revoked_at = None
-        event_org.save(update_fields=['invite_nonce', 'invite_expires_at', 'invite_revoked_at'])
+        event_org.save(update_fields=['invite_nonce', 'invite_revoked_at'])
         logger.info('Invite issued: event_org=%s', event_org.pk)
         return cls.invite_token(event_org)
 
@@ -97,7 +99,9 @@ class ExternalStaffService:
             return None
         if event_org.invite_revoked_at is not None:
             return None
-        if event_org.invite_expires_at is None or timezone.now() >= event_org.invite_expires_at:
+        if not event_org.organization.is_active:
+            return None
+        if timezone.now() >= event_org.invite_expires_at:
             return None
         if event_org.event.status in _CLOSED_EVENT_STATUSES:
             return None
@@ -125,7 +129,7 @@ class ExternalStaffService:
     def _require_pending(cls, member):
         if member.status != StaffMember.STATUS_PENDING:
             raise ValidationError(
-                'Solo se corrige lo pendiente: este elemento ya fue revisado por administración.'
+                _('Solo se corrige lo pendiente: este elemento ya fue revisado por administración.')
             )
 
     @classmethod
@@ -175,7 +179,7 @@ class ExternalStaffService:
     @transaction.atomic
     def accept(cls, *, member, user):
         if member.status != StaffMember.STATUS_PENDING:
-            raise ValidationError('Solo se aceptan elementos pendientes.')
+            raise ValidationError(_('Solo se aceptan elementos pendientes.'))
         member.status = StaffMember.STATUS_ACCEPTED
         member.badge_nonce = staff_tokens.new_nonce()
         member.reviewed_by = user
@@ -188,7 +192,7 @@ class ExternalStaffService:
     def reject(cls, *, member, user):
         """Rechaza un pendiente o da de baja un aceptado. Anula su gafete."""
         if member.status == StaffMember.STATUS_REJECTED:
-            raise ValidationError('El elemento ya está rechazado.')
+            raise ValidationError(_('El elemento ya está rechazado.'))
         member.status = StaffMember.STATUS_REJECTED
         member.badge_nonce = ''
         member.reviewed_by = user
@@ -246,14 +250,28 @@ class ExternalStaffService:
     @transaction.atomic
     def record_access(cls, *, member, direction, user):
         if not cls.can_operate_door(user, member.event):
-            raise PermissionDenied('No tienes permiso para registrar accesos en este evento.')
+            raise PermissionDenied(_('No tienes permiso para registrar accesos en este evento.'))
+        read_nonce = member.badge_nonce
         # Serializa dos toques simultáneos sobre el mismo elemento.
-        member = StaffMember.objects.select_for_update().get(pk=member.pk)
+        member = (
+            StaffMember.objects.select_for_update()
+            .select_related('event_organization__event')
+            .get(pk=member.pk)
+        )
+        # Entre leer el gafete y llegar aquí lo pudieron dar de baja, reemitir
+        # su gafete o cerrar el evento: se revisa ya con la fila bloqueada.
+        if (
+            member.status != StaffMember.STATUS_ACCEPTED
+            or not member.badge_nonce
+            or not secrets.compare_digest(member.badge_nonce, read_nonce or '')
+            or member.event.status in _CLOSED_EVENT_STATUSES
+        ):
+            raise ValidationError(_('Este gafete ya no es válido.'))
         inside = cls.is_inside(member)
         if direction == StaffAccessLog.DIRECTION_IN and inside:
-            raise ValidationError('Este elemento ya está dentro: registra primero su salida.')
+            raise ValidationError(_('Este elemento ya está dentro: registra primero su salida.'))
         if direction == StaffAccessLog.DIRECTION_OUT and not inside:
-            raise ValidationError('Este elemento no está dentro: registra primero su entrada.')
+            raise ValidationError(_('Este elemento no está dentro: registra primero su entrada.'))
         return StaffAccessLog.objects.create(member=member, direction=direction, recorded_by=user)
 
     # ── Retención ───────────────────────────────────────────────────────

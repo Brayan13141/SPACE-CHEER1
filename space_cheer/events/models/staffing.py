@@ -1,5 +1,7 @@
 """Staff del evento: roles y asignaciones."""
 
+import datetime
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -141,7 +143,6 @@ class EventOrganization(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='external_organizations')
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT, related_name='event_links')
     invite_nonce = models.CharField(max_length=64, blank=True)
-    invite_expires_at = models.DateTimeField(null=True, blank=True)
     invite_revoked_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
@@ -159,11 +160,19 @@ class EventOrganization(models.Model):
         return f'{self.organization} @ {self.event}'
 
     @property
+    def invite_expires_at(self):
+        """00:00 hora de México del día en que arranca el evento. Se calcula,
+        no se guarda: si el evento cambia de fecha, el enlace la sigue."""
+        return datetime.datetime.combine(
+            self.event.start_date, datetime.time.min, tzinfo=timezone.get_default_timezone(),
+        )
+
+    @property
     def invite_is_active(self):
         return bool(
             self.invite_nonce
             and self.invite_revoked_at is None
-            and self.invite_expires_at
+            and self.organization.is_active
             and timezone.now() < self.invite_expires_at
         )
 
@@ -242,6 +251,17 @@ class StaffMember(models.Model):
         super().save(*args, **kwargs)
 
 
+class StaffAccessLogQuerySet(models.QuerySet):
+    """La bitácora tampoco se toca en bloque: update() y delete() por queryset
+    se saltan el save()/delete() del modelo."""
+
+    def update(self, **kwargs):
+        raise ValidationError(_('La bitácora de accesos no se edita.'))
+
+    def delete(self):
+        raise ValidationError(_('La bitácora de accesos no se borra.'))
+
+
 class StaffAccessLog(models.Model):
     DIRECTION_IN = 'IN'
     DIRECTION_OUT = 'OUT'
@@ -256,6 +276,8 @@ class StaffAccessLog(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+',
     )
     recorded_at = models.DateTimeField(default=timezone.now)
+
+    objects = StaffAccessLogQuerySet.as_manager()
 
     class Meta:
         ordering = ['-recorded_at', '-pk']

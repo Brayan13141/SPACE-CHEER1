@@ -95,12 +95,12 @@ def _data(role, **extra):
 class TestMediaDotSegments:
     def test_punto_en_la_ruta_no_esquiva_la_autorizacion(self, client, settings, link_member):
         name = os.path.basename(link_member.photo.name)
-        client.force_login(_user('curioso', 'ATLETA'))
+        client.force_login(_user('curioso', 'ATHLETE'))
         assert client.get(f'{settings.MEDIA_URL}./event_staff/photos/{name}').status_code == 404
 
     def test_designs_punto_punto_no_esquiva_la_autorizacion(self, client, settings, link_member):
         name = os.path.basename(link_member.photo.name)
-        client.force_login(_user('curioso2', 'ATLETA'))
+        client.force_login(_user('curioso2', 'ATHLETE'))
         url = f'{settings.MEDIA_URL}designs/../event_staff/photos/{name}'
         assert client.get(url).status_code == 404
 

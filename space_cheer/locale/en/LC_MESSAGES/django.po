@@ -9045,6 +9045,54 @@ msgid "Los badges indican la categoría y ciudad del equipo"
 msgstr "Badges indicate the team's category and city"
 
 #, python-format
+#: events/views/external_views.py
+msgid "Elemento enviado. Queda pendiente de revisión."
+msgstr "Member submitted. It is pending review."
+
+#: events/views/external_views.py
+msgid "Elemento corregido."
+msgstr "Member corrected."
+
+#: events/views/external_views.py
+msgid "Elemento quitado."
+msgstr "Member removed."
+
+#: events/views/external_views.py
+msgid "Registrado."
+msgstr "Recorded."
+
+#: events/services/staffing.py
+msgid "El evento ya empezó: el enlace vencería al generarlo. Captura el staff directamente."
+msgstr "The event has already started: the link would expire as soon as it is generated. Enter the staff directly."
+
+#: events/services/staffing.py
+msgid "Solo se corrige lo pendiente: este elemento ya fue revisado por administración."
+msgstr "Only pending members can be corrected: this member has already been reviewed by the administration."
+
+#: events/services/staffing.py
+msgid "Solo se aceptan elementos pendientes."
+msgstr "Only pending members can be accepted."
+
+#: events/services/staffing.py
+msgid "El elemento ya está rechazado."
+msgstr "This member is already rejected."
+
+#: events/services/staffing.py
+msgid "No tienes permiso para registrar accesos en este evento."
+msgstr "You do not have permission to record access at this event."
+
+#: events/services/staffing.py
+msgid "Este gafete ya no es válido."
+msgstr "This badge is no longer valid."
+
+#: events/services/staffing.py
+msgid "Este elemento ya está dentro: registra primero su salida."
+msgstr "This member is already inside: record their exit first."
+
+#: events/services/staffing.py
+msgid "Este elemento no está dentro: registra primero su entrada."
+msgstr "This member is not inside: record their entry first."
+
 #~ msgid "Guardián Actual: %(name)s"
 #~ msgstr "Current Guardian: %(name)s"
 

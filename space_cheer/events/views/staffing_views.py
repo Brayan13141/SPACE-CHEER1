@@ -22,10 +22,16 @@ from events.services import ExternalStaffService
 logger = logging.getLogger(__name__)
 
 
+def is_pk(value):
+    """True si el valor es un pk entero. isdigit() solo tambien acepta "²" y
+    digitos de otros alfabetos, que el ORM rechaza con un 500."""
+    value = str(value or '')
+    return value.isascii() and value.isdigit()
+
+
 def _pk(value):
     """pk entero o 404: un valor no numerico nunca debe llegar a un 500."""
-    value = str(value or '')
-    if not value.isdigit():
+    if not is_pk(value):
         raise Http404
     return int(value)
 
@@ -34,7 +40,7 @@ def _pk(value):
 def organization_list(request):
     editing = None
     edit_pk = request.GET.get('edit', '')
-    if edit_pk.isdigit():
+    if is_pk(edit_pk):
         editing = Organization.objects.filter(pk=edit_pk).first()
     form = OrganizationForm(instance=editing)
 
@@ -66,6 +72,15 @@ def organization_list(request):
     })
 
 
+# Cada tarjeta trae su propio formulario de captura: sin ids propios, los
+# <label for> de una tarjeta apuntarían a los campos de la primera.
+_EDIT_IDS = 'id_edit_%s'
+
+
+def _capture_ids(event_org):
+    return f'id_eo{event_org.pk}_%s'
+
+
 def _event_org(event, pk):
     return get_object_or_404(EventOrganization, pk=_pk(pk), event=event)
 
@@ -74,7 +89,6 @@ def _event_org(event, pk):
 def external_staff(request, pk):
     event = get_object_or_404(Event, pk=pk)
     link_form = LinkOrganizationForm(event=event)
-    member_form = StaffMemberForm()
     bound_form, bound_eo_pk = None, None
     editing, edit_form = None, None
 
@@ -83,10 +97,10 @@ def external_staff(request, pk):
         status_filter = ''
 
     edit_pk = request.GET.get('edit_member', '')
-    if request.method == 'GET' and edit_pk.isdigit():
+    if request.method == 'GET' and is_pk(edit_pk):
         editing = StaffMember.objects.filter(pk=edit_pk, event_organization__event=event).first()
         if editing is not None:
-            edit_form = StaffMemberForm(instance=editing)
+            edit_form = StaffMemberForm(instance=editing, auto_id=_EDIT_IDS)
             PiiAuditService.log(
                 request=request, target_user=None, access_type='VIEW_EVENT_STAFF',
                 field_accessed='phone,photo', notes=f'external_staff edit member pk={editing.pk}',
@@ -111,7 +125,7 @@ def external_staff(request, pk):
                 messages.success(request, _('Enlace revocado.'))
             elif action == 'add_member':
                 event_org = _event_org(event, request.POST.get('eo_pk'))
-                member_form = StaffMemberForm(request.POST, request.FILES)
+                member_form = StaffMemberForm(request.POST, request.FILES, auto_id=_capture_ids(event_org))
                 if member_form.is_valid():
                     ExternalStaffService.add_member(
                         event_org=event_org, data=member_form.cleaned_data,
@@ -120,13 +134,13 @@ def external_staff(request, pk):
                     messages.success(request, _('Elemento capturado y aceptado.'))
                 else:
                     messages.error(request, _('Revisa los datos del elemento.'))
-                    bound_form, bound_eo_pk, member_form = member_form, event_org.pk, StaffMemberForm()
+                    bound_form, bound_eo_pk = member_form, event_org.pk
                     stay = True
             elif action == 'edit_member':
                 editing = get_object_or_404(
                     StaffMember, pk=_pk(request.POST.get('member_pk')), event_organization__event=event,
                 )
-                edit_form = StaffMemberForm(request.POST, request.FILES, instance=editing)
+                edit_form = StaffMemberForm(request.POST, request.FILES, instance=editing, auto_id=_EDIT_IDS)
                 if edit_form.is_valid():
                     ExternalStaffService.admin_update_member(
                         member=editing, data=edit_form.cleaned_data, user=request.user,
@@ -137,7 +151,7 @@ def external_staff(request, pk):
                     stay = True
             elif action == 'review':
                 decision = request.POST.get('decision')
-                member_pks = [int(v) for v in request.POST.getlist('member_pks') if v.isdigit()]
+                member_pks = [int(v) for v in request.POST.getlist('member_pks') if is_pk(v)]
                 members = StaffMember.objects.filter(pk__in=member_pks, event_organization__event=event)
                 done = 0
                 for member in members:
@@ -157,7 +171,7 @@ def external_staff(request, pk):
 
     event_orgs = (
         EventOrganization.objects.filter(event=event)
-        .select_related('organization')
+        .select_related('event', 'organization')
         .prefetch_related('members__role')
     )
     rows = []
@@ -170,7 +184,7 @@ def external_staff(request, pk):
             'eo': eo,
             'invite_url': request.build_absolute_uri(reverse('events:staff_invite', args=[token])) if token else None,
             'members': members,
-            'form': bound_form if eo.pk == bound_eo_pk else member_form,
+            'form': bound_form if eo.pk == bound_eo_pk else StaffMemberForm(auto_id=_capture_ids(eo)),
             'form_open': eo.pk == bound_eo_pk,
         })
 

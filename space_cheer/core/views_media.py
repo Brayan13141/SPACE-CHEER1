@@ -7,7 +7,13 @@ from django.http import FileResponse, Http404
 @login_required
 def serve_protected_media(request, path):
     media_root = Path(settings.MEDIA_ROOT).resolve()
-    requested = (media_root / path).resolve()
+    # Un byte NUL hace que el sistema de archivos lance ValueError (500).
+    if "\x00" in path:
+        raise Http404
+    try:
+        requested = (media_root / path).resolve()
+    except (OSError, ValueError):
+        raise Http404
 
     # Previene path traversal: la ruta resuelta debe estar dentro de MEDIA_ROOT
     if not requested.is_relative_to(media_root):
