@@ -330,14 +330,16 @@ class AdminOverviewCompletedJobsTests(TestCase):
         self.client.force_login(self.admin)
         response = self.client.get(
             reverse("production:admin_overview"),
-            {"filter": "completed", "date_from": timezone.now().date().isoformat()},
+            {"filter": "completed", "date_from": timezone.localdate().isoformat()},
         )
         job_ids = [j.pk for j in response.context["jobs"]]
         self.assertNotIn(self.completed_job.pk, job_ids)
 
         response = self.client.get(
             reverse("production:admin_overview"),
-            {"filter": "completed", "date_from": old_date.date().isoformat()},
+            # La vista filtra por la fecha local (TIME_ZONE México): después de
+            # las 18:00 la fecha UTC ya es la de mañana y el filtro lo dejaba fuera.
+            {"filter": "completed", "date_from": timezone.localtime(old_date).date().isoformat()},
         )
         job_ids = [j.pk for j in response.context["jobs"]]
         self.assertIn(self.completed_job.pk, job_ids)
